@@ -1,0 +1,144 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Build and Run
+
+on:
+  push:
+    branches-ignore: [ "main", "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+  workflow_call:
+    outputs:
+      new_version:
+        description: "The new version string"
+        value: ${{ jobs.version.outputs.new_version }}
+      new_tag:
+        description: "The new tag string"
+        value: ${{ jobs.version.outputs.new_tag }}
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+      new_version: ${{ steps.bump.outputs.new_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+      - name: Bump version and push tag
+        id: bump
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: "main"
+          pre_release_branches: "dev"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - directory: ./MangaShelf
+          - directory: ./MangaShelf.Api
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build -p:Version=${{ needs.version.outputs.new_version }} --no-restore
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - directory: ./MangaShelf.Tests
+            name: ui
+          - directory: ./MangaShelf.Api.Tests
+            name: api
+          - directory: ./MangaShelf.UnitTests
+            name: common
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Test
+        run: dotnet test --configuration Release --collect "XPlat Code Coverage" --verbosity normal --logger trx --results-directory TestResults-${{ matrix.name }}
+      - name: List test results directory
+        run: ls -R TestResults-${{ matrix.name }}
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.name }}
+          path: ${{ matrix.directory }}/TestResults-${{ matrix.name }}/
+      - name: Cache test results
+        uses: actions/cache@v4
+        with:
+          key: test-results-${{ matrix.name }}
+          path: ${{ matrix.directory }}/TestResults-${{ matrix.name }}/
+  coverage:
+      runs-on: ubuntu-latest
+      needs: test
+      permissions:
+        pull-requests: write
+      steps:
+      - name: Download Test Results
+        uses: actions/download-artifact@v5
+        with:
+          pattern: 'test-results-*'
+          path: test-results/
+      - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.4
+        with:
+          reports: "test-results/**/*.cobertura.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
+          targetdir: "${{ github.workspace }}/coverage-report" # REQUIRED # The directory where the generated report should be saved.
+          reporttypes: "Cobertura;MarkdownSummaryGithub" # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, Html_BlueRed, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MarkdownSummaryGithub, MarkdownDeltaSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, TextDeltaSummary, Xml, XmlSummary
+          verbosity: "Verbose" # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+          title: "Code Coverage" # Optional title.
+          tag: "${{ github.run_number }}_${{ github.run_id }}" # Optional tag or build version.
+          customSettings: "" # Optional custom settings (separated by semicolon). See: https://github.com/danielpalme/ReportGenerator/wiki/Settings.
+          toolpath: "reportgeneratortool" # Default directory for installing the dotnet tool.   
+      - name: Publish Code Coverage Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage-report/Cobertura.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: false
+          indicators: true
+          output: both
+          thresholds: "30 60"
+      - uses: jwalton/gh-find-current-pr@v1
+        id: finder
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request' || steps.finder.outputs.pr != '0'
+        with:
+          number: ${{ steps.finder.outputs.pr }}
+          recreate: true
+          path: coverage-report/SummaryGithub.md
