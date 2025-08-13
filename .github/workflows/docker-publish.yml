@@ -26,6 +26,16 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./MangaShelf/Dockerfile
+            image: ghcr.io/natashalysakova/manga-shelf-ui
+          - dockerfile: ./MangaShelf.Api/Dockerfile
+            image: ghcr.io/username/manga-shelf-api
+    
     permissions:
       contents: read
       packages: write
