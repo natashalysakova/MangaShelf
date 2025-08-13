@@ -4,3 +4,10 @@ services:
     build:
       context: .
       dockerfile: MangaShelf/Dockerfile
+
+  mangashelf.api:
+    image: ${DOCKER_REGISTRY-}mangashelfapi
+    build:
+      context: .
+      dockerfile: MangaShelf.Api/Dockerfile
+
