@@ -49,7 +49,7 @@ jobs:
             image: ${{ needs.compute.outputs.REGISTRY }}/${{ needs.compute.outputs.USER_NAME }}/manga-shelf-api
     
     permissions:
-      contents: read
+      contents: write
       packages: write
       # This is used to complete the identity challenge
       # with sigstore/fulcio when running outside of PRs.
