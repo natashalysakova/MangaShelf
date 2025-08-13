@@ -1,0 +1,6 @@
+services:
+  mangashelf:
+    image: ${DOCKER_REGISTRY-}mangashelf
+    build:
+      context: .
+      dockerfile: MangaShelf/Dockerfile
