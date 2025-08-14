@@ -12,7 +12,9 @@ on:
 jobs:
   build-api:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: ./MangaShelf
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -20,7 +22,6 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Restore dependencies
-      working-directory: ./MangaShelf
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore      
@@ -29,6 +30,9 @@ jobs:
       
   build-ui:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./MangaShelf.Api
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -36,7 +40,6 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Restore dependencies
-      working-directory: ./MangaShelf.Api
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
