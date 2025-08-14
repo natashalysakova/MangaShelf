@@ -28,7 +28,6 @@ jobs:
         id: bump
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
-          TAG_PREFIX: v
           PRERELEASE: true
           DEFAULT_BUMP : patch
         
