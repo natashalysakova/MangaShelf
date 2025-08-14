@@ -22,6 +22,8 @@ env:
 
 jobs:
   build-and-test:
+    permissions:
+      contents: write
     uses: ./.github/workflows/dotnet.yml
 
   compute:
