@@ -1,4 +1,4 @@
-﻿namespace MangaShelfTests
+﻿namespace MangaShelf.Tests
 {
     [TestClass]
     public sealed class Test1
