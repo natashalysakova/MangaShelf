@@ -15,8 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      new_tag: ${{ steps.bump.outputs.new_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
