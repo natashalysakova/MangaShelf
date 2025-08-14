@@ -11,7 +11,7 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Tests", "MangaShelf.Tests\MangaShelf.Tests.csproj", "{112A9E14-D7FE-462D-ADE8-B98E6701EB37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Api.Tests", "..\MangaShelf.Api.Tests\MangaShelf.Api.Tests.csproj", "{40C75F2F-A017-48BE-B6C3-66F6F1CD420C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Api.Tests", "MangaShelf.Api.Tests\MangaShelf.Api.Tests.csproj", "{40C75F2F-A017-48BE-B6C3-66F6F1CD420C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
