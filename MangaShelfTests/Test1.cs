@@ -14,7 +14,9 @@
         {
             Assert.IsTrue(true, "This test should always pass.");
         }
+
         [TestMethod]
+        [ExpectedException(typeof(AssertFailedException))]
         public void AlwaysFail()
         {
             Assert.IsFalse(false, "This test should always fail.");
