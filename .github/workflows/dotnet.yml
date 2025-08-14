@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./MangaShelf
+        working-directory: ./MangaShelf.Api
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -25,6 +25,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
+      
   test-api:
     runs-on: ubuntu-latest
     needs: build-api
@@ -46,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./MangaShelf.Api
+        working-directory: ./MangaShelf
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -57,6 +58,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
+
   test-ui:
     runs-on: ubuntu-latest
     needs: build-ui
