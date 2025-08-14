@@ -19,7 +19,7 @@
         [ExpectedException(typeof(AssertFailedException))]
         public void AlwaysFail()
         {
-            Assert.IsFalse(false, "This test should always fail.");
+            Assert.IsFalse(true, "This test should always fail.");
         }
     }
 }
