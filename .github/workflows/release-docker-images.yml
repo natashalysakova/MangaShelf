@@ -19,15 +19,12 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   USER_NAME: ${{github.actor}}
-
+  BRANCH_NAME: ${{ github.ref }}
 
 jobs:
-  # This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
   build-and-test:
-    uses: natashalysakova/MangaShelf/.github/workflows/dotnet.yml@${GITHUB_REF##*/}
-          
+    uses: natashalysakova/MangaShelf/.github/workflows/dotnet.yml@${BRANCH_NAME}
+
   compute:
       runs-on: ubuntu-latest
       needs: build-and-test
