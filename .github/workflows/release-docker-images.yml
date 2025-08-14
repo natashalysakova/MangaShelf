@@ -23,7 +23,7 @@ env:
 
 jobs:
   build-and-test:
-    uses: natashalysakova/MangaShelf/.github/workflows/dotnet.yml@${{ env.BRANCH_NAME }}
+    uses: natashalysakova/MangaShelf/.github/workflows/dotnet.yml
 
   compute:
       runs-on: ubuntu-latest
