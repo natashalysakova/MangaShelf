@@ -53,7 +53,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build -p:Version=${{ steps.version.outputs.new_tag }} --no-restore
+        run: dotnet build -p:Version=${{ jobs.version.outputs.new_tag }} --no-restore
 
   test:
     runs-on: ubuntu-latest
