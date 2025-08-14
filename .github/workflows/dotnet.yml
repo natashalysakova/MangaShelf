@@ -31,16 +31,6 @@ jobs:
     needs: build-api
     defaults:
       run:
-        working-directory: MangaShelf
-    steps:
-      - name: Test
-        working-directory: MangaShelf.Api.Tests
-        run: dotnet test --no-build --verbosity normal
-      
-  build-ui:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
         working-directory: MangaShelf.Api.Tests
     steps:
       - uses: actions/checkout@v4
@@ -52,6 +42,22 @@ jobs:
         run: dotnet restore
       - name: Test
         run: dotnet test --no-build --verbosity normal
+      
+  build-ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: MangaShelf
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
 
   test-ui:
     runs-on: ubuntu-latest
