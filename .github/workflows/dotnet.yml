@@ -26,7 +26,7 @@ jobs:
     needs: setup
     steps:
     - name: Build
-      working-directory: ./MangaShelf.Api
+      working-directory: MangaShelf.Api
       run: dotnet build --no-restore
 
   test-api:
@@ -34,7 +34,7 @@ jobs:
     needs: build-api
     steps:
       - name: Test
-        working-directory: ./MangaShelf.Api.Tests
+        working-directory: MangaShelf.Api.Tests
         run: dotnet test --no-build --verbosity normal
       
   build-ui:
@@ -42,7 +42,7 @@ jobs:
     needs: setup
     steps:
     - name: Build
-      working-directory: ./MangaShelf
+      working-directory: MangaShelf
       run: dotnet build --no-restore
 
   test-ui:
@@ -50,5 +50,5 @@ jobs:
     needs: build-ui
     steps:
       - name: Test
-        working-directory: ./MangaShelf.Tests
+        working-directory: MangaShelf.Tests
         run: dotnet test --no-build --verbosity normal
