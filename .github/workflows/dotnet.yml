@@ -11,6 +11,26 @@ on:
   workflow_call:
 
 jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@v1 # Don't use @master or @v1 unless you're happy to test the latest version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
+          TAG_PREFIX: v
+          PRERELEASE: true
+          DEFAULT_BUMP : patch
+          DRY_RUN: true
+        
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -31,11 +51,11 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build -p:Version=${{ steps.version.outputs.new_tag }} --no-restore
 
   test:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build 
     strategy:
       fail-fast: false
       matrix:
