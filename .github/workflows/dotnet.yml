@@ -62,8 +62,11 @@ jobs:
       matrix:
         include:
           - directory: ./MangaShelf.Tests
+            name: ui
           - directory: ./MangaShelf.Api.Tests
+            name: api
           - directory: ./MangaShelf.UnitTests
+            name: common
     defaults:
       run:
         working-directory: ${{ matrix.directory }}
@@ -76,12 +79,12 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --configuration Release --collect "XPlat Code Coverage" --verbosity normal --logger trx
+        run: dotnet test --configuration Release --collect "XPlat Code Coverage" --verbosity normal --logger trx --results-directory TestResults-${{ matrix.name }}
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ${{ github.workspace }}/TestResults
+          path: TestResults-${{ matrix.name }}
   coverage:
       runs-on: ubuntu-latest
       needs: test
