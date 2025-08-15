@@ -90,6 +90,8 @@ jobs:
   coverage:
       runs-on: ubuntu-latest
       needs: test
+      permissions:
+        pull-requests: write
       steps:
       - name: Download Test Results
         uses: actions/download-artifact@v5
