@@ -82,4 +82,7 @@ jobs:
         with:
           reports: cobertura.coverage.xml
           targetdir: coveragereport
-          reporttypes: Html;Cobertura;Badges
+          reporttypes: Html;Cobertura;Badges;MarkdownSummaryGithub
+      - name: Publish coverage in build summary # Only applicable if 'MarkdownSummaryGithub' or one of the other Markdown report types is generated
+        run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY # Adjust path and filename if necessary
+        shell: bash
