@@ -77,6 +77,19 @@ jobs:
         run: dotnet restore
       - name: Test
         run: dotnet test --configuration Release --collect "XPlat Code Coverage" --verbosity normal --logger trx
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ${{ github.workspace }}/TestResults
+  coverage:
+      runs-on: ubuntu-latest
+      needs: test
+      steps:
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
       - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
         uses: danielpalme/ReportGenerator-GitHub-Action@5.2.4
         with:
@@ -97,7 +110,7 @@ jobs:
       - name: Publish Code Coverage Report
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: ${{ github.workspace }}/Cobertura.xml
+          filename: Cobertura.xml
           badge: true
           fail_below_min: false # just informative for now
           format: markdown
