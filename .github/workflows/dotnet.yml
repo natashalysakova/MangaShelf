@@ -77,3 +77,9 @@ jobs:
         run: dotnet restore
       - name: Test
         run: dotnet test --collect "XPlat Code Coverage" --verbosity normal
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.4.12
+        with:
+          reports: cobertura.coverage.xml
+          targetdir: coveragereport
+          reporttypes: Html;Cobertura;Badges
