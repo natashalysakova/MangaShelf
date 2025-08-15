@@ -24,6 +24,7 @@ jobs:
   build-and-test:
     permissions:
       contents: write
+      pull-requests: write
     uses: ./.github/workflows/dotnet.yml
 
   compute:
