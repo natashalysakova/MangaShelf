@@ -63,6 +63,7 @@ jobs:
         include:
           - directory: ./MangaShelf.Tests
           - directory: ./MangaShelf.Api.Tests
+          - directory: ./MangaShelf.UnitTests
     defaults:
       run:
         working-directory: ${{ matrix.directory }}
@@ -75,4 +76,4 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --verbosity normal
+        run: dotnet test --collect "XPlat Code Coverage" --verbosity normal
