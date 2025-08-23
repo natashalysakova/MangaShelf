@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MangaShelf.Components.Account
 {
-    internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
+    public sealed class IdentityRedirectManager(NavigationManager navigationManager)
     {
         public const string StatusCookieName = "Identity.StatusMessage";
 

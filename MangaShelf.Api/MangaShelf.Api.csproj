@@ -12,6 +12,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <PackageReference Include="Riok.Mapperly" Version="4.2.1" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.6.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MangaShelf.BL\MangaShelf.BL.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
+    <ProjectReference Include="..\MangaShelf.Infrastructure\MangaShelf.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

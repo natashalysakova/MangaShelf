@@ -1,7 +1,31 @@
 ﻿@page "/"
+@using MangaShelf.BL.Dto
+@using MangaShelf.BL.Interfaces
+@inject ICountryService CountryService
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+@foreach (var country in countries)
+{
+    <div>
+        <h2>@country.Name</h2>
+        <p>Code: @country.Code</p>
+        <img src="@country.FlagUrl" alt="Flag of @country.Name"/>
+    </div>
+}
+}
+
+@code
+{
+    private IEnumerable<CountryDto> countries = Enumerable.Empty<CountryDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        countries = await CountryService.GetAllCountriesAsync();
+        // You can use the countries data here or pass it to a component
+    }
+}

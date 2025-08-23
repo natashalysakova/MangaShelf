@@ -6,5 +6,4 @@ namespace MangaShelf.Data
     public class ApplicationUser : IdentityUser
     {
     }
-
 }

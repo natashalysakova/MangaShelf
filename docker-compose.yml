@@ -1,13 +1,98 @@
+name: manga-shelf
 services:
-  mangashelf:
-    image: ${DOCKER_REGISTRY-}mangashelf
-    build:
-      context: .
-      dockerfile: MangaShelf/Dockerfile
+  # mangashelf:
+  #   image: ${DOCKER_REGISTRY}manga-shelf-ui:latest
+  #   container_name: mangashelf
+  #   ports:
+  #     - 5299:8080
+  #   networks: 
+  #     - manga-network
+  #   environment:
+  #       ASPNETCORE_ENVIRONMENT: Production
+  #       ASPNETCORE_HTTP_PORTS: 8080
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - images:/app/wwwroot/images:rw
+  #   restart: always
+  #   depends_on:
+  #     mangashelf.seeder:
+  #       condition: service_completed_successfully
+  
+  mangashelf.seeder:
+    container_name: mangashelf.seeder
+    image: ${DOCKER_REGISTRY}manga-shelf-seeder:latest
+    networks: 
+      - manga-network
+    environment:
+      DOTNET_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+    volumes:
+      - images:/app/wwwroot/images:rw
+    env_file:
+      - .env
+    restart: no
+    depends_on:
+        mangashelf.db:
+            condition: service_healthy
+        mangashelf.accounts:
+            condition: service_healthy
 
-  mangashelf.api:
-    image: ${DOCKER_REGISTRY-}mangashelfapi
-    build:
-      context: .
-      dockerfile: MangaShelf.Api/Dockerfile
+  mangashelf.db:
+    container_name: mangashelf.db
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    networks:
+      - manga-network
+    volumes:
+      - dbdata:/var/lib/mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: ${MANGA_HOST}
+      MYSQL_USER: ${MANGA_USER}
+      MYSQL_PASSWORD: ${MANGA_PASSWORD}
+      MYSQL_DATABASE: ${MANGA_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MANGA_ROOT_PASSWORD}
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  mangashelf.accounts:
+    container_name: mangashelf.accounts
+    image: mysql:8.0
+    ports:
+      - 3307:3306
+    networks:
+      - manga-network
+    volumes:
+      - accdata:/var/lib/mysql
+    env_file:
+      - .env 
+    environment:
+      MYSQL_HOST: ${ACCOUNTS_HOST}
+      MYSQL_USER: ${ACCOUNTS_USER}
+      MYSQL_PASSWORD: ${ACCOUNTS_PASSWORD}
+      MYSQL_DATABASE: ${ACCOUNTS_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${ACCOUNTS_ROOT_PASSWORD}
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+networks:
+  manga-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
+  images:
+    driver: local
+  accdata:
+    driver: local
 

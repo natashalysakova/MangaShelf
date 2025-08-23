@@ -11,6 +11,8 @@ EXPOSE 8081
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
+RUN dotnet dev-certs https
+RUN dotnet dev-certs https --trust
 WORKDIR /src
 COPY ["MangaShelf/MangaShelf.csproj", "MangaShelf/"]
 RUN dotnet restore "./MangaShelf/MangaShelf.csproj"
@@ -27,4 +29,16 @@ RUN dotnet publish "./MangaShelf.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Before the final CMD or ENTRYPOINT
+# Switch to the root user to change permissions
+USER root
+
+# Create the directory and change its ownership to the 'app' user.
+# The -R flag ensures that if the directory already exists, its contents also get the correct ownership.
+RUN mkdir -p /app/wwwroot/images && chown -R app:app /app/wwwroot/images
+
+# Switch back to the non-root user to run the application
+USER app
+
 ENTRYPOINT ["dotnet", "MangaShelf.dll"]

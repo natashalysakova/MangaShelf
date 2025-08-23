@@ -1,4 +1,8 @@
 
+using MangaShelf.Infrastructure.Installer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace MangaShelf.Api
 {
     public class Program
@@ -12,6 +16,10 @@ namespace MangaShelf.Api
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+
+            builder.RegisterMangaDbContext();
+
 
             var app = builder.Build();
 

@@ -51,9 +51,9 @@ jobs:
         include:
           - dockerfile: ./MangaShelf/Dockerfile
             image: ${{ needs.compute.outputs.REGISTRY }}/${{ needs.compute.outputs.USER_NAME }}/manga-shelf-ui
-          - dockerfile: ./MangaShelf.Api/Dockerfile
-            image: ${{ needs.compute.outputs.REGISTRY }}/${{ needs.compute.outputs.USER_NAME }}/manga-shelf-api
-    
+          - dockerfile: ./MangaShelf.SeedService/Dockerfile
+            image: ${{ needs.compute.outputs.REGISTRY }}/${{ needs.compute.outputs.USER_NAME }}/manga-shelf-seed
+            
     permissions:
       contents: read
       packages: write
