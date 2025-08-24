@@ -1,5 +1,3 @@
-using MangaShelf.DAL.MangaShelf;
-
 namespace MangaShelf.SeedService;
 
 public class SeedDevShelfService : ISeedDataService

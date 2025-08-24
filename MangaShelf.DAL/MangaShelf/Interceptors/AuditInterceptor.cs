@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace MangaShelf.DAL.MangaShelf
+namespace MangaShelf.DAL.MangaShelf.Interceptors
 {
     public class AuditInterceptor : SaveChangesInterceptor
     {

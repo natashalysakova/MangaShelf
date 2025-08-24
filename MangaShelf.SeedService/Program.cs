@@ -1,5 +1,4 @@
 using MangaShelf.Infrastructure.Installer;
-using Microsoft.EntityFrameworkCore;
 
 namespace MangaShelf.SeedService
 {

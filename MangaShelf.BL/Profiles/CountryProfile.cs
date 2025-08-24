@@ -1,5 +1,5 @@
 ﻿using MangaShelf.BL.Dto;
-using MangaShelf.DAL.MangaShelf;
+using MangaShelf.DAL.MangaShelf.Models;
 using Riok.Mapperly.Abstractions;
 
 namespace MangaShelf.BL.Profiles

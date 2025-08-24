@@ -1,6 +1,5 @@
 ﻿using MangaShelf.DAL.MangaShelf;
-using MangaShelf.Data;
-using Microsoft.AspNetCore.Builder;
+using MangaShelf.DAL.MangaShelf.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

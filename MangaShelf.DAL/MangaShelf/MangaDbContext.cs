@@ -1,9 +1,11 @@
 ﻿using MangaShelf.DAL.Interfaces;
-using MangaShelf.Data;
+using MangaShelf.DAL.MangaShelf.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using System.Security.Principal;
 
 namespace MangaShelf.DAL.MangaShelf
 {
@@ -13,6 +15,7 @@ namespace MangaShelf.DAL.MangaShelf
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Series> Series { get; set; }
         public DbSet<Volume> Volumes { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public MangaDbContext(DbContextOptions<MangaDbContext> options) : base(options)
         {
@@ -28,9 +31,20 @@ namespace MangaShelf.DAL.MangaShelf
                 if (typeof(IEntity).IsAssignableFrom(entityType.ClrType))
                 {
                     modelBuilder.Entity(entityType.ClrType)
+                        .Property(nameof(IEntity.Id))
+                        .ValueGeneratedOnAdd();
+
+                    // Apply a global query filter to exclude soft-deleted entities
+                    modelBuilder.Entity(entityType.ClrType)
                         .HasQueryFilter(ConvertToDeleteFilter(entityType.ClrType));
                 }
             }
+
+            modelBuilder.Entity<Series>()
+                .Property(e => e.Aliases)
+                .HasConversion(
+                    v => string.Join('|', v),
+                    v => v.Split('|', StringSplitOptions.RemoveEmptyEntries));
         }
 
         private static LambdaExpression ConvertToDeleteFilter(Type type)

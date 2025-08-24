@@ -1,7 +1,6 @@
 ﻿using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Services;
 using MangaShelf.DAL.Interfaces;
-using MangaShelf.DAL.MangaShelf;
 using MangaShelf.Data;
 using MangaShelf.Infrastructure.Accounts;
 using Microsoft.AspNetCore.Components.Authorization;

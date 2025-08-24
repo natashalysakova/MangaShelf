@@ -1,6 +1,5 @@
 using MangaShelf.Components;
 using MangaShelf.Data;
-using Microsoft.AspNetCore.Identity;
 using MangaShelf.Infrastructure.Installer;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Components.Account;

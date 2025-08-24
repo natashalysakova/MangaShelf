@@ -1,8 +1,9 @@
 using MangaShelf.DAL.MangaShelf;
+using MangaShelf.DAL.MangaShelf.Models;
 using MangaShelf.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using System.Threading.Tasks;
 
 namespace MangaShelf.SeedService;
 
@@ -16,6 +17,16 @@ public class SeedProdShelfService : ISeedDataService
     public string ActivitySourceName => "Seed prod shelf";
 
     public int Priority => 2;
+
+    public async Task Run(IServiceProvider scopedServiceProvider, CancellationToken cancellationToken)
+    {
+        var context = scopedServiceProvider.GetRequiredService<MangaDbContext>();
+        var userManager = scopedServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        await SeedUsers(context, userManager);
+
+        await SeedCountries(context);
+        await SeedPublishers(context);
+    }
 
     private async Task SeedCountries(MangaDbContext context)
     {
@@ -117,7 +128,8 @@ public class SeedProdShelfService : ISeedDataService
                 new() { Name = "Vovkulaka", Country = ukraine, Url = "https://www.vovkulaka.net/" },
                 new() { Name = "А-БА-БА-ГА-ЛА-МА-ГА", Country = ukraine },
                 new() { Name = "Видавництво", Country = ukraine, Url = "https://vydavnytstvo.com/" },
-                new() { Name = "КСД", Country = ukraine },
+                new() { Name = "КСД", Country = ukraine, Url = "https://ksd.ua/" },
+                new() { Name = "Лабораторія", Country = ukraine, Url = "https://laboratory.ua/" },
                 new() { Name = "Лол Кекс", Country = ukraine, Url = "https://ksd.ua/" },
                 new() { Name = "РМ", Country = ukraine },
                 new() { Name = "Ранок", Country = ukraine },
@@ -139,11 +151,7 @@ public class SeedProdShelfService : ISeedDataService
         var existingNames = await context.Publishers.Select(x => x.Name).ToListAsync();
         var notExisting = publishers.Where(x => !existingNames.Contains(x.Name)).ToList();
 
-        foreach (var publisher in notExisting)
-        {
-            publisher.Id = Guid.NewGuid();
-            context.Publishers.Add(publisher);
-        }
+        context.Publishers.AddRange(notExisting);
 
         if (context.ChangeTracker.HasChanges())
         {
@@ -151,10 +159,27 @@ public class SeedProdShelfService : ISeedDataService
         }
     }
 
-    public async Task Run(IServiceProvider scopedServiceProvider, CancellationToken cancellationToken)
+
+    private async Task SeedUsers(MangaDbContext context, UserManager<ApplicationUser> userManager)
     {
-        var context = scopedServiceProvider.GetRequiredService<MangaDbContext>();
-        await SeedCountries(context);
-        await SeedPublishers(context);
+        var users = await userManager.GetUsersInRoleAsync(RoleTypes.User);
+
+        foreach (var user in users)
+        {
+            var exist = context.Users.Any(x => x.ApplicationUserId == user.Id);
+
+            if (!exist)
+            {
+                context.Users.Add(new User()
+                {
+                    ApplicationUserId = user.Id,
+                });
+            }
+        }
+
+        if (context.ChangeTracker.HasChanges())
+        {
+            await context.SaveChangesAsync();
+        }
     }
 }

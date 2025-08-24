@@ -1,7 +1,5 @@
 using MangaShelf.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace MangaShelf.SeedService;

@@ -1,5 +1,4 @@
 using MangaShelf.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace MangaShelf.Components.Account
