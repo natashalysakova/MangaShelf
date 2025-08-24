@@ -1,9 +1,9 @@
 ﻿@using MangaShelf.Components.Account
-@using MangaShelf.Data
+@using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 
-@inject SignInManager<ApplicationUser> SignInManager
+@inject SignInManager<User> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
 @if (externalLogins.Length == 0)

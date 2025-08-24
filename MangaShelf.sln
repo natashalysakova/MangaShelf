@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Infrastructure",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.SeedService", "MangaShelf.SeedService\MangaShelf.SeedService.csproj", "{42EE41C9-9625-405F-8F75-C18272817624}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrateOldDatabase", "..\MigrateOldDatabase\MigrateOldDatabase.csproj", "{84F9609F-6140-4F55-B7BD-5C624C3697FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "E:\sources\ComicShelf\Backend\Backend.csproj", "{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,14 @@ Global
 		{42EE41C9-9625-405F-8F75-C18272817624}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42EE41C9-9625-405F-8F75-C18272817624}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42EE41C9-9625-405F-8F75-C18272817624}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

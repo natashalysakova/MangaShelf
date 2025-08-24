@@ -16,9 +16,7 @@ namespace MangaShelf.SeedService
 
             try
             {
-                builder.RegisterMangaDbContext();
-
-                builder.RegisterIdentityContextAndServices();
+                builder.RegisterContextAndServices();
             }
             catch (Exception ex)
             {
@@ -34,8 +32,7 @@ namespace MangaShelf.SeedService
 
             try
             {
-                await host.Services.MakeSureAccountDbCreatedAsync();
-                await host.Services.MakeSureMangaDbCreatedAsync();
+                await host.Services.MakeSureDbCreatedAsync();
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-﻿namespace MangaShelf.DAL.MangaShelf.Models
+﻿namespace MangaShelf.DAL.Models
 {
     public class Ownership : BaseEntity
     {
@@ -8,6 +8,7 @@
         public virtual Volume? Volume { get; set; }
         public VolumeStatus Status { get; set; }
         public VolumeType Type { get; set; }
+        public DateTimeOffset Date { get; set; }
 
         public enum VolumeStatus
         {

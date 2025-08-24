@@ -1,11 +1,11 @@
-using MangaShelf.Data;
+using MangaShelf.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace MangaShelf.Components.Account
 {
-    public sealed class IdentityUserAccessor(UserManager<ApplicationUser> userManager, IdentityRedirectManager redirectManager)
+    public sealed class IdentityUserAccessor(UserManager<User> userManager, IdentityRedirectManager redirectManager)
     {
-        public async Task<ApplicationUser> GetRequiredUserAsync(HttpContext context)
+        public async Task<User> GetRequiredUserAsync(HttpContext context)
         {
             var user = await userManager.GetUserAsync(context.User);
 

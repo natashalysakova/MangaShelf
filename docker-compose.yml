@@ -35,8 +35,6 @@ services:
     depends_on:
         mangashelf.db:
             condition: service_healthy
-        mangashelf.accounts:
-            condition: service_healthy
 
   mangashelf.db:
     container_name: mangashelf.db
@@ -55,29 +53,6 @@ services:
       MYSQL_PASSWORD: ${MANGA_PASSWORD}
       MYSQL_DATABASE: ${MANGA_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MANGA_ROOT_PASSWORD}
-    restart: always
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 10
-
-  mangashelf.accounts:
-    container_name: mangashelf.accounts
-    image: mysql:8.0
-    ports:
-      - 3307:3306
-    networks:
-      - manga-network
-    volumes:
-      - accdata:/var/lib/mysql
-    env_file:
-      - .env 
-    environment:
-      MYSQL_HOST: ${ACCOUNTS_HOST}
-      MYSQL_USER: ${ACCOUNTS_USER}
-      MYSQL_PASSWORD: ${ACCOUNTS_PASSWORD}
-      MYSQL_DATABASE: ${ACCOUNTS_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${ACCOUNTS_ROOT_PASSWORD}
     restart: always
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]

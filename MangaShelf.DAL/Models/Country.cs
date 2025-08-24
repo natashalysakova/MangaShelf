@@ -1,4 +1,4 @@
-﻿namespace MangaShelf.DAL.MangaShelf.Models
+﻿namespace MangaShelf.DAL.Models
 {
     public class Country : BaseEntity
     {

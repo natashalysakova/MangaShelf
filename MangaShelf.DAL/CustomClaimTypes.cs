@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace MangaShelf.Data
+namespace MangaShelf.DAL
 {
     public static class CustomClaimTypes
     {

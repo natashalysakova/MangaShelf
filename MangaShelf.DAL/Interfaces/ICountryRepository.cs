@@ -1,5 +1,4 @@
-﻿using MangaShelf.DAL.MangaShelf;
-using MangaShelf.DAL.MangaShelf.Models;
+﻿using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MangaShelf.DAL.Interfaces

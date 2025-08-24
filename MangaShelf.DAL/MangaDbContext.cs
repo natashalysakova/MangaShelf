@@ -1,5 +1,5 @@
 ﻿using MangaShelf.DAL.Interfaces;
-using MangaShelf.DAL.MangaShelf.Models;
+using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Security.Principal;
 
-namespace MangaShelf.DAL.MangaShelf
+namespace MangaShelf.DAL
 {
     public class MangaDbContext : DbContext
     {
@@ -16,6 +16,7 @@ namespace MangaShelf.DAL.MangaShelf
         public DbSet<Series> Series { get; set; }
         public DbSet<Volume> Volumes { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Author> Authors { get; set; }
 
         public MangaDbContext(DbContextOptions<MangaDbContext> options) : base(options)
         {

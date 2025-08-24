@@ -1,7 +1,5 @@
-using MangaShelf.DAL.MangaShelf;
-using MangaShelf.DAL.MangaShelf.Models;
-using MangaShelf.Data;
-using Microsoft.AspNetCore.Identity;
+using MangaShelf.DAL;
+using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
@@ -21,8 +19,6 @@ public class SeedProdShelfService : ISeedDataService
     public async Task Run(IServiceProvider scopedServiceProvider, CancellationToken cancellationToken)
     {
         var context = scopedServiceProvider.GetRequiredService<MangaDbContext>();
-        var userManager = scopedServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        await SeedUsers(context, userManager);
 
         await SeedCountries(context);
         await SeedPublishers(context);
@@ -152,30 +148,6 @@ public class SeedProdShelfService : ISeedDataService
         var notExisting = publishers.Where(x => !existingNames.Contains(x.Name)).ToList();
 
         context.Publishers.AddRange(notExisting);
-
-        if (context.ChangeTracker.HasChanges())
-        {
-            await context.SaveChangesAsync();
-        }
-    }
-
-
-    private async Task SeedUsers(MangaDbContext context, UserManager<ApplicationUser> userManager)
-    {
-        var users = await userManager.GetUsersInRoleAsync(RoleTypes.User);
-
-        foreach (var user in users)
-        {
-            var exist = context.Users.Any(x => x.ApplicationUserId == user.Id);
-
-            if (!exist)
-            {
-                context.Users.Add(new User()
-                {
-                    ApplicationUserId = user.Id,
-                });
-            }
-        }
 
         if (context.ChangeTracker.HasChanges())
         {

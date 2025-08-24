@@ -1,5 +1,5 @@
 using MangaShelf.Components;
-using MangaShelf.Data;
+using MangaShelf.DAL.Models;
 using MangaShelf.Infrastructure.Installer;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Components.Account;
@@ -18,11 +18,9 @@ namespace MangaShelf
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.RegisterIdentityContextAndServices();
+            builder.RegisterContextAndServices();
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
-
-            builder.RegisterMangaDbContext();
 
             builder.RegisterServices();
 
@@ -38,12 +36,6 @@ namespace MangaShelf
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-            }
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                dbContext.Database.EnsureCreated();
             }
 
             app.UseHttpsRedirection();

@@ -1,4 +1,4 @@
-﻿namespace MangaShelf.DAL.MangaShelf.Models
+﻿namespace MangaShelf.DAL.Models
 {
     public class Reading : BaseEntity
     {
@@ -9,7 +9,9 @@
         public DateTimeOffset StartedAt { get; set; }
         public DateTimeOffset? FinishedAt { get; set; }
         public ReadingStatus Status { get; set; }
-        public int Rating { get; set; }
+        public int? Rating { get; set; }
+        public string? Review { get; set; }
+
 
         public enum ReadingStatus
         {

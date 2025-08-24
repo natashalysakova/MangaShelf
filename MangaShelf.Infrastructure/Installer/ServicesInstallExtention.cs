@@ -1,7 +1,10 @@
 ﻿using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Services;
+using MangaShelf.DAL;
+using MangaShelf.DAL.Interceptors;
 using MangaShelf.DAL.Interfaces;
-using MangaShelf.Data;
+using MangaShelf.DAL.Models;
+using MangaShelf.DAL.Models;
 using MangaShelf.Infrastructure.Accounts;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -25,14 +28,14 @@ namespace MangaShelf.Infrastructure.Installer
         }
     }
 
-    public static class IdentityContextInstallExtention
+    public static class ContextInstallExtention
     {
-        public static IHostApplicationBuilder RegisterIdentityContextAndServices(this IHostApplicationBuilder builder)
+        public static IHostApplicationBuilder RegisterContextAndServices(this IHostApplicationBuilder builder)
         {
-            var connectionString = builder.Configuration.GetConnectionString("AccountsDb") ?? throw new InvalidOperationException("Connection string 'AccountsDb' not found.");
+            var connectionString = builder.Configuration.GetConnectionString("MangaDb") ?? throw new InvalidOperationException("Connection string 'MangaDb' not found.");
 
             var accontDbVersion = ServerVersion.AutoDetect(connectionString);
-            builder.Services.AddDbContext<ApplicationDbContext>(
+            builder.Services.AddDbContext<MangaDbContext>(
                 options =>
                 {
                     options
@@ -40,7 +43,8 @@ namespace MangaShelf.Infrastructure.Installer
                     mysqlOptions =>
                     {
                         mysqlOptions.EnableRetryOnFailure();
-                    });
+                    })
+                    .AddInterceptors(new AuditInterceptor());
 
                     if (builder.Environment.IsDevelopment())
                     {
@@ -48,13 +52,12 @@ namespace MangaShelf.Infrastructure.Installer
                     }
                 });
 
-
-            builder.Services.AddIdentityCore<ApplicationUser>(options =>
+            builder.Services.AddIdentityCore<User>(options =>
              {
                  options.SignIn.RequireConfirmedAccount = true;
              })
             .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddEntityFrameworkStores<MangaDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
@@ -67,16 +70,16 @@ namespace MangaShelf.Infrastructure.Installer
 
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-            builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
             return builder;
         }
 
-        public static async Task MakeSureAccountDbCreatedAsync(this IServiceProvider serviceProvider)
+        public static async Task MakeSureDbCreatedAsync(this IServiceProvider serviceProvider)
         {
             using (var scope = serviceProvider.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<MangaDbContext>();
                 await dbContext.Database.MigrateAsync();
             }
         }

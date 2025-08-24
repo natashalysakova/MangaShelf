@@ -1,4 +1,5 @@
-using MangaShelf.Data;
+using MangaShelf.DAL;
+using MangaShelf.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
@@ -22,14 +23,14 @@ public class SeedProdUsersService : ISeedDataService
 
     private async Task SeedUsers(IServiceProvider serviceProvider)
     {
-        UserManager<ApplicationUser> userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        UserManager<User> userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
         var provider = "local";
 
         var adminUserName = "admin@example.com";
         if (await userManager.FindByLoginAsync(provider, adminUserName) is null)
         {
-            var user = new ApplicationUser()
+            var user = new User()
             {
                 UserName = adminUserName,
                 Email = adminUserName,
@@ -44,7 +45,7 @@ public class SeedProdUsersService : ISeedDataService
         var demoUserName = "demo@example.com";
         if (await userManager.FindByLoginAsync(provider, demoUserName) is null)
         {
-            var user = new ApplicationUser()
+            var user = new User()
             {
                 UserName = demoUserName,
                 Email = demoUserName,

@@ -1,4 +1,4 @@
-using MangaShelf.Data;
+using MangaShelf.DAL.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -26,7 +26,7 @@ namespace MangaShelf.Infrastructure.Accounts
 
             accountGroup.MapPost("/PerformExternalLogin", (
                 HttpContext context,
-                [FromServices] SignInManager<ApplicationUser> signInManager,
+                [FromServices] SignInManager<User> signInManager,
                 [FromForm] string provider,
                 [FromForm] string returnUrl) =>
             {
@@ -45,7 +45,7 @@ namespace MangaShelf.Infrastructure.Accounts
 
             accountGroup.MapPost("/Logout", async (
                 ClaimsPrincipal user,
-                [FromServices] SignInManager<ApplicationUser> signInManager,
+                [FromServices] SignInManager<User> signInManager,
                 [FromForm] string returnUrl) =>
             {
                 await signInManager.SignOutAsync();
@@ -56,7 +56,7 @@ namespace MangaShelf.Infrastructure.Accounts
 
             manageGroup.MapPost("/LinkExternalLogin", async (
                 HttpContext context,
-                [FromServices] SignInManager<ApplicationUser> signInManager,
+                [FromServices] SignInManager<User> signInManager,
                 [FromForm] string provider) =>
             {
                 // Clear the existing external cookie to ensure a clean login process
@@ -76,7 +76,7 @@ namespace MangaShelf.Infrastructure.Accounts
 
             manageGroup.MapPost("/DownloadPersonalData", async (
                 HttpContext context,
-                [FromServices] UserManager<ApplicationUser> userManager,
+                [FromServices] UserManager<User> userManager,
                 [FromServices] AuthenticationStateProvider authenticationStateProvider) =>
             {
                 var user = await userManager.GetUserAsync(context.User);
@@ -90,7 +90,7 @@ namespace MangaShelf.Infrastructure.Accounts
 
                 // Only include personal data for download
                 var personalData = new Dictionary<string, string>();
-                var personalDataProps = typeof(ApplicationUser).GetProperties().Where(
+                var personalDataProps = typeof(User).GetProperties().Where(
                     prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
                 foreach (var p in personalDataProps)
                 {

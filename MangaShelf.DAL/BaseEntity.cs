@@ -1,6 +1,6 @@
 ﻿using MangaShelf.DAL.Interfaces;
 
-namespace MangaShelf.DAL.MangaShelf
+namespace MangaShelf.DAL
 {
     public class BaseEntity : IEntity
     {
