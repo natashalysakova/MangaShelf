@@ -1,22 +1,21 @@
-using MangaShelf.DAL.Models;
+using MangaShelf.DAL.Identity;
 using MangaShelf.DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace MangaShelf.Infrastructure.Accounts
+namespace MangaShelf.Infrastructure.Accounts;
+
+// Remove the "else if (EmailSender is IdentityNoOpEmailSender)" block from RegisterConfirmation.razor after updating with a real implementation.
+public sealed class IdentityNoOpEmailSender : IEmailSender<MangaIdentityUser>
 {
-    // Remove the "else if (EmailSender is IdentityNoOpEmailSender)" block from RegisterConfirmation.razor after updating with a real implementation.
-    public sealed class IdentityNoOpEmailSender : IEmailSender<User>
-    {
-        private readonly IEmailSender emailSender = new NoOpEmailSender();
+    private readonly IEmailSender emailSender = new NoOpEmailSender();
 
-        public Task SendConfirmationLinkAsync(User user, string email, string confirmationLink) =>
-            emailSender.SendEmailAsync(email, "Confirm your email", $"Please confirm your account by <a href='{confirmationLink}'>clicking here</a>.");
+    public Task SendConfirmationLinkAsync(MangaIdentityUser user, string email, string confirmationLink) =>
+        emailSender.SendEmailAsync(email, "Confirm your email", $"Please confirm your account by <a href='{confirmationLink}'>clicking here</a>.");
 
-        public Task SendPasswordResetLinkAsync(User user, string email, string resetLink) =>
-            emailSender.SendEmailAsync(email, "Reset your password", $"Please reset your password by <a href='{resetLink}'>clicking here</a>.");
+    public Task SendPasswordResetLinkAsync(MangaIdentityUser user, string email, string resetLink) =>
+        emailSender.SendEmailAsync(email, "Reset your password", $"Please reset your password by <a href='{resetLink}'>clicking here</a>.");
 
-        public Task SendPasswordResetCodeAsync(User user, string email, string resetCode) =>
-            emailSender.SendEmailAsync(email, "Reset your password", $"Please reset your password using the following code: {resetCode}");
-    }
+    public Task SendPasswordResetCodeAsync(MangaIdentityUser user, string email, string resetCode) =>
+        emailSender.SendEmailAsync(email, "Reset your password", $"Please reset your password using the following code: {resetCode}");
 }

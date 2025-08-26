@@ -8,10 +8,10 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 
-@inject UserManager<User> UserManager
-@inject IUserStore<User> UserStore
-@inject SignInManager<User> SignInManager
-@inject IEmailSender<User> EmailSender
+@inject UserManager<MangaIdentityUser> UserManager
+@inject IUserStore<MangaIdentityUser> UserStore
+@inject SignInManager<MangaIdentityUser> SignInManager
+@inject IEmailSender<MangaIdentityUser> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -103,11 +103,11 @@
         RedirectManager.RedirectTo(ReturnUrl);
     }
 
-    private User CreateUser()
+    private MangaIdentityUser CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<User>();
+            return Activator.CreateInstance<MangaIdentityUser>();
         }
         catch
         {
@@ -116,13 +116,13 @@
         }
     }
 
-    private IUserEmailStore<User> GetEmailStore()
+    private IUserEmailStore<MangaIdentityUser> GetEmailStore()
     {
         if (!UserManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<User>)UserStore;
+        return (IUserEmailStore<MangaIdentityUser>)UserStore;
     }
 
     private sealed class InputModel

@@ -1,0 +1,19 @@
+using MangaShelf.Infrastructure.Installer;
+
+namespace MangaShelf.Parser;
+
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        var builder = Host.CreateApplicationBuilder(args);
+        builder.Services.AddHostedService<Worker>();
+
+        builder.RegisterContextAndServices();
+        builder.RegisterIdentityContextAndServices();
+        builder.RegisterServices();
+
+        var host = builder.Build();
+        host.Run();
+    }
+}

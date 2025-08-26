@@ -5,10 +5,10 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 
-@inject UserManager<User> UserManager
-@inject SignInManager<User> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
+@inject SignInManager<MangaIdentityUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
-@inject IUserStore<User> UserStore
+@inject IUserStore<MangaIdentityUser> UserStore
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Manage your external logins</PageTitle>
@@ -67,7 +67,7 @@
 @code {
     public const string LinkLoginCallbackAction = "LinkLoginCallback";
 
-    private User user = default!;
+    private MangaIdentityUser user = default!;
     private IList<UserLoginInfo>? currentLogins;
     private IList<AuthenticationScheme>? otherLogins;
     private bool showRemoveButton;
@@ -93,7 +93,7 @@
             .ToList();
 
         string? passwordHash = null;
-        if (UserStore is IUserPasswordStore<User> userPasswordStore)
+        if (UserStore is IUserPasswordStore<MangaIdentityUser> userPasswordStore)
         {
             passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
         }

@@ -1,8 +1,7 @@
-﻿namespace MangaShelf.DAL.Interfaces
+﻿namespace MangaShelf.DAL.Interfaces;
+
+public interface IAuditableEntity
 {
-    public interface IAuditableEntity
-    {
-        DateTimeOffset CreatedAt { get; set; }
-        DateTimeOffset? UpdatedAt { get; set; }
-    }
+    DateTimeOffset CreatedAt { get; set; }
+    DateTimeOffset? UpdatedAt { get; set; }
 }

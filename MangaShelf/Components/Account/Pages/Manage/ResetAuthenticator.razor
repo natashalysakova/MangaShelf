@@ -4,8 +4,8 @@
 @using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Identity
 
-@inject UserManager<User> UserManager
-@inject SignInManager<User> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
+@inject SignInManager<MangaIdentityUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ResetAuthenticator> Logger

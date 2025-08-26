@@ -1,27 +1,27 @@
 name: manga-shelf
 services:
-  # mangashelf:
-  #   image: ${DOCKER_REGISTRY}manga-shelf-ui:latest
-  #   container_name: mangashelf
-  #   ports:
-  #     - 5299:8080
-  #   networks: 
-  #     - manga-network
-  #   environment:
-  #       ASPNETCORE_ENVIRONMENT: Production
-  #       ASPNETCORE_HTTP_PORTS: 8080
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - images:/app/wwwroot/images:rw
-  #   restart: always
-  #   depends_on:
-  #     mangashelf.seeder:
-  #       condition: service_completed_successfully
-  
-  mangashelf.seeder:
-    container_name: mangashelf.seeder
-    image: ${DOCKER_REGISTRY}manga-shelf-seeder:latest
+  mangashelf:
+    image: ${DOCKER_REGISTRY}manga-shelf-ui:latest
+    container_name: mangashelf
+    ports:
+      - 5299:8080
+    networks: 
+      - manga-network
+    environment:
+        ASPNETCORE_ENVIRONMENT: Production
+        ASPNETCORE_HTTP_PORTS: 8080
+    env_file:
+      - .env
+    volumes:
+      - images:/app/wwwroot/images:rw
+    restart: always
+    depends_on:
+      mangashelf.db:
+        condition: service_healthy
+
+  mangashelf.parser:
+    container_name: mangashelf.parser
+    image: ${DOCKER_REGISTRY}manga-shelf-parser:latest
     networks: 
       - manga-network
     environment:
@@ -31,10 +31,10 @@ services:
       - images:/app/wwwroot/images:rw
     env_file:
       - .env
-    restart: no
+    restart: always
     depends_on:
-        mangashelf.db:
-            condition: service_healthy
+        mangashelf:
+            condition: service_started
 
   mangashelf.db:
     container_name: mangashelf.db
@@ -45,18 +45,17 @@ services:
       - manga-network
     volumes:
       - dbdata:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
     env_file:
       - .env
     environment:
       MYSQL_HOST: ${MANGA_HOST}
-      MYSQL_USER: ${MANGA_USER}
-      MYSQL_PASSWORD: ${MANGA_PASSWORD}
-      MYSQL_DATABASE: ${MANGA_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MANGA_ROOT_PASSWORD}
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
+      timeout: 10s
       retries: 10
 
 networks:

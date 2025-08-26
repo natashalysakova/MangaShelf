@@ -4,7 +4,7 @@
 @using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Identity
 
-@inject UserManager<User> UserManager
+@inject UserManager<MangaIdentityUser> UserManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<Disable2fa> Logger
@@ -32,7 +32,7 @@
 </div>
 
 @code {
-    private User user = default!;
+    private MangaIdentityUser user = default!;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;

@@ -5,8 +5,8 @@
 @using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Identity
 
-@inject UserManager<User> UserManager
-@inject SignInManager<User> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
+@inject SignInManager<MangaIdentityUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 
@@ -35,7 +35,7 @@
 </div>
 
 @code {
-    private User user = default!;
+    private MangaIdentityUser user = default!;
     private string? username;
     private string? phoneNumber;
 

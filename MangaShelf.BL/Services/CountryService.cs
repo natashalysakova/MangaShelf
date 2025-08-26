@@ -2,50 +2,50 @@
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Profiles;
 using MangaShelf.DAL.Interfaces;
+using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.BL.Services
+namespace MangaShelf.BL.Services;
+
+public class CountryService : ICountryService
 {
-    public class CountryService : ICountryService
+    private readonly ILogger<CountryService> _logger;
+    private readonly ICountryRepository _countryRepository;
+
+    public CountryService(ILogger<CountryService> logger, ICountryRepository countryRepository)
     {
-        private readonly ILogger<CountryService> _logger;
-        private readonly ICountryRepository _countryRepository;
+        _logger = logger;
+        _countryRepository = countryRepository;
+    }
+    public async Task<IEnumerable<CountryDto>> GetAllCountriesAsync()
+    {
+        var countries = await _countryRepository.GetAllCountriesAsync();
 
-        public CountryService(ILogger<CountryService> logger, ICountryRepository countryRepository)
+        return countries
+            .Select(country => country.ToDto());
+    }
+
+    public async Task<CountryDto?> GetCountryByCodeAsync(string countryCode)
+    {
+        var country = await _countryRepository.GetByCountryCodeAsync(countryCode);
+        if (country is null)
         {
-            _logger = logger;
-            _countryRepository = countryRepository;
-        }
-        public async Task<IEnumerable<CountryDto>> GetAllCountriesAsync()
-        {
-            var countries = await _countryRepository.GetAllCountriesAsync();
-
-            return countries
-                .Select(country => country.ToDto());
-        }
-
-        public async Task<CountryDto?> GetCountryByCodeAsync(string countryCode)
-        {
-            var country = await _countryRepository.GetByCountryCodeAsync(countryCode);
-            if (country is null)
-            {
-                _logger.LogWarning("Country with code {CountryCode} not found", countryCode);
-                return null;
-            }
-
-            return country.ToDto();
+            _logger.LogWarning("Country with code {CountryCode} not found", countryCode);
+            return null;
         }
 
-        public async Task<string?> GetCountryNameByCodeAsync(string countryCode)
-        {
-            var country = await _countryRepository.GetByCountryCodeAsync(countryCode);
-            if (country is null)
-            {
-                _logger.LogWarning("Country with code {CountryCode} not found", countryCode);
-                return null;
-            }
+        return country.ToDto();
+    }
 
-            return country.Name;
+    public async Task<string?> GetCountryNameByCodeAsync(string countryCode)
+    {
+        var country = await _countryRepository.GetByCountryCodeAsync(countryCode);
+        if (country is null)
+        {
+            _logger.LogWarning("Country with code {CountryCode} not found", countryCode);
+            return null;
         }
+
+        return country.Name;
     }
 }

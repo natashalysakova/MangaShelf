@@ -5,8 +5,8 @@
 @using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Identity
 
-@inject SignInManager<User> SignInManager
-@inject UserManager<User> UserManager
+@inject SignInManager<MangaIdentityUser> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<LoginWith2fa> Logger
 
@@ -47,7 +47,7 @@
 
 @code {
     private string? message;
-    private User user = default!;
+    private MangaIdentityUser user = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();

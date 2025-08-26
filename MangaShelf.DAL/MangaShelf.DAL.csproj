@@ -25,8 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="MangaShelf\" />
-    <Folder Include="Repositories\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

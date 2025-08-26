@@ -8,8 +8,8 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 
-@inject UserManager<User> UserManager
-@inject IEmailSender<User> EmailSender
+@inject UserManager<MangaIdentityUser> UserManager
+@inject IEmailSender<MangaIdentityUser> EmailSender
 @inject IdentityUserAccessor UserAccessor
 @inject NavigationManager NavigationManager
 
@@ -56,7 +56,7 @@
 
 @code {
     private string? message;
-    private User user = default!;
+    private MangaIdentityUser user = default!;
     private string? email;
     private bool isEmailConfirmed;
 

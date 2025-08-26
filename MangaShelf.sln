@@ -23,11 +23,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{02
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Infrastructure", "MangaShelf.Infrastructure\MangaShelf.Infrastructure.csproj", "{9A57C86A-58E8-4568-8496-97D01141E422}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.SeedService", "MangaShelf.SeedService\MangaShelf.SeedService.csproj", "{42EE41C9-9625-405F-8F75-C18272817624}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Parser", "MangaShelf.Parser\MangaShelf.Parser.csproj", "{F7F13C0D-E774-4A11-8D7E-61601B6DF85B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrateOldDatabase", "..\MigrateOldDatabase\MigrateOldDatabase.csproj", "{84F9609F-6140-4F55-B7BD-5C624C3697FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Parser.Tests", "MangaShelf.Parser.Tests\MangaShelf.Parser.Tests.csproj", "{28B2BA55-E681-4F96-AE6C-9D891DBD5F7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "E:\sources\ComicShelf\Backend\Backend.csproj", "{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.DAL.Identity", "MangaShelf.DAL.Identity\MangaShelf.DAL.Identity.csproj", "{1B02DE92-5652-4A82-A7F9-6703DE9C763D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,18 +63,18 @@ Global
 		{9A57C86A-58E8-4568-8496-97D01141E422}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A57C86A-58E8-4568-8496-97D01141E422}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A57C86A-58E8-4568-8496-97D01141E422}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42EE41C9-9625-405F-8F75-C18272817624}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42EE41C9-9625-405F-8F75-C18272817624}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42EE41C9-9625-405F-8F75-C18272817624}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42EE41C9-9625-405F-8F75-C18272817624}.Release|Any CPU.Build.0 = Release|Any CPU
-		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{84F9609F-6140-4F55-B7BD-5C624C3697FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5091540C-0AD4-59BA-D2C8-3E82ABB4B73B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7F13C0D-E774-4A11-8D7E-61601B6DF85B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7F13C0D-E774-4A11-8D7E-61601B6DF85B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7F13C0D-E774-4A11-8D7E-61601B6DF85B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7F13C0D-E774-4A11-8D7E-61601B6DF85B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28B2BA55-E681-4F96-AE6C-9D891DBD5F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28B2BA55-E681-4F96-AE6C-9D891DBD5F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28B2BA55-E681-4F96-AE6C-9D891DBD5F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28B2BA55-E681-4F96-AE6C-9D891DBD5F7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B02DE92-5652-4A82-A7F9-6703DE9C763D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B02DE92-5652-4A82-A7F9-6703DE9C763D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B02DE92-5652-4A82-A7F9-6703DE9C763D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B02DE92-5652-4A82-A7F9-6703DE9C763D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

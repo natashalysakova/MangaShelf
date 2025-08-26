@@ -1,6 +1,5 @@
-﻿namespace MangaShelf.BL.Interfaces
+﻿namespace MangaShelf.BL.Interfaces;
+
+public interface IService
 {
-    public interface IService
-    {
-    }
 }

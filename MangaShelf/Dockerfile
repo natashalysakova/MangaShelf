@@ -2,7 +2,6 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -29,16 +28,4 @@ RUN dotnet publish "./MangaShelf.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-# Before the final CMD or ENTRYPOINT
-# Switch to the root user to change permissions
-USER root
-
-# Create the directory and change its ownership to the 'app' user.
-# The -R flag ensures that if the directory already exists, its contents also get the correct ownership.
-RUN mkdir -p /app/wwwroot/images && chown -R app:app /app/wwwroot/images
-
-# Switch back to the non-root user to run the application
-USER app
-
 ENTRYPOINT ["dotnet", "MangaShelf.dll"]

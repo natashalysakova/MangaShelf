@@ -1,8 +1,7 @@
-﻿namespace MangaShelf.DAL.Interfaces
+﻿namespace MangaShelf.DAL.Interfaces;
+
+public interface IDeletableEntity
 {
-    public interface IDeletableEntity
-    {
-        bool IsDeleted { get; set; }
-        DateTimeOffset? DeletedAt { get; set; }
-    }
+    bool IsDeleted { get; set; }
+    DateTimeOffset? DeletedAt { get; set; }
 }

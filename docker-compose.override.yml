@@ -1,22 +1,22 @@
 services:
-  # mangashelf:
-  #   build:
-  #     context: .
-  #     dockerfile: MangaShelf/Dockerfile
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #     - ASPNETCORE_HTTPS_PORTS=8081
-  #   ports:
-  #     - 5499:8081
-  #   volumes:
-  #     - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-  #     - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-  #     - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-  #     - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  mangashelf:
+    build:
+      context: .
+      dockerfile: MangaShelf/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - 5499:8081
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
-  mangashelf.seeder:
+  mangashelf.parser:
     build:
         context: .
-        dockerfile: MangaShelf.SeedService/Dockerfile
+        dockerfile: MangaShelf.Parser/Dockerfile
     environment:
         DOTNET_ENVIRONMENT: Development

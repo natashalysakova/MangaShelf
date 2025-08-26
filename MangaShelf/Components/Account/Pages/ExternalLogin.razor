@@ -9,10 +9,10 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 
-@inject SignInManager<User> SignInManager
-@inject UserManager<User> UserManager
-@inject IUserStore<User> UserStore
-@inject IEmailSender<User> EmailSender
+@inject SignInManager<MangaIdentityUser> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
+@inject IUserStore<MangaIdentityUser> UserStore
+@inject IEmailSender<MangaIdentityUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ExternalLogin> Logger
@@ -175,26 +175,26 @@
         message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
     }
 
-    private User CreateUser()
+    private MangaIdentityUser CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<User>();
+            return Activator.CreateInstance<MangaIdentityUser>();
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. " +
-                $"Ensure that '{nameof(User)}' is not an abstract class and has a parameterless constructor");
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(MangaIdentityUser)}'. " +
+                $"Ensure that '{nameof(MangaIdentityUser)}' is not an abstract class and has a parameterless constructor");
         }
     }
 
-    private IUserEmailStore<User> GetEmailStore()
+    private IUserEmailStore<MangaIdentityUser> GetEmailStore()
     {
         if (!UserManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<User>)UserStore;
+        return (IUserEmailStore<MangaIdentityUser>)UserStore;
     }
 
     private sealed class InputModel

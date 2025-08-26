@@ -46,7 +46,7 @@ jobs:
       matrix:
         include:
           - directory: ./MangaShelf
-          - directory: ./MangaShelf.SeedService
+          - directory: ./MangaShelf.Parser
     defaults:
       run:
         working-directory: ${{ matrix.directory }}
@@ -72,6 +72,8 @@ jobs:
             name: ui
           - directory: ./MangaShelf.UnitTests
             name: common
+          - directory: ./MangaShelf.Parser.Tests
+            name: parser
     defaults:
       run:
         working-directory: ${{ matrix.directory }}

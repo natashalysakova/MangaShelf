@@ -1,55 +1,64 @@
 using MangaShelf.Components;
-using MangaShelf.DAL.Models;
 using MangaShelf.Infrastructure.Installer;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Components.Account;
 
-namespace MangaShelf
+namespace MangaShelf;
+
+public class Program
 {
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddLogging(logging =>
         {
-            var builder = WebApplication.CreateBuilder(args);
+            logging.ClearProviders();
+            logging.AddConsole();
+        });
 
-            // Add services to the container.
-            builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
+        // Add services to the container.
+        builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
 
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.RegisterContextAndServices();
-            builder.Services.AddScoped<IdentityUserAccessor>();
-            builder.Services.AddScoped<IdentityRedirectManager>();
+        builder.RegisterContextAndServices();
+        builder.RegisterIdentityContextAndServices();
+        builder.Services.AddScoped<IdentityUserAccessor>();
+        builder.Services.AddScoped<IdentityRedirectManager>();
 
-            builder.RegisterServices();
+        builder.Services.AddHealthChecks();
 
-            var app = builder.Build();
+        builder.RegisterServices();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseMigrationsEndPoint();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+        var app = builder.Build();
 
-            app.UseHttpsRedirection();
+        app.MapHealthChecks("/health");
 
-            app.UseAntiforgery();
-
-            app.MapStaticAssets();
-            app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
-
-            // Add additional endpoints required by the Identity /Account Razor components.
-            app.MapAdditionalIdentityEndpoints();
-
-            app.Run();
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseMigrationsEndPoint();
         }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseAntiforgery();
+
+        app.MapStaticAssets();
+        app.UseStaticFiles("/images/countries");
+        app.MapRazorComponents<App>()
+            .AddInteractiveServerRenderMode();
+
+        // Add additional endpoints required by the Identity /Account Razor components.
+        app.MapAdditionalIdentityEndpoints();
+
+        app.Run();
     }
 }
