@@ -2,22 +2,21 @@
 using AngleSharp.Html.Parser;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.DAL.Models;
-using System;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
 public abstract class BaseParser : IPublisherParser
 {
     protected const int maxretry = 10;
+    private readonly ILogger<BaseParser> _logger;
 
-    public async Task<ParsedInfo> Parse()
+    public BaseParser(ILogger<BaseParser> logger)
     {
-        if (_url != string.Empty)
-        {
-            return await Parse(_url);
-        }
-
-        throw new Exception("URL not set");
+        _logger = logger;
     }
 
     protected abstract string GetTitle(IDocument document);
@@ -25,14 +24,15 @@ public abstract class BaseParser : IPublisherParser
     protected abstract int GetVolumeNumber(IDocument document);
     protected abstract string GetAuthors(IDocument document);
     protected abstract string GetCover(IDocument document);
-    protected abstract DateTime? GetReleaseDate(IDocument document);
+    protected abstract DateTimeOffset? GetReleaseDate(IDocument document);
     protected abstract string GetISBN(IDocument document);
     protected abstract int GetTotalVolumes(IDocument document);
     protected abstract string? GetSeriesStatus(IDocument document);
     protected abstract string? GetOriginalSeriesName(IDocument document);
     protected abstract string GetPublisher(IDocument document);
-    protected abstract DateTime? GetPublishDate(IDocument document);
+    protected abstract DateTimeOffset? GetPublishDate(IDocument document);
     protected abstract string GetCountryCode(IDocument document);
+    protected abstract bool GetIsPreorder(IDocument document);
     protected abstract Ownership.VolumeType GetBookType();
 
     public abstract string SiteUrl { get; }
@@ -79,13 +79,13 @@ public abstract class BaseParser : IPublisherParser
         try
         {
             var classToSearch = GetVolumeUrlBlockClass();
-            var nodes = document.QuerySelectorAll(classToSearch);
+            var nodes = document.QuerySelectorAll(classToSearch).Where(x=> !x.TextContent.ToLower().StartsWith("комплект"));
             var attribute = nodes.Select(x => x.Attributes["href"]);
             return attribute.Select(x => x.Value);
         }
-        catch (Exception)
+        catch
         {
-            Console.WriteLine(html);
+            _logger.LogTrace(html);
             throw;
         }
     }
@@ -114,21 +114,34 @@ public abstract class BaseParser : IPublisherParser
             var authors = GetAuthors(document);
             var preorderDate = GetPublishDate(document);
             var countryCode = GetCountryCode(document);
+            var isPreorder = GetIsPreorder(document);
 
-            var parsed = new ParsedInfo(title, authors, volumeNumber, series, cover, release, publisher, type.ToString(), isbn, totalVol, seriesStatus, originalSeriesName, url, preorderDate, countryCode);
+            var parsed = new ParsedInfo(title, authors, volumeNumber, series, cover, release, publisher, type.ToString(), isbn, totalVol, seriesStatus, originalSeriesName, url, preorderDate, countryCode, isPreorder);
+
+            var jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            _logger.LogDebug(System.Text.Json.JsonSerializer.Serialize(parsed, jsonOptions));
             return parsed;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Console.WriteLine(html);
+            var s = new StackTrace(ex);
+            var assmbly = Assembly.GetAssembly(typeof(BaseParser));
+            var methods = string.Empty;
+
+            foreach (var frame in s.GetFrames()!)
+            {
+                var method = frame.GetMethod();
+                if (method != null && method.Module.Assembly == assmbly)
+                {
+                    methods = method.Name;
+                    break;
+                }
+            }
+
+            _logger.LogWarning(methods);
+            _logger.LogTrace(html);
             throw;
         }
 
-    }
-
-    private string _url;
-    public void SetUrl(string url)
-    {
-        _url = url;
     }
 }

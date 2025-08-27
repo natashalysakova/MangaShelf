@@ -1,12 +1,20 @@
 ﻿
 using AngleSharp.Dom;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
-class LantsutaParser() : BaseParser
+public class LantsutaParser : BaseParser
 {
+    private readonly ILogger<LantsutaParser> _logger;
+
+    public LantsutaParser(ILogger<LantsutaParser> logger) : base(logger)
+    {
+        _logger = logger;
+    }
+
     public override string SiteUrl => "https://lantsuta-publishing.com/";
 
     private string? GetFromTable(IDocument document, string header)
@@ -54,10 +62,15 @@ class LantsutaParser() : BaseParser
 
     protected override string GetPublisher(IDocument document)
     {
-        return GetFromTable(document, "Видавництво:");
+        var publisher = GetFromTable(document, "Видавництво:");
+        if(publisher is null)
+        {
+            publisher = "LANTSUTA";
+        }
+        return publisher;
     }
 
-    protected override DateTime? GetReleaseDate(IDocument document)
+    protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
         return null;
     }
@@ -75,7 +88,15 @@ class LantsutaParser() : BaseParser
     protected override string GetTitle(IDocument document)
     {
         var node = document.QuerySelector(".name-product-title").InnerHtml;
-        node = node.Replace(GetSeries(document), "");
+        var series = GetSeries(document);
+        node = node.Replace(series, "").Trim();
+        if(series.Contains('.'))
+        {
+            series = series.Replace('.', ':');
+            node = node.Replace(series, "").Trim();
+        }
+        
+
         if (char.IsPunctuation(node[0]))
         {
             node = node.Substring(1).Trim();
@@ -91,7 +112,7 @@ class LantsutaParser() : BaseParser
     protected override int GetVolumeNumber(IDocument document)
     {
         var title = GetTitle(document);
-        if(title.Contains("Том"))
+        if (title.Contains("Том"))
         {
             var volIndex = title.IndexOf("Том");
             var nextWord = title.IndexOf(" ", volIndex + 3);
@@ -108,26 +129,42 @@ class LantsutaParser() : BaseParser
             return int.Parse(volume);
         }
 
-        return 1;
+        return -1;
     }
+
+    private string _catalogUrl = "manga-ua";
+    private string _pagination = "?page={0}";
+    int currentPage = 0;
 
     public override string GetNextPageUrl()
     {
-        throw new NotImplementedException();
+        return $"{SiteUrl}{_catalogUrl}{string.Format(_pagination, ++currentPage)}";
     }
 
     public override string GetVolumeUrlBlockClass()
     {
-        throw new NotImplementedException();
+        return ".name-product > a";
     }
 
-    protected override DateTime? GetPublishDate(IDocument document)
+    protected override DateTimeOffset? GetPublishDate(IDocument document)
     {
-        throw new NotImplementedException();
+        return null;
     }
 
     protected override string GetCountryCode(IDocument document)
     {
-        throw new NotImplementedException();
+        return "UK";
+    }
+
+    protected override bool GetIsPreorder(IDocument document)
+    {
+        var button = document.QuerySelector(".btn-buy");
+
+        if(button is null)
+        {
+            return false;
+        }
+
+        return button.TextContent.Contains("Передзамовлення");
     }
 }

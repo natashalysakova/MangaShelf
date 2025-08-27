@@ -1,7 +1,7 @@
-﻿using MangaShelf.DAL.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 
-namespace MangaShelf.Infrastructure.Installer
+namespace MangaShelf.DAL.Interfaces
 {
     public interface IPublisherRepository : IRepository<Publisher>
     {

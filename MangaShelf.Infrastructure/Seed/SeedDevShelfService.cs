@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.SeedService;
+namespace MangaShelf.Infrastructure.Seed;
 
 public class SeedDevShelfService : ISeedDataService
 {
-    public SeedDevShelfService(ILogger<SeedDevShelfService> logger) 
+    public SeedDevShelfService(ILogger<SeedDevShelfService> logger)
     {
     }
 

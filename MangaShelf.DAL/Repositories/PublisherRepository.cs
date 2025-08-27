@@ -1,9 +1,9 @@
 ﻿using MangaShelf.DAL;
+using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
-using MangaShelf.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace MangaShelf.Infrastructure.Installer
+namespace MangaShelf.DAL.Repositories
 {
     public class PublisherRepository : BaseRepository<Publisher>, IPublisherRepository
     {

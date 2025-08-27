@@ -1,4 +1,4 @@
-﻿namespace MangaShelf.BL.Dto;
+﻿namespace MangaShelf.Common.Dto;
 
 public class CountryDto
 {

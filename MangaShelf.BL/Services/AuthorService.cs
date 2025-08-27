@@ -1,9 +1,9 @@
 ﻿using MangaShelf.BL.Interfaces;
+using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
-namespace MangaShelf.Infrastructure.Installer;
+namespace MangaShelf.BL.Services;
 
 public class AuthorService : IAuthorService
 {

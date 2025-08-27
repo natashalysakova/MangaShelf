@@ -8,8 +8,6 @@ public interface IPublisherParser
     string GetNextPageUrl();
     Task<IEnumerable<string>> GetVolumesUrls(string url);
     string SiteUrl { get; }
-    void SetUrl(string url);
-    Task<ParsedInfo> Parse();
 }
 
 [Serializable]

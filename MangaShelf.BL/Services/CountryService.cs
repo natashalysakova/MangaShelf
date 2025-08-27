@@ -1,8 +1,7 @@
-﻿using MangaShelf.BL.Dto;
-using MangaShelf.BL.Interfaces;
-using MangaShelf.BL.Profiles;
+﻿using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Mappers;
+using MangaShelf.Common.Dto;
 using MangaShelf.DAL.Interfaces;
-using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Services;

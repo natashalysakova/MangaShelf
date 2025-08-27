@@ -1,11 +1,19 @@
 ﻿
 using AngleSharp.Dom;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
-internal class KoboParser : BaseParser
+public class KoboParser : AdvancedParser
 {
+    private readonly ILogger<KoboParser> _logger;
+
+    public KoboParser(ILogger<KoboParser> logger) : base(logger)
+    {
+        _logger = logger;
+    }
+
     public override string SiteUrl => "https://www.kobo.com/";
 
     protected override string GetAuthors(IDocument document)
@@ -37,16 +45,16 @@ internal class KoboParser : BaseParser
         return "https:" + url;
     }
 
-    protected override DateTime? GetReleaseDate(IDocument document)
+    protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
         var nodes = document.QuerySelectorAll(".bookitem-secondary-metadata > ul > li");
 
         foreach (var node in nodes)
         {
-            if(node.TextContent.Contains("Release Date:"))
+            if (node.TextContent.Contains("Release Date:"))
             {
-               var date = node.Children[0].TextContent;
-               return  DateTime.Parse(date);
+                var date = node.Children[0].TextContent;
+                return DateTime.Parse(date);
             }
         }
 
@@ -56,7 +64,7 @@ internal class KoboParser : BaseParser
     protected override string GetSeries(IDocument document)
     {
         var node = document.QuerySelector(".product-sequence-field > a");
-        if(node == null)
+        if (node == null)
             return GetTitle(document);
 
         return node.TextContent;
@@ -64,11 +72,11 @@ internal class KoboParser : BaseParser
 
     protected override string GetTitle(IDocument document)
     {
-        
+
 
         var volume = GetVolumeNumber(document);
 
-        if(volume == -1)
+        if (volume == -1)
         {
             var node = document.QuerySelector("h1.product-field");
             if (node == null)
@@ -96,14 +104,14 @@ internal class KoboParser : BaseParser
         var secondWhitespace = text.IndexOf(" ", firstWhiteSpace + 1);
         var volume = text.Substring(firstWhiteSpace, secondWhitespace - firstWhiteSpace).Trim();
 
-        return int.Parse(volume); 
+        return int.Parse(volume);
     }
 
     protected override string GetPublisher(IDocument document)
     {
         var nodes = document.QuerySelectorAll(".bookitem-secondary-metadata > ul > li");
 
-        if(nodes == null || !nodes.Any())
+        if (nodes == null || !nodes.Any())
         {
             return null;
         }
@@ -156,12 +164,17 @@ internal class KoboParser : BaseParser
         throw new NotImplementedException();
     }
 
-    protected override DateTime? GetPublishDate(IDocument document)
+    protected override DateTimeOffset? GetPublishDate(IDocument document)
     {
         throw new NotImplementedException();
     }
 
     protected override string GetCountryCode(IDocument document)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override bool GetIsPreorder(IDocument document)
     {
         throw new NotImplementedException();
     }

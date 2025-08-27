@@ -2,27 +2,28 @@
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MangaShelf.DAL.Repositories;
-
-public class CountryRepository : BaseRepository<Country>, ICountryRepository
+namespace MangaShelf.DAL.Repositories
 {
-    private readonly MangaDbContext _context;
-
-    public CountryRepository(MangaDbContext context) : base(context)
+    public class CountryRepository : BaseRepository<Country>, ICountryRepository
     {
-        _context = context;
-    }
+        private readonly MangaDbContext _context;
 
-    public async Task<ICollection<Country>> GetAllCountriesAsync()
-    {
-        return await _context.Countries
-            .AsNoTracking()
-            .ToListAsync();
-    }
+        public CountryRepository(MangaDbContext context) : base(context)
+        {
+            _context = context;
+        }
 
-    public async Task<Country?> GetByCountryCodeAsync(string countryCode)
-    {
-        return await _context.Countries
-            .SingleOrDefaultAsync(x => x.CountryCode.ToLower() == countryCode.ToLower());
+        public async Task<ICollection<Country>> GetAllCountriesAsync()
+        {
+            return await _context.Countries
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<Country?> GetByCountryCodeAsync(string countryCode)
+        {
+            return await _context.Countries
+                .SingleOrDefaultAsync(x => x.CountryCode.ToLower() == countryCode.ToLower());
+        }
     }
 }

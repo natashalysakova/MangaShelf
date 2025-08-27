@@ -1,55 +1,63 @@
-﻿using MangaShelf.DAL.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace MangaShelf.DAL.Repositories;
-
-public class BaseRepository<T> : IRepository<T> where T: class
+namespace MangaShelf.DAL.Repositories
 {
-    protected readonly MangaDbContext _context;
-
-    public BaseRepository(MangaDbContext dbContext)
+    public class BaseRepository<T> : IRepository<T> where T : class
     {
-        _context = dbContext;
-    }
+        protected readonly MangaDbContext _context;
 
-    public async Task<T> Add(T entity)
-    {
-        _context.Add(entity);
-        await _context.SaveChangesAsync();
-        return entity;
-    }
-
-    public async Task<bool> Delete(T entity)
-    {
-        _context.Remove(entity);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
-    }
-
-    public async Task<bool> Delete(Guid id)
-    {
-        var entity = await _context.Set<T>().FindAsync(id);
-        if(entity is null)
+        public BaseRepository(MangaDbContext dbContext)
         {
-            return false;
+            _context = dbContext;
         }
-        return await Delete(entity);
-    }
 
-    public async Task<T?> Get(Guid id)
-    {
-        return await _context.Set<T>().FindAsync(id);  
-    }
+        public async Task<T> Add(T entity)
+        {
+            _context.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
 
-    public async Task<IEnumerable<T>> GetAll()
-    {
-        return await _context.Set<T>().AsNoTracking().ToListAsync();
-    }
+        public async Task<bool> Delete(T entity)
+        {
+            _context.Remove(entity);
+            var result = await _context.SaveChangesAsync();
+            return result > 0;
+        }
 
-    public async Task<T> Update(T entity)
-    {
-        _context.Entry<T>(entity).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        return entity;
+        public async Task<bool> Delete(Guid id)
+        {
+            var entity = await _context.Set<T>().FindAsync(id);
+            if (entity is null)
+            {
+                return false;
+            }
+            return await Delete(entity);
+        }
+
+        public async Task<T?> Get(Guid id)
+        {
+            return await _context.Set<T>().FindAsync(id);
+        }
+
+        public IQueryable<T> GetAll(bool tracking = false)
+        {
+            var result = _context.Set<T>().AsQueryable<T>();
+            if (!tracking)
+            {
+                result = result.AsNoTracking();
+            }
+
+            return result;
+        }
+
+        public async Task<T> Update(T entity)
+        {
+            _context.Entry<T>(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return entity;
+        }
     }
 }

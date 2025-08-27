@@ -1,10 +1,9 @@
-﻿using AngleSharp.Dom;
-using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Interfaces;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.Infrastructure.Installer
+namespace MangaShelf.BL.Services
 {
     public class PublisherService : IPublisherService
     {

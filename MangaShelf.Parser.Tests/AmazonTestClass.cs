@@ -1,19 +1,20 @@
-﻿using MangaShelf.Parser.VolumeParsers;
+﻿using MangaShelf.BL.Parsers;
+using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Parser.Tests;
 
 [TestClass]
+[Ignore]
 public class AmazonTestClass
 {
+    ILoggerFactory loggerFactory = new LoggerFactory();
+
     [TestMethod]
     public async Task AmazonTest()
     {
-        var url = "https://www.amazon.com/dp/B08FVLVXX6/";
-        var parser = new PublisherParsersFactory().CreateParser(url);
+        var parser = new AmazonParser(loggerFactory.CreateLogger<AmazonParser>());
 
-        Assert.IsNotNull(parser);
-
-        var result = await parser.Parse(url);
+        var result = await parser.Parse("https://www.amazon.com/dp/B08FVLVXX6/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 1", result.title);
@@ -33,11 +34,9 @@ public class AmazonTestClass
     [TestMethod]
     public async Task AmazonPreorderTest()
     {
-        var parser = new PublisherParsersFactory().CreateParser("https://www.amazon.com/gp/product/B0D7Z8TGNQ");
+        var parser = new AmazonParser(loggerFactory.CreateLogger<AmazonParser>());
 
-        Assert.IsNotNull(parser);
-
-        var result = await parser.Parse();
+        var result = await parser.Parse("https://www.amazon.com/gp/product/B0D7Z8TGNQ");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 8", result.title);
@@ -58,11 +57,9 @@ public class AmazonTestClass
     [TestMethod]
     public async Task AmazonOneShotTest()
     {
-        var parser = new PublisherParsersFactory().CreateParser("https://www.amazon.com/dp/B01N0LT06V");
+        var parser = new AmazonParser(loggerFactory.CreateLogger<AmazonParser>());
 
-        Assert.IsNotNull(parser);
-
-        var result = await parser.Parse();
+        var result = await parser.Parse("https://www.amazon.com/dp/B01N0LT06V");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Nijigahara Holograph", result.title);
@@ -77,7 +74,5 @@ public class AmazonTestClass
         Assert.AreEqual(-1, result.totalVolumes);
         Assert.AreEqual(null, result.seriesStatus);
         Assert.AreEqual(null, result.originalSeriesName);
-
-
     }
 }

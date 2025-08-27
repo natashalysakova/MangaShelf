@@ -2,6 +2,10 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+body {
+    background-image: radial-gradient(18% 28% at 34% 41%, rgba(253, 253, 113, 0.2117647059) 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(18% 28% at 26% 69%, rgba(127, 89, 131, 0.3490196078) 6%, rgba(7, 58, 255, 0) 100%), radial-gradient(70% 53% at 36% 76%, #102c36 0%, rgba(7, 58, 255, 0) 100%), radial-gradient(42% 53% at 15% 94%, #050101 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(42% 53% at 34% 72%, #06041d 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(18% 28% at 35% 87%, #1ed879 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(31% 43% at 7% 98%, #611717 24%, rgba(7, 58, 255, 0) 100%), radial-gradient(21% 37% at 72% 23%, rgba(4, 30, 67, 0.6156862745) 24%, rgba(7, 58, 255, 0) 100%), radial-gradient(35% 56% at 91% 74%, rgba(8, 1, 20, 0.9607843137) 0%, rgba(7, 58, 255, 0) 100%), radial-gradient(74% 86% at 67% 38%, rgba(109, 245, 255, 0.6509803922) 24%, rgba(7, 58, 255, 0) 100%), linear-gradient(125deg, #000812 1%, #020d0f 100%);
+}
+
 a, .btn-link {
     color: #006bb7;
 }

@@ -1,4 +1,4 @@
-namespace MangaShelf.SeedService;
+namespace MangaShelf.Infrastructure.Seed;
 
 public interface ISeedDataService
 {

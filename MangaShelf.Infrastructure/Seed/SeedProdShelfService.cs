@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 
-namespace MangaShelf.SeedService;
+namespace MangaShelf.Infrastructure.Seed;
 
 public class SeedProdShelfService : ISeedDataService
 {
@@ -142,7 +142,7 @@ public class SeedProdShelfService : ISeedDataService
                 new() { Name = "Bimba", Country = ukraine, Url = "https://bimba-publisher.com/" },
                 new() { Name = "BookChef", Country = ukraine, Url = "https://bookchef.com.ua/" },
                 new() { Name = "Fireclaw", Country = ukraine, Url = "https://fireclaw.com.ua/" },
-                new() { Name = "Lantsuta", Country = ukraine, Url = "https://lantsuta-publishing.com/" },
+                new() { Name = "LANTSUTA", Country = ukraine, Url = "https://lantsuta-publishing.com/" },
                 new() { Name = "Mal'opus", Country = ukraine, Url = "https://malopus.com.ua/" },
                 new() { Name = "Manga Media", Country = ukraine, Url = "https://manga-media.com.ua/" },
                 new() { Name = "Mimir Media", Country = ukraine, Url = "https://mimir.com.ua/" },

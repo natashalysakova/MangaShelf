@@ -1,12 +1,16 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
 public class MalopusParser : BaseParser
 {
     public override string SiteUrl => "https://malopus.com.ua/";
+    private string _catalogUrl = "manga/";
+    private string _pagination = "?page={0}";
+    int currentPage = 0;
 
     protected override string GetAuthors(IDocument document)
     {
@@ -58,7 +62,7 @@ public class MalopusParser : BaseParser
         return attribute.Value;
     }
 
-    protected override DateTime? GetReleaseDate(IDocument document)
+    protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
         var html = document.ToHtml();
 
@@ -72,7 +76,19 @@ public class MalopusParser : BaseParser
         if (date == "0000-00-00")
             return null;
 
-        return DateTime.Parse(date);
+       
+        if (DateTimeOffset.TryParseExact(date, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AssumeLocal, out DateTimeOffset parsedExactDate))
+        {
+            return parsedExactDate;
+        }
+
+        if (DateTimeOffset.TryParse(date, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out DateTimeOffset parsedDate))
+        {
+            return parsedDate;
+        }
+
+        return null;
     }
 
     protected override string GetSeries(IDocument document)
@@ -101,6 +117,9 @@ public class MalopusParser : BaseParser
 
     string[] lookupArray = [". Том ", ". Омнібус "];
 
+    public MalopusParser(ILogger<MalopusParser> logger) : base(logger)
+    {
+    }
 
     protected override int GetVolumeNumber(IDocument document)
     {
@@ -191,9 +210,13 @@ public class MalopusParser : BaseParser
                     var indexclose = text.IndexOf(')');
                     return int.Parse(text.Substring(indexopen, indexclose - indexopen));
                 }
+                else if (int.TryParse(text, out int totalVolumes))
+                {
+                    return totalVolumes;
+                }
                 else
                 {
-                    return int.Parse(text);
+                    return GetVolumeNumber(document);
                 }
             }
         }
@@ -251,20 +274,30 @@ public class MalopusParser : BaseParser
 
     public override string GetNextPageUrl()
     {
-        throw new NotImplementedException();
+        return $"{SiteUrl}{_catalogUrl}{string.Format(_pagination, ++currentPage)}";
     }
     public override string GetVolumeUrlBlockClass()
     {
-        throw new NotImplementedException();
+        return ".rm-module-title > a";
     }
 
-    protected override DateTime? GetPublishDate(IDocument document)
+    protected override DateTimeOffset? GetPublishDate(IDocument document)
     {
-        throw new NotImplementedException();
+        return null;
     }
 
     protected override string GetCountryCode(IDocument document)
     {
-        throw new NotImplementedException();
+        return "UK";
+    }
+
+    protected override bool GetIsPreorder(IDocument document)
+    {
+        var lable = document.QuerySelector(".rm-module-stock");
+
+        if (lable is null)
+            return false;
+
+        return lable.TextContent.Contains("Попереднє замовлення");
     }
 }

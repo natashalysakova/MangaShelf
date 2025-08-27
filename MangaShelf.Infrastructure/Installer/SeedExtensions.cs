@@ -1,4 +1,4 @@
-﻿using MangaShelf.SeedService;
+﻿using MangaShelf.Infrastructure.Seed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

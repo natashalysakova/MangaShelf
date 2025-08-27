@@ -1,11 +1,19 @@
 ﻿using AngleSharp.Dom;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
 public class AmazonParser : AdvancedParser
 {
+    private readonly ILogger<AmazonParser> _logger;
+
+    public AmazonParser(ILogger<AmazonParser> logger) : base(logger)
+    {
+        _logger = logger;
+    }
+
     public override string SiteUrl => "https://www.amazon.com/";
 
     public override string GetNextPageUrl()
@@ -32,7 +40,7 @@ public class AmazonParser : AdvancedParser
             {
                 continue;
             }
-            var chars = new [] { "\t", "\n" };
+            var chars = new[] { "\t", "\n" };
             foreach (var item in chars)
             {
                 text = text.Replace(item, string.Empty);
@@ -87,12 +95,17 @@ public class AmazonParser : AdvancedParser
         return string.Empty;
     }
 
+    protected override bool GetIsPreorder(IDocument document)
+    {
+        throw new NotImplementedException();
+    }
+
     protected override string? GetOriginalSeriesName(IDocument document)
     {
         return null;
     }
 
-    protected override DateTime? GetPublishDate(IDocument document)
+    protected override DateTimeOffset? GetPublishDate(IDocument document)
     {
         throw new NotImplementedException();
     }
@@ -103,7 +116,7 @@ public class AmazonParser : AdvancedParser
         return node.TextContent.Trim();
     }
 
-    protected override DateTime? GetReleaseDate(IDocument document)
+    protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
         var node = document.QuerySelector("#rpi-attribute-book_details-publication_date > .rpi-attribute-value");
         return DateTime.Parse(node.TextContent.Trim());

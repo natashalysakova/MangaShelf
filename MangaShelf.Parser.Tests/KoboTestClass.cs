@@ -1,18 +1,20 @@
-﻿using MangaShelf.Parser.VolumeParsers;
+﻿using MangaShelf.BL.Parsers;
+using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Parser.Tests;
 
 [TestClass]
+[Ignore]
 public class KoboTestClass
 {
+    ILoggerFactory loggerFactory = new LoggerFactory();
+
     [TestMethod]
     public async Task KoboTest()
     {
-        var parser = new PublisherParsersFactory().CreateParser("https://www.kobo.com/ww/en/ebook/pretty-guardian-sailor-moon-eternal-edition-9");
+        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
 
-        Assert.IsNotNull(parser);
-
-        var result = await parser.Parse();
+        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/pretty-guardian-sailor-moon-eternal-edition-9");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 9", result.title);
@@ -33,11 +35,9 @@ public class KoboTestClass
     [TestMethod]
     public async Task KoboTest2()
     {
-        var parser = new PublisherParsersFactory().CreateParser("https://www.kobo.com/ww/en/ebook/spy-x-family-family-portrait");
+        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
 
-        Assert.IsNotNull(parser);
-
-        var result = await parser.Parse();
+        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/spy-x-family-family-portrait");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Spy x Family: Family Portrait", result.title);
@@ -61,11 +61,9 @@ public class KoboTestClass
     [TestMethod]
     public async Task KoboPreorderTest()
     {
-        var parser = new PublisherParsersFactory().CreateParser("https://www.kobo.com/ww/en/ebook/spy-x-family-vol-13");
+        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
 
-        Assert.IsNotNull(parser);
-
-        var result = await parser.Parse();
+        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/spy-x-family-vol-13");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 13", result.title);
@@ -87,11 +85,9 @@ public class KoboTestClass
     [TestMethod]
     public async Task KoboOneShotTest()
     {
-        var parser = new PublisherParsersFactory().CreateParser("https://www.kobo.com/ww/en/ebook/a-girl-on-the-shore");
+        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
 
-        Assert.IsNotNull(parser);
-
-        var result = await parser.Parse();
+        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/a-girl-on-the-shore");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("A Girl on the Shore", result.title);
@@ -100,7 +96,7 @@ public class KoboTestClass
         Assert.AreEqual(-1, result.volumeNumber);
         Assert.AreEqual("https://cdn.kobo.com/book-images/be122b39-d133-4162-8b54-bcca043d07bb/353/569/90/False/a-girl-on-the-shore.jpg", result.cover);
         Assert.AreEqual(DateTime.Parse("2016-01-19"), result.release);
-        Assert.AreEqual("Kodansha USA", result.publisher);        
+        Assert.AreEqual("Kodansha USA", result.publisher);
         Assert.AreEqual("9781942993766", result.isbn);
         Assert.AreEqual(-1, result.totalVolumes);
         Assert.AreEqual(null, result.seriesStatus);

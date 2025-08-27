@@ -1,9 +1,12 @@
-﻿using AngleSharp.Text;
-using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Mappers;
+using MangaShelf.Common;
+using MangaShelf.Common.Dto;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
+using MangaShelf.DAL.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks.Sources;
 
 namespace MangaShelf.BL.Services;
 
@@ -16,7 +19,7 @@ public class VolumeService(ILogger<VolumeService> logger, IVolumeRepository volu
         if (volume == null)
         {
             var series = await seriesService.FindByName(volumeInfo.series);
-            if(series == null)
+            if (series == null)
             {
                 series = await seriesService.CreateFromParsedVolumeInfo(volumeInfo);
             }
@@ -30,12 +33,15 @@ public class VolumeService(ILogger<VolumeService> logger, IVolumeRepository volu
                 PreorderStart = volumeInfo.preorderStartDate,
                 OneShot = volumeInfo.type.Equals("oneshot"),
             };
-
         }
 
+        if (volume.PurchaseUrl is null || volume.PurchaseUrl != volumeInfo.url)
+        {
+            volume.PurchaseUrl = volumeInfo.url;
+        }
 
-        volume.PurchaseUrl = volumeInfo.url;
         volume.Series.Ongoing = volumeInfo.seriesStatus == "ongoing";
+        volume.IsPreorder = volumeInfo.isPreorder;
 
         if (volumeInfo.totalVolumes > 0 && volumeInfo.totalVolumes > volume.Series.TotalVolumes)
         {
@@ -45,8 +51,21 @@ public class VolumeService(ILogger<VolumeService> logger, IVolumeRepository volu
         {
             volume.ReleaseDate = volumeInfo.release;
         }
+        else if (!volume.IsPreorder)
+        {
+            volume.ReleaseDate = DateTimeOffset.Now;
+        }
 
-        await volumeRepository.Add(volume);
+        if (volume.IsPreorder && volume.PreorderStart == null)
+        {
+            volume.PreorderStart = DateTimeOffset.Now;
+        }
+
+        if (volume.Id == Guid.Empty)
+        {
+            await volumeRepository.Add(volume);
+            logger.LogInformation($"{volume.Series.Title} {volume.Number} added");
+        }
 
         if (volume.CoverImageUrl is null)
         {
@@ -64,7 +83,7 @@ public class VolumeService(ILogger<VolumeService> logger, IVolumeRepository volu
         var extention = new FileInfo(url).Extension;
         //var escapedSeriesName = seriesName.Unidecode().Replace(Path.GetInvalidFileNameChars(), string.Empty);
         var destiantionFolder = Path.Combine(imageDir, "series", seriesId.ToString());
-        var filename = $"{seriesId}_{volumeId}{extention}";
+        var filename = $"{volumeId}{extention}";
 
         try
         {
@@ -93,5 +112,35 @@ public class VolumeService(ILogger<VolumeService> logger, IVolumeRepository volu
         {
             throw;
         }
+    }
+
+    public async Task<IEnumerable<VolumeDto>> GetAllVolumesAsync(PaginationOptions? paginationOptions = null)
+    {
+        var volumes = await volumeRepository.GetAllWithSeries(paginationOptions);
+        return volumes.Select(v => v.ToDto());
+    }
+
+    public async Task<VolumeDto?> GetbyIdAsync(Guid id)
+    {
+        var volume = await volumeRepository.Get(id);
+        return volume?.ToDto();
+    }
+
+    public async Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse)
+    {
+        if (volumesToParse == null || !volumesToParse.Any())
+        {
+            return Enumerable.Empty<string>();
+        }
+
+        var existingUrls = await volumeRepository
+            .GetAll()
+            .Where(v => v.PurchaseUrl != null && volumesToParse.Contains(v.PurchaseUrl))
+            .Where(v => !v.IsPreorder)
+            .Select(v => v.PurchaseUrl!)
+            .ToListAsync();
+
+        // Return URLs that are in volumesToParse but not in existingUrls
+        return volumesToParse.Except(existingUrls);
     }
 }

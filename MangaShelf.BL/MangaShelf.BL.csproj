@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MangaShelf.Common\MangaShelf.Common.csproj" />
     <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
   </ItemGroup>
 

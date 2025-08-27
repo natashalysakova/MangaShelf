@@ -341,6 +341,9 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("IsPreorder")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("Number")
                         .HasColumnType("int");
 

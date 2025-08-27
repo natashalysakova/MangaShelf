@@ -4,10 +4,10 @@ using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using MangaShelf.DAL.Interceptors;
 using MangaShelf.DAL.Interfaces;
-using MangaShelf.DAL.Models;
 using MangaShelf.DAL.Repositories;
 using MangaShelf.Infrastructure.Accounts;
-using MangaShelf.SeedService;
+using MangaShelf.Infrastructure.Seed;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,28 +15,37 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
+using MangaShelf.Common.Localization.Interfaces;
+using MangaShelf.Common.Localization.Services;
 
 
 namespace MangaShelf.Infrastructure.Installer;
 
 public static class ServicesInstallExtention
 {
-    public static IHostApplicationBuilder RegisterServices(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddBusinessServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddScoped<ICountryService, CountryService>();
         builder.Services.AddScoped<ICountryRepository, CountryRepository>();
+
         builder.Services.AddScoped<IVolumeService, VolumeService>();
         builder.Services.AddScoped<IVolumeRepository, VolumeRepository>();
+
         builder.Services.AddScoped<ISeriesService, SeriesService>();
         builder.Services.AddScoped<ISeriesRepository, SeriesRepository>();
+
         builder.Services.AddScoped<IAuthorService, AuthorService>();
         builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+
         builder.Services.AddScoped<IPublisherService, PublisherService>();
         builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 
         builder.RegisterSeedServices();
         return builder;
+    }
+    public static void AddLocalizationServices(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<ICountryLocalizationService, CountryLocalizationService>();
     }
 }
 
@@ -120,13 +129,12 @@ public static class ContextInstallExtention
 
             var IdentityDbContext = scope.ServiceProvider.GetRequiredService<MangaIdentityDbContext>();
             await IdentityDbContext.Database.MigrateAsync();
-
-            await SeedDatabase(scope);
         }
     }
 
-    private static async Task SeedDatabase(IServiceScope scope)
+    public static async Task SeedDatabase(this IServiceProvider serviceProvider)
     {
+        using var scope = serviceProvider.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<IServiceProvider>>();
         logger.LogInformation("Seeding Started");
         foreach (var service in scope.ServiceProvider.GetServices<ISeedDataService>().OrderBy(x => x.Priority))

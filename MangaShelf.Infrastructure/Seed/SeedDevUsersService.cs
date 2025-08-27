@@ -1,11 +1,6 @@
-using MangaShelf.DAL;
-using MangaShelf.DAL.Identity;
-using MangaShelf.DAL.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
-namespace MangaShelf.SeedService;
+namespace MangaShelf.Infrastructure.Seed;
 
 public class SeedDevUsersService : ISeedDataService
 {

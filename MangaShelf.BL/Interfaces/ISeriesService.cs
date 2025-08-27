@@ -1,7 +1,7 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 
-namespace MangaShelf.BL.Services;
+namespace MangaShelf.BL.Interfaces;
 
 public interface ISeriesService : IService
 {

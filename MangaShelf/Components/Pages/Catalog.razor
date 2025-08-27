@@ -1,0 +1,157 @@
+﻿@page "/catalog"
+@using MudBlazor.Services
+@implements IBrowserViewportObserver
+@inject IVolumeService VolumeService
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudPaper Width="100%" Square="true" style="background-color: rgba(255, 255, 255, 0.1333333333); padding:30px">
+        <div class="d-flex flex-column align-center">
+            <MudPagination ShowFirstButton="true" ShowLastButton="true" Count="11" @bind-Selected="@paginationOption.PageNumber" Class="mt-4" />
+        </div>
+        <MudGrid Justify="@justification" Spacing="6">
+            @foreach (var volume in volumes)
+            {
+                <MudItem xs="12" sm="4" md="3" lg="3">
+                    <MudCard Style="position:relative">
+                        <MudCardHeader Style="align-items: start; position: absolute; background-color: rgba(0,0,0,0.5); width: 100%; visibility:hidden;">
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.body1">@volume.SeriesName</MudText>
+                                <MudText Typo="Typo.body2">@volume.VolumeTitle</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardMedia Image="@volume.CoverImageUrl" Height="@_imageheight" Style="" />
+                        <MudCardActions>
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default" />
+                            <MudSpacer />
+                            <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Default" />
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+
+                @*                 <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8" Height="300px">
+                        <MudText Typo="Typo.h6" Align="Align.Center">@volume.SeriesName</MudText>
+                        <MudText Typo="Typo.subtitle2" Align="Align.Center">@volume.VolumeTitle</MudText>
+                    </MudPaper>
+                </MudItem> *@
+            }
+        </MudGrid>
+        <div class="d-flex flex-column align-center">
+            <MudPagination ShowFirstButton="true" ShowLastButton="true" Count="11" Class="mt-4" />
+        </div>
+    </MudPaper>
+</MudContainer>
+
+
+@* <MudPaper Class="mud-theme-primary" Style="overflow:hidden; position:relative;">
+    <MudDrawerContainer Class="mud-height-full">
+        <MudDrawer @bind-Open="@_openStart" Width="250px" Fixed="false" Anchor="Anchor.Start" Elevation="0" Variant="@DrawerVariant.Persistent">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h6">My App</MudText>
+            </MudDrawerHeader>
+            <MudNavMenu>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store">Store</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary">Library</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Forum">Community</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+        
+        <div class="d-flex justify-center align-center mud-height-full">
+            <MudButton OnClick="@ToggleStartDrawer">Open</MudButton>
+            <MudItem xs="12" Style="padding:10px">
+                
+            </MudItem>
+            <MudButton OnClick="@ToggleEndDrawer">Open</MudButton>
+        </div>
+    </MudDrawerContainer>
+</MudPaper> *@
+
+
+
+@code {
+    private bool _openStart = true;
+    private bool _openEnd = true;
+    private int _imageheight = 380;
+
+    [CascadingParameter]
+    public bool Rtl { get; set; }
+
+    private void ToggleStartDrawer()
+    {
+        _openStart = !_openStart;
+    }
+
+    private void ToggleEndDrawer()
+    {
+        _openEnd = !_openEnd;
+    }
+
+
+    Justify justification = Justify.FlexStart;
+
+    IEnumerable<VolumeDto> volumes = Enumerable.Empty<VolumeDto>();
+
+    PaginationOptions paginationOption = new() { PageNumber = 1, PageSize = 36 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        volumes = await VolumeService.GetAllVolumesAsync(paginationOption);
+        await base.OnInitializedAsync();
+    }
+
+
+
+    [Inject]
+    private IBrowserViewportService BrowserViewportService { get; set; }
+
+    private List<Breakpoint> _breakpointHistory = new();
+    private Breakpoint _start;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await BrowserViewportService.SubscribeAsync(this, fireImmediately: true);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async ValueTask DisposeAsync() => await BrowserViewportService.UnsubscribeAsync(this);
+
+    Guid IBrowserViewportObserver.Id { get; } = Guid.NewGuid();
+
+    ResizeOptions IBrowserViewportObserver.ResizeOptions { get; } = new()
+    {
+        ReportRate = 250,
+        NotifyOnBreakpointOnly = true
+    };
+
+    Task IBrowserViewportObserver.NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        if (browserViewportEventArgs.IsImmediate)
+        {
+            _start = browserViewportEventArgs.Breakpoint;
+        }
+        else
+        {
+            _breakpointHistory.Add(browserViewportEventArgs.Breakpoint);
+            _imageheight = browserViewportEventArgs.Breakpoint switch
+            {
+                Breakpoint.Xs => 280,
+                Breakpoint.Sm => 280,
+                Breakpoint.Md => 300,
+                Breakpoint.Lg => 380,
+                Breakpoint.XlAndUp => 380,
+                _ => 380
+            };
+            Console.WriteLine(browserViewportEventArgs.Breakpoint.ToString() + _imageheight.ToString());
+            StateHasChanged();
+        }
+
+
+
+        return InvokeAsync(StateHasChanged);
+    }
+}

@@ -10,11 +10,11 @@ namespace MangaShelf.DAL.Identity
     {
         public MangaIdentityDbContext(DbContextOptions<MangaIdentityDbContext> options) : base(options)
         {
-            
+
         }
     }
 
-    public class MangaIdentityUser: IdentityUser
+    public class MangaIdentityUser : IdentityUser
     {
     }
 

@@ -1,9 +1,17 @@
-﻿using PuppeteerSharp;
+﻿using Microsoft.Extensions.Logging;
+using PuppeteerSharp;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
 public abstract class AdvancedParser : BaseParser
 {
+    private readonly ILogger<AdvancedParser> _logger;
+
+    public AdvancedParser(ILogger<AdvancedParser> logger) : base(logger)
+    {
+        _logger = logger;
+    }
+
     override protected async Task<string> GetUrlHtml(string url)
     {
         int retry = 0;

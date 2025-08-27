@@ -1,35 +1,37 @@
-﻿using MangaShelf.DAL.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace MangaShelf.DAL.Interceptors;
-
-public class AuditInterceptor : SaveChangesInterceptor
+namespace MangaShelf.DAL.Interceptors
 {
-    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+    public class AuditInterceptor : SaveChangesInterceptor
     {
-        var context = eventData.Context;
-        if (context is MangaDbContext mangaContext)
+        public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
         {
-            foreach (var entry in mangaContext.ChangeTracker.Entries<IEntity>())
+            var context = eventData.Context;
+            if (context is MangaDbContext mangaContext)
             {
-                if (entry.State == EntityState.Added)
+                foreach (var entry in mangaContext.ChangeTracker.Entries<IEntity>())
                 {
-                    entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
-                    entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
-                }
-                else if (entry.State == EntityState.Deleted)
-                {
-                    entry.Entity.IsDeleted = true;
-                    entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
-                    entry.State = EntityState.Modified; // Change state to Modified to avoid actual deletion
+                    if (entry.State == EntityState.Added)
+                    {
+                        entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+                        entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+                    }
+                    else if (entry.State == EntityState.Modified)
+                    {
+                        entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+                    }
+                    else if (entry.State == EntityState.Deleted)
+                    {
+                        entry.Entity.IsDeleted = true;
+                        entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
+                        entry.State = EntityState.Modified; // Change state to Modified to avoid actual deletion
+                    }
                 }
             }
+            return base.SavingChanges(eventData, result);
         }
-        return base.SavingChanges(eventData, result);
     }
 }

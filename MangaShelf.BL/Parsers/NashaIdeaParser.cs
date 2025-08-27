@@ -1,9 +1,8 @@
 ﻿using AngleSharp.Dom;
 using MangaShelf.DAL.Models;
-using System;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
 public class NashaIdeaParser : AdvancedParser
 {
@@ -32,7 +31,7 @@ public class NashaIdeaParser : AdvancedParser
         var tag = document.QuerySelector("h1.product_title");
         var title = tag.InnerHtml;
 
-        var volIndex = title.IndexOf("Том");
+        var volIndex = title.ToLower().LastIndexOf("том");
         if (volIndex == -1)
         {
             return title.Trim();
@@ -49,7 +48,7 @@ public class NashaIdeaParser : AdvancedParser
         var tag = document.QuerySelector("h1.product_title");
         var title = tag.InnerHtml;
 
-        var volIndex = title.IndexOf("Том");
+        var volIndex = title.ToLower().LastIndexOf("том");
         if (volIndex == -1)
         {
             return title.Trim();
@@ -63,14 +62,18 @@ public class NashaIdeaParser : AdvancedParser
     protected override int GetVolumeNumber(IDocument document)
     {
         var tag = document.QuerySelector("h1.product_title");
-        var title = tag.InnerHtml;
+        var title = tag.InnerHtml.ToLower();
 
-        var volIndex = title.IndexOf("Том");
+        var volIndex = title.IndexOf("том");
 
         if (volIndex == -1)
             return volIndex;
 
         var nextWord = title.IndexOf(" ", volIndex + 3);
+        if(nextWord == -1)
+        {
+            nextWord = volIndex + 3;
+        }
 
         var nextWhitespace = title.IndexOf(" ", nextWord + 1);
 
@@ -88,7 +91,7 @@ public class NashaIdeaParser : AdvancedParser
         return int.Parse(volume);
     }
 
-    protected override DateTime? GetReleaseDate(IDocument document)
+    protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
         var nodes = document.QuerySelectorAll(".book-product-description > p");
         string? releaseNode = null;
@@ -103,13 +106,13 @@ public class NashaIdeaParser : AdvancedParser
         if (releaseNode is null)
             return null;
 
-        var date = releaseNode.Replace("У НАЯВНОСТІ", "").Trim([' ', '.', '.', '!']);
+        var date = releaseNode.Replace("У НАЯВНОСТІ", "").Trim([' ', '.', '.', '!', ':']);
         var dateString = GetDateFromText(date);
 
         return dateString;
     }
 
-    private DateTime? GetPreorderDate(string dateText)
+    private DateTimeOffset? GetPreorderDate(string dateText)
     {
         var date = dateText.Replace("Дата публікації:", "").Trim([' ', '.', '.', '!']);
 
@@ -124,10 +127,10 @@ public class NashaIdeaParser : AdvancedParser
         var month = monthes.Where(x => x.names.Contains(dateSplits[1].ToUpper())).FirstOrDefault().number;
         var year = int.Parse(dateSplits[2]);
 
-        return new DateTime(year, month, day);
+        return DateTime.SpecifyKind(new DateTime(year, month, day), DateTimeKind.Local);
     }
 
-    private DateTime? GetDateFromText(string text)
+    private DateTimeOffset? GetDateFromText(string text)
     {
         if (text.Contains('–'))
         {
@@ -149,11 +152,11 @@ public class NashaIdeaParser : AdvancedParser
         {
             month = text.Substring("ДРУГА ПОЛОВИНА".Length);
         }
-        if(StartsWithMonth(text))
+        if (StartsWithMonth(text))
         {
             month = text.Substring(0, text.IndexOf(' '));
         }
-        
+
         if (month == default)
             return null;
 
@@ -169,7 +172,7 @@ public class NashaIdeaParser : AdvancedParser
             day = DateTime.DaysInMonth(year, monthNumber.number);
 
 
-        return new DateTime(year, monthNumber.number, day);
+        return DateTime.SpecifyKind(new DateTime(year, monthNumber.number, day), DateTimeKind.Local);
     }
 
     private bool StartsWithMonth(string text)
@@ -305,7 +308,7 @@ public class NashaIdeaParser : AdvancedParser
         return "Nasha Idea";
     }
 
-    protected override DateTime? GetPublishDate(IDocument document)
+    protected override DateTimeOffset? GetPublishDate(IDocument document)
     {
         var nodes = document.QuerySelectorAll(".book-product-table-data-view");
         string? publishDate = null;
@@ -340,11 +343,20 @@ public class NashaIdeaParser : AdvancedParser
         return "UK";
     }
 
+    protected override bool GetIsPreorder(IDocument document)
+    {
+        var lable = document.QuerySelector(".inventory_status");
+        if (lable is null)
+            return false;
+
+        return lable.TextContent.Contains("Передзамовлення");
+    }
+
     (int number, string[] names)[] monthes = [
         (1, ["СІЧЕНЬ", "СІЧНІ", "СІЧНЯ"]),
         (2, ["ЛЮТИЙ", "ЛЮТОМУ", "ЛЮТОГО"]),
         (3, ["БЕРЕЗЕНЬ", "БЕРЕЗНІ", "БЕРЕЗНЯ"]),
-        (4, ["КВІТЕНЬ", "КВІТНІ", "КВТНЯ"]),
+        (4, ["КВІТЕНЬ", "КВІТНІ", "КВІТНЯ"]),
         (5, ["ТРАВЕНЬ", "ТРАВНІ", "ТРАВНЯ"]),
         (6, ["ЧЕРВЕНЬ", "ЧЕВНІ", "ЧЕРВНЯ"]),
         (7, ["ЛИПЕНЬ", "ЛИПНІ", "ЛИПНЯ"]),
@@ -354,4 +366,9 @@ public class NashaIdeaParser : AdvancedParser
         (11, ["ЛИСТОПАД", "ЛИСТОПАДІ", "ЛИСТОПАДА"]),
         (12, ["ГРУДЕНЬ", "ГРУДНІ", "ГРУДНЯ"]),
         ];
+
+
+    public NashaIdeaParser(ILogger<NashaIdeaParser> logger) : base(logger)
+    {
+    }
 }

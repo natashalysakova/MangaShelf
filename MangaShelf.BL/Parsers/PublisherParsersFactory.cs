@@ -1,19 +1,21 @@
 ﻿using MangaShelf.BL.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace MangaShelf.Parser.VolumeParsers;
+namespace MangaShelf.BL.Parsers;
 
 public class PublisherParsersFactory
 {
     private readonly IEnumerable<IPublisherParser> _parsers;
 
-    public PublisherParsersFactory()
+    public PublisherParsersFactory(ILoggerFactory loggerFactory)
     {
         _parsers = [
-            new NashaIdeaParser(),
-            //new MalopusParser(),
-            //new AmazonParser(),
-            //new KoboParser(),
-            //new LantsutaParser()
+            new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>()),
+            new MalopusParser(loggerFactory.CreateLogger<MalopusParser>()),
+            //new AmazonParser(loggerFactory.CreateLogger<AmazonParser>()),
+            //new KoboParser(loggerFactory.CreateLogger<KoboParser>()),
+            new LantsutaParser(loggerFactory.CreateLogger<LantsutaParser>())
             ];
     }
 
@@ -28,7 +30,6 @@ public class PublisherParsersFactory
         {
             if (url.StartsWith(parser.SiteUrl))
             {
-                parser.SetUrl(url);
                 return parser;
             }
         }

@@ -1,9 +1,10 @@
-﻿using MangaShelf.DAL.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 
-namespace MangaShelf.Infrastructure.Installer;
-
-public interface ISeriesRepository : IRepository<Series>
+namespace MangaShelf.DAL.Interfaces
 {
-    Task<Series?> GetByTitle(string series);
+    public interface ISeriesRepository : IRepository<Series>
+    {
+        Task<Series?> GetByTitle(string series);
+    }
 }

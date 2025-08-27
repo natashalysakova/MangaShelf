@@ -11,9 +11,13 @@ public class Program
 
         builder.RegisterContextAndServices();
         builder.RegisterIdentityContextAndServices();
-        builder.RegisterServices();
+        builder.AddBusinessServices();
 
         var host = builder.Build();
+
+        await host.Services.MakeSureDbCreatedAsync();
+        await host.Services.SeedDatabase();
+
         host.Run();
     }
 }

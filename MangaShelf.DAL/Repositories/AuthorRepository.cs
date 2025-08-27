@@ -1,9 +1,9 @@
 ﻿using MangaShelf.DAL;
+using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
-using MangaShelf.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace MangaShelf.Infrastructure.Installer
+namespace MangaShelf.DAL.Repositories
 {
     public class AuthorRepository : BaseRepository<Author>, IAuthorRepository
     {
@@ -13,7 +13,7 @@ namespace MangaShelf.Infrastructure.Installer
 
         public async Task<Author?> GetByName(string name)
         {
-            return await _context.Authors.FirstOrDefaultAsync(x=>x.Name == name);
+            return await _context.Authors.FirstOrDefaultAsync(x => x.Name == name);
         }
     }
 }

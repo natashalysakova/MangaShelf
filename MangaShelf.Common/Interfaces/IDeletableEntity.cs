@@ -1,4 +1,4 @@
-﻿namespace MangaShelf.DAL.Interfaces;
+﻿namespace MangaShelf.Common.Interfaces;
 
 public interface IDeletableEntity
 {
