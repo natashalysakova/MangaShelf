@@ -2,38 +2,25 @@
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
+using MangaShelf.BL.Mappers;
+using MangaShelf.BL.Dto;
 
-namespace MangaShelf.BL.Services
+namespace MangaShelf.BL.Services;
+
+public class PublisherService : IPublisherService
 {
-    public class PublisherService : IPublisherService
+    private readonly IPublisherDomainService _publisherRepository;
+    private readonly ICountryDomainService _countryRepository;
+
+    public PublisherService(ILogger<Publisher> logger, IPublisherDomainService publisherRepository, ICountryDomainService countryRepository)
     {
-        private readonly IPublisherRepository _publisherRepository;
-        private readonly ICountryRepository _countryRepository;
+        _publisherRepository = publisherRepository;
+        _countryRepository = countryRepository;
+    }
 
-        public PublisherService(ILogger<Publisher> logger, IPublisherRepository publisherRepository, ICountryRepository countryRepository)
-        {
-            _publisherRepository = publisherRepository;
-            _countryRepository = countryRepository;
-        }
-
-        public async Task<Publisher> CreateFromParsedVolumeInfo(ParsedInfo volumeInfo)
-        {
-
-            var country = await _countryRepository.GetByCountryCodeAsync(volumeInfo.countryCode) ?? await _countryRepository.GetByCountryCodeAsync("uk");
-            var publisher = new Publisher()
-            {
-                Name = volumeInfo.publisher,
-                Country = country,
-                Url = new Uri(volumeInfo.url).ToString()
-            };
-
-            await _publisherRepository.Add(publisher);
-            return publisher;
-        }
-
-        public async Task<Publisher?> GetByName(string publisher)
-        {
-            return await _publisherRepository.GetByName(publisher);
-        }
+    public async Task<PublisherDto?> GetByName(string publisherName)
+    {
+        var publisher = await _publisherRepository.GetByName(publisherName);
+        return publisher?.ToDto();
     }
 }

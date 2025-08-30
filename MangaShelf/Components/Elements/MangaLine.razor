@@ -1,0 +1,22 @@
+﻿@if (Volumes.Any())
+{
+    <MudGrid Justify="@justification" Spacing="6">
+        @foreach (var volume in Volumes)
+        {
+            <MudItem xs="2">
+                <SmallCard Volume="@volume" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public IEnumerable<VolumeDto> Volumes { get; set; }
+
+
+    Justify justification = Justify.FlexStart;
+
+}

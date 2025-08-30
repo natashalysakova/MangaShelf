@@ -1,15 +1,9 @@
-using MangaShelf.BL.Interfaces;
-using MangaShelf.BL.Services;
 using MangaShelf.Common.Localization.Services;
 using MangaShelf.Components;
 using MangaShelf.Components.Account;
-using MangaShelf.DAL.Interfaces;
-using MangaShelf.DAL.Repositories;
 using MangaShelf.Extentions;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Installer;
-using MangaShelf.Localization.Interfaces;
-using MangaShelf.Localization.Services;
 using MudBlazor.Services;
 
 namespace MangaShelf;

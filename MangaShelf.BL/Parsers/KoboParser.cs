@@ -1,15 +1,19 @@
 ﻿
 using AngleSharp.Dom;
+using MangaShelf.BL.Enums;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers;
 
-public class KoboParser : AdvancedParser
+public class KoboParser : BaseParser
 {
     private readonly ILogger<KoboParser> _logger;
 
-    public KoboParser(ILogger<KoboParser> logger) : base(logger)
+    public KoboParser(ILogger<KoboParser> logger, 
+        [FromKeyedServices(HtmlDownloaderKeys.Advanced)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
         _logger = logger;
     }
@@ -175,6 +179,11 @@ public class KoboParser : AdvancedParser
     }
 
     protected override bool GetIsPreorder(IDocument document)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override int? GetAgeRestriction(IDocument document)
     {
         throw new NotImplementedException();
     }

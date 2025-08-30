@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Localization\Resources\UserInterfaceResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>UserInterfaceResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

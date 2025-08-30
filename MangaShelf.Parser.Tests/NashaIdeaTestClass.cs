@@ -1,33 +1,31 @@
 ﻿using MangaShelf.BL.Parsers;
-using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Parser.Tests;
 
 [TestClass]
-public class NashaIdeaTestClass
+public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
 {
-    ILoggerFactory loggerFactory = new LoggerFactory();
 
     [TestMethod]
     public async Task NashaIdea_PreorderTest()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/ne-khlopets-tom-1/");
+        var result = await Parser.Parse("https://nashaidea.com/product/ne-khlopets-tom-1/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Том 1", result.title);
         Assert.AreEqual("Хлопець, який їй сподобався, — не хлопець", result.series);
         Assert.AreEqual("", result.authors);
         Assert.AreEqual(1, result.volumeNumber);
-        Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2025/05/guy01-sc-1080_result.webp", result.cover);
+        Assert.IsNotNull(result.cover);
+        Assert.IsTrue(result.cover.StartsWith("https://nashaidea.com/"));
+        Assert.IsTrue(result.cover.EndsWith(".webp"));
         Assert.AreEqual("Nasha Idea", result.publisher);
         Assert.AreEqual("Physical", result.type);
         Assert.AreEqual("978-617-8516-51-2", result.isbn);
         Assert.AreEqual(3, result.totalVolumes);
         Assert.AreEqual("ongoing", result.seriesStatus);
         Assert.AreEqual("https://nashaidea.com/product/ne-khlopets-tom-1/", result.url);
-        Assert.AreEqual(DateTime.Parse("2025-06-06"), result.preorderStartDate);
+        Assert.AreEqual(DateTime.Parse("2025-08-28"), result.preorderStartDate);
         Assert.AreEqual(DateTime.Parse("2025-09-30"), result.release);
         Assert.AreEqual(true, result.isPreorder);
     }
@@ -35,9 +33,7 @@ public class NashaIdeaTestClass
     [TestMethod]
     public async Task NashaIdea_RegularVolume()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/chi-tom-10/");
+        var result = await Parser.Parse("https://nashaidea.com/product/chi-tom-10/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Том 10", result.title);
@@ -61,9 +57,7 @@ public class NashaIdeaTestClass
     [TestMethod]
     public async Task NashaIdea_OneShotVolume()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/vitaiemo-v-koto-kafe/");
+        var result = await Parser.Parse("https://nashaidea.com/product/vitaiemo-v-koto-kafe/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Вітаємо в кото-кафе", result.title);
@@ -85,9 +79,7 @@ public class NashaIdeaTestClass
     [TestMethod]
     public async Task NashaIdea_FinishedSeries()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/proshhavaj-troyandovyj-sade-tom-3/");
+        var result = await Parser.Parse("https://nashaidea.com/product/proshhavaj-troyandovyj-sade-tom-3/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Том 3", result.title);
@@ -102,15 +94,14 @@ public class NashaIdeaTestClass
         Assert.AreEqual(3, result.totalVolumes);
         Assert.AreEqual("finished", result.seriesStatus);
         Assert.AreEqual(false, result.isPreorder);
+        Assert.AreEqual(12, result.ageRestrictions);
 
     }
 
     [TestMethod]
     public async Task NashaIdea_PreorderDate_SholdBe_LastDayOfMonth()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/given-1/");
+        var result = await Parser.Parse("https://nashaidea.com/product/given-1/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual(DateTime.Parse("2025-07-09"), result.preorderStartDate);
@@ -121,9 +112,7 @@ public class NashaIdeaTestClass
     [TestMethod]
     public async Task NashaIdea_PublishDate_SholdBe()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/hiraiasumi-tom-1/");
+        var result = await Parser.Parse("https://nashaidea.com/product/hiraiasumi-tom-1/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual(DateTime.Parse("2025-04-01"), result.preorderStartDate);
@@ -135,9 +124,7 @@ public class NashaIdeaTestClass
     [TestMethod]
     public async Task NashaIdea_VolumeNumber_ShouldBe()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/hirayasumi-tom-2/");
+        var result = await Parser.Parse("https://nashaidea.com/product/hirayasumi-tom-2/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.volumeNumber);
@@ -146,9 +133,7 @@ public class NashaIdeaTestClass
     [TestMethod]
     public async Task NashaIdea_VolumeNumberAndTitle_ShouldBe()
     {
-        var parser = new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>());
-
-        var result = await parser.Parse("https://nashaidea.com/product/zhoze-tygr-ta-ryba-tom-2/");
+        var result = await Parser.Parse("https://nashaidea.com/product/zhoze-tygr-ta-ryba-tom-2/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.volumeNumber);

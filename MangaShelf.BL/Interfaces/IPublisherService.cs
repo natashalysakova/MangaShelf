@@ -1,10 +1,9 @@
-﻿using MangaShelf.Common.Interfaces;
-using MangaShelf.DAL.Models;
+﻿using MangaShelf.BL.Dto;
+using MangaShelf.Common.Interfaces;
 
 namespace MangaShelf.BL.Interfaces;
 
 public interface IPublisherService : IService
 {
-    Task<Publisher> CreateFromParsedVolumeInfo(ParsedInfo volumeInfo);
-    Task<Publisher?> GetByName(string publisher);
+    Task<PublisherDto?> GetByName(string publisherName);
 }

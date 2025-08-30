@@ -1,4 +1,8 @@
-﻿using MangaShelf.BL.Parsers;
+﻿using MangaShelf.BL.Enums;
+using MangaShelf.BL.Parsers;
+using MangaShelf.Common.Interfaces;
+using MangaShelf.Infrastructure.Network;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Parser.Tests;
@@ -7,14 +11,25 @@ namespace MangaShelf.Parser.Tests;
 [Ignore]
 public class AmazonTestClass
 {
-    ILoggerFactory loggerFactory = new LoggerFactory();
+    private AmazonParser _parser;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging(builder =>
+            builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
+        services.AddKeyedSingleton<IHtmlDownloader, AdvancedHtmlDownloader>(HtmlDownloaderKeys.Advanced);
+        services.AddTransient<AmazonParser>();
+
+        _parser = services.BuildServiceProvider().GetRequiredService<AmazonParser>();
+    }
 
     [TestMethod]
     public async Task AmazonTest()
     {
-        var parser = new AmazonParser(loggerFactory.CreateLogger<AmazonParser>());
 
-        var result = await parser.Parse("https://www.amazon.com/dp/B08FVLVXX6/");
+        var result = await _parser.Parse("https://www.amazon.com/dp/B08FVLVXX6/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 1", result.title);
@@ -34,9 +49,7 @@ public class AmazonTestClass
     [TestMethod]
     public async Task AmazonPreorderTest()
     {
-        var parser = new AmazonParser(loggerFactory.CreateLogger<AmazonParser>());
-
-        var result = await parser.Parse("https://www.amazon.com/gp/product/B0D7Z8TGNQ");
+        var result = await _parser.Parse("https://www.amazon.com/gp/product/B0D7Z8TGNQ");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 8", result.title);
@@ -57,9 +70,7 @@ public class AmazonTestClass
     [TestMethod]
     public async Task AmazonOneShotTest()
     {
-        var parser = new AmazonParser(loggerFactory.CreateLogger<AmazonParser>());
-
-        var result = await parser.Parse("https://www.amazon.com/dp/B01N0LT06V");
+        var result = await _parser.Parse("https://www.amazon.com/dp/B01N0LT06V");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Nijigahara Holograph", result.title);

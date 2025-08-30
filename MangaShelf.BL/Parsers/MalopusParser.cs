@@ -1,6 +1,9 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
+using MangaShelf.BL.Enums;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers;
@@ -10,7 +13,6 @@ public class MalopusParser : BaseParser
     public override string SiteUrl => "https://malopus.com.ua/";
     private string _catalogUrl = "manga/";
     private string _pagination = "?page={0}";
-    int currentPage = 0;
 
     protected override string GetAuthors(IDocument document)
     {
@@ -34,29 +36,6 @@ public class MalopusParser : BaseParser
 
     protected override string GetCover(IDocument document)
     {
-        //var node = document.QuerySelector(".rm-product-title > h1");
-        //var title = node.InnerHtml;
-
-        //HttpClient client = new HttpClient();
-
-        //var api = _configuration.GetValue<string>("googleApiKey");
-
-        //var query = $"https://www.googleapis.com/customsearch/v1?cx=76a6d7a5dfbdf4163&key={api}&q={title}&searchType=image";
-
-
-        //var task = client.GetAsync(query);
-        //task.Wait();
-
-        //if (task.IsCompleted && task.Result.IsSuccessStatusCode)
-        //{
-        //    var result = task.Result.Content.ReadAsStringAsync();
-        //    result.Wait();
-        //    var json = result.Result;
-        //}
-        //return string.Empty;
-
-
-
         var node = document.QuerySelector(".oct-gallery > img.img-fluid");
         var attribute = node.Attributes["src"];
         return attribute.Value;
@@ -105,7 +84,23 @@ public class MalopusParser : BaseParser
     protected override string GetTitle(IDocument document)
     {
         var node = document.QuerySelector(".rm-product-title > h1");
-        var title = node.InnerHtml.Substring(node.InnerHtml.LastIndexOf('.') + 1).Trim();
+        var title = node.InnerHtml.ToString();
+
+        var lookupChar = new char[] { '.', '!', '?' };
+        int index = -1;
+        foreach (var ch in lookupChar)
+        {
+            index = node.InnerHtml.IndexOf(ch);
+            if (index != -1)
+            {
+                break;
+            }
+        }
+
+        if(index != -1)
+        {
+             title = title.Substring(index + 1).Trim();
+        }
 
         if (title.StartsWith("Ранобе") || title.StartsWith("Манґа") || title.StartsWith("Комікс"))
         {
@@ -115,9 +110,9 @@ public class MalopusParser : BaseParser
         return title;
     }
 
-    string[] lookupArray = [". Том ", ". Омнібус "];
+    string[] lookupArray = [". Том ", "! Том ", "? Том ", ". Омнібус ", "! Омнібус ", "? Омнібус "];
 
-    public MalopusParser(ILogger<MalopusParser> logger) : base(logger)
+    public MalopusParser(ILogger<MalopusParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Basic)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
     }
 
@@ -274,7 +269,7 @@ public class MalopusParser : BaseParser
 
     public override string GetNextPageUrl()
     {
-        return $"{SiteUrl}{_catalogUrl}{string.Format(_pagination, ++currentPage)}";
+        return $"{SiteUrl}{_catalogUrl}{_pagination}";
     }
     public override string GetVolumeUrlBlockClass()
     {
@@ -283,7 +278,18 @@ public class MalopusParser : BaseParser
 
     protected override DateTimeOffset? GetPublishDate(IDocument document)
     {
-        return null;
+        var newsDates = document.QuerySelectorAll(".rm-news-item-date");
+        var dates = new List<DateTimeOffset>();
+        foreach (var item in newsDates)
+        {
+            if(DateTime.TryParseExact(item.InnerHtml, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out var parsedDate))
+            {
+                dates.Add(parsedDate);
+            }
+        }
+
+        var earliest = dates.OrderBy(x => x).FirstOrDefault();
+        return earliest;
     }
 
     protected override string GetCountryCode(IDocument document)
@@ -299,5 +305,31 @@ public class MalopusParser : BaseParser
             return false;
 
         return lable.TextContent.Contains("Попереднє замовлення");
+    }
+
+    protected override int? GetAgeRestriction(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-tabs-attributtes-list-item");
+        string? ageString = null;
+
+        foreach (var node in nodes)
+        {
+            if (node.Children[0].TextContent.StartsWith("Вік"))
+            {
+                ageString = node.Children[1].TextContent.Trim();
+            }
+        }
+
+        if (ageString is not null && ageString.Contains("+"))
+        {
+            ageString = ageString.Replace("+", "").Trim();
+        }
+
+        if (int.TryParse(ageString, out var age))
+        {
+            return age;
+        }
+
+        return null;
     }
 }

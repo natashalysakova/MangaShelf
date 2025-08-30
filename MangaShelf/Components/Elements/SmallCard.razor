@@ -1,0 +1,22 @@
+﻿@if (Volume != null)
+{
+    <MudCard Style="position:relative;" Class="manga-card ">
+        <div class="image-container">
+            <img class="card-image" src="@Volume.CoverImageUrl" alt="@Volume.SeriesName" />
+        </div>
+    </MudCard>
+}
+else
+{
+    <MudCard Style="position:relative;" Class="manga-card ">
+        <div class="image-container">
+            <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Rectangle"></MudSkeleton>
+        </div>
+    </MudCard>
+
+}
+
+@code {
+    [Parameter]
+    public VolumeDto? Volume { get; set; }
+}

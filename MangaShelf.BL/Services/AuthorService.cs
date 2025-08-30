@@ -1,6 +1,7 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Dto;
+using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Mappers;
 using MangaShelf.DAL.Interfaces;
-using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Services;
@@ -8,27 +9,16 @@ namespace MangaShelf.BL.Services;
 public class AuthorService : IAuthorService
 {
     private readonly ILogger<AuthorService> _logger;
-    private readonly IAuthorRepository _authorRepository;
-    public AuthorService(ILogger<AuthorService> logger, IAuthorRepository authorRepository)
+    private readonly IAuthorDomainService _authorDomainService;
+    public AuthorService(ILogger<AuthorService> logger, IAuthorDomainService authorDomainService)
     {
         _logger = logger;
-        _authorRepository = authorRepository;
+        _authorDomainService = authorDomainService;
     }
 
-    public async Task<ICollection<Author>> GetByNames(IEnumerable<string> authors, bool createIfNotExists = false)
+    public async Task<IEnumerable<AuthorDto>> GetByNames(IEnumerable<string> authors)
     {
-        var result = new List<Author>();
-
-        foreach (var author in authors)
-        {
-            var authorEntity = await _authorRepository.GetByName(author);
-            if (authorEntity is null && createIfNotExists)
-            {
-                authorEntity = new Author() { Name = author };
-                authorEntity = await _authorRepository.Add(authorEntity);
-            }
-            result.Add(authorEntity!);
-        }
-        return result;
+        var result = await _authorDomainService.GetOrCreateByNames(authors.ToArray());
+        return result.Select(x => x.ToDto());
     }
 }

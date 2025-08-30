@@ -1,6 +1,9 @@
 ﻿
 using AngleSharp.Dom;
+using MangaShelf.BL.Enums;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -10,7 +13,7 @@ public class LantsutaParser : BaseParser
 {
     private readonly ILogger<LantsutaParser> _logger;
 
-    public LantsutaParser(ILogger<LantsutaParser> logger) : base(logger)
+    public LantsutaParser(ILogger<LantsutaParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Basic)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
         _logger = logger;
     }
@@ -63,15 +66,123 @@ public class LantsutaParser : BaseParser
     protected override string GetPublisher(IDocument document)
     {
         var publisher = GetFromTable(document, "Видавництво:");
-        if(publisher is null)
+        if (publisher is null)
         {
             publisher = "LANTSUTA";
         }
         return publisher;
     }
 
+    static string[] lookupPhrases = new string[]
+        {
+            "Видання на стадії виробництва і з'явиться у продажі",
+            "Відправка з"
+        };
+
     protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
+        var description = document.QuerySelector("#tab-description");
+        var text = description?.TextContent;
+        if (text is null || !text.ContainsAny(lookupPhrases))
+        {
+            var year = GetFromTable(document, "Дата виходу");
+
+            if (year != null && int.TryParse(year, out var yearNumber))
+            {
+                var month = 12;
+                var day = 31;
+
+                var date = DateTime.SpecifyKind(new DateTime(yearNumber, month, day), DateTimeKind.Local);
+
+                return new DateTimeOffset(date);
+            }
+
+            return null;
+        }
+
+        return ParseDescription(text);
+    }
+
+    public static DateTimeOffset? ParseDescription(string text)
+    {
+
+        var seasonPhrases = new (string pattern, int month)[]
+        {
+            ("взимку", 2),
+            ("навесні", 5),
+            ("влітку", 8),
+            ("восени", 11),
+            ("наприкінці", 12),
+            ("у середині", 6),
+            ("на початку", 3),
+            ("січні", 1),
+            ("лютому", 2),
+            ("березні", 3),
+            ("квітні", 4),
+            ("травні", 5),
+            ("червні", 6),
+            ("липні", 7),
+            ("серпні", 8),
+            ("вересні", 9),
+            ("жовтні", 10),
+            ("листопаді", 11),
+            ("грудні", 12)
+        };
+
+        var monthPhrases = new (string pattern, int month)[]
+        {
+            ("січня", 1),
+            ("лютого", 2),
+            ("березня", 3),
+            ("квітня", 4),
+            ("травня", 5),
+            ("червня", 6),
+            ("липня", 7),
+            ("серпня", 8),
+            ("вересня", 9),
+            ("жовтня", 10),
+            ("листопада", 11),
+            ("грудня", 12)
+        };
+
+        if (text.Contains(lookupPhrases[0]))
+        {
+            var startIndex = text.IndexOf(lookupPhrases[0]) + lookupPhrases[0].Length;
+
+            var dateString = text.Substring(startIndex).Trim();
+            foreach (var season in seasonPhrases)
+            {
+                if (dateString.Contains(season.pattern))
+                {
+                    var month = season.month;
+                    var indexAfterSeason = dateString.IndexOf(season.pattern) + season.pattern.Length;
+                    var yearString = dateString.Substring(indexAfterSeason, 5).Trim();
+                    var year = int.Parse(yearString);
+                    return new DateTimeOffset(DateTime.SpecifyKind(new DateTime(year, month, DateTime.DaysInMonth(year, month)), DateTimeKind.Local));
+                }
+            }
+        }
+
+        if (text.Contains(lookupPhrases[1]))
+        {
+            var startIndex = text.IndexOf(lookupPhrases[1]) + lookupPhrases[1].Length;
+            var dateString = text.Substring(startIndex).Trim();
+            foreach (var monthPhrase in monthPhrases)
+            {
+                if (dateString.Contains(monthPhrase.pattern))
+                {
+                    var month = monthPhrase.month;
+                    var indexAfterMonth = dateString.IndexOf(monthPhrase.pattern) + monthPhrase.pattern.Length;
+                    var yearString = dateString.Substring(indexAfterMonth, 5).Trim();
+                    var dayString = dateString.Substring(0, dateString.IndexOf(monthPhrase.pattern)).Trim();
+                    var day = int.Parse(dayString);
+                    var year = int.Parse(yearString);
+                    return new DateTimeOffset(DateTime.SpecifyKind(new DateTime(year, month, day), DateTimeKind.Local));
+                }
+            }
+        }
+
+
         return null;
     }
 
@@ -90,12 +201,12 @@ public class LantsutaParser : BaseParser
         var node = document.QuerySelector(".name-product-title").InnerHtml;
         var series = GetSeries(document);
         node = node.Replace(series, "").Trim();
-        if(series.Contains('.'))
+        if (series.Contains('.'))
         {
             series = series.Replace('.', ':');
             node = node.Replace(series, "").Trim();
         }
-        
+
 
         if (char.IsPunctuation(node[0]))
         {
@@ -134,11 +245,10 @@ public class LantsutaParser : BaseParser
 
     private string _catalogUrl = "manga-ua";
     private string _pagination = "?page={0}";
-    int currentPage = 0;
 
     public override string GetNextPageUrl()
     {
-        return $"{SiteUrl}{_catalogUrl}{string.Format(_pagination, ++currentPage)}";
+        return $"{SiteUrl}{_catalogUrl}{_pagination}";
     }
 
     public override string GetVolumeUrlBlockClass()
@@ -160,11 +270,42 @@ public class LantsutaParser : BaseParser
     {
         var button = document.QuerySelector(".btn-buy");
 
-        if(button is null)
+        if (button is null)
         {
             return false;
         }
 
         return button.TextContent.Contains("Передзамовлення");
+    }
+
+    protected override int? GetAgeRestriction(IDocument document)
+    {
+        var ageString = GetFromTable(document, "Вік");
+        if (ageString is not null && ageString.Contains("+"))
+        {
+            ageString = ageString.Replace("+", "").Trim();
+        }
+        
+        if (int.TryParse(ageString, out var age))
+        {
+            return age;
+        }
+
+        return null;
+    }
+}
+
+public static class StringExtensions
+{
+    public static bool ContainsAny(this string source, IEnumerable<string> toCheck)
+    {
+        foreach (var check in toCheck)
+        {
+            if (source.Contains(check))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,9 +1,9 @@
-﻿using MangaShelf.Common.Interfaces;
-using MangaShelf.DAL.Models;
+﻿using MangaShelf.BL.Dto;
+using MangaShelf.Common.Interfaces;
 
 namespace MangaShelf.BL.Interfaces;
 
 public interface IAuthorService : IService
 {
-    Task<ICollection<Author>> GetByNames(IEnumerable<string> authors, bool createIfNotExists = false);
+    Task<IEnumerable<AuthorDto>> GetByNames(IEnumerable<string> authors);
 }

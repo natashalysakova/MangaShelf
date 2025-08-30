@@ -1,6 +1,5 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers;
 
@@ -8,15 +7,9 @@ public class PublisherParsersFactory
 {
     private readonly IEnumerable<IPublisherParser> _parsers;
 
-    public PublisherParsersFactory(ILoggerFactory loggerFactory)
+    public PublisherParsersFactory(IServiceProvider serviceProvider)
     {
-        _parsers = [
-            new NashaIdeaParser(loggerFactory.CreateLogger<NashaIdeaParser>()),
-            new MalopusParser(loggerFactory.CreateLogger<MalopusParser>()),
-            //new AmazonParser(loggerFactory.CreateLogger<AmazonParser>()),
-            //new KoboParser(loggerFactory.CreateLogger<KoboParser>()),
-            new LantsutaParser(loggerFactory.CreateLogger<LantsutaParser>())
-            ];
+        _parsers = serviceProvider.GetServices<IPublisherParser>();
     }
 
     public IEnumerable<IPublisherParser> GetParsers()

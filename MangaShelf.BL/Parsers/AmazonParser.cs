@@ -1,15 +1,21 @@
 ﻿using AngleSharp.Dom;
-using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Enums;
+using MangaShelf.BL.Exceptions;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers;
 
-public class AmazonParser : AdvancedParser
+public class AmazonParser : BaseParser
 {
     private readonly ILogger<AmazonParser> _logger;
 
-    public AmazonParser(ILogger<AmazonParser> logger) : base(logger)
+    public AmazonParser(
+        ILogger<AmazonParser> logger, 
+        [FromKeyedServices(HtmlDownloaderKeys.Advanced)]IHtmlDownloader htmlDownloader) 
+        : base(logger, htmlDownloader)
     {
         _logger = logger;
     }
@@ -22,6 +28,11 @@ public class AmazonParser : AdvancedParser
     }
 
     public override string GetVolumeUrlBlockClass()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override int? GetAgeRestriction(IDocument document)
     {
         throw new NotImplementedException();
     }

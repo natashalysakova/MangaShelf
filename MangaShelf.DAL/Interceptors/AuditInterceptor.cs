@@ -1,37 +1,53 @@
-﻿using MangaShelf.Common.Interfaces;
-using MangaShelf.DAL.Interfaces;
+﻿using MangaShelf.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace MangaShelf.DAL.Interceptors
+namespace MangaShelf.DAL.Interceptors;
+
+public class AuditInterceptor : SaveChangesInterceptor
 {
-    public class AuditInterceptor : SaveChangesInterceptor
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
-        public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+        AuditEntity(eventData);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
+    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+    {
+        AuditEntity(eventData);
+        return base.SavingChanges(eventData, result);
+    }
+
+    private static void AuditEntity(DbContextEventData eventData)
+    {
+        var context = eventData.Context;
+        if (context is MangaDbContext mangaContext)
         {
-            var context = eventData.Context;
-            if (context is MangaDbContext mangaContext)
+            foreach (var entry in mangaContext.ChangeTracker.Entries<IEntity>())
             {
-                foreach (var entry in mangaContext.ChangeTracker.Entries<IEntity>())
+                if (string.IsNullOrEmpty(entry.Entity.CreatedBy))
                 {
-                    if (entry.State == EntityState.Added)
-                    {
-                        entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
-                        entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
-                    }
-                    else if (entry.State == EntityState.Modified)
-                    {
-                        entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
-                    }
-                    else if (entry.State == EntityState.Deleted)
-                    {
-                        entry.Entity.IsDeleted = true;
-                        entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
-                        entry.State = EntityState.Modified; // Change state to Modified to avoid actual deletion
-                    }
+                    entry.Entity.CreatedBy = "system";
                 }
+
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+                    entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+                }
+                else if (entry.State == EntityState.Deleted)
+                {
+                    entry.Entity.IsDeleted = true;
+                    entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
+                    entry.State = EntityState.Modified; // Change state to Modified to avoid actual deletion
+                }
+
+                
             }
-            return base.SavingChanges(eventData, result);
         }
     }
 }

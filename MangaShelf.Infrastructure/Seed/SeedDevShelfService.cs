@@ -12,13 +12,13 @@ public class SeedDevShelfService : ISeedDataService
 
     public int Priority => 91;
 
-    public async Task Run(IServiceProvider scopedServiceProvider, CancellationToken cancellationToken)
+    public async Task Run(CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }
 
-    public async Task Run(IServiceProvider scopedServiceProvider)
+    public async Task Run()
     {
-        await Run(scopedServiceProvider, CancellationToken.None);
+        await Run(CancellationToken.None);
     }
 }

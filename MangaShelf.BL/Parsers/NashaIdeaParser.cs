@@ -1,18 +1,19 @@
 ﻿using AngleSharp.Dom;
+using MangaShelf.BL.Enums;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers;
 
-public class NashaIdeaParser : AdvancedParser
+public class NashaIdeaParser : BaseParser
 {
 
     public override string SiteUrl => "https://nashaidea.com/";
 
     private string _catalogUrl = "product-category/manga/";
     private string _pagination = "page/{0}";
-    int currentPage = 0;
-
 
     protected override string GetAuthors(IDocument document)
     {
@@ -330,7 +331,7 @@ public class NashaIdeaParser : AdvancedParser
 
     public override string GetNextPageUrl()
     {
-        return $"{SiteUrl}{_catalogUrl}{string.Format(_pagination, ++currentPage)}";
+        return $"{SiteUrl}{_catalogUrl}{_pagination}";
     }
 
     public override string GetVolumeUrlBlockClass()
@@ -352,6 +353,31 @@ public class NashaIdeaParser : AdvancedParser
         return lable.TextContent.Contains("Передзамовлення");
     }
 
+    protected override int? GetAgeRestriction(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".book-product-table-data-bik");
+        string? ageString = null;
+        foreach (var node in nodes)
+        {
+            if (node.TextContent.StartsWith("Вік:"))
+            {
+                ageString = node.TextContent.Replace("Вік:", string.Empty).Trim();
+            }
+        }
+
+        if (ageString is not null && ageString.Contains("+"))
+        {
+            ageString = ageString.Replace("+", "").Trim();
+        }
+
+        if (int.TryParse(ageString, out var age))
+        {
+            return age;
+        }
+
+        return null;
+    }
+
     (int number, string[] names)[] monthes = [
         (1, ["СІЧЕНЬ", "СІЧНІ", "СІЧНЯ"]),
         (2, ["ЛЮТИЙ", "ЛЮТОМУ", "ЛЮТОГО"]),
@@ -368,7 +394,7 @@ public class NashaIdeaParser : AdvancedParser
         ];
 
 
-    public NashaIdeaParser(ILogger<NashaIdeaParser> logger) : base(logger)
+    public NashaIdeaParser(ILogger<NashaIdeaParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Advanced)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
     }
 }

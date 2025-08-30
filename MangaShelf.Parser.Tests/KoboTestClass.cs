@@ -1,4 +1,8 @@
-﻿using MangaShelf.BL.Parsers;
+﻿using MangaShelf.BL.Enums;
+using MangaShelf.BL.Parsers;
+using MangaShelf.Common.Interfaces;
+using MangaShelf.Infrastructure.Network;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Parser.Tests;
@@ -7,14 +11,25 @@ namespace MangaShelf.Parser.Tests;
 [Ignore]
 public class KoboTestClass
 {
-    ILoggerFactory loggerFactory = new LoggerFactory();
+    private KoboParser _parser;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging(builder =>
+            builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
+        services.AddKeyedSingleton<IHtmlDownloader, BasicHtmlDownloader>(HtmlDownloaderKeys.Basic);
+        services.AddTransient<KoboParser>();
+
+        _parser = services.BuildServiceProvider().GetRequiredService<KoboParser>();
+    }
 
     [TestMethod]
     public async Task KoboTest()
     {
-        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
 
-        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/pretty-guardian-sailor-moon-eternal-edition-9");
+        var result = await _parser.Parse("https://www.kobo.com/ww/en/ebook/pretty-guardian-sailor-moon-eternal-edition-9");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 9", result.title);
@@ -35,9 +50,7 @@ public class KoboTestClass
     [TestMethod]
     public async Task KoboTest2()
     {
-        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
-
-        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/spy-x-family-family-portrait");
+        var result = await _parser.Parse("https://www.kobo.com/ww/en/ebook/spy-x-family-family-portrait");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Spy x Family: Family Portrait", result.title);
@@ -61,9 +74,7 @@ public class KoboTestClass
     [TestMethod]
     public async Task KoboPreorderTest()
     {
-        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
-
-        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/spy-x-family-vol-13");
+        var result = await _parser.Parse("https://www.kobo.com/ww/en/ebook/spy-x-family-vol-13");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Volume 13", result.title);
@@ -85,9 +96,7 @@ public class KoboTestClass
     [TestMethod]
     public async Task KoboOneShotTest()
     {
-        var parser = new KoboParser(loggerFactory.CreateLogger<KoboParser>());
-
-        var result = await parser.Parse("https://www.kobo.com/ww/en/ebook/a-girl-on-the-shore");
+        var result = await _parser.Parse("https://www.kobo.com/ww/en/ebook/a-girl-on-the-shore");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("A Girl on the Shore", result.title);

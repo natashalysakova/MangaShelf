@@ -1,7 +1,6 @@
 using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
@@ -9,31 +8,39 @@ namespace MangaShelf.Infrastructure.Seed;
 
 public class SeedProdUsersService : ISeedDataService
 {
-    public SeedProdUsersService(ILogger<SeedProdUsersService> logger)
+    private readonly ILogger<SeedProdUsersService> _logger;
+    private readonly UserManager<MangaIdentityUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
+
+    public SeedProdUsersService(
+        ILogger<SeedProdUsersService> logger, 
+        UserManager<MangaIdentityUser> userManager, 
+        RoleManager<IdentityRole> roleManager)
     {
+        _logger = logger;
+        _userManager = userManager;
+        _roleManager = roleManager;
     }
-    public async Task Run(IServiceProvider scopedServiceProvider)
+    public async Task Run()
     {
-        await Run(scopedServiceProvider, CancellationToken.None);
+        await Run(CancellationToken.None);
     }
     public string ActivitySourceName => "Seed prod users";
 
     public int Priority => 1;
 
-    public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public async Task Run(CancellationToken cancellationToken)
     {
-        await SeedRolesAsync(serviceProvider);
-        await SeedUsers(serviceProvider);
+        await SeedRolesAsync();
+        await SeedUsers();
     }
 
-    private async Task SeedUsers(IServiceProvider serviceProvider)
+    private async Task SeedUsers()
     {
-        UserManager<MangaIdentityUser> userManager = serviceProvider.GetRequiredService<UserManager<MangaIdentityUser>>();
-
         var provider = "local";
 
         var adminUserName = "admin@example.com";
-        var adminUser = await userManager.FindByNameAsync(adminUserName);
+        var adminUser = await _userManager.FindByNameAsync(adminUserName);
         if (adminUser is null)
         {
             var user = new MangaIdentityUser()
@@ -43,13 +50,13 @@ public class SeedProdUsersService : ISeedDataService
                 EmailConfirmed = true,
             };
 
-            await userManager.CreateAsync(user, "Admin@123");
-            await userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.MustChangePassword, "true"));
-            await userManager.AddToRoleAsync(user, RoleTypes.Admin);
+            await _userManager.CreateAsync(user, "Admin@123");
+            await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.MustChangePassword, "true"));
+            await _userManager.AddToRoleAsync(user, RoleTypes.Admin);
         }
 
         var demoUserName = "demo@example.com";
-        var demoUser = await userManager.FindByNameAsync(demoUserName);
+        var demoUser = await _userManager.FindByNameAsync(demoUserName);
         if (demoUser is null)
         {
             var user = new MangaIdentityUser()
@@ -59,15 +66,15 @@ public class SeedProdUsersService : ISeedDataService
                 EmailConfirmed = true,
             };
 
-            await userManager.CreateAsync(user, "Demo@123");
-            await userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.CannotChangePassword, "true"));
-            await userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.IsDemoUser, "true"));
-
-            await userManager.AddToRoleAsync(user, RoleTypes.User);
+            await _userManager.CreateAsync(user, "Demo@123");
+            await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.CannotChangePassword, "true"));
+            await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.IsDemoUser, "true"));
+                  
+            await _userManager.AddToRoleAsync(user, RoleTypes.User);
         }
 
         var parserServiceUserName = "PARSER_SERVICE";
-        var parserServiceUser = await userManager.FindByNameAsync(parserServiceUserName);
+        var parserServiceUser = await _userManager.FindByNameAsync(parserServiceUserName);
         if (parserServiceUser is null)
         {
             var user = new MangaIdentityUser()
@@ -76,40 +83,38 @@ public class SeedProdUsersService : ISeedDataService
                 EmailConfirmed = true
             };
 
-            var result = await userManager.CreateAsync(user, "Tp!s2vDzpxB93*4V");
+            var result = await _userManager.CreateAsync(user, "Tp!s2vDzpxB93*4V");
             if (result.Succeeded)
             {
-                await userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.CannotChangePassword, "true"));
-                await userManager.AddToRoleAsync(user, RoleTypes.Service);
+                await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.CannotChangePassword, "true"));
+                await _userManager.AddToRoleAsync(user, RoleTypes.Service);
             }
         }
     }
-    private async Task SeedRolesAsync(IServiceProvider serviceProvider)
+    private async Task SeedRolesAsync()
     {
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-        if (!await roleManager.RoleExistsAsync(RoleTypes.Admin))
+        if (!await _roleManager.RoleExistsAsync(RoleTypes.Admin))
         {
             var adminRole = new IdentityRole(RoleTypes.Admin);
-            await roleManager.CreateAsync(adminRole);
+            await _roleManager.CreateAsync(adminRole);
         }
 
-        if (!await roleManager.RoleExistsAsync(RoleTypes.Cataloger))
+        if (!await _roleManager.RoleExistsAsync(RoleTypes.Cataloger))
         {
             var catalogerRole = new IdentityRole(RoleTypes.Cataloger);
-            await roleManager.CreateAsync(catalogerRole);
+            await _roleManager.CreateAsync(catalogerRole);
         }
 
-        if (!await roleManager.RoleExistsAsync(RoleTypes.User))
+        if (!await _roleManager.RoleExistsAsync(RoleTypes.User))
         {
             var userRole = new IdentityRole(RoleTypes.User);
-            await roleManager.CreateAsync(userRole);
+            await _roleManager.CreateAsync(userRole);
         }
 
-        if (!await roleManager.RoleExistsAsync(RoleTypes.Service))
+        if (!await _roleManager.RoleExistsAsync(RoleTypes.Service))
         {
             var serviceRole = new IdentityRole(RoleTypes.Service);
-            await roleManager.CreateAsync(serviceRole);
+            await _roleManager.CreateAsync(serviceRole);
         }
     }
 

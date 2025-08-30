@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Localization;
-using System.Globalization;
 
 namespace MangaShelf.Common.Localization.Interfaces;
 

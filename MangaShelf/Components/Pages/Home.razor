@@ -1,8 +1,8 @@
 ﻿@page "/"
+@using MangaShelf.BL.Dto
 @using MangaShelf.BL.Interfaces
-@using MangaShelf.Common.Dto
-@inject ICountryService CountryService
 @inject IVolumeService VolumeService
+@inject IUiLocalizationService Localizer
 
 <PageTitle>Home</PageTitle>
 
@@ -10,31 +10,22 @@
 
 Welcome to your new app.
 
-@* @foreach (var volume in volumes)
-{
-    <div>
-        <p>@volume.SeriesName - @volume.VolumeTitle</p>
-    </div>
-}
 
-@foreach (var country in countries)
-{
-    <div>
-        <h2>@country.Name</h2>
-        <p>Code: @country.Code</p>
-        <img src="@country.FlagUrl" alt="Flag of @country.Name" />
-    </div>
-} *@
+<MudText Typo="Typo.h5">@Localizer["NewManga"]</MudText>
+<MangaLine Volumes="@NewReleasedManga" />
+
+<MudText Typo="Typo.h5">@Localizer["NewPreorders"]</MudText>
+<MangaLine Volumes="@Preorders" />
 
 
 @code
 {
-    private IEnumerable<CountryDto> countries = Enumerable.Empty<CountryDto>();
-    private IEnumerable<VolumeDto> volumes = Enumerable.Empty<VolumeDto>();
+    private IEnumerable<VolumeDto>? NewReleasedManga { get; set; } = Enumerable.Empty<VolumeDto>();
+    private IEnumerable<VolumeDto>? Preorders { get; set; } = Enumerable.Empty<VolumeDto>();
 
     protected override async Task OnInitializedAsync()
     {
-        countries = await CountryService.GetAllCountriesAsync();
-        volumes = await VolumeService.GetAllVolumesAsync();
+        NewReleasedManga = await VolumeService.GetNewestReleases();
+        Preorders = await VolumeService.GetLatestPreorders();
     }
 }

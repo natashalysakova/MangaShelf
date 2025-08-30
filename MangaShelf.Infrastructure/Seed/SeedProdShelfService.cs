@@ -1,8 +1,9 @@
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
+using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 
@@ -10,52 +11,67 @@ namespace MangaShelf.Infrastructure.Seed;
 
 public class SeedProdShelfService : ISeedDataService
 {
-    public SeedProdShelfService(ILogger<SeedProdShelfService> logger)
+    private readonly ILogger<SeedProdShelfService> _logger;
+    private readonly IImageManager _imageManager;
+    private readonly ICountryDomainService _countryDomainService;
+    private readonly IPublisherDomainService _publisherDomainService;
+    private readonly MangaIdentityDbContext _identityContext;
+    private readonly MangaDbContext _context;
+
+    public SeedProdShelfService(ILogger<SeedProdShelfService> logger,
+        IImageManager imageManager,
+        ICountryDomainService countryDomainService,
+        IPublisherDomainService publisherDomainService,
+        MangaIdentityDbContext identityContext,
+        MangaDbContext context
+        )
     {
         _logger = logger;
+        _imageManager = imageManager;
+        _countryDomainService = countryDomainService;
+        _publisherDomainService = publisherDomainService;
+        _identityContext = identityContext;
+        _context = context;
     }
 
     public string ActivitySourceName => "Seed prod shelf";
 
     public int Priority => 2;
-    public async Task Run(IServiceProvider scopedServiceProvider)
+    public async Task Run()
     {
-        await Run(scopedServiceProvider, CancellationToken.None);
+        await Run(CancellationToken.None);
     }
-    public async Task Run(IServiceProvider scopedServiceProvider, CancellationToken cancellationToken)
+    public async Task Run(CancellationToken cancellationToken)
     {
-        var context = scopedServiceProvider.GetRequiredService<MangaDbContext>();
+        await SeedCountries();
+        await SeedPublishers();
 
-        await SeedCountries(context);
-        await SeedPublishers(context);
-
-        var identityContext = scopedServiceProvider.GetRequiredService<MangaIdentityDbContext>();
-        await SeedUsers(context, identityContext);
+        await SeedUsers();
     }
 
-    private async Task SeedUsers(MangaDbContext context, MangaIdentityDbContext identityContext)
+    private async Task SeedUsers()
     {
-        var users = identityContext.Users.Select(x => x.Id);
-        var existingUserIds = await context.Users.Select(x => x.IdentityUserId).ToListAsync();
+        var users = _identityContext.Users.Select(x => x.Id);
+        var existingUserIds = await _context.Users.Select(x => x.IdentityUserId).ToListAsync();
         var notExisting = users.Where(x => !existingUserIds.Contains(x)).ToList();
 
         foreach (var id in notExisting)
         {
-            context.Users.Add(new User()
+            _context.Users.Add(new User()
             {
                 IdentityUserId = id
             });
         }
 
-        if (context.ChangeTracker.HasChanges())
+        if (_context.ChangeTracker.HasChanges())
         {
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
     }
 
-    private async Task SeedCountries(MangaDbContext context)
+    private async Task SeedCountries()
     {
-        var existing = await context.Countries.ToListAsync();
+        var existing = await _countryDomainService.GetAllCountriesAsync();
 
         if (!existing.Any())
         {
@@ -68,11 +84,11 @@ public class SeedProdShelfService : ISeedDataService
                     continue; // Skip regions with invalid country codes
                 }
 
-                context.Countries.Add(new Country()
+                await _countryDomainService.Add(new Country()
                 {
                     CountryCode = region.TwoLetterISORegionName.ToLowerInvariant(),
                     Name = region.EnglishName,
-                    FlagUrl = SaveFlagFromCDN(region.TwoLetterISORegionName.ToLowerInvariant())
+                    FlagUrl = _imageManager.SaveFlagFromCDN(region.TwoLetterISORegionName.ToLowerInvariant())
                 });
                 _logger.LogInformation(region.Name);
             }
@@ -83,58 +99,18 @@ public class SeedProdShelfService : ISeedDataService
             {
                 if (string.IsNullOrEmpty(country.FlagUrl))
                 {
-                    country.FlagUrl = SaveFlagFromCDN(country.CountryCode);
+                    await _countryDomainService.UpdateFlagUrl(country.Id, _imageManager.SaveFlagFromCDN(country.CountryCode));
                 }
             }
         }
-
-        await context.SaveChangesAsync();
-    }
-
-    private const string serverRoot = "wwwroot";
-    private const string imageDir = "images";
-    private readonly ILogger<SeedProdShelfService> _logger;
-
-    public static string SaveFlagFromCDN(string countryCode)
-    {
-        var urls = new List<string> {
-            $"https://flagcdn.com/40x30/{countryCode}.webp" };
-
-        var destiantionFolder = Path.Combine(imageDir, "countries");
-        var localDirectory = Path.Combine(serverRoot, destiantionFolder);
-
-
-        foreach (var url in urls)
-        {
-            var extention = Path.GetExtension(url);
-            var filename = $"{countryCode}{extention}";
-
-            using (var client = new HttpClient())
-            {
-                using (var response = client.GetAsync(url))
-                {
-                    byte[] imageBytes =
-                        response.Result.Content.ReadAsByteArrayAsync().Result;
-
-                    var localPath = Path.Combine(localDirectory, filename);
-
-                    if (!Directory.Exists(localDirectory))
-                        Directory.CreateDirectory(localDirectory);
-
-                    File.WriteAllBytes(localPath, imageBytes);
-                }
-            }
-        }
-
-        return Path.Combine(destiantionFolder, $"{countryCode}.webp");
     }
 
     public string IsoCountryCodeToFlagEmoji(string countryCode) => string.Concat(countryCode.ToUpper().Select(x => char.ConvertFromUtf32(x + 0x1F1A5)));
 
-    private async Task SeedPublishers(MangaDbContext context)
+    private async Task SeedPublishers()
     {
-        var ukraine = context.Countries.SingleOrDefault(x => x.CountryCode == "ua");
-        var us = context.Countries.SingleOrDefault(x => x.CountryCode == "us");
+        var ukraine = await _countryDomainService.GetByCountryCodeAsync("ua");
+        var us = await _countryDomainService.GetByCountryCodeAsync("us");
 
         var publishers = new Publisher[]
         {
@@ -173,14 +149,9 @@ public class SeedProdShelfService : ISeedDataService
         };
 
         var names = publishers.Select(x => x.Name);
-        var existingNames = await context.Publishers.Select(x => x.Name).ToListAsync();
+        var existingNames = _publisherDomainService.GetAll().Select(x => x.Name).ToList();
         var notExisting = publishers.Where(x => !existingNames.Contains(x.Name)).ToList();
 
-        context.Publishers.AddRange(notExisting);
-
-        if (context.ChangeTracker.HasChanges())
-        {
-            await context.SaveChangesAsync();
-        }
+        await _publisherDomainService.AddRange(notExisting);
     }
 }

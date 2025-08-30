@@ -1,6 +1,6 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Dto;
+using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
-using MangaShelf.Common.Dto;
 using MangaShelf.DAL.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -9,9 +9,9 @@ namespace MangaShelf.BL.Services;
 public class CountryService : ICountryService
 {
     private readonly ILogger<CountryService> _logger;
-    private readonly ICountryRepository _countryRepository;
+    private readonly ICountryDomainService _countryRepository;
 
-    public CountryService(ILogger<CountryService> logger, ICountryRepository countryRepository)
+    public CountryService(ILogger<CountryService> logger, ICountryDomainService countryRepository)
     {
         _logger = logger;
         _countryRepository = countryRepository;

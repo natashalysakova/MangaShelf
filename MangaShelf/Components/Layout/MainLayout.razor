@@ -3,7 +3,7 @@
 @inject IUiLocalizationService Localizer
 
 @* Required *@
-<MudThemeProvider />
+<MudThemeProvider IsDarkMode="true" />
 <MudPopoverProvider />
 @* Needed for dialogs *@
 <MudDialogProvider />
@@ -11,25 +11,24 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Style="background-color: #198754">
-        <NavMenu/>
+    <MudAppBar Elevation="1" Class="manga-gradient-background">
+        <NavMenu />
     </MudAppBar>
-    @*     <MudDrawer @bind-Open="@_open" Width="280px" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always">
-        <NavMenu></NavMenu>
-    </MudDrawer> *@
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large">
-            @Body
+        <MudContainer MaxWidth="MaxWidth.Large" Class="catalog-container">
+            <MudPaper Width="100%" Square="true" Class="catalog-paper">
+                @Body
+            </MudPaper>
         </MudContainer>
+
         <MudScrollToTop>
             <MudFab Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
         </MudScrollToTop>
-        <MudAppBar Elevation="0" Dense="true" Fixed="false" Style="z-index:auto; background-color: #198754">
+        <MudAppBar Elevation="0" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
             <MudGrid Justify="Justify.Center">
                 <MudText Style="font-size:small">COPYRIGHT</MudText>
             </MudGrid>
         </MudAppBar>
-
     </MudMainContent>
 </MudLayout>
 
