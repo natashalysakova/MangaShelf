@@ -4,8 +4,9 @@ using Riok.Mapperly.Abstractions;
 
 namespace MangaShelf.BL.Mappers;
 
-[Mapper]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[UseStaticMapper(typeof(PublisherMapper))]
 public static partial class SeriesMapper
 {
-    public static partial SeriesDto ToDto(this Series country);
+    public static partial SeriesSimpleDto ToDto(this Series country);
 }

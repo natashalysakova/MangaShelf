@@ -4,8 +4,11 @@ using Riok.Mapperly.Abstractions;
 
 namespace MangaShelf.BL.Mappers;
 
-[Mapper]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class PublisherMapper
 {
-    public static partial PublisherDto ToDto(this Publisher country);
+    [MapProperty(nameof(Publisher.Country.CountryCode), nameof(PublisherSimpleDto.CountryCode))]
+    [MapProperty(nameof(Publisher.Country.Name), nameof(PublisherSimpleDto.Country))]
+
+    public static partial PublisherSimpleDto ToDto(this Publisher publisher);
 }

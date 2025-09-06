@@ -1,7 +1,6 @@
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
-using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,25 +12,18 @@ public class SeedProdShelfService : ISeedDataService
 {
     private readonly ILogger<SeedProdShelfService> _logger;
     private readonly IImageManager _imageManager;
-    private readonly ICountryDomainService _countryDomainService;
-    private readonly IPublisherDomainService _publisherDomainService;
     private readonly MangaIdentityDbContext _identityContext;
-    private readonly MangaDbContext _context;
+    private readonly IDbContextFactory<MangaDbContext> _factory;
 
     public SeedProdShelfService(ILogger<SeedProdShelfService> logger,
-        IImageManager imageManager,
-        ICountryDomainService countryDomainService,
-        IPublisherDomainService publisherDomainService,
-        MangaIdentityDbContext identityContext,
-        MangaDbContext context
+        IImageManager imageManager, IDbContextFactory<MangaDbContext> dbContextFactory,
+        MangaIdentityDbContext identityContext
         )
     {
         _logger = logger;
         _imageManager = imageManager;
-        _countryDomainService = countryDomainService;
-        _publisherDomainService = publisherDomainService;
         _identityContext = identityContext;
-        _context = context;
+        _factory = dbContextFactory;
     }
 
     public string ActivitySourceName => "Seed prod shelf";
@@ -51,27 +43,31 @@ public class SeedProdShelfService : ISeedDataService
 
     private async Task SeedUsers()
     {
+        using var context = await _factory.CreateDbContextAsync();
+
         var users = _identityContext.Users.Select(x => x.Id);
-        var existingUserIds = await _context.Users.Select(x => x.IdentityUserId).ToListAsync();
+        var existingUserIds = await context.Users.Select(x => x.IdentityUserId).ToListAsync();
         var notExisting = users.Where(x => !existingUserIds.Contains(x)).ToList();
 
-        foreach (var id in notExisting)
+        if (notExisting.Any())
         {
-            _context.Users.Add(new User()
+            foreach (var id in notExisting)
             {
-                IdentityUserId = id
-            });
-        }
+                context.Users.Add(new User()
+                {
+                    IdentityUserId = id
+                });
+            }
 
-        if (_context.ChangeTracker.HasChanges())
-        {
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
     }
 
     private async Task SeedCountries()
     {
-        var existing = await _countryDomainService.GetAllCountriesAsync();
+        using var context = await _factory.CreateDbContextAsync();
+
+        var existing = context.Countries;
 
         if (!existing.Any())
         {
@@ -84,7 +80,7 @@ public class SeedProdShelfService : ISeedDataService
                     continue; // Skip regions with invalid country codes
                 }
 
-                await _countryDomainService.Add(new Country()
+                await context.AddAsync(new Country()
                 {
                     CountryCode = region.TwoLetterISORegionName.ToLowerInvariant(),
                     Name = region.EnglishName,
@@ -99,9 +95,15 @@ public class SeedProdShelfService : ISeedDataService
             {
                 if (string.IsNullOrEmpty(country.FlagUrl))
                 {
-                    await _countryDomainService.UpdateFlagUrl(country.Id, _imageManager.SaveFlagFromCDN(country.CountryCode));
+                    country.FlagUrl = IsoCountryCodeToFlagEmoji(country.CountryCode);
                 }
             }
+        }
+
+        if (context.ChangeTracker.HasChanges())
+        {
+            _logger.LogInformation("Saving countries");
+            await context.SaveChangesAsync();
         }
     }
 
@@ -109,8 +111,10 @@ public class SeedProdShelfService : ISeedDataService
 
     private async Task SeedPublishers()
     {
-        var ukraine = await _countryDomainService.GetByCountryCodeAsync("ua");
-        var us = await _countryDomainService.GetByCountryCodeAsync("us");
+        var context = await _factory.CreateDbContextAsync();
+
+        var ukraine = context.Countries.FirstOrDefault(x => x.CountryCode == "ua");
+        var us = context.Countries.FirstOrDefault(x => x.CountryCode == "us");
 
         var publishers = new Publisher[]
         {
@@ -149,9 +153,14 @@ public class SeedProdShelfService : ISeedDataService
         };
 
         var names = publishers.Select(x => x.Name);
-        var existingNames = _publisherDomainService.GetAll().Select(x => x.Name).ToList();
+        var existingNames = context.Publishers.Select(x => x.Name);
         var notExisting = publishers.Where(x => !existingNames.Contains(x.Name)).ToList();
 
-        await _publisherDomainService.AddRange(notExisting);
+        if (notExisting.Any())
+        {
+            await context.Publishers.AddRangeAsync(notExisting);
+            _logger.LogInformation("Saving publishers");
+            await context.SaveChangesAsync();
+        }
     }
 }

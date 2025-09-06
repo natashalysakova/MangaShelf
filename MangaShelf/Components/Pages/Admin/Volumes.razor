@@ -1,0 +1,141 @@
+﻿@page "/admin/volumes"
+@using MangaShelf.DAL.Interfaces
+@using MangaShelf.DAL.Models
+@using Microsoft.EntityFrameworkCore
+
+@inject IUiLocalizationService Localizer
+
+
+
+<MudPaper>
+
+    <MudDataGrid T="Volume" ServerData="ServerReload"
+                 MultiSelection="true"
+                 Hideable="true"
+                 Class="m-8" Hover="true"
+                 Filterable FilterCaseSensitivity="DataGridFilterCaseSensitivity.CaseInsensitive" FilterMode="DataGridFilterMode.ColumnFilterRow"
+                 SortMode="SortMode.Multiple">
+        @*         <ToolBarContent>
+            <MudText Typo="Typo.h6">@Localizer["AdminVolumes"]</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="@Localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent> *@
+        <Columns>
+            <SelectColumn T="Volume" />
+            <TemplateColumn Title="Cover">
+                <CellTemplate>
+                    <MudImage Width="40" Height="60" Src="@context.Item.CoverImageUrl" Class="rounded-lg"></MudImage>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.Series.Title"
+                            Title="@Localizer["Title"]">
+                <CellTemplate>
+                    <MudText>@context.Item.Series.Title</MudText>
+                    @if (context.Item.Series.Title != context.Item.Title)
+                    {
+                        <MudText>@context.Item.Title</MudText>
+                    }
+                    <MudText>@string.Join(',', context.Item.Series.Authors.Select(x => x.Name))</MudText>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.IsPreorder" Title="@Localizer["Preorder"]">
+                <CellTemplate>
+                    <MudCheckBox ReadOnly="true" Value="@context.Item.IsPreorder"></MudCheckBox>
+                    <MudText>@context.Item.PreorderStart?.ToString("dd.MM.yyyy")</MudText>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.ReleaseDate" Format="dd.MM.yyyy" Filterable="false" Title="@Localizer["ReleaseDate"]" />
+            <PropertyColumn Property="x => x.Series.Publisher.Name" Title="@Localizer["Publisher"]" />
+            <PropertyColumn Property="x => x.AvgRating" Filterable="false" Title="@Localizer["Rating"]" />
+            <PropertyColumn Property="x => x.IsPublishedOnSite" Title="@Localizer["Published"]" HeaderStyle="width: 50px">
+                <CellTemplate>
+                    @if (context.Item.IsPublishedOnSite)
+                    {
+                        <MudButton Color="Color.Warning">Unpublish</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Color="Color.Success">Publish</MudButton>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn>
+                <CellTemplate>
+                    <MudButton Color="Color.Warning">Edit</MudButton>
+                    <MudButton Href="@context.Item.PurchaseUrl" Target="_blank" Color="Color.Warning">Go to site</MudButton>
+
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Volume" s PageSizeOptions="new int[] { 10, 20, 50, int.MaxValue }" />
+        </PagerContent>
+        <RowLoadingContent>
+            <tr class="mud-table-row">
+                <td class="mud-table-cell" colspan="1000">
+                    Loading...
+                </td>
+            </tr>
+        </RowLoadingContent>
+    </MudDataGrid>
+</MudPaper>
+
+
+@code {
+
+    private string _searchString;
+
+    bool _loading = false;
+
+    int _rowsPerPage = 10;
+
+
+    [Inject]
+    IVolumeService volumeService { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private async Task<GridData<Volume>> ServerReload(GridState<Volume> state)
+    {
+        try
+        {
+            Console.WriteLine($"Fetching data: StartIndex={state.Page}, Count={state.PageSize}");
+
+            //Console.WriteLine($"Fetching data: StartIndex={gridState.StartIndex}, Count={gridState.Count}");
+            var paginationOptions = new PaginationOptions
+            {
+                PageNumber = state.Page,
+                PageSize = state.PageSize
+            };
+
+            var filterFunctions = state.FilterDefinitions.Select(x => x.GenerateFilterFunction());
+            var sortDefinitions = state.SortDefinitions.Select(x => new BL.Services.SortDefinitions<Volume>
+            {
+                Descending = x.Descending,
+                SortFunction = x.SortFunc
+            });
+
+            var (resultList, totalVolumes) = await volumeService.GetAllFullVolumesAsync(paginationOptions, filterFunctions, sortDefinitions);
+
+
+            return new GridData<Volume>
+            {
+                Items = resultList,
+                TotalItems = totalVolumes
+            };
+        }
+        catch (TaskCanceledException)
+        {
+            return new GridData<Volume>
+            {
+                Items = [],
+                TotalItems = 0
+            };
+        }
+    }
+
+}

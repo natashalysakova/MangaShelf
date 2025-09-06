@@ -5,5 +5,5 @@ namespace MangaShelf.BL.Interfaces;
 
 public interface ISeriesService : IService
 {
-    Task<SeriesDto?> FindByName(string series);
+    Task<SeriesSimpleDto?> FindByName(string series);
 }

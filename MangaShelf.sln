@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.DAL.Identity", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.Common", "MangaShelf.Common\MangaShelf.Common.csproj", "{78E6633E-4EBD-47C0-89E9-94620EDAB17F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangaShelf.DAL.System", "MangaShelf.DAL.System\MangaShelf.DAL.System.csproj", "{568B8EB8-6D14-4B60-8D24-A98704F7E183}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{78E6633E-4EBD-47C0-89E9-94620EDAB17F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78E6633E-4EBD-47C0-89E9-94620EDAB17F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78E6633E-4EBD-47C0-89E9-94620EDAB17F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{568B8EB8-6D14-4B60-8D24-A98704F7E183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{568B8EB8-6D14-4B60-8D24-A98704F7E183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{568B8EB8-6D14-4B60-8D24-A98704F7E183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{568B8EB8-6D14-4B60-8D24-A98704F7E183}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

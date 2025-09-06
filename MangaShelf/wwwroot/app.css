@@ -66,7 +66,7 @@ h1:focus {
 
 
 .catalog-container {
-    min-height: 1326px;
+    min-height: 1356px;
 }
 
 .catalog-paper {
@@ -85,19 +85,20 @@ h1:focus {
 
 .manga-card {
     position:relative;
+    pointer-events: auto;
 }
 
     .manga-card:hover {
         transition: 0.2s ease-in;
-        transform: scale(1.25);
+        transform: scale(1.35);
         backface-visibility: hidden;
         z-index: 3 !important;
         box-shadow: 5px 5px 5px rgba(0,0,0,0.5) !important;
         padding: 0;
+        cursor: pointer;
     }
 
     .manga-card:hover .card-image{
-        object-fit:contain;
     }
 
     .manga-card .hidden-child {
@@ -124,7 +125,12 @@ h1:focus {
     padding-top: 150%;
     overflow: hidden;
     background-color: white;
+    pointer-events: none;
 }
+
+    .image-container:hover {
+        background-color: transparent !important;
+    }
 
 .card-image {
     position: absolute;

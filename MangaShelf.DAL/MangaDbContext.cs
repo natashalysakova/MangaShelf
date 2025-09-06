@@ -1,21 +1,19 @@
 ﻿using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
 
 namespace MangaShelf.DAL;
 
 public class MangaDbContext : DbContext
 {
+    // Domain tables
     public DbSet<Country> Countries { get; set; }
     public DbSet<Publisher> Publishers { get; set; }
     public DbSet<Series> Series { get; set; }
     public DbSet<Volume> Volumes { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Author> Authors { get; set; }
-    public DbSet<FailedSyncRecords> FailedSyncRecords { get; set; }
 
     public MangaDbContext(DbContextOptions<MangaDbContext> options) : base(options)
     {
@@ -45,6 +43,17 @@ public class MangaDbContext : DbContext
             .HasConversion(
                 v => string.Join('|', v),
                 v => v.Split('|', StringSplitOptions.RemoveEmptyEntries));
+
+        //modelBuilder.Entity<Volume>()
+        //    .HasIndex(v=> new { v.SeriesId, v.Number, v.Title }).IsUnique();
+
+        modelBuilder.Entity<Country>()
+            .HasIndex(c => c.Name);
+
+        modelBuilder.Entity<Author>()
+            .HasIndex(a => a.Name);
+
+
     }
 
     private static LambdaExpression ConvertToDeleteFilter(Type type)
@@ -54,23 +63,5 @@ public class MangaDbContext : DbContext
         var constant = Expression.Constant(false);
         var body = Expression.Equal(property, constant);
         return Expression.Lambda(body, parameter);
-    }
-}
-
-public class MangaDbContextFactory : IDesignTimeDbContextFactory<MangaDbContext>
-{
-    public MangaDbContext CreateDbContext(string[] args)
-    {
-        IConfigurationRoot configuration = new ConfigurationBuilder()
-             .SetBasePath(Directory.GetCurrentDirectory())
-             .AddJsonFile("appsettings.json")
-             .Build();
-
-        var connectionString = configuration.GetConnectionString("MangaDb") ?? throw new InvalidOperationException("Connection string 'MangaDb' not found.");
-
-        var shelfDbVersion = ServerVersion.AutoDetect(connectionString);
-        var options = new DbContextOptionsBuilder<MangaDbContext>()
-            .UseMySql(connectionString, shelfDbVersion);
-        return new MangaDbContext(options.Options);
     }
 }

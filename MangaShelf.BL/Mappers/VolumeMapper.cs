@@ -4,13 +4,15 @@ using Riok.Mapperly.Abstractions;
 
 namespace MangaShelf.BL.Mappers;
 
-[Mapper]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[UseStaticMapper(typeof(SeriesMapper))]
 public static partial class VolumeMapper
 {
-    [MapProperty(nameof(Volume.Series.Title), nameof(VolumeDto.SeriesName))]
-    [MapProperty(nameof(Volume.Title), nameof(VolumeDto.VolumeTitle))]
-    [MapProperty(nameof(Volume.CoverImageUrl), nameof(VolumeDto.CoverImageUrl))]
-    [MapProperty(nameof(Volume.Number), nameof(VolumeDto.VolumeNumber))]
-    [MapProperty(nameof(Volume.PurchaseUrl), nameof(VolumeDto.Url))]
-    public static partial VolumeDto ToDto(this Volume country);
+    [MapProperty(nameof(Volume.Series.Title), nameof(CardVolumeDto.SeriesName))]
+    public static partial CardVolumeDto ToDto(this Volume volume);
+
+
+    private static string? MapDateTimeOffsetToString(DateTimeOffset? source) => source?.ToString("dd.MM.yyyy");
+
+    public static partial VolumeDto ToFullDto(this Volume volume);
 }

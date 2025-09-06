@@ -1,6 +1,8 @@
 ﻿using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using MangaShelf.DAL.Interceptors;
+using MangaShelf.DAL.System;
+using MangaShelf.DAL.System.Models;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Seed;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -62,44 +64,90 @@ public static class ContextInstallExtention
 
     public static IHostApplicationBuilder RegisterContextAndServices(this IHostApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("MangaDb") ?? throw new InvalidOperationException("Connection string 'MangaDb' not found.");
-
-        var accontDbVersion = ServerVersion.AutoDetect(connectionString);
-        builder.Services.AddDbContext<MangaDbContext>(
-            options =>
-            {
-                options
-                .UseMySql(connectionString, accontDbVersion,
-                mysqlOptions =>
-                {
-                    mysqlOptions.EnableRetryOnFailure();
-                })
-                .AddInterceptors(new AuditInterceptor());
-
-                if (builder.Environment.IsDevelopment())
-                {
-                    options.EnableSensitiveDataLogging();
-                }
-            });
+        RegisterSystemContextAndServices(builder);
+        RegisterShelfContextAndServices(builder);
 
         return builder;
     }
 
-    public static async Task MakeSureDbCreatedAsync(this IServiceProvider serviceProvider)
+    private static IHostApplicationBuilder RegisterShelfContextAndServices(IHostApplicationBuilder builder)
     {
-        using (var scope = serviceProvider.CreateScope())
+        var connectionString = builder.Configuration.GetConnectionString("MangaDb") ?? throw new InvalidOperationException("Connection string 'MangaDb' not found.");
+
+        var accontDbVersion = ServerVersion.AutoDetect(connectionString);
+        var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<MangaDbContext>();
-            await dbContext.Database.MigrateAsync();
+            if (builder.Environment.IsDevelopment())
+            {
+                options.EnableSensitiveDataLogging();
+            }
+
+            options
+            .UseMySql(connectionString, accontDbVersion,
+            mysqlOptions =>
+            {
+                mysqlOptions.EnableRetryOnFailure();
+            })
+            .AddInterceptors(new AuditInterceptor());
+        });
+
+
+        builder.Services.AddDbContext<MangaDbContext>(options => sqlConfiguration(options), optionsLifetime: ServiceLifetime.Singleton);
+        builder.Services.AddDbContextFactory<MangaDbContext>(options => sqlConfiguration(options));
+
+        return builder;
+    }
+
+    private static IHostApplicationBuilder RegisterSystemContextAndServices(this IHostApplicationBuilder builder)
+    {
+        var connectionString = builder.Configuration.GetConnectionString("SystemDb") ?? throw new InvalidOperationException("Connection string 'SystemDb' not found.");
+
+        var accontDbVersion = ServerVersion.AutoDetect(connectionString);
+        var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
+        {
+            if (builder.Environment.IsDevelopment())
+            {
+                options.EnableSensitiveDataLogging();
+            }
+
+            options
+            .UseMySql(connectionString, accontDbVersion,
+            mysqlOptions =>
+            {
+                mysqlOptions.EnableRetryOnFailure();
+            });
+        });
+
+
+        builder.Services.AddDbContext<MangaSystemDbContext>(options => sqlConfiguration(options), optionsLifetime: ServiceLifetime.Singleton);
+        builder.Services.AddDbContextFactory<MangaSystemDbContext>(options => sqlConfiguration(options));
+
+        return builder;
+    }
+
+    public static async Task MakeSureDbCreatedAsync(this IHost host)
+    {
+        using (var scope = host.Services.CreateScope())
+        {
+            var systemContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
+            var SystemDbContext = systemContextFactory.CreateDbContext();
+            var str = SystemDbContext.Database.GetConnectionString();
+            await SystemDbContext.Database.MigrateAsync();
+
+            await ResetStuckJobs(SystemDbContext);
+
+            var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaDbContext>>();
+            var context = await factory.CreateDbContextAsync();
+            await context.Database.MigrateAsync();
 
             var IdentityDbContext = scope.ServiceProvider.GetRequiredService<MangaIdentityDbContext>();
             await IdentityDbContext.Database.MigrateAsync();
         }
     }
 
-    public static async Task SeedDatabase(this IServiceProvider serviceProvider)
+    public static async Task SeedDatabase(this IHost host)
     {
-        using var scope = serviceProvider.CreateScope();
+        using var scope = host.Services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<IServiceProvider>>();
         logger.LogInformation("Seeding Started");
         foreach (var service in scope.ServiceProvider.GetServices<ISeedDataService>().OrderBy(x => x.Priority))
@@ -116,5 +164,42 @@ public static class ContextInstallExtention
             }
         }
         logger.LogInformation("Seeding done");
+    }
+
+    private static async Task ResetStuckJobs(MangaSystemDbContext context)
+    {
+        try
+        {
+            var parserStatuses = context.Parsers
+                .Include(p => p.Jobs)
+                    .ThenInclude(r => r.Errors);
+
+            var notFinishedProperly = parserStatuses
+                .SelectMany(x => x.Jobs)
+                .Where(r => r.Status == RunStatus.Waiting || r.Status == RunStatus.Running);
+
+            foreach (var job in notFinishedProperly)
+            {
+                job.Status = RunStatus.Error;
+                job.Finished = DateTimeOffset.Now;
+                job.Progress = -1;
+                job.Errors.Add(new ParserError()
+                {
+                    ErrorMessage = "Was automatically cancelled after restart",
+                    RunTime = job.Finished.Value
+                });
+            }
+
+            foreach (var parser in parserStatuses)
+            {
+                parser.Status = ParserStatus.Idle;
+            }
+
+            await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            // do nothing, we don't want to block the app from starting
+        }
     }
 }

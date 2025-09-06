@@ -1,4 +1,5 @@
-﻿using MangaShelf.BL.Parsers;
+﻿using MangaShelf.BL.Parsers.NashaIdea;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.Parser.Tests;
 
@@ -12,22 +13,22 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/ne-khlopets-tom-1/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 1", result.title);
-        Assert.AreEqual("Хлопець, який їй сподобався, — не хлопець", result.series);
-        Assert.AreEqual("", result.authors);
-        Assert.AreEqual(1, result.volumeNumber);
-        Assert.IsNotNull(result.cover);
-        Assert.IsTrue(result.cover.StartsWith("https://nashaidea.com/"));
-        Assert.IsTrue(result.cover.EndsWith(".webp"));
-        Assert.AreEqual("Nasha Idea", result.publisher);
-        Assert.AreEqual("Physical", result.type);
-        Assert.AreEqual("978-617-8516-51-2", result.isbn);
-        Assert.AreEqual(3, result.totalVolumes);
-        Assert.AreEqual("ongoing", result.seriesStatus);
-        Assert.AreEqual("https://nashaidea.com/product/ne-khlopets-tom-1/", result.url);
-        Assert.AreEqual(DateTime.Parse("2025-08-28"), result.preorderStartDate);
-        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.release);
-        Assert.AreEqual(true, result.isPreorder);
+        Assert.AreEqual("Том 1", result.Title);
+        Assert.AreEqual("Хлопець, який їй сподобався, — не хлопець", result.Series);
+        Assert.IsNull(result.Authors);
+        Assert.AreEqual(1, result.VolumeNumber);
+        Assert.IsNotNull(result.Cover);
+        Assert.IsTrue(result.Cover.StartsWith("https://nashaidea.com/"));
+        Assert.IsTrue(result.Cover.EndsWith(".webp"));
+        Assert.AreEqual("Nasha Idea", result.Publisher);
+        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
+        Assert.AreEqual("978-617-8516-51-2", result.Isbn);
+        Assert.AreEqual(3, result.TotalVolumes);
+        Assert.AreEqual(SeriesStatus.Ongoing, result.SeriesStatus);
+        Assert.AreEqual("https://nashaidea.com/product/ne-khlopets-tom-1/", result.Url);
+        Assert.AreEqual(DateTime.Parse("2025-08-28"), result.PreorderStartDate);
+        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.Release);
+        Assert.AreEqual(true, result.IsPreorder);
     }
 
     [TestMethod]
@@ -36,22 +37,21 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/chi-tom-10/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 10", result.title);
-        Assert.AreEqual("Чi “Життя однієї киці”", result.series);
-        Assert.AreEqual("", result.authors);
-        Assert.AreEqual(10, result.volumeNumber);
-        Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2024/07/chi10-x1080.webp", result.cover);
-        Assert.AreEqual(null, result.release);
-        Assert.AreEqual("Nasha Idea", result.publisher);
-        Assert.AreEqual("Physical", result.type);
-        Assert.AreEqual("978-617-8396-46-6", result.isbn);
-        Assert.AreEqual(12, result.totalVolumes);
-        Assert.AreEqual("finished", result.seriesStatus);
-        Assert.AreEqual("https://nashaidea.com/product/chi-tom-10/", result.url);
-        Assert.AreEqual(DateTime.Parse("2024-07-31"), result.preorderStartDate);
-        Assert.AreEqual(null, result.release);
-        Assert.AreEqual(false, result.isPreorder);
-
+        Assert.AreEqual("Том 10", result.Title);
+        Assert.AreEqual("Чi \"Життя однієї киці\"", result.Series);
+        Assert.IsNull(result.Authors);
+        Assert.AreEqual(10, result.VolumeNumber);
+        Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2024/07/chi10-x1080.webp", result.Cover);
+        Assert.AreEqual(null, result.Release);
+        Assert.AreEqual("Nasha Idea", result.Publisher);
+        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
+        Assert.AreEqual("978-617-8396-46-6", result.Isbn);
+        Assert.AreEqual(12, result.TotalVolumes);
+        Assert.AreEqual(SeriesStatus.Completed, result.SeriesStatus);
+        Assert.AreEqual("https://nashaidea.com/product/chi-tom-10/", result.Url);
+        Assert.AreEqual(DateTime.Parse("2024-07-31"), result.PreorderStartDate);
+        Assert.AreEqual(null, result.Release);
+        Assert.AreEqual(false, result.IsPreorder);
     }
 
     [TestMethod]
@@ -60,21 +60,19 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/vitaiemo-v-koto-kafe/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Вітаємо в кото-кафе", result.title);
-        Assert.AreEqual("Вітаємо в кото-кафе", result.series);
-        Assert.AreEqual("", result.authors);
-        Assert.AreEqual(-1, result.volumeNumber);
-        Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2023/10/cat-flat.webp", result.cover);
-        Assert.AreEqual(null, result.release);
-        Assert.AreEqual("Nasha Idea", result.publisher);
-        Assert.AreEqual("Physical", result.type);
-        Assert.AreEqual("978-617-8109-88-2", result.isbn);
-        Assert.AreEqual(1, result.totalVolumes);
-        Assert.AreEqual("oneshot", result.seriesStatus);
-        Assert.AreEqual(false, result.isPreorder);
-
+        Assert.AreEqual("Вітаємо в кото-кафе", result.Title);
+        Assert.AreEqual("Вітаємо в кото-кафе", result.Series);
+        Assert.IsNull(result.Authors);
+        Assert.AreEqual(-1, result.VolumeNumber);
+        Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2023/10/cat-flat.webp", result.Cover);
+        Assert.AreEqual(null, result.Release);
+        Assert.AreEqual("Nasha Idea", result.Publisher);
+        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
+        Assert.AreEqual("978-617-8109-88-2", result.Isbn);
+        Assert.AreEqual(1, result.TotalVolumes);
+        Assert.AreEqual(SeriesStatus.OneShot, result.SeriesStatus);
+        Assert.AreEqual(false, result.IsPreorder);
     }
-
 
     [TestMethod]
     public async Task NashaIdea_FinishedSeries()
@@ -82,20 +80,19 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/proshhavaj-troyandovyj-sade-tom-3/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 3", result.title);
-        Assert.AreEqual("Прощавай, трояндовий саде", result.series);
-        Assert.AreEqual("", result.authors);
-        Assert.AreEqual(3, result.volumeNumber);
-        Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2024/08/mrg03-x1080.webp", result.cover);
-        Assert.AreEqual(null, result.release);
-        Assert.AreEqual("Nasha Idea", result.publisher);
-        Assert.AreEqual("Physical", result.type);
-        Assert.AreEqual("978-617-8396-55-8", result.isbn);
-        Assert.AreEqual(3, result.totalVolumes);
-        Assert.AreEqual("finished", result.seriesStatus);
-        Assert.AreEqual(false, result.isPreorder);
-        Assert.AreEqual(12, result.ageRestrictions);
-
+        Assert.AreEqual("Том 3", result.Title);
+        Assert.AreEqual("Прощавай, трояндовий саде", result.Series);
+        Assert.IsNull(result.Authors);
+        Assert.AreEqual(3, result.VolumeNumber);
+        Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2024/08/mrg03-x1080.webp", result.Cover);
+        Assert.AreEqual(null, result.Release);
+        Assert.AreEqual("Nasha Idea", result.Publisher);
+        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
+        Assert.AreEqual("978-617-8396-55-8", result.Isbn);
+        Assert.AreEqual(3, result.TotalVolumes);
+        Assert.AreEqual(SeriesStatus.Completed, result.SeriesStatus);
+        Assert.AreEqual(false, result.IsPreorder);
+        Assert.AreEqual(12, result.AgeRestrictions);
     }
 
     [TestMethod]
@@ -104,9 +101,9 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/given-1/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(DateTime.Parse("2025-07-09"), result.preorderStartDate);
-        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.release);
-        Assert.AreEqual(true, result.isPreorder);
+        Assert.AreEqual(DateTime.Parse("2025-07-09"), result.PreorderStartDate);
+        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.Release);
+        Assert.AreEqual(true, result.IsPreorder);
     }
 
     [TestMethod]
@@ -115,11 +112,10 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/hiraiasumi-tom-1/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(DateTime.Parse("2025-04-01"), result.preorderStartDate);
-        Assert.AreEqual(null, result.release);
-        Assert.AreEqual(false, result.isPreorder);
+        Assert.AreEqual(DateTime.Parse("2025-04-01"), result.PreorderStartDate);
+        Assert.AreEqual(null, result.Release);
+        Assert.AreEqual(false, result.IsPreorder);
     }
-
 
     [TestMethod]
     public async Task NashaIdea_VolumeNumber_ShouldBe()
@@ -127,7 +123,7 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/hirayasumi-tom-2/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(2, result.volumeNumber);
+        Assert.AreEqual(2, result.VolumeNumber);
     }
 
     [TestMethod]
@@ -136,8 +132,9 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         var result = await Parser.Parse("https://nashaidea.com/product/zhoze-tygr-ta-ryba-tom-2/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(2, result.volumeNumber);
-        Assert.AreEqual("Жозе, тигр та риба", result.series);
-        Assert.AreEqual("том 2", result.title);
+        Assert.AreEqual(2, result.VolumeNumber);
+        Assert.AreEqual("Жозе, тигр та риба", result.Series);
+        Assert.AreEqual("том 2", result.Title);
+        Assert.IsNotNull(result.Description);
     }
 }

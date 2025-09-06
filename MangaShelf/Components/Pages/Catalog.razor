@@ -11,13 +11,13 @@
 @if (_loading != true)
 {
     <div class="d-flex flex-column align-center mb-8">
-        <MudPagination ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="_selectedPage" Class="mt-4" />
+        <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="_selectedPage" Class="mt-4" />
     </div>
     <MudGrid Justify="@justification" Spacing="6">
         @foreach (var volume in volumes)
         {
-            <MudItem xs="6" sm="4" md="3" lg="2">
-                <VolumeCard Volume="@volume" />
+            <MudItem xs="6" sm="3" md="2" lg="2">
+                <SmallCard Volume="@volume"/>
             </MudItem>
         }
     </MudGrid>
@@ -28,8 +28,6 @@
 @code {
     private bool _loading;
 
-    private bool _openStart = true;
-    private bool _openEnd = true;
     private int _totalPages;
     private int _selectedPage
     {
@@ -42,40 +40,24 @@
     }
     private int _selectedPageValue = 1;
 
-    [CascadingParameter]
-    public bool Rtl { get; set; }
-
-    private void ToggleStartDrawer()
-    {
-        _openStart = !_openStart;
-    }
-
-    private void ToggleEndDrawer()
-    {
-        _openEnd = !_openEnd;
-    }
-
 
     Justify justification = Justify.FlexStart;
 
-    IEnumerable<VolumeDto> volumes = Enumerable.Empty<VolumeDto>();
+    IEnumerable<CardVolumeDto> volumes = Enumerable.Empty<CardVolumeDto>();
 
-    PaginationOptions paginationOption = new() { PageNumber = 1, PageSize = 24 };
+
 
     protected override async Task OnInitializedAsync()
     {
-
         await ReloadVolumes();
-
-        await base.OnInitializedAsync();
     }
 
     private async Task ReloadVolumes()
     {
-
-        paginationOption.PageNumber = _selectedPage;
+        PaginationOptions paginationOption = new() { PageNumber = _selectedPage, PageSize = 24 };
         (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
-
+        _totalPages = (int) Math.Floor((double)(_totalPages / paginationOption.PageSize));
         StateHasChanged();
     }
+
 }

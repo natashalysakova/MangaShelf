@@ -1,12 +1,18 @@
-﻿using MangaShelf.Common;
+﻿using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 
 namespace MangaShelf.DAL.Interfaces;
 
-public interface IVolumeDomainService : IDomainService<Volume>
+public interface IVolumeDomainService : IDomainService<Volume>, IShelfDomainService
 {
-    Task<Volume?> FindBySeriesNameTitleAndNumber(string series, int volumeNumber, string volumeTitle);
-    Task<(IEnumerable<Volume> volumes, int totalPages)> GetAllWithSeries(PaginationOptions? paginationOptions = null);
-    Task<IEnumerable<Volume>> GetLatestPreorders(int count);
-    Task<IEnumerable<Volume>> GetNewestReleases(int count);
+    Volume? FindBySeriesNameTitleAndNumber(string series, int volumeNumber, string volumeTitle);
+    IQueryable<Volume> GetAllFullPaginated(IPaginationOptions? paginationOptions = default);
+    IQueryable<Volume> GetAllWithSeries(IPaginationOptions? paginationOptions = default);
+
+    Volume? GetFullVolume(Guid id);
+    IQueryable<Volume> GetLatestPreorders(int count);
+    IQueryable<Volume> GetNewestReleases(int count);
+
+
+    IQueryable<Volume>GetAllFull();
 }

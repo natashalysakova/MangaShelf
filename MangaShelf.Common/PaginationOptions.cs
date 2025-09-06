@@ -1,9 +1,20 @@
-﻿namespace MangaShelf.Common;
+﻿using MangaShelf.Common.Interfaces;
 
-public record PaginationOptions
+namespace MangaShelf.Common;
+
+public record PaginationOptions : IPaginationOptions
 {
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
-    public string SortColumn { get; set; }
-    public bool IsAscending { get; set; } = true;
+    public required int PageNumber { get; init; }
+    public required int PageSize { get; init; }
+    public int Skip
+    {
+        get
+        {
+            return PageNumber * PageSize;
+        }
+    }
+    public int Take { get => PageSize; }
+    public string Search { get; init; }
+    public string SortBy { get ; init; }
+    public bool SortDescending { get ; init; }
 }

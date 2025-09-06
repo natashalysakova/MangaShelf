@@ -1,11 +1,32 @@
-﻿namespace MangaShelf.BL.Dto;
+﻿using MangaShelf.DAL.Models;
+
+namespace MangaShelf.BL.Dto;
 
 public class VolumeDto
 {
     public Guid Id { get; set; }
-    public string SeriesName { get; set; }
-    public string VolumeTitle { get; set; }
-    public string CoverImageUrl { get; set; }
-    public int VolumeNumber { get; set; }
-    public string Url { get; set; }
+
+    public required string Title { get; set; }
+    public int Number { get; set; }
+    public string? ISBN { get; set; }
+
+    public bool OneShot { get; set; }
+    public bool SingleIssue { get; set; }
+    public int AgeRestriction { get; set; }
+
+    public string? CoverImageUrl { get; set; }
+    public string? PurchaseUrl { get; set; }
+
+    public string? Description { get; set; }
+
+    public bool IsPreorder { get; set; }
+    public DateTimeOffset? PreorderStart { get; set; }
+    public DateTimeOffset? ReleaseDate { get; set; }
+
+    public double AvgRating { get; set; }
+
+    public bool IsPublishedOnSite { get; set; }
+    public VolumeType Type { get; set; }
+
+    public SeriesSimpleDto? Series { get; set; }
 }

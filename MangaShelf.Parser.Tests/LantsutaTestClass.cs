@@ -1,4 +1,5 @@
 ﻿using MangaShelf.BL.Parsers;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.Parser.Tests;
 
@@ -12,45 +13,44 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
         var result = await Parser.Parse("https://lantsuta-publishing.com/seriy/series-apothecary-ua/apothecary3-ua");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 3", result.title);
-        Assert.AreEqual("Монолог Травниці", result.series);
-        Assert.AreEqual("Нацу Хюуґа", result.authors);
-        Assert.AreEqual(3, result.volumeNumber);
-        Assert.AreEqual("https://lantsuta-publishing.com/image/cache/catalog/Product/Apothecary/Kusuriya%20no%20hitorigoto-3_jacket-UA-425x650.jpg", result.cover);
-        Assert.AreEqual(DateTime.Parse("2024-12-31"), result.release);
-        Assert.AreEqual("LANTSUTA", result.publisher);
-        Assert.AreEqual("Physical", result.type);
-        Assert.AreEqual("978-617-8202-19-4", result.isbn);
-        Assert.AreEqual(0, result.totalVolumes);
-        Assert.AreEqual(null, result.seriesStatus);
-        Assert.AreEqual(null, result.originalSeriesName);
-        Assert.AreEqual(false, result.isPreorder);
-        Assert.AreEqual(12, result.ageRestrictions);
+        Assert.AreEqual("Том 3", result.Title);
+        Assert.AreEqual("Монолог Травниці", result.Series);
+        Assert.AreEqual("Нацу Хюуґа", result.Authors);
+        Assert.AreEqual(3, result.VolumeNumber);
+        Assert.AreEqual("https://lantsuta-publishing.com/image/cache/catalog/Product/Apothecary/Kusuriya%20no%20hitorigoto-3_jacket-UA-425x650.jpg", result.Cover);
+        Assert.AreEqual(DateTime.Parse("2024-12-31"), result.Release);
+        Assert.AreEqual("LANTSUTA", result.Publisher);
+        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
+        Assert.AreEqual("978-617-8202-19-4", result.Isbn);
+        Assert.AreEqual(-1, result.TotalVolumes);
+        Assert.AreEqual(SeriesStatus.Unknown, result.SeriesStatus);
+        Assert.AreEqual(null, result.OriginalSeriesName);
+        Assert.AreEqual(false, result.IsPreorder);
+        Assert.AreEqual(12, result.AgeRestrictions);
     }
 
     [TestMethod]
+
     public async Task LantsutaPreorderTest()
     {
-
         var result = await Parser.Parse("https://lantsuta-publishing.com/manga-ua/apothecary11-ua");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 11", result.title);
-        Assert.AreEqual("Монолог Травниці", result.series);
-        Assert.AreEqual("Нацу Хюуґа", result.authors);
-        Assert.AreEqual(11, result.volumeNumber);
-        Assert.AreEqual("https://lantsuta-publishing.com/image/cache/catalog/Product/Apothecary/kusuriya-11_+-425x650.jpg", result.cover);
-        Assert.AreEqual(DateTime.Parse("2025-11-30"), result.release);
-        Assert.AreEqual("LANTSUTA", result.publisher);
-        Assert.AreEqual("Physical", result.type);
-        Assert.AreEqual("978-617-8202-48-4", result.isbn);
-        Assert.AreEqual(0, result.totalVolumes);
-        Assert.AreEqual(null, result.seriesStatus);
-        Assert.AreEqual(null, result.originalSeriesName);
-        Assert.AreEqual(null, result.preorderStartDate);
-        Assert.AreEqual("https://lantsuta-publishing.com/manga-ua/apothecary11-ua", result.url);
-        Assert.AreEqual(true, result.isPreorder);
-
+        Assert.AreEqual("Том 11", result.Title);
+        Assert.AreEqual("Монолог Травниці", result.Series);
+        Assert.AreEqual("Нацу Хюуґа", result.Authors);
+        Assert.AreEqual(11, result.VolumeNumber);
+        Assert.AreEqual("https://lantsuta-publishing.com/image/cache/catalog/Product/Apothecary/kusuriya-11_+-425x650.jpg", result.Cover);
+        Assert.AreEqual(DateTime.Parse("2025-11-30"), result.Release);
+        Assert.AreEqual("LANTSUTA", result.Publisher);
+        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
+        Assert.AreEqual("978-617-8202-48-4", result.Isbn);
+        Assert.AreEqual(-1, result.TotalVolumes);
+        Assert.AreEqual(SeriesStatus.Unknown, result.SeriesStatus);
+        Assert.AreEqual(null, result.OriginalSeriesName);
+        Assert.AreEqual(null, result.PreorderStartDate);
+        Assert.AreEqual("https://lantsuta-publishing.com/manga-ua/apothecary11-ua", result.Url);
+        Assert.AreEqual(true, result.IsPreorder);
     }
 
     [TestMethod]
@@ -59,9 +59,10 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
         var result = await Parser.Parse("https://lantsuta-publishing.com/manga-ua/avatar_tla_ua");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Обіцянка", result.title);
-        Assert.AreEqual("Аватар. Останній Захисник", result.series);
-        Assert.AreEqual(-1, result.volumeNumber);
+        Assert.AreEqual("Обіцянка", result.Title);
+        Assert.AreEqual("Аватар. Останній Захисник", result.Series);
+        Assert.AreEqual(-1, result.VolumeNumber);
+        Assert.IsNotNull(result.Description);
     }
 
     [TestMethod]

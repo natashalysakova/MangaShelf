@@ -5,4 +5,3 @@ public enum HtmlDownloaderKeys
     Basic,
     Advanced
 }
-

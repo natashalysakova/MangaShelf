@@ -1,4 +1,5 @@
-﻿using MangaShelf.DAL.Models;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.DAL.Interfaces;
 

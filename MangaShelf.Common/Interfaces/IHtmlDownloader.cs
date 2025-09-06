@@ -2,6 +2,5 @@
 
 public interface IHtmlDownloader
 {
-    Task<string> GetUrlHtml(string url);
+    Task<string> GetUrlHtml(string url, CancellationToken token = default);
 }
-

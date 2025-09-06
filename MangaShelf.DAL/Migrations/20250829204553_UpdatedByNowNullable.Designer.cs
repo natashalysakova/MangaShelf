@@ -9,618 +9,617 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace MangaShelf.DAL.Migrations
+namespace MangaShelf.DAL.Migrations;
+
+[DbContext(typeof(MangaDbContext))]
+[Migration("20250829204553_UpdatedByNowNullable")]
+partial class UpdatedByNowNullable
 {
-    [DbContext(typeof(MangaDbContext))]
-    [Migration("20250829204553_UpdatedByNowNullable")]
-    partial class UpdatedByNowNullable
+    /// <inheritdoc />
+    protected override void BuildTargetModel(ModelBuilder modelBuilder)
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+        modelBuilder
+            .HasAnnotation("ProductVersion", "9.0.8")
+            .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+        MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("AuthorSeries", b =>
-                {
-                    b.Property<Guid>("AuthorsId")
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("AuthorSeries", b =>
+            {
+                b.Property<Guid>("AuthorsId")
+                    .HasColumnType("char(36)");
 
-                    b.Property<Guid>("SeriesId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("SeriesId")
+                    .HasColumnType("char(36)");
 
-                    b.HasKey("AuthorsId", "SeriesId");
+                b.HasKey("AuthorsId", "SeriesId");
 
-                    b.HasIndex("SeriesId");
+                b.HasIndex("SeriesId");
 
-                    b.ToTable("AuthorSeries");
-                });
+                b.ToTable("AuthorSeries");
+            });
 
-            modelBuilder.Entity("AuthorVolume", b =>
-                {
-                    b.Property<Guid>("OverrideAuthorsId")
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("AuthorVolume", b =>
+            {
+                b.Property<Guid>("OverrideAuthorsId")
+                    .HasColumnType("char(36)");
 
-                    b.Property<Guid>("VolumesId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("VolumesId")
+                    .HasColumnType("char(36)");
 
-                    b.HasKey("OverrideAuthorsId", "VolumesId");
+                b.HasKey("OverrideAuthorsId", "VolumesId");
 
-                    b.HasIndex("VolumesId");
+                b.HasIndex("VolumesId");
 
-                    b.ToTable("AuthorVolume");
-                });
+                b.ToTable("AuthorVolume");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Author", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Author", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Authors");
-                });
+                b.ToTable("Authors");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Country", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Country", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<string>("CountryCode")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CountryCode")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("FlagUrl")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("FlagUrl")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Countries");
-                });
+                b.ToTable("Countries");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.FailedSyncRecords", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.FailedSyncRecords", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("longtext");
+                b.Property<string>("ErrorMessage")
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("ExceptionMessage")
-                        .HasColumnType("longtext");
+                b.Property<string>("ExceptionMessage")
+                    .HasColumnType("longtext");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Parser")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Parser")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("StackTrace")
-                        .HasColumnType("longtext");
+                b.Property<string>("StackTrace")
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Url")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("VolumeJson")
-                        .HasColumnType("longtext");
+                b.Property<string>("VolumeJson")
+                    .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("FailedSyncRecords");
-                });
+                b.ToTable("FailedSyncRecords");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Ownership", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Ownership", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("Date")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("Date")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                b.Property<int>("Status")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                b.Property<int>("Type")
+                    .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("UserId")
+                    .HasColumnType("char(36)");
 
-                    b.Property<Guid>("VolumeId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("VolumeId")
+                    .HasColumnType("char(36)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                b.HasIndex("UserId");
 
-                    b.HasIndex("VolumeId");
+                b.HasIndex("VolumeId");
 
-                    b.ToTable("Ownership");
-                });
+                b.ToTable("Ownership");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Publisher", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Publisher", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<Guid>("CountryId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("CountryId")
+                    .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("Url")
-                        .HasColumnType("longtext");
+                b.Property<string>("Url")
+                    .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CountryId");
+                b.HasIndex("CountryId");
 
-                    b.ToTable("Publishers");
-                });
+                b.ToTable("Publishers");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Reading", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Reading", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("FinishedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("FinishedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("Rating")
-                        .HasColumnType("int");
+                b.Property<int?>("Rating")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Review")
-                        .HasColumnType("longtext");
+                b.Property<string>("Review")
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("StartedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("StartedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                b.Property<int>("Status")
+                    .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("UserId")
+                    .HasColumnType("char(36)");
 
-                    b.Property<Guid>("VolumeId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("VolumeId")
+                    .HasColumnType("char(36)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                b.HasIndex("UserId");
 
-                    b.HasIndex("VolumeId");
+                b.HasIndex("VolumeId");
 
-                    b.ToTable("Reading");
-                });
+                b.ToTable("Reading");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Series", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Series", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<string>("Aliases")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Aliases")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("MalId")
-                        .HasColumnType("int");
+                b.Property<int>("MalId")
+                    .HasColumnType("int");
 
-                    b.Property<bool>("Ongoing")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("Ongoing")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("OriginalName")
-                        .HasColumnType("longtext");
+                b.Property<string>("OriginalName")
+                    .HasColumnType("longtext");
 
-                    b.Property<Guid>("PublisherId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("PublisherId")
+                    .HasColumnType("char(36)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<int?>("TotalVolumes")
-                        .HasColumnType("int");
+                b.Property<int?>("TotalVolumes")
+                    .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("PublisherId");
+                b.HasIndex("PublisherId");
 
-                    b.ToTable("Series");
-                });
+                b.ToTable("Series");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.User", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("IdentityUserId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("IdentityUserId")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.Property<string>("VisibleUsername")
-                        .HasColumnType("longtext");
+                b.Property<string>("VisibleUsername")
+                    .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Users");
-                });
+                b.ToTable("Users");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("char(36)");
 
-                    b.Property<int>("AgeRestriction")
-                        .HasColumnType("int");
+                b.Property<int>("AgeRestriction")
+                    .HasColumnType("int");
 
-                    b.Property<double>("AvgRating")
-                        .HasColumnType("double");
+                b.Property<double>("AvgRating")
+                    .HasColumnType("double");
 
-                    b.Property<string>("CoverImageUrl")
-                        .HasColumnType("longtext");
+                b.Property<string>("CoverImageUrl")
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("CreatedBy")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("DeletedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("ISBN")
-                        .HasColumnType("longtext");
+                b.Property<string>("ISBN")
+                    .HasColumnType("longtext");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsDeleted")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("IsPreorder")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("IsPreorder")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("Number")
-                        .HasColumnType("int");
+                b.Property<int>("Number")
+                    .HasColumnType("int");
 
-                    b.Property<bool>("OneShot")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("OneShot")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("PreorderStart")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("PreorderStart")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("PurchaseUrl")
-                        .HasColumnType("longtext");
+                b.Property<string>("PurchaseUrl")
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("ReleaseDate")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("ReleaseDate")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("SeriesId")
-                        .HasColumnType("char(36)");
+                b.Property<Guid>("SeriesId")
+                    .HasColumnType("char(36)");
 
-                    b.Property<bool>("SingleIssue")
-                        .HasColumnType("tinyint(1)");
+                b.Property<bool>("SingleIssue")
+                    .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                    .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                b.Property<string>("UpdatedBy")
+                    .HasColumnType("longtext");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("SeriesId");
+                b.HasIndex("SeriesId");
 
-                    b.ToTable("Volumes");
-                });
+                b.ToTable("Volumes");
+            });
 
-            modelBuilder.Entity("AuthorSeries", b =>
-                {
-                    b.HasOne("MangaShelf.DAL.Models.Author", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("AuthorSeries", b =>
+            {
+                b.HasOne("MangaShelf.DAL.Models.Author", null)
+                    .WithMany()
+                    .HasForeignKey("AuthorsId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("MangaShelf.DAL.Models.Series", null)
-                        .WithMany()
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                b.HasOne("MangaShelf.DAL.Models.Series", null)
+                    .WithMany()
+                    .HasForeignKey("SeriesId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
-            modelBuilder.Entity("AuthorVolume", b =>
-                {
-                    b.HasOne("MangaShelf.DAL.Models.Author", null)
-                        .WithMany()
-                        .HasForeignKey("OverrideAuthorsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("AuthorVolume", b =>
+            {
+                b.HasOne("MangaShelf.DAL.Models.Author", null)
+                    .WithMany()
+                    .HasForeignKey("OverrideAuthorsId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("MangaShelf.DAL.Models.Volume", null)
-                        .WithMany()
-                        .HasForeignKey("VolumesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                b.HasOne("MangaShelf.DAL.Models.Volume", null)
+                    .WithMany()
+                    .HasForeignKey("VolumesId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Ownership", b =>
-                {
-                    b.HasOne("MangaShelf.DAL.Models.User", "User")
-                        .WithMany("OwnedVolumes")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("MangaShelf.DAL.Models.Ownership", b =>
+            {
+                b.HasOne("MangaShelf.DAL.Models.User", "User")
+                    .WithMany("OwnedVolumes")
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("MangaShelf.DAL.Models.Volume", "Volume")
-                        .WithMany("Owners")
-                        .HasForeignKey("VolumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("MangaShelf.DAL.Models.Volume", "Volume")
+                    .WithMany("Owners")
+                    .HasForeignKey("VolumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("User");
+                b.Navigation("User");
 
-                    b.Navigation("Volume");
-                });
+                b.Navigation("Volume");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Publisher", b =>
-                {
-                    b.HasOne("MangaShelf.DAL.Models.Country", "Country")
-                        .WithMany("Publishers")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("MangaShelf.DAL.Models.Publisher", b =>
+            {
+                b.HasOne("MangaShelf.DAL.Models.Country", "Country")
+                    .WithMany("Publishers")
+                    .HasForeignKey("CountryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Country");
-                });
+                b.Navigation("Country");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Reading", b =>
-                {
-                    b.HasOne("MangaShelf.DAL.Models.User", "User")
-                        .WithMany("Readings")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("MangaShelf.DAL.Models.Reading", b =>
+            {
+                b.HasOne("MangaShelf.DAL.Models.User", "User")
+                    .WithMany("Readings")
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("MangaShelf.DAL.Models.Volume", "Volume")
-                        .WithMany("Readers")
-                        .HasForeignKey("VolumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("MangaShelf.DAL.Models.Volume", "Volume")
+                    .WithMany("Readers")
+                    .HasForeignKey("VolumeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("User");
+                b.Navigation("User");
 
-                    b.Navigation("Volume");
-                });
+                b.Navigation("Volume");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Series", b =>
-                {
-                    b.HasOne("MangaShelf.DAL.Models.Publisher", "Publisher")
-                        .WithMany("Mangas")
-                        .HasForeignKey("PublisherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("MangaShelf.DAL.Models.Series", b =>
+            {
+                b.HasOne("MangaShelf.DAL.Models.Publisher", "Publisher")
+                    .WithMany("Mangas")
+                    .HasForeignKey("PublisherId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Publisher");
-                });
+                b.Navigation("Publisher");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
-                {
-                    b.HasOne("MangaShelf.DAL.Models.Series", "Series")
-                        .WithMany("Volumes")
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+        modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
+            {
+                b.HasOne("MangaShelf.DAL.Models.Series", "Series")
+                    .WithMany("Volumes")
+                    .HasForeignKey("SeriesId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Series");
-                });
+                b.Navigation("Series");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Country", b =>
-                {
-                    b.Navigation("Publishers");
-                });
+        modelBuilder.Entity("MangaShelf.DAL.Models.Country", b =>
+            {
+                b.Navigation("Publishers");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Publisher", b =>
-                {
-                    b.Navigation("Mangas");
-                });
+        modelBuilder.Entity("MangaShelf.DAL.Models.Publisher", b =>
+            {
+                b.Navigation("Mangas");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Series", b =>
-                {
-                    b.Navigation("Volumes");
-                });
+        modelBuilder.Entity("MangaShelf.DAL.Models.Series", b =>
+            {
+                b.Navigation("Volumes");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.User", b =>
-                {
-                    b.Navigation("OwnedVolumes");
+        modelBuilder.Entity("MangaShelf.DAL.Models.User", b =>
+            {
+                b.Navigation("OwnedVolumes");
 
-                    b.Navigation("Readings");
-                });
+                b.Navigation("Readings");
+            });
 
-            modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
-                {
-                    b.Navigation("Owners");
+        modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
+            {
+                b.Navigation("Owners");
 
-                    b.Navigation("Readers");
-                });
+                b.Navigation("Readers");
+            });
 #pragma warning restore 612, 618
-        }
     }
 }

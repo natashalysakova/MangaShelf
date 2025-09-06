@@ -1,6 +1,6 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
-using MangaShelf.Common;
+using MangaShelf.BL.Interfaces;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
@@ -20,34 +20,67 @@ public abstract class BaseParser : IPublisherParser
         _htmlDownloader = htmlDownloader;
     }
 
-    protected abstract string GetTitle(IDocument document);
+    protected abstract string GetVolumeTitle(IDocument document);
     protected abstract string GetSeries(IDocument document);
     protected abstract int GetVolumeNumber(IDocument document);
-    protected abstract string GetAuthors(IDocument document);
+    protected abstract string? GetAuthors(IDocument document);
     protected abstract string GetCover(IDocument document);
     protected abstract DateTimeOffset? GetReleaseDate(IDocument document);
-    protected abstract string GetISBN(IDocument document);
-    protected abstract int GetTotalVolumes(IDocument document);
-    protected abstract string? GetSeriesStatus(IDocument document);
+    protected abstract string? GetISBN(IDocument document);
+    protected abstract SeriesStatus GetSeriesStatus(IDocument document);
     protected abstract string? GetOriginalSeriesName(IDocument document);
     protected abstract string GetPublisher(IDocument document);
-    protected abstract DateTimeOffset? GetPublishDate(IDocument document);
-    protected abstract string GetCountryCode(IDocument document);
+    protected abstract DateTimeOffset? GetSaleStartDate(IDocument document);
     protected abstract bool GetIsPreorder(IDocument document);
-    protected abstract Ownership.VolumeType GetBookType();
+    protected abstract VolumeType GetVolumeType(IDocument document);
     protected abstract int? GetAgeRestriction(IDocument document);
+    protected abstract string GetVolumeUrlBlockClass();
+    protected abstract string? GetDescription(IDocument document);
+
+    protected virtual SeriesType GetSeriesType(IDocument document)
+    {
+        return SeriesType.Manga;
+    }
+
+    protected virtual string GetCountryCode(IDocument document)
+    {
+        return "ua";
+    }
+
+    protected virtual int GetTotalVolumes(IDocument document)
+    {
+        return -1;
+    }
+
+
+
     public abstract string SiteUrl { get; }
 
-    
+    public abstract string CatalogUrl { get; }
 
-    public abstract string GetNextPageUrl();
-    public abstract string GetVolumeUrlBlockClass();
+    public abstract string Pagination { get; }
 
-    public async Task<IEnumerable<string>> GetVolumesUrls(string pageUrl)
+    public bool IsRunning => _isRunning;
+
+    public string ParserName { get => this.GetType().Name; }
+
+    private bool _isRunning = false;
+
+    public virtual string GetNextPageUrl()
     {
-        var html = await _htmlDownloader.GetUrlHtml(pageUrl);
+        return $"{SiteUrl}{CatalogUrl}{Pagination}";
+    }
+
+    protected virtual bool GetCanBePublished()
+    {
+        return true;
+    }
+
+    public async Task<IEnumerable<string>> GetVolumesUrls(string pageUrl, CancellationToken token)
+    {
+        var html = await _htmlDownloader.GetUrlHtml(pageUrl, token);
         var parser = new HtmlParser();
-        var document = parser.ParseDocument(html);
+        var document = await parser.ParseDocumentAsync(html, token);
 
         try
         {
@@ -65,52 +98,42 @@ public abstract class BaseParser : IPublisherParser
 
 
 
-    public async Task<ParsedInfo> Parse(string url)
+    public async Task<ParsedInfo> Parse(string url, CancellationToken token = default)
     {
-        var html = await _htmlDownloader.GetUrlHtml(url);
+        _isRunning = true;
+        var html = await _htmlDownloader.GetUrlHtml(url, token);
         var parser = new HtmlParser();
-        var document = parser.ParseDocument(html);
+        var document = await parser.ParseDocumentAsync(html, token);
 
         try
         {
-            var title = GetTitle(document);
-            var volumeNumber = GetVolumeNumber(document);
-            var series = GetSeries(document);
-            var cover = GetCover(document);
-            var release = GetReleaseDate(document);
-            var publisher = GetPublisher(document);
-            var type = GetBookType();
-            var isbn = GetISBN(document);
-            var totalVol = GetTotalVolumes(document);
-            var seriesStatus = GetSeriesStatus(document);
-            var originalSeriesName = GetOriginalSeriesName(document);
-            var authors = GetAuthors(document);
-            var preorderDate = GetPublishDate(document);
-            var countryCode = GetCountryCode(document);
-            var isPreorder = GetIsPreorder(document);
-            var ageRestriction = GetAgeRestriction(document);
-
-            var parsed = new ParsedInfo(
-                title, 
-                authors, 
-                volumeNumber, 
-                series, 
-                cover, 
-                release, 
-                publisher, 
-                type.ToString(), 
-                isbn, totalVol, 
-                seriesStatus, 
-                originalSeriesName, 
-                url, 
-                preorderDate, 
-                countryCode, 
-                isPreorder, 
-                ageRestriction);
+            var parsed = new ParsedInfo
+            {
+                Title = GetVolumeTitle(document),
+                Authors = GetAuthors(document),
+                VolumeNumber = GetVolumeNumber(document),
+                Series = GetSeries(document),
+                Cover = GetCover(document),
+                Release = GetReleaseDate(document),
+                Publisher = GetPublisher(document),
+                VolumeType = GetVolumeType(document),
+                Isbn = GetISBN(document),
+                TotalVolumes = GetTotalVolumes(document),
+                SeriesStatus = GetSeriesStatus(document),
+                OriginalSeriesName = GetOriginalSeriesName(document),
+                Url = url,
+                PreorderStartDate = GetSaleStartDate(document),
+                CountryCode = GetCountryCode(document),
+                IsPreorder = GetIsPreorder(document),
+                AgeRestrictions = GetAgeRestriction(document),
+                CanBePublished = GetCanBePublished(),
+                SeriesType = GetSeriesType(document),
+                Description = GetDescription(document)
+            };
 
             var jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-            parsed.json = System.Text.Json.JsonSerializer.Serialize(parsed, jsonOptions);
-            _logger.LogDebug(parsed.json);
+            parsed.Json = System.Text.Json.JsonSerializer.Serialize(parsed, jsonOptions);
+            _logger.LogDebug(parsed.Json);
 
             return parsed;
         }
@@ -134,6 +157,83 @@ public abstract class BaseParser : IPublisherParser
             _logger.LogTrace(html);
             throw;
         }
+        finally
+        {
+            _isRunning = false;
+        }
+        }
+    protected static DateTimeOffset? ParseYearIntoLastDayOfYear(string? year)
+    {
+        if (year != null && int.TryParse(year, out var yearNumber))
+        {
+            var month = 12;
+            var day = 31;
 
+            var date = DateTime.SpecifyKind(new DateTime(yearNumber, month, day), DateTimeKind.Local);
+
+            return new DateTimeOffset(date);
+        }
+
+        return null;
+    }
+
+    protected string GetVolumeTitleFromDefaultTitle(string title)
+    {
+        var volIndex = title.ToLower().LastIndexOf("том");
+        if (volIndex == -1)
+        {
+            return title.Trim();
+        }
+        else
+        {
+            return title.Substring(volIndex).Trim();
+        }
+    }
+
+    protected int GetVolumeNumberFromDefaultTitle(string title)
+    {
+        var volIndex = title.ToLower().IndexOf("том");
+
+        if (volIndex == -1)
+            return volIndex;
+
+        var nextWord = title.IndexOf(" ", volIndex + 3);
+        if (nextWord == -1)
+        {
+            nextWord = volIndex + 3;
+        }
+
+        var nextWhitespace = title.IndexOf(" ", nextWord + 1);
+
+        string volume;
+        if (nextWhitespace == -1)
+        {
+            volume = title.Substring(nextWord).Trim();
+        }
+        else
+        {
+            volume = title.Substring(nextWord, nextWhitespace - nextWord).Trim();
+        }
+
+        return int.Parse(volume);
+    }
+
+    protected string GetSeriesNameFromDefaultTitle(string title)
+    {
+        var volIndex = title.ToLower().LastIndexOf("том");
+        if (volIndex == -1)
+        {
+            return title.Trim();
+        }
+        else
+        {
+            var series = title.Substring(0, volIndex).Trim([' ', ',', '.']);
+            return series;
+        }
+    }
+
+    public bool CanParse(string url)
+    {
+        return url.StartsWith(SiteUrl, StringComparison.OrdinalIgnoreCase);
     }
 }

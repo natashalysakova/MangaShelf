@@ -1,8 +1,9 @@
-﻿using MangaShelf.DAL.Models;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.DAL.Interfaces;
 
-public interface IPublisherDomainService : IDomainService<Publisher>
+public interface IPublisherDomainService : IDomainService<Publisher>, IShelfDomainService
 {
-    Task<Publisher?> GetByName(string name);
+    Task<Publisher?> GetByNameAsync(string name, CancellationToken token = default);
 }

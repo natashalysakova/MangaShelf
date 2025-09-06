@@ -1,8 +1,9 @@
-﻿using MangaShelf.DAL.Models;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.DAL.Interfaces;
 
-public interface ISeriesDomainService : IDomainService<Series>
+public interface ISeriesDomainService : IDomainService<Series>, IShelfDomainService
 {
-    Task<Series?> GetByTitle(string series);
+    Task<Series?> GetByTitleAsync(string series, CancellationToken token = default);
 }

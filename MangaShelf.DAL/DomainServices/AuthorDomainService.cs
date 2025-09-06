@@ -6,18 +6,18 @@ namespace MangaShelf.DAL.DomainServices;
 
 public class AuthorDomainService : BaseDomainService<Author>, IAuthorDomainService
 {
-    public AuthorDomainService(MangaDbContext dbContext) : base(dbContext)
+    internal AuthorDomainService(MangaDbContext context) : base(context)
     {
     }
 
-    public async Task<Author?> GetByName(string name)
+    public Author? GetByName(string name)
     {
-        return await _context.Authors.FirstOrDefaultAsync(x => x.Name == name);
+        return _context.Authors.FirstOrDefault(x => x.Name == name);
     }
 
-    public async Task<ICollection<Author>> GetOrCreateByNames(string[] autorsList)
+    public async Task<IEnumerable<Author>> GetOrCreateByNames(IEnumerable<string> autorsList, CancellationToken token)
     {
-        var autorsInDb = await _context.Authors.Where(a => autorsList.Contains(a.Name)).ToListAsync();
+        var autorsInDb =  await _context.Authors.Where(a => autorsList.Contains(a.Name)).ToListAsync(token);
         var autorsToCreate = autorsList
             .Except(autorsInDb.Select(a => a.Name))
             .Select(name => new Author { Name = name });

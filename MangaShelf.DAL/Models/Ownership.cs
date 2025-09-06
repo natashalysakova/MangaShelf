@@ -17,10 +17,4 @@ public class Ownership : BaseEntity
         Own = 2,
         Gone = 3
     }
-
-    public enum VolumeType
-    {
-        Physical = 0,
-        Digital = 1
-    }
 }

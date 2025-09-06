@@ -1,8 +1,8 @@
 ﻿@page "/my-shelf"
 
-@* @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Authorization
 
-@attribute [Authorize]
+@* @attribute [Authorize] *@
 
 
 <h3>MyShelf</h3>
@@ -11,7 +11,7 @@
 
 <AuthorizeView>
     Hello @context.User.Identity?.Name!
-</AuthorizeView> *@
+</AuthorizeView>
 @code {
 
 }

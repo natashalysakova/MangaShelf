@@ -3,28 +3,30 @@ using MangaShelf.DAL.Interfaces;
 using Microsoft.Extensions.Logging;
 using MangaShelf.BL.Mappers;
 using MangaShelf.BL.Dto;
+using Microsoft.EntityFrameworkCore;
+using MangaShelf.DAL;
 
 namespace MangaShelf.BL.Services;
 
 public class SeriesService : ISeriesService
 {
     private readonly ILogger<SeriesService> _logger;
-    private readonly ISeriesDomainService _seriesRepository;
-    private readonly IAuthorService _authorsService;
-    private readonly IPublisherService _publisherService;
+    private readonly IDbContextFactory<MangaDbContext> _contextFactory;
 
-    public SeriesService(ILogger<SeriesService> logger, ISeriesDomainService seriesRepository, IAuthorService authorsService, IPublisherService publisherService)
+    public SeriesService(ILogger<SeriesService> logger, IDbContextFactory<MangaDbContext> contextFactory)
     {
         _logger = logger;
-        _seriesRepository = seriesRepository;
-        _authorsService = authorsService;
-        _publisherService = publisherService;
+        _contextFactory = contextFactory;
     }
 
 
-    public async Task<SeriesDto?> FindByName(string seriesTitle)
+    public async Task<SeriesSimpleDto?> FindByName(string seriesTitle)
     {
-        var series = await _seriesRepository.GetByTitle(seriesTitle);
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var serviceFactory = new DomainServiceFactory(context);
+        var seriesService = serviceFactory.GetDomainService<ISeriesDomainService>();
+
+        var series = await seriesService.GetByTitleAsync(seriesTitle);
         return series?.ToDto();
     }
 }

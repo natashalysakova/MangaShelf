@@ -23,6 +23,7 @@ public class Program
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
         builder.Services.AddControllers();
+        builder.Services.AddMudServices();
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -39,11 +40,16 @@ public class Program
         builder.AddLocalizationServices();
         builder.AddUILocalizationServices();
 
-        builder.Services.AddMudServices();
+        builder.Services.AddHttpContextAccessor();
+
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+        }
 
         var app = builder.Build();
 
-        await app.Services.MakeSureDbCreatedAsync();
+        await app.MakeSureDbCreatedAsync();
 
         app.MapHealthChecks("/health");
 
@@ -51,20 +57,20 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseMigrationsEndPoint();
+            app.UseExceptionHandler("/Error");
+
         }
         else
         {
-            app.UseExceptionHandler("/Error");
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
 
         app.UseHttpsRedirection();
 
-        app.UseAntiforgery();
 
-        app.MapStaticAssets();
         app.UseStaticFiles();
+        app.MapStaticAssets();
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
 
@@ -76,7 +82,18 @@ public class Program
             .SetDefaultCulture(supportedCultures[0])
             .AddSupportedCultures(supportedCultures)
             .AddSupportedUICultures(supportedCultures);
+        localizationOptions.ApplyCurrentCultureToResponseHeaders = true;
         app.UseRequestLocalization(localizationOptions);
+
+        app.UseStatusCodePagesWithRedirects("/404");
+
+
+        app.UseAuthentication();
+        app.UseRouting();
+
+        app.UseAntiforgery();
+
+        app.UseAuthorization();
 
         app.MapControllers();
 

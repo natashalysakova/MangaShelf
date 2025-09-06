@@ -2,7 +2,7 @@
 
 namespace MangaShelf.DAL;
 
-public class BaseEntity : IEntity
+public class BaseEntity : IEntity, IAuditableEntity, IDeletableEntity
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

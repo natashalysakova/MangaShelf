@@ -1,4 +1,3 @@
-using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -69,7 +68,7 @@ public class SeedProdUsersService : ISeedDataService
             await _userManager.CreateAsync(user, "Demo@123");
             await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.CannotChangePassword, "true"));
             await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.IsDemoUser, "true"));
-                  
+              
             await _userManager.AddToRoleAsync(user, RoleTypes.User);
         }
 

@@ -1,9 +1,7 @@
 ﻿
 using AngleSharp.Dom;
-using MangaShelf.BL.Enums;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -13,12 +11,16 @@ public class LantsutaParser : BaseParser
 {
     private readonly ILogger<LantsutaParser> _logger;
 
-    public LantsutaParser(ILogger<LantsutaParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Basic)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    public LantsutaParser(ILogger<LantsutaParser> logger,  IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
         _logger = logger;
     }
 
     public override string SiteUrl => "https://lantsuta-publishing.com/";
+
+    public override string CatalogUrl => "manga-ua";
+
+    public override string Pagination => "?page={0}";
 
     private string? GetFromTable(IDocument document, string header)
     {
@@ -36,14 +38,14 @@ public class LantsutaParser : BaseParser
         return null;
     }
 
-    protected override string GetAuthors(IDocument document)
+    protected override string? GetAuthors(IDocument document)
     {
         return GetFromTable(document, "Автор");
     }
 
-    protected override Ownership.VolumeType GetBookType()
+    protected override VolumeType GetVolumeType(IDocument document)
     {
-        return Ownership.VolumeType.Physical;
+        return VolumeType.Physical;
     }
 
     protected override string GetCover(IDocument document)
@@ -86,22 +88,13 @@ public class LantsutaParser : BaseParser
         if (text is null || !text.ContainsAny(lookupPhrases))
         {
             var year = GetFromTable(document, "Дата виходу");
-
-            if (year != null && int.TryParse(year, out var yearNumber))
-            {
-                var month = 12;
-                var day = 31;
-
-                var date = DateTime.SpecifyKind(new DateTime(yearNumber, month, day), DateTimeKind.Local);
-
-                return new DateTimeOffset(date);
-            }
-
-            return null;
+            return ParseYearIntoLastDayOfYear(year);
         }
 
         return ParseDescription(text);
     }
+
+
 
     public static DateTimeOffset? ParseDescription(string text)
     {
@@ -191,12 +184,12 @@ public class LantsutaParser : BaseParser
         return GetFromTable(document, "Серія");
     }
 
-    protected override string? GetSeriesStatus(IDocument document)
+    protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
-        return null;
+        return SeriesStatus.Unknown;
     }
 
-    protected override string GetTitle(IDocument document)
+    protected override string GetVolumeTitle(IDocument document)
     {
         var node = document.QuerySelector(".name-product-title").InnerHtml;
         var series = GetSeries(document);
@@ -215,14 +208,9 @@ public class LantsutaParser : BaseParser
         return node;
     }
 
-    protected override int GetTotalVolumes(IDocument document)
-    {
-        return 0;
-    }
-
     protected override int GetVolumeNumber(IDocument document)
     {
-        var title = GetTitle(document);
+        var title = GetVolumeTitle(document);
         if (title.Contains("Том"))
         {
             var volIndex = title.IndexOf("Том");
@@ -243,27 +231,14 @@ public class LantsutaParser : BaseParser
         return -1;
     }
 
-    private string _catalogUrl = "manga-ua";
-    private string _pagination = "?page={0}";
-
-    public override string GetNextPageUrl()
-    {
-        return $"{SiteUrl}{_catalogUrl}{_pagination}";
-    }
-
-    public override string GetVolumeUrlBlockClass()
+    protected override string GetVolumeUrlBlockClass()
     {
         return ".name-product > a";
     }
 
-    protected override DateTimeOffset? GetPublishDate(IDocument document)
+    protected override DateTimeOffset? GetSaleStartDate(IDocument document)
     {
         return null;
-    }
-
-    protected override string GetCountryCode(IDocument document)
-    {
-        return "UK";
     }
 
     protected override bool GetIsPreorder(IDocument document)
@@ -285,13 +260,19 @@ public class LantsutaParser : BaseParser
         {
             ageString = ageString.Replace("+", "").Trim();
         }
-        
+    
         if (int.TryParse(ageString, out var age))
         {
             return age;
         }
 
         return null;
+    }
+
+    protected override string? GetDescription(IDocument document)
+    {
+        var descriptionNode = document.QuerySelectorAll("#tab-description p");
+        return string.Join("\n\n", descriptionNode.Select(n => n.TextContent.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)));
     }
 }
 

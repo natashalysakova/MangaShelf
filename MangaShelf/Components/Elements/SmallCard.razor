@@ -1,6 +1,9 @@
-﻿@if (Volume != null)
+﻿@inject IDialogService Dialog
+
+
+@if (Volume != null)
 {
-    <MudCard Style="position:relative;" Class="manga-card ">
+    <MudCard @onclick="OpenVolumeAsync" Style="position:relative;" Class="manga-card ">
         <div class="image-container">
             <img class="card-image" src="@Volume.CoverImageUrl" alt="@Volume.SeriesName" />
         </div>
@@ -18,5 +21,13 @@ else
 
 @code {
     [Parameter]
-    public VolumeDto? Volume { get; set; }
+    public CardVolumeDto? Volume { get; set; }
+
+
+    private async Task OpenVolumeAsync()
+    {
+        var parameters = new DialogParameters<VolumeDetailedPage>();
+        parameters.Add(x => x.VolumeId, Volume.Id);
+        await Dialog.ShowAsync<VolumeDetailedPage>(string.Empty, parameters);
+    }
 }

@@ -1,9 +1,10 @@
-﻿using MangaShelf.DAL.Models;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.DAL.Interfaces;
 
-public interface IAuthorDomainService : IDomainService<Author>
+public interface IAuthorDomainService : IDomainService<Author>, IShelfDomainService
 {
-    Task<Author?> GetByName(string name);
-    Task<ICollection<Author>> GetOrCreateByNames(string[] autorsList);
+    Author? GetByName(string name);
+    Task<IEnumerable<Author>> GetOrCreateByNames(IEnumerable<string> autorsList, CancellationToken token);
 }

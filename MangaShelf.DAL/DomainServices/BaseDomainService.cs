@@ -1,84 +1,102 @@
-﻿using MangaShelf.DAL.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace MangaShelf.DAL.DomainServices;
 
-public class BaseDomainService<T> : IDomainService<T> where T : class, IEntity
+public abstract class BaseDomainService<T> : BaseDomainService<MangaDbContext, T> where T : class, IEntity
 {
-    protected readonly MangaDbContext _context;
-
-    public BaseDomainService(MangaDbContext dbContext)
+    protected BaseDomainService(MangaDbContext context) : base(context)
     {
-        _context = dbContext;
+    }
+}
+
+public abstract class BaseDomainService<C, T> : IDomainService<T> where T : class, IEntity where C : DbContext
+{
+    protected C _context;
+
+    public BaseDomainService(C context)
+    {
+        _context = context;
     }
 
-    public async Task<T> Add(T entity)
+    public async Task<T> Add(T entity, bool shouldSave = false, CancellationToken token = default)
     {
-        await _context.Set<T>().AddAsync(entity);
-        await _context.SaveChangesAsync();
+        await _context.Set<T>().AddAsync(entity, token);
+        await Save(shouldSave, token);
         return entity;
     }
 
-    public async Task<(T Entity, State State)> AddOrUpdate(T entity)
+    public async Task<(T Entity, State State)> AddOrUpdate(T entity, bool shouldSave = false, CancellationToken token = default)
     {
-        var existingEntity = await _context.Set<T>().FindAsync(entity.Id);
+        var existingEntity = await _context.Set<T>().FindAsync(entity.Id, token);
 
         var entityState = _context.Entry<T>(entity).State;
 
         if (entityState == EntityState.Detached)
         {
-            return (await Add(entity), State.Added);
+            return (await Add(entity, shouldSave, token), State.Added);
         }
         else
         {
-            return (await Update(entity), State.Updated);
+            return (await Update(entity, shouldSave, token), State.Updated);
         }
     }
 
-    public async Task<IEnumerable<T>> AddRange(IEnumerable<T> entities)
-    {
-        await _context.Set<T>().AddRangeAsync(entities);
-        await _context.SaveChangesAsync();
-        return entities;
-    }
+    //public async Task<IEnumerable<T>> AddRange(IEnumerable<T> entities, CancellationToken token = default)
+    //{
+    //    await _context.Set<T>().AddRangeAsync(entities, token);
+    //    await _context.SaveChangesAsync(token);
+    //    return entities;
+    //}
 
-    public async Task<bool> Delete(T entity)
-    {
-        _context.Set<T>().Remove(entity);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
-    }
+    //public async Task<bool> Delete(T entity, CancellationToken token = default)
+    //{
+    //    _context.Set<T>().Remove(entity);
+    //    var result = await _context.SaveChangesAsync(token);
+    //    return result > 0;
+    //}
 
-    public async Task<bool> Delete(Guid id)
-    {
-        var entity = await _context.Set<T>().FindAsync(id);
-        if (entity is null)
-        {
-            return false;
-        }
-        return await Delete(entity);
-    }
+    //public async Task<bool> Delete(Guid id, CancellationToken token = default)
+    //{
+    //    var entity = await _context.Set<T>().FindAsync(id, token);
+    //    if (entity is null)
+    //    {
+    //        return false;
+    //    }
+    //    return await Delete(entity, token);
+    //}
 
-    public async Task<T?> Get(Guid id)
-    {
-        return await _context.Set<T>().FindAsync(id);
-    }
+    //public async Task<T?> Get(Guid id, CancellationToken token = default)
+    //{
+    //    return await _context.Set<T>().FindAsync(id, token);
+    //}
 
-    public IQueryable<T> GetAll(bool tracking = false)
-    {
-        var result = _context.Set<T>().AsQueryable<T>();
-        if (!tracking)
-        {
-            result = result.AsNoTracking();
-        }
+    //public async Task<IEnumerable<T>> GetAll(bool tracking = false, CancellationToken token = default)
+    //{
+    //    var result = _context.Set<T>().AsQueryable<T>();
+    //    if (!tracking)
+    //    {
+    //        result = result.AsNoTracking();
+    //    }
 
-        return result;
-    }
+    //    return await result.ToListAsync(token);
+    //}
 
-    public async Task<T> Update(T entity)
+    public async Task<T> Update(T entity, bool shouldSave = false, CancellationToken token = default)
     {
         _context.Entry(entity).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        
+        await Save(shouldSave, token);
         return entity;
+    }
+
+    private async Task<int> Save(bool shouldSave, CancellationToken token = default)
+    {
+        if (shouldSave)
+        {
+            return await _context.SaveChangesAsync(token);
+        }
+        return -1;
     }
 }

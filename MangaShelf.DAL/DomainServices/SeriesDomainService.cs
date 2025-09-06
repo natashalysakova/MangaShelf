@@ -6,13 +6,13 @@ namespace MangaShelf.DAL.DomainServices;
 
 public class SeriesDomainService : BaseDomainService<Series>, ISeriesDomainService
 {
-    public SeriesDomainService(MangaDbContext dbContext) : base(dbContext)
+    internal SeriesDomainService(MangaDbContext context) : base(context)
     {
     }
 
-    public async Task<Series?> GetByTitle(string series)
+    public async Task<Series?> GetByTitleAsync(string series, CancellationToken token = default)
     {
         return await _context.Series
-            .FirstOrDefaultAsync(s => s.Title.ToLower() == series.ToLower());
+            .FirstOrDefaultAsync(s => s.Title.ToLower() == series.ToLower(), token);
     }
 }

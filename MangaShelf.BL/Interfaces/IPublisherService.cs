@@ -5,5 +5,5 @@ namespace MangaShelf.BL.Interfaces;
 
 public interface IPublisherService : IService
 {
-    Task<PublisherDto?> GetByName(string publisherName);
+    Task<PublisherSimpleDto?> GetByNameAsync(string publisherName, CancellationToken token = default);
 }

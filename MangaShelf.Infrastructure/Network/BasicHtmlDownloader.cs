@@ -18,7 +18,7 @@ public class BasicHtmlDownloader : IHtmlDownloader
         _httpClient.DefaultRequestHeaders.Clear();
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
     }
-    public async Task<string> GetUrlHtml(string url)
+    public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
         var maxretry = _configuration.GetSection("HtmlDownloaders").GetValue<int>("MaxRetries");
         int retry = 0;
@@ -26,14 +26,14 @@ public class BasicHtmlDownloader : IHtmlDownloader
         {
             try
             {
-                var page = await _httpClient.GetStringAsync(url);
+                var page = await _httpClient.GetStringAsync(url, token);
                 return page;
             }
             catch (Exception ex)
             {
                 _logger.LogWarning("Retrying {url}\nPrevious run was failed: {error}", url, ex.Message);
                 retry += 1;
-                await Task.Delay(1000);
+                await Task.Delay(1000, token);
             }
         } while (retry < maxretry);
 

@@ -3,10 +3,15 @@
 @inject IUiLocalizationService Localizer
 
 @* Required *@
-<MudThemeProvider IsDarkMode="true" />
+<MudThemeProvider IsDarkMode="true" Theme="MangaShelfTheme" />
 <MudPopoverProvider />
 @* Needed for dialogs *@
-<MudDialogProvider />
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.Large"
+                   CloseButton="true"
+                   BackdropClick="false"
+                   Position="DialogPosition.TopCenter"
+                   CloseOnEscapeKey="true"/>
 @* Needed for snackbars *@
 <MudSnackbarProvider />
 
@@ -22,7 +27,7 @@
         </MudContainer>
 
         <MudScrollToTop>
-            <MudFab Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
+            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
         </MudScrollToTop>
         <MudAppBar Elevation="0" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
             <MudGrid Justify="Justify.Center">
@@ -46,4 +51,24 @@
     {
         _open = !_open;
     }
+
+    MudTheme MangaShelfTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Primary = Colors.DeepOrange.Darken2,
+            Secondary = Colors.Blue.Darken4,
+            Tertiary = Colors.Teal.Accent4,
+            TextPrimary = Colors.Blue.Lighten3,
+            ActionDefault = Colors.Blue.Lighten3,
+            Surface = "#30333c"
+        },
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography()
+            {
+                FontFamily = new[] { "Poppins", "Helvetica", "Arial", "sans-serif" }
+            }
+        }
+    };
 }

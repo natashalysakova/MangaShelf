@@ -1,4 +1,5 @@
 ﻿using MangaShelf.BL.Enums;
+using MangaShelf.BL.Interfaces;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.Infrastructure.Network;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,7 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
         services.AddLogging(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
+        services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
         services.AddKeyedScoped<IHtmlDownloader, BasicHtmlDownloader>(HtmlDownloaderKeys.Basic);
         services.AddKeyedScoped<IHtmlDownloader, AdvancedHtmlDownloader>(HtmlDownloaderKeys.Advanced);
 

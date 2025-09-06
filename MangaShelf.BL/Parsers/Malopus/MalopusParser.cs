@@ -1,0 +1,328 @@
+﻿using AngleSharp;
+using AngleSharp.Dom;
+using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
+using Microsoft.Extensions.Logging;
+
+namespace MangaShelf.BL.Parsers.Malopus;
+public class MalopusParser : BaseParser
+{
+    public override string SiteUrl => "https://malopus.com.ua/";
+    public override string CatalogUrl => "manga/";
+    public override string Pagination => "?page={0}";
+
+    protected override string? GetAuthors(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-attr-list-item");
+
+        foreach (var item in nodes)
+        {
+            var divs = item.ChildNodes.Where(x => x.NodeName == "DIV");
+            var node = divs.FirstOrDefault(x => x.TextContent == "Автор");
+
+            if (node is null)
+            {
+                continue;
+            }
+
+            return divs.Last().TextContent;
+        }
+
+        return null;
+    }
+
+    protected override string GetCover(IDocument document)
+    {
+        var node = document.QuerySelector(".oct-gallery > img.img-fluid");
+        var attribute = node.Attributes["src"];
+        return attribute.Value;
+    }
+
+    protected override DateTimeOffset? GetReleaseDate(IDocument document)
+    {
+        var html = document.ToHtml();
+
+        int index = html.IndexOf("Орієнтовна дата надходження:");
+        if (index == -1)
+            return null;
+
+
+        var date = html.Substring(index + "Орієнтовна дата надходження:".Length + 1, 10);
+
+        if (date == "0000-00-00")
+            return null;
+
+   
+        if (DateTimeOffset.TryParseExact(date, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AssumeLocal, out DateTimeOffset parsedExactDate))
+        {
+            return parsedExactDate;
+        }
+
+        if (DateTimeOffset.TryParse(date, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out DateTimeOffset parsedDate))
+        {
+            return parsedDate;
+        }
+
+        return null;
+    }
+
+    protected override string GetSeries(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-center-info-item-title");
+        var node = nodes.FirstOrDefault(x => x.InnerHtml == "Серія:");
+        if (node is null)
+            return GetVolumeTitle(document);
+
+
+        return node.NextElementSibling.TextContent.Trim([' ', '\n']);
+    }
+
+    protected override string GetVolumeTitle(IDocument document)
+    {
+        var node = document.QuerySelector(".rm-product-title > h1");
+        var title = node.InnerHtml.ToString();
+
+        var lookupChar = new char[] { '.', '!', '?' };
+        int index = -1;
+        foreach (var ch in lookupChar)
+        {
+            index = node.InnerHtml.IndexOf(ch);
+            if (index != -1)
+            {
+                break;
+            }
+        }
+
+        if(index != -1)
+        {
+             title = title.Substring(index + 1).Trim();
+        }
+
+        if (title.StartsWith("Ранобе") || title.StartsWith("Манґа") || title.StartsWith("Комікс"))
+        {
+            title = title.Substring(title.IndexOf(' ') + 1).Trim();
+        }
+
+        return title;
+    }
+
+    string[] lookupArray = [". Том ", "! Том ", "? Том ", ". Омнібус ", "! Омнібус ", "? Омнібус "];
+
+    public MalopusParser(ILogger<MalopusParser> logger,  IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    {
+    }
+
+    protected override int GetVolumeNumber(IDocument document)
+    {
+        var node = document.QuerySelector(".rm-product-title > h1");
+        var title = node.InnerHtml;
+
+        if (!lookupArray.Any(x => title.Contains(x)))
+        {
+            return -1;
+        }
+
+        var lookupValue = lookupArray.Single(x => title.Contains(x));
+
+        int indexOfVolume, nextWhitespace;
+        indexOfVolume = title.IndexOf(lookupValue) + lookupValue.Length;
+        nextWhitespace = title.IndexOf(' ', indexOfVolume);
+        string volume;
+        if (nextWhitespace == -1)
+        {
+            volume = title.Substring(indexOfVolume).Trim();
+        }
+        else
+        {
+            volume = title.Substring(indexOfVolume, nextWhitespace - indexOfVolume);
+        }
+
+
+        //var volInd = title.IndexOf("Том ");
+
+        //if (volInd == -1)
+        //{
+        //    volInd = title.IndexOf("Омнібус");
+
+        //    if(volInd == -1)
+        //        return volInd;
+        //}
+
+        //var nextWhiteSpace = title.IndexOf(' ', volInd);
+        //string volume;
+        //if (nextWhiteSpace == -1)
+        //{
+        //    volume = title.Substring(volInd + 1).Trim();
+        //}
+        //else
+        //{
+        //    volume = title.Substring(nextWhiteSpace).Trim();
+        //}
+        return int.Parse(volume);
+    }
+
+    protected override VolumeType GetVolumeType(IDocument document)
+    {
+        return VolumeType.Physical;
+    }
+
+    protected override string GetISBN(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-tabs-attributtes-list-item");
+
+        foreach (var node in nodes)
+        {
+            if (node.Children[0].TextContent.Contains("ISBN"))
+            {
+                return node.Children[1].TextContent.Trim();
+            }
+        }
+
+        return string.Empty;
+    }
+
+    protected override int GetTotalVolumes(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-tabs-attributtes-list-item");
+
+        foreach (var node in nodes)
+        {
+            if (node.Children[0].TextContent.Contains("Кількість томів"))
+            {
+                var text = node.Children[1].TextContent;
+
+                if (text.Contains('/'))
+                {
+                    return int.Parse(text.Split('/', StringSplitOptions.RemoveEmptyEntries).First());
+                }
+                else if (text.Contains('(') && text.Contains(')'))
+                {
+                    var indexopen = text.IndexOf('(') + 1;
+                    var indexclose = text.IndexOf(')');
+                    return int.Parse(text.Substring(indexopen, indexclose - indexopen));
+                }
+                else if (int.TryParse(text, out int totalVolumes))
+                {
+                    return totalVolumes;
+                }
+                else
+                {
+                    return GetVolumeNumber(document);
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    protected override SeriesStatus GetSeriesStatus(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-tabs-attributtes-list-item");
+
+        foreach (var node in nodes)
+        {
+            if (node.Children[0].TextContent.Contains("Кількість томів"))
+            {
+                var text = node.Children[1].TextContent;
+
+                if (text.Contains("онґоїнґ"))
+                {
+                    return SeriesStatus.Ongoing;
+                }
+                else if (text == "1")
+                {
+                    return SeriesStatus.OneShot;
+                }
+                else
+                {
+                    return SeriesStatus.Completed;
+                }
+            }
+        }
+
+        return SeriesStatus.Unknown;
+    }
+
+    protected override string? GetOriginalSeriesName(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-tabs-attributtes-list-item");
+
+        foreach (var node in nodes)
+        {
+            if (node.Children[0].TextContent.Contains("Оригінальна назва"))
+            {
+                return node.Children[1].TextContent.Trim();
+            }
+        }
+
+        return string.Empty;
+    }
+
+    protected override string GetPublisher(IDocument document)
+    {
+        return "Mal'opus";
+    }
+
+    protected override string GetVolumeUrlBlockClass()
+    {
+        return ".rm-module-title > a";
+    }
+
+    protected override DateTimeOffset? GetSaleStartDate(IDocument document)
+    {
+        var newsDates = document.QuerySelectorAll(".rm-news-item-date");
+        var dates = new List<DateTimeOffset>();
+        foreach (var item in newsDates)
+        {
+            if(DateTime.TryParseExact(item.InnerHtml, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out var parsedDate))
+            {
+                dates.Add(parsedDate);
+            }
+        }
+
+        var earliest = dates.OrderBy(x => x).FirstOrDefault();
+        return earliest;
+    }
+    protected override bool GetIsPreorder(IDocument document)
+    {
+        var lable = document.QuerySelector(".rm-module-stock");
+
+        if (lable is null)
+            return false;
+
+        return lable.TextContent.Contains("Попереднє замовлення");
+    }
+
+    protected override int? GetAgeRestriction(IDocument document)
+    {
+        var nodes = document.QuerySelectorAll(".rm-product-tabs-attributtes-list-item");
+        string? ageString = null;
+
+        foreach (var node in nodes)
+        {
+            if (node.Children[0].TextContent.StartsWith("Вік"))
+            {
+                ageString = node.Children[1].TextContent.Trim();
+            }
+        }
+
+        if (ageString is not null && ageString.Contains("+"))
+        {
+            ageString = ageString.Replace("+", "").Trim();
+        }
+
+        if (int.TryParse(ageString, out var age))
+        {
+            return age;
+        }
+
+        return null;
+    }
+
+    protected override string? GetDescription(IDocument document)
+    {
+        var node = document.QuerySelector("#product_description");
+        return node?.TextContent;
+    }
+}

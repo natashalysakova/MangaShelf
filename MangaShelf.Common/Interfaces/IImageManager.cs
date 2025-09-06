@@ -13,6 +13,12 @@ public class ImageManager : IImageManager
 
     public string? DownloadFileFromWeb(string url)
     {
+        if(url.Contains('?'))
+        {
+            var indexOfQuestionMark = url.IndexOf('?');
+            url = url.Substring(0, indexOfQuestionMark).Trim('?');
+        }
+
         var extention = new FileInfo(url).Extension;
         var destiantionFolder = Path.Combine(imageDir, "series", DateTime.Today.Year.ToString());
         var filename = $"{Guid.NewGuid()}{extention}";

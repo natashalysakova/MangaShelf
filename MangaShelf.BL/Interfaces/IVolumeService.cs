@@ -1,16 +1,43 @@
 ﻿using MangaShelf.BL.Dto;
-using MangaShelf.Common;
+using MangaShelf.BL.Services;
 using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL;
+using MangaShelf.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MangaShelf.BL.Interfaces;
 
 public interface IVolumeService : IService
 {
-    Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse);
-    Task<(IEnumerable<VolumeDto>, int)> GetAllVolumesAsync(PaginationOptions? paginationOptions = null);
-    Task<VolumeDto?> GetbyIdAsync(Guid id);
+    Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse, CancellationToken token = default);
+    Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IPaginationOptions? paginationOptions = default, CancellationToken token = default);
+    Task<VolumeDto?> GetFullVolumeByIdAsync(Guid id, CancellationToken token = default);
+    Task<IEnumerable<CardVolumeDto>> GetLatestPreorders(int count = 6, CancellationToken token = default);
+    Task<IEnumerable<CardVolumeDto>> GetNewestReleases(int count = 6, CancellationToken token = default);
 
-    Task<IEnumerable<VolumeDto>> GetLatestPreorders(int count = 6);
-    Task<IEnumerable<VolumeDto>> GetNewestReleases(int count = 6);
 
+    Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IPaginationOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions);
+    //Task<(IEnumerable<VolumeDto>, int)> GetAllFullVolumesAsync(IPaginationOptions? paginationOptions = default, CancellationToken token = default);
+}
+
+public interface ISeedService : IService
+{
+
+}
+
+public class SeedService : ISeedService
+{
+    private readonly IDbContextFactory<MangaDbContext> _dbContextFactory;
+
+    public SeedService(IDbContextFactory<MangaDbContext> dbContextFactory)
+    {
+        _dbContextFactory = dbContextFactory;
+    }
+
+
+    public Country GetCountryByCode(string countryCode)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return context.Countries.FirstOrDefault(c => c.CountryCode == countryCode);
+    }
 }

@@ -1,7 +1,9 @@
 ﻿using MangaShelf.BL.Dto;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
+using MangaShelf.DAL;
 using MangaShelf.DAL.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Services;
@@ -9,42 +11,33 @@ namespace MangaShelf.BL.Services;
 public class CountryService : ICountryService
 {
     private readonly ILogger<CountryService> _logger;
-    private readonly ICountryDomainService _countryRepository;
+    private readonly IDbContextFactory<MangaDbContext> _dbContextFactory;
 
-    public CountryService(ILogger<CountryService> logger, ICountryDomainService countryRepository)
+    public CountryService(ILogger<CountryService> logger, IDbContextFactory<MangaDbContext> dbContextFactory)
     {
         _logger = logger;
-        _countryRepository = countryRepository;
-    }
-    public async Task<IEnumerable<CountryDto>> GetAllCountriesAsync()
-    {
-        var countries = await _countryRepository.GetAllCountriesAsync();
-
-        return countries
-            .Select(country => country.ToDto());
+        _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<CountryDto?> GetCountryByCodeAsync(string countryCode)
+    public async Task<CountryDto?> GetCountryByCodeAsync(string countryCode, CancellationToken token = default)
     {
-        var country = await _countryRepository.GetByCountryCodeAsync(countryCode);
-        if (country is null)
-        {
-            _logger.LogWarning("Country with code {CountryCode} not found", countryCode);
-            return null;
-        }
+        using var context = _dbContextFactory.CreateDbContext();
+        var serviceFactory = new DomainServiceFactory(context);
+        var countryDomainService = serviceFactory.GetDomainService<ICountryDomainService>();
 
-        return country.ToDto();
+        var country = await countryDomainService.GetByCountryCodeAsync(countryCode, token);
+
+        return country?.ToDto();
     }
 
-    public async Task<string?> GetCountryNameByCodeAsync(string countryCode)
+    public async Task<string?> GetCountryNameByCodeAsync(string countryCode, CancellationToken token = default)
     {
-        var country = await _countryRepository.GetByCountryCodeAsync(countryCode);
-        if (country is null)
-        {
-            _logger.LogWarning("Country with code {CountryCode} not found", countryCode);
-            return null;
-        }
+        using var context = _dbContextFactory.CreateDbContext();
+        var serviceFactory = new DomainServiceFactory(context);
+        var countryDomainService = serviceFactory.GetDomainService<ICountryDomainService>();
 
-        return country.Name;
+        var country = await countryDomainService.GetByCountryCodeAsync(countryCode, token);
+
+        return country?.Name;
     }
 }

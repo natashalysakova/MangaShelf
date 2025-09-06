@@ -52,7 +52,7 @@ public abstract class LocalizationService<T>(IStringLocalizer<T> localizer, ILog
         if (result.ResourceNotFound || string.IsNullOrEmpty(result.Value))
         {
             result = new LocalizedString(result.Name, "{" + result.Name + "}", result.ResourceNotFound, result.SearchedLocation);
-            logger.LogWarning("Translation for '{name}' {state}. Fallback value {value}", result.Name, result.ResourceNotFound ? "not found" : "is empty", result.Value);
+            logger.LogTrace("Translation for '{name}' {state}. Fallback value {value}", result.Name, result.ResourceNotFound ? "not found" : "is empty", result.Value);
         }
 
         return result;

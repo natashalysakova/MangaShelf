@@ -23,11 +23,16 @@ public class AuditInterceptor : SaveChangesInterceptor
         var context = eventData.Context;
         if (context is MangaDbContext mangaContext)
         {
-            foreach (var entry in mangaContext.ChangeTracker.Entries<IEntity>())
+            foreach (var entry in mangaContext.ChangeTracker.Entries<IAuditableEntity>())
             {
                 if (string.IsNullOrEmpty(entry.Entity.CreatedBy))
                 {
                     entry.Entity.CreatedBy = "system";
+                }
+
+                if(string.IsNullOrEmpty(entry.Entity.UpdatedBy))
+                {
+                    entry.Entity.UpdatedBy = "system";
                 }
 
                 if (entry.State == EntityState.Added)
@@ -39,14 +44,16 @@ public class AuditInterceptor : SaveChangesInterceptor
                 {
                     entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
                 }
-                else if (entry.State == EntityState.Deleted)
+            }
+
+            foreach (var entry in mangaContext.ChangeTracker.Entries<IDeletableEntity>())
+            {
+                if (entry.State == EntityState.Deleted)
                 {
                     entry.Entity.IsDeleted = true;
                     entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
                     entry.State = EntityState.Modified; // Change state to Modified to avoid actual deletion
                 }
-
-                
             }
         }
     }

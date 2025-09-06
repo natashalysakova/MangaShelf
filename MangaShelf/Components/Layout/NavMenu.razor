@@ -1,12 +1,11 @@
-﻿
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
 @inject IUiLocalizationService Localizer
 
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-center px-0 my-0">
 
-        <MudIcon Icon="@Icons.Custom.Brands.MudBlazor" Size="Size.Large" />
-        <MudText Typo="Typo.h5" Class="mx-4">@Localizer["MangaShelf"]</MudText>
+    <MudIcon Icon="@Icons.Custom.Brands.MudBlazor" Size="Size.Large" />
+    <MudText Typo="Typo.h5" Class="mx-4">@Localizer["MangaShelf"]</MudText>
 
 
 
@@ -24,18 +23,24 @@
 
     <MudSpacer />
 
-            <MudButton Href="/preorders"
-                       StartIcon="@Icons.Material.Outlined.ViewList"
-                       Variant="Variant.Text"
-                       Class="manga-header-menu-item">
-                @Localizer["Preorders"]
-            </MudButton>
-            <MudButton Href="/my-shelf"
-                       StartIcon="@Icons.Material.Outlined.Home"
-                       Variant="Variant.Text"
-                       Class="manga-header-menu-item">
-                @Localizer["MyShelf"]
-            </MudButton>
+    <MudButton Href="/preorders"
+               StartIcon="@Icons.Material.Outlined.ViewList"
+               Variant="Variant.Text"
+               Class="manga-header-menu-item">
+        @Localizer["Preorders"]
+    </MudButton>
+    <MudButton Href="/my-shelf"
+               StartIcon="@Icons.Material.Outlined.Home"
+               Variant="Variant.Text"
+               Class="manga-header-menu-item">
+        @Localizer["MyShelf"]
+    </MudButton>
+    <MudButton Href="/admin"
+               StartIcon="@Icons.Material.Outlined.Key"
+               Variant="Variant.Text"
+               Class="manga-header-menu-item">
+        @Localizer["Admin"]
+    </MudButton>
     <CultureSelector />
 </MudContainer>
 

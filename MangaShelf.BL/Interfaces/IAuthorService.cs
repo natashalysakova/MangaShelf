@@ -5,5 +5,5 @@ namespace MangaShelf.BL.Interfaces;
 
 public interface IAuthorService : IService
 {
-    Task<IEnumerable<AuthorDto>> GetByNames(IEnumerable<string> authors);
+    Task<IEnumerable<AuthorDto>> GetByNamesAsync(IEnumerable<string> authors, CancellationToken token = default);
 }

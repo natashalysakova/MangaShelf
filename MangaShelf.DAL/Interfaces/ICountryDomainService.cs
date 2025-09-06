@@ -1,10 +1,9 @@
-﻿using MangaShelf.DAL.Models;
+﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.DAL.Interfaces;
 
-public interface ICountryDomainService : IDomainService<Country>
+public interface ICountryDomainService : IDomainService<Country>, IShelfDomainService
 {
-    Task<ICollection<Country>> GetAllCountriesAsync();
-    Task<Country?> GetByCountryCodeAsync(string countryCode);
-    Task UpdateFlagUrl(Guid id, string v);
+    Task<Country?> GetByCountryCodeAsync(string countryCode, CancellationToken token = default);
 }

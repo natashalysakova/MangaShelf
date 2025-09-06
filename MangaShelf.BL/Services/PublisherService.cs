@@ -4,23 +4,28 @@ using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 using MangaShelf.BL.Mappers;
 using MangaShelf.BL.Dto;
+using Microsoft.EntityFrameworkCore;
+using MangaShelf.DAL;
 
 namespace MangaShelf.BL.Services;
 
 public class PublisherService : IPublisherService
 {
-    private readonly IPublisherDomainService _publisherRepository;
-    private readonly ICountryDomainService _countryRepository;
+    private readonly IDbContextFactory<MangaDbContext> _dbContextFactory;
 
-    public PublisherService(ILogger<Publisher> logger, IPublisherDomainService publisherRepository, ICountryDomainService countryRepository)
+    public PublisherService(ILogger<Publisher> logger, IDbContextFactory<MangaDbContext> dbContextFactory) 
     {
-        _publisherRepository = publisherRepository;
-        _countryRepository = countryRepository;
+        _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<PublisherDto?> GetByName(string publisherName)
+    public async Task<PublisherSimpleDto?> GetByNameAsync(string publisherName, CancellationToken token = default)
     {
-        var publisher = await _publisherRepository.GetByName(publisherName);
+        using var context = _dbContextFactory.CreateDbContext();
+        var serviceFactory = new DomainServiceFactory(context);
+        var publisherDomainService = serviceFactory.GetDomainService<IPublisherDomainService>();
+
+        var publisher = await publisherDomainService.GetByNameAsync(publisherName, token);
+
         return publisher?.ToDto();
     }
 }

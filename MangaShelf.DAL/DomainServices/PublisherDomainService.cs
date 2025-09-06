@@ -6,12 +6,12 @@ namespace MangaShelf.DAL.DomainServices;
 
 public class PublisherDomainService : BaseDomainService<Publisher>, IPublisherDomainService
 {
-    public PublisherDomainService(MangaDbContext dbContext) : base(dbContext)
+    internal PublisherDomainService(MangaDbContext context) : base(context)
     {
     }
 
-    public async Task<Publisher?> GetByName(string name)
+    public async Task<Publisher?> GetByNameAsync(string name, CancellationToken token = default)
     {
-        return await _context.Publishers.FirstOrDefaultAsync(x => x.Name == name);
+        return await _context.Publishers.FirstOrDefaultAsync(x => x.Name == name, token);
     }
 }

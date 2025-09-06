@@ -5,7 +5,7 @@ namespace MangaShelf.DAL.DomainServices;
 
 public class UserDomainService : BaseDomainService<User>, IUserDomainService
 {
-    public UserDomainService(MangaDbContext dbContext) : base(dbContext)
+    internal UserDomainService(MangaDbContext context) : base(context)
     {
     }
 }
