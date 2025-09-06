@@ -1,0 +1,132 @@
+﻿<MudDialog>
+    <DialogContent>
+        @if (Volume != null)
+        {
+            <MudGrid Spacing="6">
+                <MudItem xs="12">
+
+                    <MudText Typo="Typo.h4">@Volume.Series.Title @Volume.Title</MudText>
+                    <MudText Typo="Typo.caption">@Volume.Series.OriginalName</MudText>
+                    <MudText Typo="Typo.h4"></MudText>
+                </MudItem>
+                <MudItem>
+                    <MudStack Row>
+                        <MudItem xs="6" sm="4">
+                            <MudPaper Elevation="2">
+                                <MudImage Fluid="true" Src="@Volume.CoverImageUrl"></MudImage>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="4" sm="4">
+                            <MudStack Row Breakpoint="Breakpoint.SmAndDown" AlignItems="AlignItems.Center">
+                                <MudToggleIconButton Icon="@notFiled"
+                                                     Color="@Color.Error"
+                                                     ToggledIcon="@likeFiled"
+                                                     ToggledColor="@Color.Success" />
+                                
+                                <MudIconButton Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Rounded.PlaylistAdd"></MudIconButton>
+                            </MudStack>
+                            <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                                <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
+                                    <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
+                                    <MudText>Бажають</MudText>
+                                </MudStack>
+                                <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
+                                    <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
+                                    <MudText>В бібліотеці</MudText>
+                                </MudStack>
+                                <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
+                                    <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
+                                    <MudText>Читають</MudText>
+                                </MudStack>
+                                <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
+                                    <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
+                                    <MudText>Прочитано</MudText>
+                                </MudStack>
+                            </MudStack>
+                            <MudStack AlignItems="AlignItems.Center">
+                                <MudChipSet T="Color" SelectionMode="SelectionMode.ToggleSelection">
+                                    <MudChip Icon="@Icons.Material.Rounded.ThumbUp" Text="Like" Color="Color.Primary" Value="@Color.Primary"></MudChip>
+                                    <MudChip Icon="@Icons.Material.Rounded.ThumbDown" Text="Dislike" Color="Color.Secondary" Value="@Color.Secondary"></MudChip>
+                                </MudChipSet>
+                                <MudRating></MudRating>
+                                <MudText>@Volume.AvgRating</MudText>
+
+                            </MudStack>
+
+                        </MudItem>
+                        <MudItem xs="8" sm="4">
+                            <MudStack>
+                                <MudTextField Variant="Variant.Filled" Label="Author" ReadOnly="true" Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
+
+                                <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                                    <MudTextField Variant="Variant.Filled" Label="Publisher" ReadOnly="true" Value="@Volume.Series.Publisher.Name"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="ISBN" ReadOnly="true" Value="@Volume.ISBN"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="AGE" ReadOnly="true" Value="@Volume.AgeRestriction"></MudTextField>
+                                </MudStack>
+
+                                <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                                    <MudTextField Variant="Variant.Filled" Label="Status" ReadOnly="true" Value="@Volume.Series.Status"></MudTextField>
+
+                                    <MudTextField Variant="Variant.Filled" Label="Volume" ReadOnly="true" Value="@Volume.Number"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="Total Volumes" ReadOnly="true" Value="@Volume.Series.TotalVolumes"></MudTextField>
+                                </MudStack>
+                                <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+
+                                    <MudTextField ShrinkLabel="true" Variant="Variant.Filled" Label="PreorderStart" ReadOnly="true" Value="@Volume.PreorderStart?.ToString("dd.MM.yyyy")"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="ReleaseDate" ReadOnly="true" Value="@Volume.ReleaseDate?.ToString("dd.MM.yyyy")"></MudTextField>
+                                </MudStack>
+                            </MudStack>
+                        </MudItem>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6 mb-4">
+                        <MudTabPanel Text="Description">
+                            <MudText>@Volume.Description</MudText>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Series">
+                            <MudText>Content Two</MudText>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Reviews">
+                            <MudText>Content Two</MudText>
+                        </MudTabPanel>
+                    </MudTabs>
+                </MudItem>
+            </MudGrid>
+        }
+        else
+        {
+            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">OK</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Guid VolumeId { get; set; }
+
+    [Inject]
+    public required IVolumeService VolumeService { get; set; }
+
+    public VolumeDto? Volume { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Volume = await VolumeService.GetFullVolumeByIdAsync(VolumeId);
+    }
+
+    const string likeFiled = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>heart</title><path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" /></svg>""";
+    const string notFiled = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>heart-outline</title><path d="M12.1,18.55L12,18.65L11.89,18.55C7.14,14.24 4,11.39 4,8.5C4,6.5 5.5,5 7.5,5C9.04,5 10.54,6 11.07,7.36H12.93C13.46,6 14.96,5 16.5,5C18.5,5 20,6.5 20,8.5C20,11.39 16.86,14.24 12.1,18.55M16.5,3C14.76,3 13.09,3.81 12,5.08C10.91,3.81 9.24,3 7.5,3C4.42,3 2,5.41 2,8.5C2,12.27 5.4,15.36 10.55,20.03L12,21.35L13.45,20.03C18.6,15.36 22,12.27 22,8.5C22,5.41 19.58,3 16.5,3Z" /></svg>""";
+}

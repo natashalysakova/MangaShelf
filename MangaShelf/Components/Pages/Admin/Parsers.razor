@@ -1,0 +1,198 @@
+﻿@page "/admin/parsers"
+@using MangaShelf.DAL.System.Models
+@using System.Collections.ObjectModel
+
+@inject IParserReadService parserService;
+@inject IJobRequester jobManager;
+@implements IDisposable
+
+
+<MudPaper Class="p-4 mb-4 mt-4">
+    <h3>Parsers</h3>
+    <MudStack Row>
+        <MudTextField @bind-Value="url" Label="Paste URL for parsing" Variant="Variant.Filled"></MudTextField>
+        <MudButton OnClick="RunForUrl" Color="Color.Primary" Variant="Variant.Filled">Run</MudButton>
+    </MudStack>
+</MudPaper>
+
+@if (statuses != null)
+{
+    <MudGrid Justify="Justify.Center" Class="mb-4">
+        @foreach (ParserStatusDto parser in statuses)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3" xl="2" xxl="1">
+                <MudPaper Elevation="3" Class="p-4">
+                    @{
+                        var color = parser.Status switch
+                        {
+                            ParserStatus.Idle => Color.Default,
+                            ParserStatus.Parsing => Color.Success,
+                            ParserStatus.GatheringVolumes => Color.Info,
+                            ParserStatus.Waiting => Color.Warning,
+                            _ => Color.Default
+                        };
+                    }
+                    <MudGrid>
+                        <MudItem xs="7">
+                            <MudStack>
+                                <MudStack Row>
+
+                                    @if (parser.Status == ParserStatus.Parsing)
+                                    {
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Book" Color="@color"></MudIcon>
+                                    }
+                                    else if (parser.Status == ParserStatus.Idle)
+                                    {
+                                        <MudIconButton OnClick="(() => RunParser(parser.Id))" Size="Size.Small" Icon="@Icons.Material.Rounded.PlayArrow" Color="Color.Success"></MudIconButton>
+                                    }
+                                    else if (parser.Status == ParserStatus.Waiting)
+                                    {
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Timer" Color="@color"></MudIcon>
+                                    }
+                                    else if (parser.Status == ParserStatus.GatheringVolumes)
+                                    {
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Cached" Color="@color"></MudIcon>
+                                    }
+                                    else
+                                    {
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Help" Color="Color.Default"></MudIcon>
+                                    }
+                                    <MudText>@parser.ParserName</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.h5" Color="@color"> @parser.Status </MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="5">
+                            @if (parser.Status == ParserStatus.Parsing)
+                            {
+                                <MudProgressCircular Color="@color" Size="Size.Large" Value="@parser.Progress">
+                                    <ChildContent>@parser.Progress.ToString("N2")</ChildContent>
+                                </MudProgressCircular>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+<MudTable Items="jobs" Hover="true" Breakpoint="Breakpoint.Sm">
+    <HeaderContent>
+        <MudTh></MudTh>
+        <MudTh>Parser</MudTh>
+        <MudTh>Created</MudTh>
+        <MudTh>Started</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Finished</MudTh>
+        <MudTh>Url</MudTh>
+        <MudTh>Progress</MudTh>
+        <MudTh>Error</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="row">
+        <MudTd>
+            @if (row.Status == RunStatus.Waiting || row.Status == RunStatus.Running)
+            {
+                <MudIconButton Size="Size.Small" OnClick="(() => CancelJob(row.Id))" Icon="@Icons.Material.Rounded.Cancel" Color="Color.Error"></MudIconButton>
+            }
+        </MudTd>
+        <MudTd DataLabel="Parser">@row.ParserStatus.ParserName</MudTd>
+        <MudTd DataLabel="Created">@row.Created.ToLocalTime()</MudTd>
+        <MudTd DataLabel="Started">@row.Started.ToLocalTime()</MudTd>
+        <MudTd DataLabel="Status">@row.Status</MudTd>
+        <MudTd DataLabel="Finished">@row.Finished?.ToLocalTime()</MudTd>
+        <MudTd DataLabel="Url">@row.Url</MudTd>
+        <MudTd DataLabel="Progress">@row.Progress.ToString("N2")</MudTd>
+        <MudTd DataLabel="Error">
+            @foreach (var error in row.Errors)
+            {
+                @if (error.ExceptionMessage != null)
+                {
+                    <li>@error.ExceptionMessage</li>
+                }
+                if (error.ErrorMessage != null)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+
+
+
+
+@code {
+    string url = null;
+    CancellationTokenSource tokenSource = new();
+    IEnumerable<ParserJob> jobs;
+    IEnumerable<ParserStatusDto> statuses = null;
+    System.DateTimeOffset lastCheckTime;
+    private Dictionary<Guid, CancellationToken> jobDictionary = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        lastCheckTime = System.DateTimeOffset.Now;
+        jobs = await parserService.GetJobs(100);
+
+        RunParse();
+    }
+
+    private async Task RunParse()
+    {
+        do
+        {
+            statuses = await parserService.GetStatusesAsync(tokenSource.Token);
+
+            StateHasChanged();
+
+            // var result = await parserService.GetNewJobsSince(lastCheckTime, tokenSource.Token);
+            // lastCheckTime = System.DateTimeOffset.Now;
+
+            jobs = await parserService.GetJobs(100);
+
+            await Task.Delay(1000);
+
+        } while (!tokenSource.IsCancellationRequested);
+    }
+
+    // private void AddToJobList(IEnumerable<ParserRun> newJobs)
+    // {
+    //     foreach (var job in newJobs)
+    //     {
+    //         var existingJob = jobs.FirstOrDefault(x => x.Id == job.Id);
+    //         if (existingJob == null)
+    //         {
+    //             jobs.Insert(0, job);
+    //         }
+    //     }
+    // }
+
+    public void Dispose()
+    {
+        if (tokenSource != null)
+        {
+            tokenSource.Cancel();
+        }
+    }
+
+    private async Task RunParser(Guid id)
+    {
+        await jobManager.CreateParserJob(id);
+    }
+    private async Task RunForUrl(MouseEventArgs args)
+    {
+        if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+        {
+            await jobManager.CreateSingleJob(url);
+        }
+    }
+    private async Task CancelJob(Guid? id)
+    {
+        if (id != null)
+        {
+            await jobManager.CancelJob(id.Value);
+        }
+    }
+}

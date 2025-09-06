@@ -1,0 +1,33 @@
+﻿@inject IDialogService Dialog
+
+
+@if (Volume != null)
+{
+    <MudCard @onclick="OpenVolumeAsync" Style="position:relative;" Class="manga-card ">
+        <div class="image-container">
+            <img class="card-image" src="@Volume.CoverImageUrl" alt="@Volume.SeriesName" />
+        </div>
+    </MudCard>
+}
+else
+{
+    <MudCard Style="position:relative;" Class="manga-card ">
+        <div class="image-container">
+            <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Rectangle"></MudSkeleton>
+        </div>
+    </MudCard>
+
+}
+
+@code {
+    [Parameter]
+    public CardVolumeDto? Volume { get; set; }
+
+
+    private async Task OpenVolumeAsync()
+    {
+        var parameters = new DialogParameters<VolumeDetailedPage>();
+        parameters.Add(x => x.VolumeId, Volume.Id);
+        await Dialog.ShowAsync<VolumeDetailedPage>(string.Empty, parameters);
+    }
+}

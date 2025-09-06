@@ -1,0 +1,57 @@
+﻿@inherits LayoutComponentBase
+
+@inject IUiLocalizationService Localizer
+
+@* Required *@
+<MudThemeProvider IsDarkMode="true" />
+<MudPopoverProvider />
+@* Needed for dialogs *@
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.Large"
+                   CloseButton="true"
+                   BackdropClick="false"
+                   Position="DialogPosition.Center"
+                   CloseOnEscapeKey="true" />
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Class="manga-gradient-background">
+        <NavMenu />
+    </MudAppBar>
+    <MudDrawer Variant="DrawerVariant.Persistent" Open="true" ClipMode="DrawerClipMode.Docked">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">Admin panel</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store">Dashboard</MudNavLink>
+            <MudNavLink Href="/admin/volumes" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store">Volumes</MudNavLink>
+            <MudNavLink Href="/admin/series" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LocalLibrary">Series</MudNavLink>
+            <MudNavLink Href="/admin/publishers" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Forum">Publishers</MudNavLink>
+            <MudNavLink Href="/admin/users" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Forum">Users</MudNavLink>
+            <MudNavLink Href="/admin/parsers" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Forum">Parsers</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code
+{
+    private bool _open = false;
+
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
+}

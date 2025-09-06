@@ -3,9 +3,13 @@
     "Docker Compose": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "mangashelf",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
       "serviceActions": {
         "mangashelf": "StartDebugging",
-        "mangashelf.api": "StartDebugging"
+        "mangashelf.db": "StartWithoutDebugging",
+        "mangashelf.parser": "StartDebugging"
       }
     }
   }

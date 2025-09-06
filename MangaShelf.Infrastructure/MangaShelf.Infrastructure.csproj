@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.8" />
+    <PackageReference Include="PuppeteerSharp" Version="20.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MangaShelf.BL\MangaShelf.BL.csproj" />
+    <ProjectReference Include="..\MangaShelf.Common\MangaShelf.Common.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL.Identity\MangaShelf.DAL.Identity.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
+  </ItemGroup>
+
+</Project>

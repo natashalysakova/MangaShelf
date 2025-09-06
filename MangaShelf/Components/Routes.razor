@@ -8,4 +8,13 @@
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(Layout.MainLayout)">
+            <h2>Oops! That page can't be found.</h2>
+        </LayoutView>
+    </NotFound>
 </Router>
+@code
+{
+
+}

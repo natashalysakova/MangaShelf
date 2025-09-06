@@ -1,9 +1,10 @@
 ﻿@page "/Account/Manage/Disable2fa"
 
+@using MangaShelf.Components.Account
+@using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Identity
-@using MangaShelf.Data
 
-@inject UserManager<ApplicationUser> UserManager
+@inject UserManager<MangaIdentityUser> UserManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<Disable2fa> Logger
@@ -31,7 +32,7 @@
 </div>
 
 @code {
-    private ApplicationUser user = default!;
+    private MangaIdentityUser user = default!;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;

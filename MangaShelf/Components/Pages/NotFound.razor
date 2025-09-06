@@ -1,0 +1,15 @@
+﻿@page "/404"
+@inject IHttpContextAccessor httpContextAccessor
+
+<h1>404 - Page not found</h1>
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        if (httpContextAccessor.HttpContext is { Response.HasStarted: false })
+        {
+            httpContextAccessor.HttpContext.Response.StatusCode = 404;
+        }
+        return base.OnInitializedAsync();
+    }
+}

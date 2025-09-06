@@ -1,11 +1,12 @@
 ﻿@page "/Account/Manage/TwoFactorAuthentication"
 
+@using MangaShelf.Components.Account
+@using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Http.Features
 @using Microsoft.AspNetCore.Identity
-@using MangaShelf.Data
 
-@inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
+@inject SignInManager<MangaIdentityUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 

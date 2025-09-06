@@ -1,23 +1,74 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
+@inject IUiLocalizationService Localizer
+
+@* Required *@
+<MudThemeProvider IsDarkMode="true" Theme="MangaShelfTheme" />
+<MudPopoverProvider />
+@* Needed for dialogs *@
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.Large"
+                   CloseButton="true"
+                   BackdropClick="false"
+                   Position="DialogPosition.TopCenter"
+                   CloseOnEscapeKey="true"/>
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Class="manga-gradient-background">
         <NavMenu />
-    </div>
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="catalog-container">
+            <MudPaper Width="100%" Square="true" Class="catalog-paper">
+                @Body
+            </MudPaper>
+        </MudContainer>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <MudScrollToTop>
+            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
+        </MudScrollToTop>
+        <MudAppBar Elevation="0" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
+            <MudGrid Justify="Justify.Center">
+                <MudText Style="font-size:small">COPYRIGHT</MudText>
+            </MudGrid>
+        </MudAppBar>
+    </MudMainContent>
+</MudLayout>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code
+{
+    private bool _open = false;
+
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
+
+    MudTheme MangaShelfTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Primary = Colors.DeepOrange.Darken2,
+            Secondary = Colors.Blue.Darken4,
+            Tertiary = Colors.Teal.Accent4,
+            TextPrimary = Colors.Blue.Lighten3,
+            ActionDefault = Colors.Blue.Lighten3,
+            Surface = "#30333c"
+        },
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography()
+            {
+                FontFamily = new[] { "Poppins", "Helvetica", "Arial", "sans-serif" }
+            }
+        }
+    };
+}

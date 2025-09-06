@@ -1,0 +1,63 @@
+﻿@page "/catalog"
+@using MangaShelf.BL.Dto
+@using MudBlazor.Services
+@inject IVolumeService VolumeService
+
+<MudPaper Class="p-4" Elevation="3" Style="background-color: transparent">
+    <MudTextField T="string" Label="OnFocus Helper" Variant="Variant.Outlined" />
+</MudPaper>
+
+
+@if (_loading != true)
+{
+    <div class="d-flex flex-column align-center mb-8">
+        <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="_selectedPage" Class="mt-4" />
+    </div>
+    <MudGrid Justify="@justification" Spacing="6">
+        @foreach (var volume in volumes)
+        {
+            <MudItem xs="6" sm="3" md="2" lg="2">
+                <SmallCard Volume="@volume"/>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+
+
+@code {
+    private bool _loading;
+
+    private int _totalPages;
+    private int _selectedPage
+    {
+        get => _selectedPageValue;
+        set
+        {
+            _selectedPageValue = value;
+            ReloadVolumes();
+        }
+    }
+    private int _selectedPageValue = 1;
+
+
+    Justify justification = Justify.FlexStart;
+
+    IEnumerable<CardVolumeDto> volumes = Enumerable.Empty<CardVolumeDto>();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadVolumes();
+    }
+
+    private async Task ReloadVolumes()
+    {
+        PaginationOptions paginationOption = new() { PageNumber = _selectedPage, PageSize = 24 };
+        (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
+        _totalPages = (int) Math.Floor((double)(_totalPages / paginationOption.PageSize));
+        StateHasChanged();
+    }
+
+}
