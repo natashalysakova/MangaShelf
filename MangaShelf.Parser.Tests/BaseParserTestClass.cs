@@ -21,11 +21,17 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
             {
                 {"HtmlDownloaders:MaxRetries", "5"}
             })
+            .AddJsonFile("appsettings.json")
             .Build();
 
         var services = new ServiceCollection();
 
         services.AddSingleton<IConfiguration>(configuration);
+
+        services
+            .Configure<HtmlDownloadOptions>(
+                configuration
+                .GetSection(HtmlDownloadOptions.SectionName));
 
         services.AddLogging(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));

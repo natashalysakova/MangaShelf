@@ -114,12 +114,12 @@ public class ParserWriteService : IParserWriteService
         return true;
     }
 
-    public async Task SetToParsingStatus(Guid runId, CancellationToken token)
+    public async Task SetToParsingStatus(Guid runId, IEnumerable<string> volumes, CancellationToken token)
     {
-        await SetStatusInternal(runId, ParserStatus.Parsing, token);
+        await SetStatusInternal(runId, ParserStatus.Parsing, volumes, token);
     }
 
-    public async Task SetProgress(Guid runId, double progress, CancellationToken token)
+    public async Task SetProgress(Guid runId, double progress, string url, bool isUpdated, CancellationToken token)
     {
         using var context = _dbContextFactory.CreateDbContext();
 
@@ -140,16 +140,24 @@ public class ParserWriteService : IParserWriteService
         }
 
         run.Progress = progress;
+        if(isUpdated)
+        {
+            run.VolumesUpdated.Add(url);
+        }
+        else
+        {
+            run.VolumesAdded.Add(url);
+        }
 
         await context.SaveChangesAsync(token);
     }
 
     public async Task SetToFinishedStatus(Guid runId, CancellationToken token)
     {
-        await SetStatusInternal(runId, ParserStatus.Idle, token);
+        await SetStatusInternal(runId, ParserStatus.Idle, null, token);
     }
 
-    private async Task SetStatusInternal(Guid runId, ParserStatus status, CancellationToken token)
+    private async Task SetStatusInternal(Guid runId, ParserStatus status, IEnumerable<string>? volumes, CancellationToken token)
     {
         using var context = _dbContextFactory.CreateDbContext();
 
@@ -170,6 +178,11 @@ public class ParserWriteService : IParserWriteService
         }
 
         parserStatus.Status = status;
+
+        if(status == ParserStatus.Parsing && volumes is not null)
+        {
+           run.VolumesFound = volumes.Count();
+        }
 
         if (status == ParserStatus.Idle)
         {
@@ -319,7 +332,7 @@ public class ParserWriteService : IParserWriteService
         {
             return;
         }
-
+        job.VolumesFound = 1;
         job.Status = RunStatus.Running;
         job.ParserStatus.Status = ParserStatus.Parsing;
         job.Started = DateTimeOffset.Now;

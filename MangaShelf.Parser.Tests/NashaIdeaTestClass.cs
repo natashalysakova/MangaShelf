@@ -38,7 +38,7 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Том 10", result.Title);
-        Assert.AreEqual("Чi \"Життя однієї киці\"", result.Series);
+        Assert.AreEqual("Чi “Життя однієї киці”", result.Series);
         Assert.IsNull(result.Authors);
         Assert.AreEqual(10, result.VolumeNumber);
         Assert.AreEqual("https://nashaidea.com/wp-content/uploads/2024/07/chi10-x1080.webp", result.Cover);
@@ -98,11 +98,11 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
     [TestMethod]
     public async Task NashaIdea_PreorderDate_SholdBe_LastDayOfMonth()
     {
-        var result = await Parser.Parse("https://nashaidea.com/product/given-1/");
+        var result = await Parser.Parse("https://web.archive.org/web/20250210143653/https://nashaidea.com/product/stalevyj-alhimik-tom-6/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(DateTime.Parse("2025-07-09"), result.PreorderStartDate);
-        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.Release);
+        Assert.AreEqual(DateTime.Parse("2025-02-04"), result.PreorderStartDate);
+        Assert.AreEqual(DateTime.Parse("2025-03-31"), result.Release);
         Assert.AreEqual(true, result.IsPreorder);
     }
 

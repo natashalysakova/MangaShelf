@@ -109,7 +109,7 @@ public class ParserService : IParseService
             _logger.LogDebug($"{volumesToParse.Count()} volumes left after filtering");
         }
 
-        await statusService.SetToParsingStatus(jobId, token);
+        await statusService.SetToParsingStatus(jobId, volumesToParse, token);
 
         var progress = 0.0;
         var step = 100.0 / volumesToParse.Count;
@@ -130,10 +130,10 @@ public class ParserService : IParseService
 
             await Task.Delay(_options.DelayBetweenParse, token);
 
-            await ParsePageInternal(jobId, volume, parser, token);
+            var result = await ParsePageInternal(jobId, volume, parser, token);
 
             progress += step;
-            await statusService.SetProgress(jobId, progress, token);
+            await statusService.SetProgress(jobId, progress, volume, result == State.Updated, token);
         }
 
         await statusService.SetToFinishedStatus(jobId, token);
@@ -142,12 +142,13 @@ public class ParserService : IParseService
     }
 
 
-    private async Task<bool> ParsePageInternal(Guid jobId, string url, IPublisherParser parser, CancellationToken token)
+    private async Task<State> ParsePageInternal(Guid jobId, string url, IPublisherParser parser, CancellationToken token)
     {
         using var scope = _serviceProvider.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<IParserWriteService>();
 
         await service.RunSingleJob(jobId);
+        State result = default;
 
         ParsedInfo volumeInfo;
         try
@@ -159,25 +160,25 @@ public class ParserService : IParseService
         {
             await service.RecordError(jobId, url, ex, token: token);
             _logger.LogWarning($"{parser.GetType().Name}: Cannot parse volume {url} : {ex.Message}");
-            return false;
+            return result;
         }
 
         try
         {
-            await CreateOrUpdateFromParsedInfoAsync(volumeInfo, token);
+            result = await CreateOrUpdateFromParsedInfoAsync(volumeInfo, token);
         }
         catch (Exception ex)
         {
             await service.RecordError(jobId, url, volumeInfo.Json, ex, token);
             _logger.LogWarning($"{parser.GetType().Name}: Cannot create volume {volumeInfo.Series} - {volumeInfo.Title}: {ex.Message}");
-            return false;
+            return result;
         }
 
         await service.SetSingleJobToFinishedStatus(jobId);
-        return true;
+        return result;
     }
 
-    public async Task CreateOrUpdateFromParsedInfoAsync(ParsedInfo volumeInfo, CancellationToken token = default)
+    public async Task<State> CreateOrUpdateFromParsedInfoAsync(ParsedInfo volumeInfo, CancellationToken token = default)
     {
         using var context = await _dbContextFactory.CreateDbContextAsync();
         var domainContextFactory = new DomainServiceFactory(context);
@@ -295,6 +296,8 @@ public class ParserService : IParseService
 
         var result = await volumeDomainService.AddOrUpdate(volume, true, token);
         _logger.LogInformation($"{result.Entity.Series.Title} {volume.Title} {volume.Number} was {result.State}");
+
+        return result.State;
     }
 
     public async Task RunParseJob(Guid jobId, CancellationToken token)

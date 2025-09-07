@@ -19,8 +19,9 @@ public interface IDomainService<T>
 
 public enum State
 {
+    None,
     Added,
     Updated,
     Deleted,
-    Unchanged
+    Unchanged,
 }

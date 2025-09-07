@@ -41,7 +41,7 @@ public class NashaIdeaParser : BaseParser
         var tag = document.QuerySelector("h1.product_title");
         var title = tag.InnerHtml;
 
-        return GetVolumeTitleFromDefaultTitle(title);  
+        return GetVolumeTitleFromDefaultTitle(title);
     }
 
     protected override int GetVolumeNumber(IDocument document)
@@ -127,13 +127,37 @@ public class NashaIdeaParser : BaseParser
         if (monthNumber == default)
             return null;
 
-        var year = DateTime.Today.Month > monthNumber.number ? DateTime.Today.Year + 1 : DateTime.Today.Year;
+        var year = TryToGetFromDate(text);
+        if (year == -1)
+        {
+            year = DateTime.Today.Month > monthNumber.number ? DateTime.Today.Year + 1 : DateTime.Today.Year;
+
+        }
 
         if (day == 0)
             day = DateTime.DaysInMonth(year, monthNumber.number);
 
 
         return DateTime.SpecifyKind(new DateTime(year, monthNumber.number, day), DateTimeKind.Local);
+    }
+
+    private int TryToGetFromDate(string text)
+    {
+        var split = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        var potentialYear = split.Where(x => x.Length == 4);
+        if(potentialYear.Any())
+        {
+            foreach (var item in potentialYear)
+            {
+                if(int.TryParse(item, out var year))
+                {
+                    return year;
+                }
+            }
+        }
+
+        return -1;
     }
 
     private bool StartsWithMonth(string text)

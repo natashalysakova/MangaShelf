@@ -13,8 +13,8 @@ public class ParserJob : IEntity
     public RunStatus Status { get; set; }
     public ParserRunType Type { get; set; }
     public int VolumesFound { get; set; }
-    public IEnumerable<string> VolumesAdded { get; set; } = new List<string>();
-    public IEnumerable<string> VolumesUpdated { get; set; } = new List<string>();
+    public ICollection<string> VolumesAdded { get; set; } = new List<string>();
+    public ICollection<string> VolumesUpdated { get; set; } = new List<string>();
     public virtual ICollection<ParserError> Errors { get; set; } = new List<ParserError>();
 
     public Guid ParserStatusId { get; set; }
