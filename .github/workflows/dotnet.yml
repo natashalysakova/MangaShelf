@@ -99,7 +99,7 @@ jobs:
         if: ${{ !cancelled() }}       # run this step even if previous step failed
         with:
           name: DotNet Tests            # Name of the check run which will be created
-          path: ${{ matrix.directory }}/TestResults-${{ matrix.name }}/*.xml    # Path to test results
+          path: ${{ matrix.directory }}/TestResults-${{ matrix.name }}/    # Path to test results
           reporter: dotnet-trx        # Format of test results
       - name: Cache test results
         uses: actions/cache@v4
