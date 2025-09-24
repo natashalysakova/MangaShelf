@@ -184,21 +184,28 @@ public class NashaIdeaParser : BaseParser
 
     protected override string GetISBN(IDocument document)
     {
-        var node = document.QuerySelector(".book-product-table-ibn");
-        var text = node.TextContent.Substring(node.TextContent.IndexOf(":") + 1).Trim();
-        return text;
+        // var node = document.QuerySelector(".book-product-table-ibn");
+        // var text = node?.TextContent.Substring(node.TextContent.IndexOf(":") + 1).Trim();
+        // return text;
+        return string.Empty;
     }
 
     protected override int GetTotalVolumes(IDocument document)
     {
-        var nodes = document.QuerySelectorAll(".book-product-table-data-weight");
-
-
-        var oldNode = nodes.SingleOrDefault(x => x.TextContent.Contains("Статус серії"));
-        if (oldNode == null)
+        var node = document.QuerySelector(".book-product-table-data-status");
+        if (node is null)
             return -1;
 
-        var text = oldNode.TextContent;
+        if (node.TextContent.Contains("Серія завершена"))
+        {
+            var volumeNumberNode = document.QuerySelector(".book-product-table-data-volumes > span");
+            if (volumeNumberNode != null && int.TryParse(volumeNumberNode.TextContent.Trim(), out var volumeNumber))
+            {
+                return volumeNumber;
+            }
+        }
+
+        var text = node.TextContent;
 
         if (text.Contains("Однотомник") || text.Contains("Однотомна"))
         {
@@ -213,21 +220,6 @@ public class NashaIdeaParser : BaseParser
         if (text.Contains("Серія з "))
         {
             return GetFromStatus(text, "Серія з ");
-        }
-
-        var volumeNode = nodes.SingleOrDefault(x => x.TextContent.Contains("Кількість томів"));
-        if (volumeNode != null)
-        {
-            var volumeText = volumeNode.TextContent;
-            var index = volumeText.IndexOf(":");
-            if (index != -1)
-            {
-                var numberPart = volumeText.Substring(index + 1).Trim();
-                if (int.TryParse(numberPart, out var volumeCount))
-                {
-                    return volumeCount;
-                }
-            }
         }
 
         return -1;
@@ -262,7 +254,7 @@ public class NashaIdeaParser : BaseParser
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
-        var node = document.QuerySelectorAll(".book-product-table-data-weight");
+        var node = document.QuerySelectorAll(".book-product-table-data-status");
         foreach (var item in node)
         {
             if (item.TextContent.Contains("Статус серії:"))

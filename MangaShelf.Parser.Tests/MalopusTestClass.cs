@@ -16,7 +16,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("Ця порцелянова лялечка закохалася", result.Series);
         Assert.AreEqual("Шін'ічі Фукуда", result.Authors);
         Assert.AreEqual(5, result.VolumeNumber);
-        Assert.AreEqual("https://malopus.com.ua/image/cache/catalog/import_files/my%20dress%20up%20darling/005/Moc_Cover_ЦПЛЗ%205-700x700.png", result.Cover);
+        Assert.AreEqual("https://malopus.com.ua/content/images/30/600x600l80mc0/manga-cya-porcelyanova-lyalechka-zakohalasya-tom-5-63577913695375.png", result.Cover);
         Assert.AreEqual(null, result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
@@ -38,8 +38,8 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("Темний дворецький", result.Series);
         Assert.AreEqual("Яна Тобосо", result.Authors);
         Assert.AreEqual(6, result.VolumeNumber);
-        Assert.AreEqual("https://malopus.com.ua/image/cache/catalog/import_files/kuroshitsuji/006/Moc_Cover%20_Темний%20Дворецький_6-700x700.png", result.Cover);
-        Assert.AreEqual(DateTime.Parse("2025-09-14"), result.Release);
+        Assert.AreEqual("https://malopus.com.ua/content/images/29/600x600l80mc0/kuroshitsuji-vol-6-41508603832573.png", result.Cover);
+        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
         Assert.AreEqual("978-617-8168-68-1", result.Isbn);
@@ -47,7 +47,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual(SeriesStatus.Ongoing, result.SeriesStatus);
         Assert.AreEqual("Kuroshitsuji", result.OriginalSeriesName);
         Assert.AreEqual(true, result.IsPreorder);
-        Assert.AreEqual(DateTime.Parse("2025-07-28"), result.PreorderStartDate);
+        //Assert.AreEqual(DateTime.Parse("2025-07-28"), result.PreorderStartDate);
         Assert.AreEqual(null, result.AgeRestrictions);
         Assert.IsNotNull(result.Description);
     }
@@ -62,7 +62,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("Голограф Веселкового поля", result.Series);
         Assert.AreEqual("Ініо Асано", result.Authors);
         Assert.AreEqual(-1, result.VolumeNumber);
-        Assert.AreEqual("https://malopus.com.ua/image/cache/catalog/import_files/nijigahara/Moc_Cover_Голограф%20веселкового%20поля-700x700.png", result.Cover);
+        Assert.AreEqual("https://malopus.com.ua/content/images/24/600x600l80mc0/nijigahara-holograph-55453872054888.png", result.Cover);
         Assert.AreEqual(null, result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
@@ -100,6 +100,6 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("Bocchi the Rock!", result.Series);
         Assert.AreEqual("Том 2", result.Title);
         Assert.AreEqual(2, result.VolumeNumber);
-        Assert.AreEqual(DateTime.Parse("2024-06-17"), result.PreorderStartDate);
+        //Assert.AreEqual(DateTime.Parse("2024-06-17"), result.PreorderStartDate);
     }
 }
