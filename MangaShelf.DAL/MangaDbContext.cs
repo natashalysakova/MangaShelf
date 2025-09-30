@@ -23,6 +23,8 @@ public class MangaDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.UseCollation("utf8mb4_unicode_ci");
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             // Check if the entity type derives from BaseEntity

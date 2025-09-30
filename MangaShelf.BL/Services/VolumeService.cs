@@ -25,9 +25,9 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         if (!string.IsNullOrEmpty(paginationOptions.Search))
         {
             result = result.Where(x =>
-            x.Title.Contains(paginationOptions.Search, StringComparison.InvariantCultureIgnoreCase)
-            || x.Series.Title.Contains(paginationOptions.Search, StringComparison.InvariantCultureIgnoreCase)
-            || x.Series.Authors.Any(a => a.Name.Contains(paginationOptions.Search, StringComparison.InvariantCultureIgnoreCase)));
+                EF.Functions.Like(x.Title, $"%{paginationOptions.Search}%") ||
+                EF.Functions.Like(x.Series.Title, $"%{paginationOptions.Search}%") ||
+                x.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
         }
 
         var totalPages = 1;
