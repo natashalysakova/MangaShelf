@@ -1,6 +1,7 @@
 ﻿using MangaShelf.BL.Dto;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
+using MangaShelf.Common;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Interfaces;
@@ -16,12 +17,33 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
     {
         using var context = dbContextFactory.CreateDbContext();
 
-        var result = await context.Volumes.Include(v => v.Series).Where(x=>x.IsPublishedOnSite).ToListAsync(token);
-        var totalCount = result.Count;
+        var result = context.Volumes
+            .Include(v => v.Series)
+                .ThenInclude(s => s.Authors)
+            .Where(x => x.IsPublishedOnSite);
 
-        result = result.Skip(paginationOptions.Skip).Take(paginationOptions.Take).ToList();
+        if (!string.IsNullOrEmpty(paginationOptions.Search))
+        {
+            result = result.Where(x =>
+            x.Title.Contains(paginationOptions.Search, StringComparison.InvariantCultureIgnoreCase)
+            || x.Series.Title.Contains(paginationOptions.Search, StringComparison.InvariantCultureIgnoreCase)
+            || x.Series.Authors.Any(a => a.Name.Contains(paginationOptions.Search, StringComparison.InvariantCultureIgnoreCase)));
+        }
 
-        return (result.Select(v => v.ToDto()), totalCount);
+        var totalPages = 1;
+
+        if (paginationOptions.Take != 0)
+        {
+            var totalCount = await result.CountAsync();
+            var pagesCount = (double)totalCount / paginationOptions.Take;
+            totalPages = (int)Math.Ceiling(pagesCount);
+
+            result = result.Skip(paginationOptions.Skip).Take(paginationOptions.Take);
+        }
+
+        var resultList = await result.ToListAsync(token);
+
+        return (resultList.Select(v => v.ToDto()), totalPages);
     }
 
     public async Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse, CancellationToken token = default)

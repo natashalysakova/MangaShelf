@@ -42,7 +42,7 @@ public class MangaDbContext : DbContext
             .Property(e => e.Aliases)
             .HasConversion(
                 v => string.Join('|', v),
-                v => v.Split('|', StringSplitOptions.RemoveEmptyEntries));
+                v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
 
         //modelBuilder.Entity<Volume>()
         //    .HasIndex(v=> new { v.SeriesId, v.Number, v.Title }).IsUnique();

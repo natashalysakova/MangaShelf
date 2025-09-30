@@ -4,23 +4,49 @@
 @inject IVolumeService VolumeService
 
 <MudPaper Class="p-4" Elevation="3" Style="background-color: transparent">
-    <MudTextField T="string" Label="OnFocus Helper" Variant="Variant.Outlined" />
+    <MudStack Row>
+
+        <MudTextField @bind-Value="Search" Label="Search" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+        <MudSelect @bind-Value="PageSize" FitContent="true">
+            <MudSelectItem Value="24"></MudSelectItem>
+            <MudSelectItem Value="48"></MudSelectItem>
+            <MudSelectItem Value="96"></MudSelectItem>
+            <MudSelectItem Value="0">All</MudSelectItem>
+        </MudSelect>
+        <MudButton Variant="Variant.Filled" OnClick="ToggleFilters"><MudIcon Icon="@Icons.Material.Rounded.Filter"></MudIcon>Filters</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="ResetFilters"><MudIcon Icon="@Icons.Material.Rounded.Filter"></MudIcon>Reset</MudButton>
+    </MudStack>
+    @if (filterToggle)
+    {
+        <MudPaper>There will be filters</MudPaper>
+    }
 </MudPaper>
 
 
 @if (_loading != true)
 {
-    <div class="d-flex flex-column align-center mb-8">
-        <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="_selectedPage" Class="mt-4" />
-    </div>
+    @if (_totalPages > 1)
+    {
+        <div class="d-flex flex-column align-center mb-8">
+            <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="SelectedPage" Class="mt-4" />
+        </div>
+    }
     <MudGrid Justify="@justification" Spacing="6">
         @foreach (var volume in volumes)
         {
             <MudItem xs="6" sm="3" md="2" lg="2">
-                <SmallCard Volume="@volume"/>
+                <SmallCard Volume="@volume" />
             </MudItem>
         }
     </MudGrid>
+
+    @if (_totalPages > 1)
+    {
+        <div class="d-flex flex-column align-center mb-8">
+            <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="SelectedPage" Class="mt-4" />
+        </div>
+    }
+
 }
 
 
@@ -28,8 +54,44 @@
 @code {
     private bool _loading;
 
+    private bool filterToggle = false;
+
     private int _totalPages;
-    private int _selectedPage
+
+    private string _search = string.Empty;
+    private string Search
+    {
+        get => _search;
+        set
+        {
+            if (_search != value)
+            {
+                _search = value;
+                if (_search.Length > 1)
+                {
+                    SelectedPage = 1;
+                }
+            }
+        }
+    }
+
+    private int _pageSize = 24;
+    private int PageSize
+    {
+        get => _pageSize;
+        set
+        {
+            if (value != _pageSize)
+            {
+                _pageSize = value;
+                SelectedPage = 1;
+            }
+        }
+    }
+
+    
+    private int _selectedPageValue = 1;
+    private int SelectedPage
     {
         get => _selectedPageValue;
         set
@@ -38,7 +100,6 @@
             ReloadVolumes();
         }
     }
-    private int _selectedPageValue = 1;
 
 
     Justify justification = Justify.FlexStart;
@@ -54,10 +115,24 @@
 
     private async Task ReloadVolumes()
     {
-        PaginationOptions paginationOption = new() { PageNumber = _selectedPage, PageSize = 24 };
-        (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
-        _totalPages = (int) Math.Floor((double)(_totalPages / paginationOption.PageSize));
+        _loading = true;
         StateHasChanged();
+
+        PaginationOptions paginationOption = new() { PageNumber = SelectedPage, PageSize = PageSize, Search = Search };
+        (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
+
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private void ToggleFilters()
+    {
+        filterToggle = !filterToggle;
+    }
+
+    private void ResetFilters()
+    {
+        filterToggle = !filterToggle;
     }
 
 }

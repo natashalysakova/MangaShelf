@@ -32,13 +32,13 @@ public class MangaSystemDbContext : DbContext
             .Property(e => e.VolumesAdded)
             .HasConversion(
                 v => string.Join('|', v),
-                v => v.Split('|', StringSplitOptions.RemoveEmptyEntries));
+                v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
 
         modelBuilder.Entity<ParserJob>()
            .Property(e => e.VolumesUpdated)
            .HasConversion(
                v => string.Join('|', v),
-               v => v.Split('|', StringSplitOptions.RemoveEmptyEntries));
+               v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
 
 
         modelBuilder.Entity<Parser>()

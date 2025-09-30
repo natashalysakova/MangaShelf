@@ -101,6 +101,12 @@ public abstract class BaseParser : IPublisherParser
     public async Task<ParsedInfo> Parse(string url, CancellationToken token = default)
     {
         _isRunning = true;
+
+        if (!url.StartsWith(SiteUrl))
+        {
+            url = SiteUrl + url;
+        }
+
         var html = await _htmlDownloader.GetUrlHtml(url, token);
         var parser = new HtmlParser();
         var document = await parser.ParseDocumentAsync(html, token);

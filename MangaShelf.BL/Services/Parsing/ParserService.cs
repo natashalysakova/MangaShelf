@@ -324,20 +324,29 @@ public class ParserService : IParseService
             throw new InvalidOperationException($"Parser {job.ParserStatus.ParserName} not found");
         }
 
-
-
-        switch (job.Type)
+        try
         {
-            case ParserRunType.SingleUrl:
+            switch (job.Type)
+            {
+                case ParserRunType.SingleUrl:
 
-                await ParsePageInternal(jobId, job.Url!, parsers, token);
-                break;
-            case ParserRunType.FullSite:
-                await ParseSite(parsers, jobId, token);
-                break;
-            default:
-                break;
+                    await ParsePageInternal(jobId, job.Url!, parsers, token);
+                    break;
+                case ParserRunType.FullSite:
+                    await ParseSite(parsers, jobId, token);
+                    break;
+                default:
+                    break;
+            }
+
         }
+        catch (Exception ex)
+        {
+            var parserWriteService = scope.ServiceProvider.GetRequiredService<IParserWriteService>();
+            await parserWriteService.RecordErrorAndStop(jobId, ex, token);
+            throw;
+        }
+
 
     }
 }

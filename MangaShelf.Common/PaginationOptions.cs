@@ -10,7 +10,7 @@ public record PaginationOptions : IPaginationOptions
     {
         get
         {
-            return PageNumber * PageSize;
+            return (PageNumber - 1) * PageSize;
         }
     }
     public int Take { get => PageSize; }

@@ -9,7 +9,7 @@ public class MalopusParser : BaseParser
 {
     public override string SiteUrl => "https://malopus.com.ua";
     public override string CatalogUrl => "/manga/";
-    public override string Pagination => "?page={0}";
+    public override string Pagination => "filter/page={0}/";
 
     private string? GetFromTable(IDocument document, string headerText)
     {
