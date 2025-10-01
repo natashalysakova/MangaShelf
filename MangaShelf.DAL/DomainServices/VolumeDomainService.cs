@@ -20,7 +20,7 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
             .Where(x => x.Series!.Title == series).SingleOrDefault();
     }
 
-    public IQueryable<Volume> GetAllFullPaginated(IPaginationOptions? paginationOptions = default)
+    public IQueryable<Volume> GetAllFullPaginated(IFilterOptions? paginationOptions = default)
     {
         return GetAllFull().ApplyPagination(paginationOptions);
     }
@@ -37,7 +37,7 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
         return query;
     }
 
-    public IQueryable<Volume> GetAllWithSeries(IPaginationOptions? paginationOptions = default)
+    public IQueryable<Volume> GetAllWithSeries(IFilterOptions? paginationOptions = default)
     {
         return _context.Volumes
             .Include(v => v.Series)
@@ -72,7 +72,7 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
 
 public static class PaginationExtention
 {
-    public static IQueryable<Volume> ApplyPagination(this IQueryable<Volume> query, IPaginationOptions? paginationOptions)
+    public static IQueryable<Volume> ApplyPagination(this IQueryable<Volume> query, IFilterOptions? paginationOptions)
     {
         if (paginationOptions is null)
         {

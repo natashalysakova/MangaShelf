@@ -1,7 +1,10 @@
-﻿namespace MangaShelf.Common.Interfaces;
+﻿using ImageMagick;
+
+namespace MangaShelf.Common.Interfaces;
 
 public interface IImageManager
 {
+    string CreateSmallImage(string coverImageUrl);
     string? DownloadFileFromWeb(string url);
     string SaveFlagFromCDN(string countryCode);
 }
@@ -10,6 +13,39 @@ public class ImageManager : IImageManager
 {
     private const string serverRoot = "wwwroot";
     const string imageDir = "images";
+
+    public string CreateSmallImage(string coverImageUrl)
+    {
+        var sourceImage = Path.Combine(serverRoot, coverImageUrl);
+
+        if (Path.Exists(sourceImage))
+        {
+            // Create destination path
+            var fileInfo = new FileInfo(sourceImage);
+            var filename = fileInfo.Name;
+            var destiantionFolder = Path.Combine(imageDir, "small");
+            var destinationPath = Path.Combine(serverRoot, destiantionFolder, filename);
+            var destinationDirectory = Path.GetDirectoryName(destinationPath);
+
+            if (!Directory.Exists(destinationDirectory))
+                Directory.CreateDirectory(destinationDirectory);
+
+            // Resize image to 300px height
+            using var image = new MagickImage(sourceImage);
+
+            var size = new MagickGeometry(0, 360);
+
+            image.Resize(size);
+
+            // Save the result
+            image.Write(destinationPath);
+
+            // Return relative path
+            return Path.Combine(destiantionFolder, filename);
+        }
+
+        return coverImageUrl; // Return original if resize fails
+    }
 
     public string? DownloadFileFromWeb(string url)
     {

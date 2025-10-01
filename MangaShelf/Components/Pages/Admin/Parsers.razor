@@ -20,7 +20,7 @@
     <MudGrid Justify="Justify.Center" Class="mb-4">
         @foreach (ParserStatusDto parser in statuses)
         {
-            <MudItem xs="12" sm="6" md="4" lg="3" xl="2" xxl="1">
+            <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
                 <MudPaper Elevation="3" Class="p-4">
                     @{
                         var color = parser.Status switch
@@ -77,6 +77,28 @@
     </MudGrid>
 }
 
+<style>
+    .cell-Running {
+        color: var(--mud-palette-info) !important;
+    }
+
+    .cell-Finished {
+        color: var(--mud-palette-success) !important;
+    }
+
+    .cell-Error {
+        color: var(--mud-palette-error) !important;
+    }
+
+    .cell-Waiting {
+        color: var(--mud-palette-warning) !important;
+    }
+
+    .cell-Cancelled {
+        color: var(--mud-palette-text-secondary) !important;
+    }
+</style>
+
 <MudTable Items="jobs" Hover="true" Breakpoint="Breakpoint.Sm">
     <HeaderContent>
         <MudTh></MudTh>
@@ -99,7 +121,10 @@
         <MudTd DataLabel="Parser">@row.ParserStatus.ParserName</MudTd>
         <MudTd DataLabel="Created">@row.Created.ToLocalTime()</MudTd>
         <MudTd DataLabel="Started">@row.Started.ToLocalTime()</MudTd>
-        <MudTd DataLabel="Status">@row.Status</MudTd>
+        @{
+            var className = "cell-" + @row.Status;
+        }
+        <MudTd Class="@className" DataLabel="Status">@row.Status</MudTd>
         <MudTd DataLabel="Finished">@row.Finished?.ToLocalTime()</MudTd>
         <MudTd DataLabel="Url">@row.Url</MudTd>
         <MudTd DataLabel="Progress">@row.Progress.ToString("N2")</MudTd>
@@ -152,7 +177,7 @@
 
             jobs = await parserService.GetJobs(100);
 
-            await Task.Delay(1000);
+            await Task.Delay(2000);
 
         } while (!tokenSource.IsCancellationRequested);
     }

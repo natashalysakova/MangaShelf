@@ -2,7 +2,7 @@
 
 namespace MangaShelf.Common;
 
-public record PaginationOptions : IPaginationOptions
+public record FilterOptions : IFilterOptions
 {
     public required int PageNumber { get; init; }
     public required int PageSize { get; init; }
@@ -17,4 +17,7 @@ public record PaginationOptions : IPaginationOptions
     public string Search { get; init; }
     public string SortBy { get ; init; }
     public bool SortDescending { get ; init; }
+
+    public ReleaseFilter ReleaseFilter { get; init; }
+    public OrderBy OrderBy { get; init; }
 }

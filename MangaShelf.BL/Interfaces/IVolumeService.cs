@@ -10,14 +10,14 @@ namespace MangaShelf.BL.Interfaces;
 public interface IVolumeService : IService
 {
     Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse, CancellationToken token = default);
-    Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IPaginationOptions? paginationOptions = default, CancellationToken token = default);
+    Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IFilterOptions? paginationOptions = default, CancellationToken token = default);
     Task<VolumeDto?> GetFullVolumeByIdAsync(Guid id, CancellationToken token = default);
     Task<IEnumerable<CardVolumeDto>> GetLatestPreorders(int count = 6, CancellationToken token = default);
     Task<IEnumerable<CardVolumeDto>> GetNewestReleases(int count = 6, CancellationToken token = default);
 
 
-    Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IPaginationOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions);
-    //Task<(IEnumerable<VolumeDto>, int)> GetAllFullVolumesAsync(IPaginationOptions? paginationOptions = default, CancellationToken token = default);
+    Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions);
+    Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken);
 }
 
 public interface ISeedService : IService

@@ -1,9 +1,11 @@
+using MangaShelf.Cache;
 using MangaShelf.Common.Localization.Services;
 using MangaShelf.Components;
 using MangaShelf.Components.Account;
 using MangaShelf.Extentions;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Installer;
+using MangaShelf.Infrastructure.Network;
 using MudBlazor.Services;
 
 namespace MangaShelf;
@@ -35,6 +37,18 @@ public class Program
         builder.Services.AddHealthChecks();
 
         builder.AddBusinessServices();
+
+        builder.Services
+            .Configure<CacheOptions>(
+                builder.Configuration
+                .GetSection(CacheOptions.SectionName));
+        builder.Services
+            .Configure<HtmlDownloadOptions>(
+                builder.Configuration
+                .GetSection(HtmlDownloadOptions.SectionName));
+
+        builder.Services.AddHostedService<CacheWorker>();
+        builder.Services.AddSingleton<CacheSignal>();
 
         builder.Services.AddLocalization();
         builder.AddLocalizationServices();
@@ -77,7 +91,7 @@ public class Program
         // Add additional endpoints required by the Identity /Account Razor components.
         app.MapAdditionalIdentityEndpoints();
 
-        string[] supportedCultures = LocalizationService.SupportedCultures.Select(x=>x.Name).ToArray();
+        string[] supportedCultures = LocalizationService.SupportedCultures.Select(x => x.Name).ToArray();
         var localizationOptions = new RequestLocalizationOptions()
             .SetDefaultCulture(supportedCultures[0])
             .AddSupportedCultures(supportedCultures)

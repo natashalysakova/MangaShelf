@@ -29,4 +29,14 @@ public class SeriesService : ISeriesService
         var series = await seriesService.GetByTitleAsync(seriesTitle);
         return series?.ToDto();
     }
+
+    public async Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var serviceFactory = new DomainServiceFactory(context);
+        var seriesService = serviceFactory.GetDomainService<ISeriesDomainService>();
+
+        var titles = await seriesService.GetAllTitlesAsync(stoppingToken);
+        return titles;
+    }
 }

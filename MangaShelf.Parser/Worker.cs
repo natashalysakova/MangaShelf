@@ -21,12 +21,6 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (!_options.Enabled)
-        {
-            _logger.LogDebug("Background worker is disabled, exiting");
-            return;
-        }
-
         using var scope = _serviceProvider.CreateScope();
         var parserFactory = scope.ServiceProvider.GetRequiredService<IParserFactory>();
         var parsers = parserFactory.GetParsers();
@@ -55,10 +49,12 @@ public class Worker : BackgroundService
                 return;
             }
 
-            await _jobManager.CreateScheduledJobs();
+            if (_options.Enabled)
+            {
+                await _jobManager.CreateScheduledJobs();
+            }
 
             await _jobManager.RunScheduledJobs();
-
 
             await Task.Delay(_options.LoopDelay, stoppingToken);
         }

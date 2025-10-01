@@ -90,7 +90,7 @@ h1:focus {
 
     .manga-card:hover {
         transition: 0.2s ease-in;
-        transform: scale(1.35);
+        transform: scale(1.235);
         backface-visibility: hidden;
         z-index: 3 !important;
         box-shadow: 5px 5px 5px rgba(0,0,0,0.5) !important;

@@ -35,7 +35,13 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
                 await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
                 {
                     Headless = true,
-                    Args = new[] { "--no-sandbox" },
+                    Args = new[]
+                    {
+                        "--disable-gpu",
+                        "--disable-dev-shm-usage",
+                        "--disable-setuid-sandbox",
+                        "--no-sandbox"
+                    }
                 });
 
                 await using var page = await browser.NewPageAsync();

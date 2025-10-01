@@ -5,7 +5,7 @@ public class CardVolumeDto
     public Guid Id { get; set; }
     public string SeriesName { get; set; }
     public string Title { get; set; }
-    public string CoverImageUrl { get; set; }
+    public string CoverImageUrlSmall { get; set; }
     public int Number { get; set; }
     public string PurchaseUrl { get; set; }
     public bool IsPreorder { get; set; }

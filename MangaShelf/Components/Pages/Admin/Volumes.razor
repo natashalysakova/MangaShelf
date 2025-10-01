@@ -106,7 +106,7 @@
             Console.WriteLine($"Fetching data: StartIndex={state.Page}, Count={state.PageSize}");
 
             //Console.WriteLine($"Fetching data: StartIndex={gridState.StartIndex}, Count={gridState.Count}");
-            var paginationOptions = new PaginationOptions
+            var paginationOptions = new Common.FilterOptions
             {
                 PageNumber = state.Page,
                 PageSize = state.PageSize

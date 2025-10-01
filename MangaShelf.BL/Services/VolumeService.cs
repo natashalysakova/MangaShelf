@@ -13,29 +13,47 @@ namespace MangaShelf.BL.Services;
 
 public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<MangaDbContext> dbContextFactory) : IVolumeService
 {
-    public async Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IPaginationOptions? paginationOptions = default, CancellationToken token = default)
+    public async Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IFilterOptions? paginationOptions = default, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
 
         var result = context.Volumes
             .Include(v => v.Series)
-                .ThenInclude(s => s.Authors)
+                .ThenInclude(s => s!.Authors)
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Publisher)
             .Where(x => x.IsPublishedOnSite);
 
-        if (!string.IsNullOrEmpty(paginationOptions.Search))
+        if (paginationOptions?.ReleaseFilter != ReleaseFilter.None)
+        {
+            switch (paginationOptions!.ReleaseFilter)
+            {
+                case ReleaseFilter.Released:
+                   result = result.Where(x => x.IsPreorder == false);
+                    break;
+                case ReleaseFilter.Preorder:
+                    result = result.Where(x => x.IsPreorder == true);
+                    break;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(paginationOptions?.Search))
         {
             result = result.Where(x =>
                 EF.Functions.Like(x.Title, $"%{paginationOptions.Search}%") ||
-                EF.Functions.Like(x.Series.Title, $"%{paginationOptions.Search}%") ||
+                EF.Functions.Like(x.Series!.Title, $"%{paginationOptions.Search}%") ||
+                EF.Functions.Like(x.Series!.Publisher!.Name, $"%{paginationOptions.Search}%") ||
                 x.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
         }
 
+        
+
         var totalPages = 1;
 
-        if (paginationOptions.Take != 0)
+        if (paginationOptions?.Take != 0)
         {
             var totalCount = await result.CountAsync();
-            var pagesCount = (double)totalCount / paginationOptions.Take;
+            var pagesCount = (double)totalCount / paginationOptions!.Take;
             totalPages = (int)Math.Ceiling(pagesCount);
 
             result = result.Skip(paginationOptions.Skip).Take(paginationOptions.Take);
@@ -94,7 +112,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return volume?.ToFullDto();
     }
 
-    public async Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IPaginationOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions)
+    public async Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions)
     {
         using var context = dbContextFactory.CreateDbContext();
         var volumeDomainService = new DomainServiceFactory(context).GetDomainService<IVolumeDomainService>();
@@ -138,6 +156,18 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
 
 
         return (resultList, totalVolumes);
+    }
+
+    public async Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+
+        var titles = context.Volumes
+            .AsNoTracking()
+            .OrderBy(v => v.Title)
+            .Select(v => v.Title);
+
+        return await titles.ToListAsync(stoppingToken);
     }
 }
 
