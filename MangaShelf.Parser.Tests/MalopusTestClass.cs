@@ -14,7 +14,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.IsNotNull(result);
         Assert.AreEqual("Том 5", result.Title);
         Assert.AreEqual("Ця порцелянова лялечка закохалася", result.Series);
-        Assert.AreEqual("Шін'ічі Фукуда", result.Authors);
+        Assert.AreEqual("Шін’ічі Фукуда", result.Authors);
         Assert.AreEqual(5, result.VolumeNumber);
         Assert.AreEqual("https://malopus.com.ua/content/images/30/600x600l80mc0/manga-cya-porcelyanova-lyalechka-zakohalasya-tom-5-63577913695375.png", result.Cover);
         Assert.AreEqual(null, result.Release);
@@ -89,7 +89,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
     {
         var result = await Parser.Parse("https://malopus.com.ua/manga/junji-ito-shiver");
 
-        Assert.AreEqual(DateTime.Parse("2025-10-31"), result.Release);
+        Assert.AreEqual(DateTime.Parse("2025-11-28"), result.Release);
     }
 
     [TestMethod]
@@ -102,4 +102,35 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual(2, result.VolumeNumber);
         //Assert.AreEqual(DateTime.Parse("2024-06-17"), result.PreorderStartDate);
     }
+
+    [TestMethod]
+    public async Task Malopus_PageExist_ShouldHaveVolumes()
+    {
+        var result = await Parser.GetVolumesUrls("https://malopus.com.ua/manga/filter/page=2/", CancellationToken.None);
+
+        Assert.IsNotNull(result);
+        Assert.HasCount(20, result);
+    }
+
+    [TestMethod]
+    public async Task Malopus_PageExist_ShouldHaveDescription()
+    {
+        var result = await Parser.Parse("https://malopus.com.ua/manga/wotakoi-vol-1/", CancellationToken.None);
+        
+        var expectedDescription = "На перший погляд, Нарумі та Хіротака — зразкова пара. Молоді, симпатичні, успішні на роботі. Та вони мають секрет, який довіряють лише одне одному: насправді вони ті ще отаку! Нарумі — поціновувачка яою, а Хіротака — гардкорний геймер. Ця зворушлива й незграбна романтична комедія для тих, хто так само закоханий у свої хобі, як ці двоє.";
+        Assert.IsNotNull(result);
+        Assert.AreEqual(expectedDescription, result.Description);
+    }
+
+    [TestMethod]
+
+    public async Task Malopus_PageNotExist_ShouldHaveNoVolumes()
+    {
+        await Assert.ThrowsExactlyAsync<HttpRequestException>(async () =>
+        {
+            await Parser.GetVolumesUrls("https://malopus.com.ua/manga/filter/page=9999/", CancellationToken.None);
+        });
+    }
+
+
 }

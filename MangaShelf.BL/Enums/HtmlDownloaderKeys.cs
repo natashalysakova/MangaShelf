@@ -3,5 +3,6 @@
 public enum HtmlDownloaderKeys
 {
     Basic,
-    Advanced
+    Advanced,
+    Malopus
 }

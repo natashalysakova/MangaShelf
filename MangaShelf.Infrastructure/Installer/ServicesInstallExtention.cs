@@ -31,6 +31,7 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
         builder.Services.AddKeyedScoped<IHtmlDownloader, BasicHtmlDownloader>(HtmlDownloaderKeys.Basic);
         builder.Services.AddKeyedScoped<IHtmlDownloader, AdvancedHtmlDownloader>(HtmlDownloaderKeys.Advanced);
+        builder.Services.AddKeyedScoped<IHtmlDownloader, MalopusHtmlDownloader>(HtmlDownloaderKeys.Malopus);
         builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
         builder.Services.AddScoped<IParserFactory, ParserFactory>();
         builder.Services.AddScoped<IParseService, ParserService>();

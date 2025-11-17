@@ -1,7 +1,9 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
+using MangaShelf.BL.Enums;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers.Malopus;
@@ -112,7 +114,7 @@ public class MalopusParser : BaseParser
 
     string[] lookupArray = [". Том ", "! Том ", "? Том ", ". Омнібус ", "! Омнібус ", "? Омнібус "];
 
-    public MalopusParser(ILogger<MalopusParser> logger,  IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    public MalopusParser(ILogger<MalopusParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Malopus)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
     }
 
@@ -279,7 +281,19 @@ public class MalopusParser : BaseParser
 
     protected override string? GetDescription(IDocument document)
     {
-        var node = document.QuerySelector(".text");
-        return node?.TextContent;
+        // Get the description container
+        var descriptionDiv = document.QuerySelector(".product-description");
+
+        if(descriptionDiv == null)
+            return null;
+
+        var paragraphs = descriptionDiv.QuerySelectorAll("p");
+        
+        var description = string.Join("\n", 
+            paragraphs
+                .Select(p => p.TextContent.Trim())
+                .Where(text => !string.IsNullOrWhiteSpace(text))
+        );
+        return description;
     }
 }
