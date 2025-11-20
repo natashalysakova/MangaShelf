@@ -72,6 +72,13 @@ public class ParserService : IParseService
                 await statusService.RecordErrorAndStop(jobId, ex, token);
                 break;
             }
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                pageExists = false;
+                _logger.LogInformation($"{parser.GetType().Name}: Page not found {pageUrl} : {httpEx.Message}");
+                await statusService.RecordError(jobId, pageUrl, httpEx, token);
+                break;
+            }
             catch (Exception ex)
             {
                 pageExists = false;
@@ -88,6 +95,13 @@ public class ParserService : IParseService
                 _logger.LogDebug($"{parser.GetType().Name}: No volumes found on page {pageUrl}, last page reached");
                 break;
             }
+            if(volumes.Except(volumesToParse).Count() == 0)
+            {
+                pageExists = false;
+                _logger.LogDebug($"{parser.GetType().Name}: No new volumes found on page {pageUrl}, last page reached");
+                break;
+            }   
+
             volumesToParse.AddRange(volumes);
 
             var jobStatus = await readService.GetJobStatusById(jobId, token);
@@ -241,7 +255,7 @@ public class ParserService : IParseService
             };
         }
 
-        if (volume.Description is null && volumeInfo.Description is not null)
+        if (volumeInfo.Description is not null && volume.Description != volumeInfo.Description)
         {
             volume.Description = volumeInfo.Description;
         }
@@ -339,7 +353,6 @@ public class ParserService : IParseService
                 default:
                     break;
             }
-
         }
         catch (Exception ex)
         {
@@ -347,7 +360,5 @@ public class ParserService : IParseService
             await parserWriteService.RecordErrorAndStop(jobId, ex, token);
             throw;
         }
-
-
     }
 }

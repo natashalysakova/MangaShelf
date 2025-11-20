@@ -39,6 +39,7 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
         services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
         services.AddKeyedScoped<IHtmlDownloader, BasicHtmlDownloader>(HtmlDownloaderKeys.Basic);
         services.AddKeyedScoped<IHtmlDownloader, AdvancedHtmlDownloader>(HtmlDownloaderKeys.Advanced);
+        services.AddKeyedScoped<IHtmlDownloader, MalopusHtmlDownloader>(HtmlDownloaderKeys.Malopus);
 
         services.AddScoped<T>();
 

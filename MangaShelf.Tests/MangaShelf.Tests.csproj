@@ -12,13 +12,21 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="MSTest" Version="3.10.3" />
     <PackageReference Include="ReportGenerator" Version="5.4.12" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MangaShelf.BL\MangaShelf.BL.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
+    <ProjectReference Include="..\MangaShelf.Common\MangaShelf.Common.csproj" />
   </ItemGroup>
 
 </Project>
