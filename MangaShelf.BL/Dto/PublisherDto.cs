@@ -1,5 +1,6 @@
-﻿namespace MangaShelf.BL.Dto;
+﻿using System.Diagnostics.CodeAnalysis;
 
+[ExcludeFromCodeCoverage]
 public class PublisherSimpleDto
 {
     public Guid Id { get; set; }

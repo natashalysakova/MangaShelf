@@ -149,6 +149,8 @@ public class ParserWriteService : IParserWriteService
             run.VolumesAdded.Add(url);
         }
 
+        context.Entry(run).State = EntityState.Modified;
+
         await context.SaveChangesAsync(token);
     }
 

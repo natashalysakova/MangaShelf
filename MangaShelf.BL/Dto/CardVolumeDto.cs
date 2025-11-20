@@ -1,5 +1,8 @@
-﻿namespace MangaShelf.BL.Dto;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace MangaShelf.BL.Dto;
+
+[ExcludeFromCodeCoverage]
 public class CardVolumeDto
 {
     public Guid Id { get; set; }

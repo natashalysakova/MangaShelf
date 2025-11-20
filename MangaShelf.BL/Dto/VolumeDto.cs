@@ -1,7 +1,9 @@
-﻿using MangaShelf.DAL.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.BL.Dto;
 
+[ExcludeFromCodeCoverage]   
 public class VolumeDto
 {
     public Guid Id { get; set; }

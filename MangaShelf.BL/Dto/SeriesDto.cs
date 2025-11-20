@@ -1,7 +1,9 @@
-﻿using MangaShelf.DAL.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.BL.Dto;
 
+[ExcludeFromCodeCoverage]
 public class SeriesSimpleDto
 {
     public Guid Id { get; set; }
