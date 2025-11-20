@@ -85,6 +85,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
     }
 
     [TestMethod]
+    [Obsolete("Release date is not on the page anymore")]
     public async Task Malopus_ReleaseDate_ShouldBe_Parsed()
     {
         var result = await Parser.Parse("https://malopus.com.ua/manga/junji-ito-shiver");
@@ -93,13 +94,16 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
     }
 
     [TestMethod]
-    public async Task Malopus_TitleAndSeries_ShouldBe_Parsed()
+    [DataRow("https://malopus.com.ua/manga/bocchi-the-rock-vol2", "Самітниця-рокерка", "Том 2", 2)]
+    [DataRow("https://malopus.com.ua/manga/reborn-as-a-vending-machine-vol-2/", "Я переродився торговим автоматом і тепер блукаю підземеллям", "Том 2", 2)]
+    [DataRow("https://malopus.com.ua/manga/manga-shlyah-domogospodarya-tom-8/", "Шлях домогосподаря", "Том 8", 8)]
+    [DataRow("https://malopus.com.ua/manga/dungeon-meshi-omnibus-4/", "Підземелля смакоти", "Омнібус 4 (Томи 7–8)", 4)]
+    public async Task Malopus_TitleAndSeries_ShouldBe_Parsed(string url, string expectedSeries, string expectedTitle, int expectedVolumeNumber)
     {
-        var result = await Parser.Parse("https://malopus.com.ua/manga/bocchi-the-rock-vol2");
+        var result = await Parser.Parse(url);
 
-        Assert.AreEqual("Bocchi the Rock!", result.Series);
-        Assert.AreEqual("Том 2", result.Title);
-        Assert.AreEqual(2, result.VolumeNumber);
-        //Assert.AreEqual(DateTime.Parse("2024-06-17"), result.PreorderStartDate);
+        Assert.AreEqual(expectedSeries, result.Series);
+        Assert.AreEqual(expectedTitle, result.Title);
+        Assert.AreEqual(expectedVolumeNumber, result.VolumeNumber);
     }
 }
