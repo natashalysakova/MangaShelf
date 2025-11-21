@@ -13,7 +13,9 @@
                     <MudStack Row>
                         <MudItem xs="6" sm="4">
                             <MudPaper Elevation="2">
-                                <MudImage Fluid="true" Src="@Volume.CoverImageUrl"></MudImage>
+                        
+                                <FallbackImage Class="img-fluid"
+                                    ImageUrl="@Volume.CoverImageUrl"></FallbackImage>
                             </MudPaper>
                         </MudItem>
                         <MudItem xs="4" sm="4">

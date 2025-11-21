@@ -1,5 +1,6 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Identity
+@inherits LayoutComponentBase
 @inject IUiLocalizationService Localizer
 
 @* Required *@
@@ -52,6 +53,31 @@
         _open = !_open;
     }
 
+    @code {
+    [Inject] private SignInManager<MangaIdentityUser> AuthService { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var user = await AuthService.UserManager.GetUserAsync(AuthService.Context.User);
+        // A hard refresh or the user just navigated to the application for the first time
+        if (firstRender && user != null && !AuthService.Context.User.Identity!.IsAuthenticated)
+        {
+            var url = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).ToString();
+            if (url.Contains("/login"))
+            {
+                return;
+            }
+
+            @* var restoredFromState = await AuthService.GetStateFromTokenAsync();
+            //The user lost their server side session, but still has a valid JWT
+            if (restoredFromState) *@
+            {
+                NavigationManager.Refresh();
+            }
+        }
+    }
+
     MudTheme MangaShelfTheme = new MudTheme()
     {
         PaletteDark = new PaletteDark()
@@ -71,4 +97,5 @@
             }
         }
     };
+}
 }

@@ -1,8 +1,27 @@
-﻿@inject NavigationManager? NavigationManager
+﻿@using Microsoft.AspNetCore.Identity
+
+
+<h1>@message</h1>
 
 @code {
-    protected override void OnInitialized()
+    [Inject] private SignInManager<MangaIdentityUser> AuthService { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    string returnUrl;
+    string message = string.Empty;
+
+    protected override async Task OnInitializedAsync()
     {
-        NavigationManager?.NavigateTo($"Account/Login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}", forceLoad: true);
+        returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var user = await AuthService.UserManager.GetUserAsync(AuthService.Context.User);
+        //The user is logged in, but does not have the required role for a page
+        if (user != null && !AuthService.Context.User.Identity!.IsAuthenticated)
+        {
+            message = "Sorry, you are not authorized to view this page.";
+        }
+        //The user is not logged in
+        else
+        {
+            NavigationManager.NavigateTo($"/login?returnUrl={returnUrl}", true);
+        }
     }
 }

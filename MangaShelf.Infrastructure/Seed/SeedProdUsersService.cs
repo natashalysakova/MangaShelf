@@ -42,16 +42,11 @@ public class SeedProdUsersService : ISeedDataService
         var adminUser = await _userManager.FindByNameAsync(adminUserName);
         if (adminUser is null)
         {
-            var user = new MangaIdentityUser()
-            {
-                UserName = adminUserName,
-                Email = adminUserName,
-                EmailConfirmed = true,
-            };
-
-            await _userManager.CreateAsync(user, "Admin@123");
-            await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.MustChangePassword, "true"));
-            await _userManager.AddToRoleAsync(user, RoleTypes.Admin);
+            await SeedAdmin(adminUserName);
+        }
+        else
+        {
+            await AddMissingAdminRoles(adminUser);
         }
 
         var demoUserName = "demo@example.com";
@@ -90,6 +85,31 @@ public class SeedProdUsersService : ISeedDataService
             }
         }
     }
+
+    private async Task AddMissingAdminRoles(MangaIdentityUser adminUser)
+    {
+        var hasUserRole = await _userManager.IsInRoleAsync(adminUser, RoleTypes.User);
+        if (!hasUserRole)
+        {
+            await _userManager.AddToRoleAsync(adminUser, RoleTypes.User);
+        }
+    }
+
+    private async Task SeedAdmin(string adminUserName)
+    {
+        var user = new MangaIdentityUser()
+        {
+            UserName = adminUserName,
+            Email = adminUserName,
+            EmailConfirmed = true,
+        };
+
+        await _userManager.CreateAsync(user, "Admin@123");
+        await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.MustChangePassword, "true"));
+        await _userManager.AddToRoleAsync(user, RoleTypes.Admin);
+        await _userManager.AddToRoleAsync(user, RoleTypes.User);
+    }
+
     private async Task SeedRolesAsync()
     {
         if (!await _roleManager.RoleExistsAsync(RoleTypes.Admin))

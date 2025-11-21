@@ -1,2 +1,4 @@
 ﻿@using MangaShelf.Components.Account.Shared
-@attribute [ExcludeFromInteractiveRouting]
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [AllowAnonymous]

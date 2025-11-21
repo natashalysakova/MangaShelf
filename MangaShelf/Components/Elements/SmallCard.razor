@@ -5,7 +5,7 @@
 {
     <MudCard @onclick="OpenVolumeAsync" Style="position:relative;" Class="manga-card ">
         <div class="image-container">
-            <img class="card-image" src="@Volume.CoverImageUrlSmall" alt="@Volume.SeriesName" />
+            <FallbackImage ImageUrl="@Volume.CoverImageUrlSmall" Class="card-image" Alt="@Volume.SeriesName" />
         </div>
     </MudCard>
 }

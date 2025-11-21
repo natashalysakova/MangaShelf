@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /.env
 /MangaShelf.Parser/wwwroot/
+.DS_Store
