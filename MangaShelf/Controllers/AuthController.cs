@@ -30,4 +30,17 @@ public class AuthController : Controller
         // Redirect back to login with error
         return Redirect("/Account/Login?error=Invalid login attempt");
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Logout()
+    {
+        using var scope = HttpContext.RequestServices.CreateScope();
+        var _signInManager = 
+            scope.ServiceProvider.GetRequiredService<SignInManager<MangaIdentityUser>>();
+
+        await _signInManager.SignOutAsync();
+        
+        // Redirect to home page with a full reload to refresh the Blazor circuit
+        return Redirect("/");
+    }
 }

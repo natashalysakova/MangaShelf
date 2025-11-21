@@ -20,13 +20,16 @@
                         </MudItem>
                         <MudItem xs="4" sm="4">
                             <MudStack Row Breakpoint="Breakpoint.SmAndDown" AlignItems="AlignItems.Center">
-                                <MudToggleIconButton Icon="@notFiled"
+                                <AuthorizeView>
+                                    <Authorized>
+                                        <MudToggleIconButton Icon="@notFiled"
                                                      Color="@Color.Error"
                                                      ToggledIcon="@likeFiled"
-                                                     ToggledColor="@Color.Success" />
-                                
-                                <MudIconButton Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
-                                <MudIconButton Icon="@Icons.Material.Rounded.PlaylistAdd"></MudIconButton>
+                                                     ToggledColor="@Color.Success" />                    
+                                        <MudIconButton Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+                                        <MudIconButton Icon="@Icons.Material.Rounded.PlaylistAdd"></MudIconButton>
+                                    </Authorized>
+                                </AuthorizeView>                        
                             </MudStack>
                             <MudStack Row Breakpoint="Breakpoint.SmAndDown">
                                 <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
