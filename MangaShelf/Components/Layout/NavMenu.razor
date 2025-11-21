@@ -1,6 +1,5 @@
 ﻿@inject NavigationManager NavigationManager
 @inject IUiLocalizationService Localizer
-@inject IJSRuntime JS
 @rendermode InteractiveServer
 
 
@@ -63,26 +62,18 @@
                        Class="manga-header-menu-item">
                 @Localizer["Account"]
             </MudButton>
-            <MudButton OnClick="Logout"
-                       StartIcon="@Icons.Material.Outlined.Logout"
-                       Variant="Variant.Text"
-                       Class="manga-header-menu-item">
-                @Localizer["Logout"]
-            </MudButton>
+            <form method="post" action="/Auth/Logout" style="display:inline-block;">
+                <MudButton ButtonType="ButtonType.Submit"
+                           StartIcon="@Icons.Material.Outlined.Logout"
+                           Variant="Variant.Text"
+                           Class="manga-header-menu-item">
+                    @Localizer["Logout"]
+                </MudButton>
+            </form>
         </Authorized>
     </AuthorizeView>
     <CultureSelector />
 </MudContainer>
 
-<!-- Hidden logout form -->
-<form @ref="logoutForm" action="/Auth/Logout" method="post" style="display:none;"></form>
-
 @code {
-    private ElementReference logoutForm;
-
-    private async Task Logout()
-    {
-        // Submit the logout form which will POST to the controller
-        await JS.InvokeVoidAsync("eval", "document.querySelector('form[action=\"/Auth/Logout\"]').submit()");
-    }
 }
