@@ -15,6 +15,6 @@ public class Ownership : BaseEntity
         Wishlist = 0,
         Preorder = 1,
         Own = 2,
-        Gone = 3
+        Gone = 3,
     }
 }

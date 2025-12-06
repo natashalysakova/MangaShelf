@@ -30,5 +30,15 @@ public class VolumeDto
     public bool IsPublishedOnSite { get; set; }
     public VolumeType Type { get; set; }
 
-    public SeriesSimpleDto? Series { get; set; }
+    public SeriesSimpleDto Series { get; set; }
+
+    public VolumeStats Stats { get; set; }
+}
+
+public class VolumeStats
+{
+    public int OwnersCount { get; set; }
+    public int WishlistsCount { get; set; }
+    public int ReadersCount { get; set; }
+    public int CompletedCount { get; set; }
 }

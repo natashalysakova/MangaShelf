@@ -21,7 +21,7 @@ public class SeriesSimpleDto
     public bool IsPublishedOnSite { get; set; }
 
     public Guid PublisherId { get; set; }
-    public PublisherSimpleDto? Publisher { get; set; }
+    public PublisherSimpleDto Publisher { get; set; }
 
     public ICollection<string> Authors { get; set; } = new List<string>();
 }

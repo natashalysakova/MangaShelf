@@ -18,6 +18,8 @@ public interface IVolumeService : IService
 
     Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions);
     Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken);
+
+    Task<UserVolumeStatus> GetVolumeUserStatusAsync(Guid volumeId, string userId, CancellationToken token = default);
 }
 
 public interface ISeedService : IService

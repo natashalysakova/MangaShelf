@@ -49,6 +49,9 @@ public class MangaDbContext : DbContext
         //modelBuilder.Entity<Volume>()
         //    .HasIndex(v=> new { v.SeriesId, v.Number, v.Title }).IsUnique();
 
+        modelBuilder.Entity<Likes>()
+            .HasIndex(l => new { l.UserId, l.VolumeId }).IsUnique();
+
         modelBuilder.Entity<Country>()
             .HasIndex(c => c.Name);
 

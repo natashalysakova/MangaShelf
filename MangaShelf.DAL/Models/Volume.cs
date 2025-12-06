@@ -31,7 +31,9 @@ public class Volume : BaseEntity
     public virtual ICollection<Author> OverrideAuthors { get; set; } = new List<Author>();
     public virtual ICollection<Ownership> Owners { get; set; } = new List<Ownership>();
     public virtual ICollection<Reading> Readers { get; set; } = new List<Reading>();
+    public virtual ICollection<Likes> Likes { get; set; } = new List<Likes>();
 }
+
 
 [Flags]
 public enum VolumeType

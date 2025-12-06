@@ -29,7 +29,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             switch (paginationOptions!.ReleaseFilter)
             {
                 case ReleaseFilter.Released:
-                   result = result.Where(x => x.IsPreorder == false);
+                    result = result.Where(x => x.IsPreorder == false);
                     break;
                 case ReleaseFilter.Preorder:
                     result = result.Where(x => x.IsPreorder == true);
@@ -46,7 +46,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
                 x.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
         }
 
-        
+
 
         var totalPages = 1;
 
@@ -168,6 +168,62 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             .Select(v => v.Title);
 
         return await titles.ToListAsync(stoppingToken);
+    }
+
+    public async Task<UserVolumeStatus> GetVolumeUserStatusAsync(Guid volumeId, string userId, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        var user = await context.Users
+            .Include(x => x.OwnedVolumes)
+            .Include(x => x.Readings)
+            .Include(x => x.Likes)
+        .FirstOrDefaultAsync(u => u.IdentityUserId == userId);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        var status = new UserVolumeStatus
+        {
+            IsInWishlist = IsInWishlist(user, volumeId),
+            LikeStatus = GetLikeStatus(user, volumeId),
+            ReadingStatus = GetReadingStatus(user, volumeId),
+            Rating = GetRating(user, volumeId),
+            OwnersipStatus = GetOwnershipStatus(user, volumeId)
+        };
+
+        return status;
+    }
+
+    private string GetOwnershipStatus(User user, Guid volumeId)
+    {
+        var ownership = user.OwnedVolumes.FirstOrDefault(o => o.VolumeId == volumeId);
+        return ownership?.Status.ToString() ?? "None";
+    }
+
+    private int GetRating(User user, Guid volumeId)
+    {
+        var reading = user.Readings.FirstOrDefault(r => r.VolumeId == volumeId);
+        return reading?.Rating ?? 0;
+    }
+
+    private LikeStatus GetLikeStatus(User user, Guid volumeId)
+    {
+        var like = user.Likes.FirstOrDefault(l => l.VolumeId == volumeId);
+        return like?.Status ?? LikeStatus.None;
+    }
+
+    private string GetReadingStatus(User user, Guid volumeId)
+    {
+        var reading = user.Readings.FirstOrDefault(r => r.VolumeId == volumeId);
+        return reading?.Status.ToString() ?? "None";
+    }
+
+    private bool IsInWishlist(User user, Guid volumeId)
+    {
+        var ownership = user.OwnedVolumes.FirstOrDefault(o => o.VolumeId == volumeId);
+        return ownership != null && ownership.Status == Ownership.VolumeStatus.Wishlist;
     }
 }
 

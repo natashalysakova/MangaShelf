@@ -1,4 +1,7 @@
-﻿<MudDialog>
+﻿@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+<MudDialog>
     <DialogContent>
         @if (Volume != null)
         {
@@ -13,46 +16,45 @@
                     <MudStack Row>
                         <MudItem xs="6" sm="4">
                             <MudPaper Elevation="2">
-                        
-                                <FallbackImage Class="img-fluid"
-                                    ImageUrl="@Volume.CoverImageUrl"></FallbackImage>
+
+                                <FallbackImage Class="img-fluid" ImageUrl="@Volume.CoverImageUrl"></FallbackImage>
                             </MudPaper>
                         </MudItem>
                         <MudItem xs="4" sm="4">
                             <MudStack Row Breakpoint="Breakpoint.SmAndDown" AlignItems="AlignItems.Center">
                                 <AuthorizeView>
                                     <Authorized>
-                                        <MudToggleIconButton Icon="@notFiled"
-                                                     Color="@Color.Error"
-                                                     ToggledIcon="@likeFiled"
-                                                     ToggledColor="@Color.Success" />                    
-                                        <MudIconButton Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+                                        <MudToggleIconButton @bind-Toggled="@IsLiked" Icon="@notFiled"
+                                            Color="@Color.Default" ToggledIcon="@likeFiled" ToggledColor="@Color.Error" />
+                                        <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
                                         <MudIconButton Icon="@Icons.Material.Rounded.PlaylistAdd"></MudIconButton>
                                     </Authorized>
-                                </AuthorizeView>                        
+                                </AuthorizeView>
                             </MudStack>
                             <MudStack Row Breakpoint="Breakpoint.SmAndDown">
                                 <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
                                     <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
-                                    <MudText>Бажають</MudText>
+                                    <MudText>Бажають @Volume.Stats.WishlistsCount</MudText>
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
                                     <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
-                                    <MudText>В бібліотеці</MudText>
+                                    <MudText>В бібліотеці @Volume.Stats.OwnersCount</MudText>
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
                                     <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
-                                    <MudText>Читають</MudText>
+                                    <MudText>Читають @Volume.Stats.ReadersCount</MudText>
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Spacing="0" a>
                                     <MudIcon Icon="@Icons.Material.Filled.PriceCheck" />
-                                    <MudText>Прочитано</MudText>
+                                    <MudText>Прочитано @Volume.Stats.CompletedCount</MudText>
                                 </MudStack>
                             </MudStack>
                             <MudStack AlignItems="AlignItems.Center">
                                 <MudChipSet T="Color" SelectionMode="SelectionMode.ToggleSelection">
-                                    <MudChip Icon="@Icons.Material.Rounded.ThumbUp" Text="Like" Color="Color.Primary" Value="@Color.Primary"></MudChip>
-                                    <MudChip Icon="@Icons.Material.Rounded.ThumbDown" Text="Dislike" Color="Color.Secondary" Value="@Color.Secondary"></MudChip>
+                                    <MudChip Icon="@Icons.Material.Rounded.ThumbUp" Text="Like" Color="Color.Primary"
+                                        Value="@Color.Primary"></MudChip>
+                                    <MudChip Icon="@Icons.Material.Rounded.ThumbDown" Text="Dislike" Color="Color.Secondary"
+                                        Value="@Color.Secondary"></MudChip>
                                 </MudChipSet>
                                 <MudRating></MudRating>
                                 <MudText>@Volume.AvgRating</MudText>
@@ -62,24 +64,34 @@
                         </MudItem>
                         <MudItem xs="8" sm="4">
                             <MudStack>
-                                <MudTextField Variant="Variant.Filled" Label="Author" ReadOnly="true" Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
+                                <MudTextField Variant="Variant.Filled" Label="Author" ReadOnly="true"
+                                    Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
 
                                 <MudStack Row Breakpoint="Breakpoint.SmAndDown">
-                                    <MudTextField Variant="Variant.Filled" Label="Publisher" ReadOnly="true" Value="@Volume.Series.Publisher.Name"></MudTextField>
-                                    <MudTextField Variant="Variant.Filled" Label="ISBN" ReadOnly="true" Value="@Volume.ISBN"></MudTextField>
-                                    <MudTextField Variant="Variant.Filled" Label="AGE" ReadOnly="true" Value="@Volume.AgeRestriction"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="Publisher" ReadOnly="true"
+                                        Value="@Volume.Series.Publisher.Name"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="ISBN" ReadOnly="true"
+                                        Value="@Volume.ISBN"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="AGE" ReadOnly="true"
+                                        Value="@Volume.AgeRestriction"></MudTextField>
                                 </MudStack>
 
                                 <MudStack Row Breakpoint="Breakpoint.SmAndDown">
-                                    <MudTextField Variant="Variant.Filled" Label="Status" ReadOnly="true" Value="@Volume.Series.Status"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="Status" ReadOnly="true"
+                                        Value="@Volume.Series.Status"></MudTextField>
 
-                                    <MudTextField Variant="Variant.Filled" Label="Volume" ReadOnly="true" Value="@Volume.Number"></MudTextField>
-                                    <MudTextField Variant="Variant.Filled" Label="Total Volumes" ReadOnly="true" Value="@Volume.Series.TotalVolumes"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="Volume" ReadOnly="true"
+                                        Value="@Volume.Number"></MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="Total Volumes" ReadOnly="true"
+                                        Value="@Volume.Series.TotalVolumes"></MudTextField>
                                 </MudStack>
                                 <MudStack Row Breakpoint="Breakpoint.SmAndDown">
 
-                                    <MudTextField ShrinkLabel="true" Variant="Variant.Filled" Label="PreorderStart" ReadOnly="true" Value="@Volume.PreorderStart?.ToString("dd.MM.yyyy")"></MudTextField>
-                                    <MudTextField Variant="Variant.Filled" Label="ReleaseDate" ReadOnly="true" Value="@Volume.ReleaseDate?.ToString("dd.MM.yyyy")"></MudTextField>
+                                    <MudTextField ShrinkLabel="true" Variant="Variant.Filled" Label="PreorderStart"
+                                        ReadOnly="true" Value="@Volume.PreorderStart?.ToString("dd.MM.yyyy")">
+                                    </MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="ReleaseDate" ReadOnly="true"
+                                        Value="@Volume.ReleaseDate?.ToString("dd.MM.yyyy")"></MudTextField>
                                 </MudStack>
                             </MudStack>
                         </MudItem>
@@ -121,7 +133,22 @@
     [Inject]
     public required IVolumeService VolumeService { get; set; }
 
-    public VolumeDto? Volume { get; set; }
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthStateTask { get; set; }
+
+    private VolumeDto? Volume { get; set; }
+    private UserVolumeStatus? VolumeStatus { get; set; }
+    private bool IsLiked
+    {
+        get { return VolumeStatus?.LikeStatus == LikeStatus.Liked; }
+        set
+        {
+            if (VolumeStatus != null)
+            {
+
+            }
+        }
+    }
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(true));
 
@@ -130,6 +157,22 @@
     protected override async Task OnParametersSetAsync()
     {
         Volume = await VolumeService.GetFullVolumeByIdAsync(VolumeId);
+
+        try
+        {
+            var authState = await AuthStateTask;
+            var user = authState.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return;
+            }
+            VolumeStatus = await VolumeService.GetVolumeUserStatusAsync(VolumeId, userId);
+        }
+        catch
+        {
+        }
+
     }
 
     const string likeFiled = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>heart</title><path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" /></svg>""";
