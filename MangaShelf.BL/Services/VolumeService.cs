@@ -22,6 +22,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
                 .ThenInclude(s => s!.Authors)
             .Include(v => v.Series)
                 .ThenInclude(s => s!.Publisher)
+            .Include(v=>v.Likes)
             .Where(x => x.IsPublishedOnSite);
 
         if (paginationOptions?.ReleaseFilter != ReleaseFilter.None)
@@ -46,7 +47,24 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
                 x.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
         }
 
-
+        switch (paginationOptions.OrderBy)
+        {
+            case OrderBy.SeriesTitle:
+                result = result.OrderBy(x => x.Series.Title).ThenBy(x=>x.Number);
+                break;
+            case OrderBy.ReleaseDate:
+                result = result.OrderBy(x => x.ReleaseDate);
+                break;
+            case OrderBy.Popularity:
+                result = result.OrderBy(x => x.Likes.Count);
+                break;
+            case OrderBy.Rating:
+                result = result.OrderBy(x => x.AvgRating);
+                break;
+            case OrderBy.PreorderDate:
+                result = result.OrderBy(x => x.PreorderStart);
+                break;
+        }
 
         var totalPages = 1;
 
