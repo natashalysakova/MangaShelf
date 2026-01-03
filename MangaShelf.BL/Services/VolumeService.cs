@@ -196,6 +196,18 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         var ownership = user.OwnedVolumes.FirstOrDefault(o => o.VolumeId == volumeId);
         return ownership != null && ownership.Status == Ownership.VolumeStatus.Wishlist;
     }
+
+    public async Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(Guid seriesId, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+
+        var volumes = context.Volumes
+            .Include(v => v.Series)
+            .Where(v=>v.SeriesId == seriesId)
+            .OrderBy(v=>v.Number);
+
+        return await volumes.Select(v => v.ToDto()).ToListAsync(token);
+    }
 }
 
 public class SortDefinitions<T>

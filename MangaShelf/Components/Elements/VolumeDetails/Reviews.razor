@@ -1,0 +1,55 @@
+@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+
+@inject IUiLocalizationService Localizer
+
+@if (ReviewsList != null)
+{
+    <MudText Typo="Typo.h5" Class="mb-4">@Localizer["Reviews"]</MudText>
+    <MudStack>
+
+        @foreach (var review in ReviewsList)
+        {
+            <MudText>@review</MudText>
+        }
+    </MudStack>
+}
+else
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+
+@code{
+
+    [Parameter]
+    [EditorRequired]
+    public required Guid VolumeId { get; set; }
+
+    [Inject]
+    public required IVolumeService VolumeService { get; set; }
+
+    private IEnumerable<string>? ReviewsList { get; set; }
+
+
+    override protected async Task OnParametersSetAsync()
+    {
+        await LoadReviews();
+    }
+
+    private async Task LoadReviews()
+    {
+        try
+        {
+            ReviewsList = new List<string>
+            {
+                "Great volume, really enjoyed the storyline and character development.",
+                "The artwork is stunning, but the plot felt a bit rushed in some parts.",
+                "I couldn't put it down! Looking forward to the next volume."
+            };
+        }
+        catch (Exception)
+        {
+        }
+    }
+}

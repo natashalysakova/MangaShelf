@@ -1,12 +1,12 @@
-﻿@inject IDialogService Dialog
+﻿@using MangaShelf.Components.Elements.VolumeDetails
+@inject IDialogService Dialog
 
 
 @if (Volume != null)
 {
     <MudCard @onclick="OpenVolumeAsync" Style="position:relative;" Class="manga-card ">
-        <div class="image-container">§
+        <div class="image-container">
             <FallbackImage ImageUrl="@Volume.CoverImageUrlSmall" Class="card-image" Alt="@Volume.SeriesName" />
-            <MudText style="position: absolute; top: 0;">@Volume.SeriesName @Volume.Number</MudText>
         </div>
     </MudCard>
 }
@@ -20,15 +20,26 @@ else
 
 }
 
+<style>
+    .my-custom-class {
+        backdrop-filter: blur(10px);
+    }
+</style>
+
 @code {
     [Parameter]
     public CardVolumeDto? Volume { get; set; }
 
-
     private async Task OpenVolumeAsync()
     {
-        var parameters = new DialogParameters<VolumeDetailedPage>();
+        var parameters = new DialogParameters<VolumeDetailedModal>();
         parameters.Add(x => x.VolumeId, Volume.Id);
-        await Dialog.ShowAsync<VolumeDetailedPage>(string.Empty, parameters);
+        var options = new DialogOptions()
+        {
+            BackgroundClass = "my-custom-class",
+            CloseOnEscapeKey = true
+        };
+
+        await Dialog.ShowAsync<VolumeDetailedModal>(string.Empty, parameters, options);
     }
 }

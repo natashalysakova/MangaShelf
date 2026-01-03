@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @inherits LayoutComponentBase
 @inject IUiLocalizationService Localizer
+@inject AuthenticationStateProvider AuthStateProvider
 
 @* Required *@
 <MudThemeProvider IsDarkMode="true" Theme="MangaShelfTheme" />
@@ -59,22 +60,30 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var user = await AuthService.UserManager.GetUserAsync(AuthService.Context.User);
-        // A hard refresh or the user just navigated to the application for the first time
-        if (firstRender && user != null && !AuthService.Context.User.Identity!.IsAuthenticated)
+        try
         {
-            var url = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).ToString();
-            if (url.Contains("/login"))
+            var user = await AuthService.UserManager.GetUserAsync(AuthService.Context.User);
+            // A hard refresh or the user just navigated to the application for the first time
+            if (firstRender && user != null && !AuthService.Context.User.Identity!.IsAuthenticated)
             {
-                return;
-            }
+                var url = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).ToString();
+                if (url.Contains("/login"))
+                {
+                    return;
+                }
 
-            @* var restoredFromState = await AuthService.GetStateFromTokenAsync();
-            //The user lost their server side session, but still has a valid JWT
-            if (restoredFromState) *@
-            {
-                NavigationManager.Refresh();
+                @* var restoredFromState = await AuthService.GetStateFromTokenAsync();
+                //The user lost their server side session, but still has a valid JWT
+                if (restoredFromState) *@
+                {
+                    NavigationManager.Refresh();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Authentication check failed: {ex.Message}");
+            // Don't let authentication checks crash the circuit
         }
     }
 

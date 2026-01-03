@@ -1,0 +1,230 @@
+﻿@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+
+@inject IUiLocalizationService Localizer
+
+<MudDialog>
+    <DialogContent>
+        @if (Volume != null)
+        {
+            <MudGrid Spacing="6">
+                <MudItem xs="12">
+
+                    <MudText Typo="Typo.h4">@Volume.Series.Title @Volume.Title</MudText>
+                    <MudText Typo="Typo.caption">@Volume.Series.OriginalName</MudText>
+                    <MudText Typo="Typo.h4"></MudText>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row Breakpoint="Breakpoint.Xs">
+                        <MudItem xs="12" sm="4">
+                            <MudItem>
+
+                                <FallbackImage Class="img-fluid" ImageUrl="@Volume.CoverImageUrl"></FallbackImage>
+                            </MudItem>
+                            <MudItem>
+                                <MudStack Row Justify="Justify.Center" Class="m-3">
+                                    <AuthorizeView>
+                                        <Authorized>
+                                            <MudToggleIconButton @bind-Toggled="@IsLiked" Icon="@notFiled" Size="Size.Large"
+                                                                 Color="@Color.Default" ToggledIcon="@likeFiled" ToggledColor="@Color.Error" />
+                                            <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+                                            <MudIconButton Icon="@Icons.Material.Rounded.PlaylistAdd" Size="Size.Large"></MudIconButton>
+                                        </Authorized>
+                                    </AuthorizeView>
+                                </MudStack>
+
+                                <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                    <RatingComponent RatingValue="@Volume.AvgRating"></RatingComponent>
+                                </MudStack>
+
+                            </MudItem>
+
+                        </MudItem>
+
+                        <MudItem xs="12" sm="8">
+                            <MudStack>
+                                @if (Volume.IsPreorder)
+                                {
+                                    <MudAlert Severity="Severity.Warning" Elevation="0">
+                                        This volume is available for preorder until @Volume.ReleaseDate?.ToString("dd.MM.yyyy")
+                                    </MudAlert>
+                                }
+                                <MudTextField Variant="Variant.Filled" Label="@Localizer["Author"]" ReadOnly="true"
+                                              Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
+
+                                <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                                    <MudTextField Variant="Variant.Filled" Label="@Localizer["Publisher"]" ReadOnly="true"
+                                                  Value="@Volume.Series.Publisher.Name"></MudTextField>
+                                    <MudStack Row>
+
+                                        <MudTextField Variant="Variant.Filled" Label="@Localizer["ISBN"]" ReadOnly="true"
+                                                      Value="@Volume.ISBN"></MudTextField>
+                                        <MudTextField Variant="Variant.Filled" Label="@Localizer["Age"]" ReadOnly="true"
+                                                      Value="@Volume.AgeRestriction"></MudTextField>
+                                    </MudStack>
+
+                                </MudStack>
+
+                                <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                                    <MudTextField Variant="Variant.Filled" Label="@Localizer["Status"]" ReadOnly="true"
+                                                  Value="@Volume.Series.Status"></MudTextField>
+                                    <MudStack Row>
+                                        <MudTextField Variant="Variant.Filled" Label="@Localizer["VolumeNumber"]" ReadOnly="true"
+                                                      Value="@Volume.Number"></MudTextField>
+                                        <MudTextField Variant="Variant.Filled" Label="@Localizer["TotalVolumes"]" ReadOnly="true"
+                                                      Value="@Volume.Series.TotalVolumes"></MudTextField>
+                                    </MudStack>
+                                </MudStack>
+                                <MudStack Row>
+
+                                    <MudTextField ShrinkLabel="true" Variant="Variant.Filled" Label="@Localizer["PreorderStarted"]"
+                                                  ReadOnly="true" Value="@Volume.PreorderStart?.ToString("dd.MM.yyyy")">
+                                    </MudTextField>
+                                    <MudTextField Variant="Variant.Filled" Label="@Localizer["Released"]" ReadOnly="true"
+                                                  Value="@Volume.ReleaseDate?.ToString("dd.MM.yyyy")"></MudTextField>
+                                </MudStack>
+
+                                <MudStack Row Breakpoint="Breakpoint.Xs" Justify="Justify.Center">
+                                    <MudStack Row>
+                                        <MudItem xs="6">
+
+                                            <MudTextField Variant="Variant.Outlined"
+                                                          Label="@Localizer["Wishlisted"]" ReadOnly="true"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@likeFiled"
+                                                          Value="@Volume.Stats.WishlistsCount"></MudTextField>
+                                        </MudItem>
+                                        <MudItem xs="6">
+
+                                            <MudTextField Variant="Variant.Outlined"
+                                                          Label="@Localizer["InLibrary"]" ReadOnly="true"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Filled.LibraryBooks"
+                                                          Value="@Volume.Stats.OwnersCount"></MudTextField>
+                                        </MudItem>
+                                    </MudStack>
+                                    <MudStack Row>
+                                        <MudItem xs="6">
+
+                                            <MudTextField Variant="Variant.Outlined"
+                                                          Label="@Localizer["Reading"]" ReadOnly="true"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Filled.RemoveRedEye"
+                                                          Value="@Volume.Stats.ReadersCount"></MudTextField>
+                                        </MudItem>
+                                        <MudItem xs="6">
+
+                                            <MudTextField Variant="Variant.Outlined"
+                                                          Label="@Localizer["Finished"]" ReadOnly="true"
+                                                          Adornment="Adornment.Start"
+                                                          AdornmentIcon="@Icons.Material.Filled.Done"
+                                                          Value="@Volume.Stats.CompletedCount"></MudTextField>
+                                        </MudItem>
+                                    </MudStack>
+
+                                </MudStack>
+                                <MudItem>
+                                    <MudText>@((MarkupString)Volume.Description)</MudText>
+                                </MudItem>
+                            </MudStack>
+                        </MudItem>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                        <MudItem xs="12">
+                            <Reviews VolumeId="@Volume.Id" />
+                        </MudItem>
+                        <MudItem xs="8">
+                            <MoreInSeries Volume="@Volume"/>
+                        </MudItem>
+                    </MudStack>
+                </MudItem>
+                <MudItem>
+                    <MudSpacer></MudSpacer>
+                </MudItem>
+            </MudGrid>
+        }
+        else
+        {
+            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public Guid VolumeId { get; set; }
+
+    [Inject]
+    public required IVolumeService VolumeService { get; set; }
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthStateTask { get; set; }
+
+    private VolumeDto? Volume { get; set; }
+    private UserVolumeStatus? VolumeStatus { get; set; }
+    private bool IsLiked
+    {
+        get { return VolumeStatus?.LikeStatus == LikeStatus.Liked; }
+        set
+        {
+            if (VolumeStatus != null)
+            {
+
+            }
+        }
+    }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.CancelAll();
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadVolumeInfo();
+
+        await LoadVolumeUserStatus();
+    }
+
+    const string likeFiled = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>heart</title><path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" /></svg>""";
+    const string notFiled = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>heart-outline</title><path d="M12.1,18.55L12,18.65L11.89,18.55C7.14,14.24 4,11.39 4,8.5C4,6.5 5.5,5 7.5,5C9.04,5 10.54,6 11.07,7.36H12.93C13.46,6 14.96,5 16.5,5C18.5,5 20,6.5 20,8.5C20,11.39 16.86,14.24 12.1,18.55M16.5,3C14.76,3 13.09,3.81 12,5.08C10.91,3.81 9.24,3 7.5,3C4.42,3 2,5.41 2,8.5C2,12.27 5.4,15.36 10.55,20.03L12,21.35L13.45,20.03C18.6,15.36 22,12.27 22,8.5C22,5.41 19.58,3 16.5,3Z" /></svg>""";
+
+    private async Task LoadVolumeInfo()
+    {
+        try
+        {
+            Volume = await VolumeService.GetFullVolumeByIdAsync(VolumeId);
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+
+
+
+
+    private async Task LoadVolumeUserStatus()
+    {
+        try
+        {
+            var authState = await AuthStateTask;
+            var user = authState.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return;
+            }
+            VolumeStatus = await VolumeService.GetVolumeUserStatusAsync(VolumeId, userId);
+        }
+        catch
+        {
+        }
+    }
+}
