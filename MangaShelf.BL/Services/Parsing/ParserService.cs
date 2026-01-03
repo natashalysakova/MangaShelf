@@ -277,7 +277,7 @@ public class ParserService : IParseService
             volume.Series.TotalVolumes = volumeInfo.TotalVolumes;
         }
 
-        if (volumeInfo.Release is not null && volumeInfo.Release < DateTime.Now)
+        if (volumeInfo.Release is not null && volumeInfo.Release > DateTime.Now)
         {
             volume.ReleaseDate = volumeInfo.Release;
         }

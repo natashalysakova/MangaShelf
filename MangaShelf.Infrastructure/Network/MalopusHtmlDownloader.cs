@@ -12,7 +12,7 @@ public class MalopusHtmlDownloader : BasicHtmlDownloader
     protected override async Task PreRequest(string url, CancellationToken token = default)
     {
         var html = await this.GetHtmlFromUrl(url, token);
-        if (html.StartsWith("<script>"))
+        if (html.Contains("defaultHash"))
         {
             var hashIndex = html.IndexOf("defaultHash");
             var hashStart = html.IndexOf("\"", hashIndex) + 1;

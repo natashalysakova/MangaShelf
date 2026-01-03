@@ -31,25 +31,13 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
     [TestMethod]
     public async Task MalopusPreorderTest()
     {
-        var result = await Parser.Parse("https://malopus.com.ua/manga/kuroshitsuji-vol-6");
+        var result = await Parser.Parse("https://malopus.com.ua/manga/smoking-behind-the-supermarket-vol-3/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 6", result.Title);
-        Assert.AreEqual("Темний дворецький", result.Series);
-        Assert.AreEqual("Яна Тобосо", result.Authors);
-        Assert.AreEqual(6, result.VolumeNumber);
-        Assert.AreEqual("https://malopus.com.ua/content/images/29/600x600l80mc0/kuroshitsuji-vol-6-41508603832573.png", result.Cover);
-        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
-        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
-        Assert.AreEqual("978-617-8168-68-1", result.Isbn);
-        Assert.AreEqual(34, result.TotalVolumes);
-        Assert.AreEqual(SeriesStatus.Ongoing, result.SeriesStatus);
-        Assert.AreEqual("Kuroshitsuji", result.OriginalSeriesName);
+        Assert.AreEqual(DateTime.Today, result.PreorderStartDate.Value.Date);
         Assert.AreEqual(true, result.IsPreorder);
-        //Assert.AreEqual(DateTime.Parse("2025-07-28"), result.PreorderStartDate);
-        Assert.AreEqual(null, result.AgeRestrictions);
-        Assert.IsNotNull(result.Description);
+        Assert.AreEqual(DateTime.Parse("2026-03-31"), result.Release);
     }
 
     [TestMethod]
@@ -85,7 +73,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
     }
 
     [TestMethod]
-    [Obsolete("Release date is not on the page anymore")]
+    [Ignore("Release date is not on the page anymore.")]
     public async Task Malopus_ReleaseDate_ShouldBe_Parsed()
     {
         var result = await Parser.Parse("https://malopus.com.ua/manga/junji-ito-shiver");

@@ -1,9 +1,11 @@
-﻿using MangaShelf.BL.Dto;
+﻿using System.Linq.Expressions;
+using MangaShelf.BL.Dto;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
 using MangaShelf.Common;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
+using MangaShelf.DAL.DomainServices;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -22,62 +24,13 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
                 .ThenInclude(s => s!.Authors)
             .Include(v => v.Series)
                 .ThenInclude(s => s!.Publisher)
-            .Include(v=>v.Likes)
-            .Where(x => x.IsPublishedOnSite);
+            .Include(v => v.Likes)
+            .Where(x => x.IsPublishedOnSite)
+            .Filter(paginationOptions);
 
-        if (paginationOptions?.ReleaseFilter != ReleaseFilter.None)
-        {
-            switch (paginationOptions!.ReleaseFilter)
-            {
-                case ReleaseFilter.Released:
-                    result = result.Where(x => x.IsPreorder == false);
-                    break;
-                case ReleaseFilter.Preorder:
-                    result = result.Where(x => x.IsPreorder == true);
-                    break;
-            }
-        }
+        var resultList = await result.ApplyPagination(paginationOptions).ToListAsync(token);
 
-        if (!string.IsNullOrEmpty(paginationOptions?.Search))
-        {
-            result = result.Where(x =>
-                EF.Functions.Like(x.Title, $"%{paginationOptions.Search}%") ||
-                EF.Functions.Like(x.Series!.Title, $"%{paginationOptions.Search}%") ||
-                EF.Functions.Like(x.Series!.Publisher!.Name, $"%{paginationOptions.Search}%") ||
-                x.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
-        }
-
-        switch (paginationOptions.OrderBy)
-        {
-            case OrderBy.SeriesTitle:
-                result = result.OrderBy(x => x.Series.Title).ThenBy(x=>x.Number);
-                break;
-            case OrderBy.ReleaseDate:
-                result = result.OrderBy(x => x.ReleaseDate);
-                break;
-            case OrderBy.Popularity:
-                result = result.OrderBy(x => x.Likes.Count);
-                break;
-            case OrderBy.Rating:
-                result = result.OrderBy(x => x.AvgRating);
-                break;
-            case OrderBy.PreorderDate:
-                result = result.OrderBy(x => x.PreorderStart);
-                break;
-        }
-
-        var totalPages = 1;
-
-        if (paginationOptions?.Take != 0)
-        {
-            var totalCount = await result.CountAsync();
-            var pagesCount = (double)totalCount / paginationOptions!.Take;
-            totalPages = (int)Math.Ceiling(pagesCount);
-
-            result = result.Skip(paginationOptions.Skip).Take(paginationOptions.Take);
-        }
-
-        var resultList = await result.ToListAsync(token);
+        var totalPages = await result.GetTotalPagesAsync(paginationOptions);
 
         return (resultList.Select(v => v.ToDto()), totalPages);
     }

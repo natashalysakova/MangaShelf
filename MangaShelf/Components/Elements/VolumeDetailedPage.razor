@@ -64,6 +64,12 @@
                         </MudItem>
                         <MudItem xs="8" sm="4">
                             <MudStack>
+                                @if(Volume.IsPreorder)
+                                {
+                                    <MudAlert Severity="Severity.Info" Elevation="0">
+                                        This volume is available for preorder until @Volume.ReleaseDate?.ToString("dd.MM.yyyy")
+                                    </MudAlert>
+                                }
                                 <MudTextField Variant="Variant.Filled" Label="Author" ReadOnly="true"
                                     Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
 

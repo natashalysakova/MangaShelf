@@ -4,8 +4,9 @@
 @if (Volume != null)
 {
     <MudCard @onclick="OpenVolumeAsync" Style="position:relative;" Class="manga-card ">
-        <div class="image-container">
+        <div class="image-container">§
             <FallbackImage ImageUrl="@Volume.CoverImageUrlSmall" Class="card-image" Alt="@Volume.SeriesName" />
+            <MudText style="position: absolute; top: 0;">@Volume.SeriesName @Volume.Number</MudText>
         </div>
     </MudCard>
 }

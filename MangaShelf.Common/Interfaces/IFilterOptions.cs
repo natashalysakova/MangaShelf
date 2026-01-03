@@ -6,11 +6,10 @@ public interface IFilterOptions
     int Take { get; }
 
     string Search { get; init; }
-    string SortBy { get; init; }
-    bool SortDescending { get; init; }
+    OrderBy OrderBy { get; init; }
+    bool OrderIsAsc { get; init; }
 
     ReleaseFilter ReleaseFilter { get; init; }
-    OrderBy OrderBy { get; init; }
 }
 
 public enum ReleaseFilter

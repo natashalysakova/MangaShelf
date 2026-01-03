@@ -12,33 +12,40 @@
 <MudPaper Class="p-4 mb-4" Elevation="3" Style="background-color: transparent">
     <MudStack Row>
 
-        <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Value="Search" SearchFunc="@Search2" Variant="Variant.Outlined" Clearable
-                         ResetValueOnEmptyText="true"
-                         SelectValueOnTab="true" CoerceValue="true"
-                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+        <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Value="Search" SearchFunc="@Search2"
+            Variant="Variant.Outlined" Clearable ResetValueOnEmptyText="true" SelectValueOnTab="true" CoerceValue="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
 
 
-        <MudButton Variant="Variant.Text" OnClick="ToggleFilters"><MudIcon Icon="@Icons.Material.Rounded.FilterAlt"></MudIcon>@Localizer["Filter"]</MudButton>
-        <MudButton Variant="Variant.Text" OnClick="ResetFilters"><MudIcon Icon="@Icons.Material.Rounded.FilterAltOff"></MudIcon>@Localizer["Reset"]</MudButton>
+        <MudButton Variant="Variant.Text" OnClick="ToggleFilters">
+            <MudIcon Icon="@Icons.Material.Rounded.FilterAlt"></MudIcon>@Localizer["Filter"]
+        </MudButton>
+        <MudButton Variant="Variant.Text" OnClick="ResetFilters">
+            <MudIcon Icon="@Icons.Material.Rounded.FilterAltOff"></MudIcon>@Localizer["Reset"]
+        </MudButton>
     </MudStack>
     @if (FilterToggle)
     {
-        <MudStack Row Class="pt-4" Elevation="0" Style="background-color: transparent" AlignItems="AlignItems.Center" Justify="Justify.Center">
+        <MudStack Row Class="pt-4" Elevation="0" Style="background-color: transparent" AlignItems="AlignItems.Center"
+            Justify="Justify.Center">
             <MudSelect Label="@Localizer["ResultPerPage"]" @bind-Value="PageSize" FitContent="true">
                 <MudSelectItem Value="24"></MudSelectItem>
                 <MudSelectItem Value="48"></MudSelectItem>
                 <MudSelectItem Value="96"></MudSelectItem>
                 <MudSelectItem Value="0">@Localizer["All"]</MudSelectItem>
             </MudSelect>
-            <MudSelect Label="@Localizer["OrderBy"]" @bind-Value="OrderBy" FitContent ="true">
-                <MudSelectItem Value="OrderBy.ReleaseDate">@Localizer["ByReleaseDate"]</MudSelectItem>
-                <MudSelectItem Value="OrderBy.SeriesTitle">@Localizer["BySeriesTitle"]</MudSelectItem>
-                <MudSelectItem Value="OrderBy.Popularity">@Localizer["ByPopularity"]</MudSelectItem>
-                <MudSelectItem Value="OrderBy.Rating">@Localizer["ByRating"]</MudSelectItem>
-                <MudSelectItem Value="OrderBy.PreorderDate">@Localizer["ByPreorderDate"]</MudSelectItem>
+            <MudSelect Label="@Localizer["OrderBy"]" @bind-Value="OrderBy" FitContent="true">
+                @foreach (var order in Enum.GetValues<OrderBy>())
+                {
+                    <MudSelectItem Value="@order">@Localizer[order.ToString()]</MudSelectItem>
+                }
             </MudSelect>
+            <MudToggleIconButton @bind-Toggled="OrderIsAsc" 
+                Icon="@Icons.Material.Filled.Sort" Color="@Color.Error"
+                ToggledIcon="@Icons.Material.Filled.Sort" ToggledColor="@Color.Success" />
 
-            <MudChipSet @bind-SelectedValues="SelectedReleaseFilter" SelectionMode="SelectionMode.MultiSelection" Variant="Variant.Text" Color="Color.Info">
+            <MudChipSet @bind-SelectedValues="SelectedReleaseFilter" SelectionMode="SelectionMode.MultiSelection"
+                Variant="Variant.Text" Color="Color.Info">
                 <MudChip Value="ReleaseFilter.Preorder" Text="@Localizer[ReleaseFilter.Preorder.ToString()]" />
                 <MudChip Value="ReleaseFilter.Released" Text="@Localizer[ReleaseFilter.Released.ToString()]" />
             </MudChipSet>
@@ -53,7 +60,8 @@
     @if (_totalPages > 1)
     {
         <div class="d-flex flex-column align-center mb-8">
-            <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="SelectedPage" Class="mt-4" />
+            <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages"
+                @bind-Selected="SelectedPage" Class="mt-4" />
         </div>
     }
     <MudGrid Justify="@justification" Spacing="6">
@@ -68,7 +76,8 @@
     @if (_totalPages > 1)
     {
         <div class="d-flex flex-column align-center mb-8">
-            <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages" @bind-Selected="SelectedPage" Class="mt-4" />
+            <MudPagination Color="Color.Primary" ShowFirstButton="true" ShowLastButton="true" Count="_totalPages"
+                @bind-Selected="SelectedPage" Class="mt-4" />
         </div>
     }
 }
@@ -151,13 +160,13 @@
         }
     }
 
-    private OrderBy _orderBy = OrderBy.ReleaseDate;
+    private OrderBy _orderBy = OrderBy.Popularity;
     private OrderBy OrderBy
     {
         get => _orderBy;
         set
         {
-            if(_orderBy != value)
+            if (_orderBy != value)
             {
                 _orderBy = value;
                 _ = ReloadVolumes();
@@ -165,6 +174,19 @@
         }
     }
 
+    private bool _orderIsAsc = false;
+    private bool OrderIsAsc
+    {
+        get => _orderIsAsc;
+        set
+        {
+            if (_orderIsAsc != value)
+            {
+                _orderIsAsc = value;
+                _ = ReloadVolumes();
+            }
+        }
+    }
 
     Justify justification = Justify.FlexStart;
 
@@ -194,7 +216,15 @@
             releaseFilter = SelectedReleaseFilter.First();
         }
 
-        Common.FilterOptions paginationOption = new() { PageNumber = SelectedPage, PageSize = PageSize, Search = Search, ReleaseFilter = releaseFilter, OrderBy = this.OrderBy };
+        Common.FilterOptions paginationOption = new()
+        {
+            PageNumber = SelectedPage,
+            PageSize = PageSize,
+            Search = Search,
+            ReleaseFilter = releaseFilter,
+            OrderBy = this.OrderBy,
+            OrderIsAsc = this.OrderIsAsc
+        };
 
         (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
 
@@ -218,6 +248,7 @@
 
             await ProtectedLocalStorage.SetAsync(nameof(SelectedReleaseFilter), SelectedReleaseFilter);
             await ProtectedLocalStorage.SetAsync(nameof(OrderBy), OrderBy);
+            await ProtectedLocalStorage.SetAsync(nameof(OrderIsAsc), OrderIsAsc);
         }
         catch (Exception ex)
         {
@@ -227,12 +258,33 @@
 
     private async Task LoadFromStorage()
     {
-        _selectedPageValue = await GetFromStorage<int>(nameof(SelectedPage));
-        _pageSize = await GetFromStorage<int>(nameof(PageSize));
-        _search = await GetFromStorage<string>(nameof(Search));
-        _filterToggle = await GetFromStorage<bool>(nameof(FilterToggle));
-        _selectedReleaseFilter = await GetFromStorage<IReadOnlyCollection<ReleaseFilter>>(nameof(SelectedReleaseFilter));
-        _orderBy = await GetFromStorage<OrderBy>(nameof(OrderBy));
+        var storedSelectedPage = await GetFromStorage<int?>(nameof(SelectedPage));
+        if (storedSelectedPage.HasValue)
+            _selectedPageValue = storedSelectedPage.Value;
+
+        var storedPageSize = await GetFromStorage<int?>(nameof(PageSize));
+        if (storedPageSize.HasValue)
+            _pageSize = storedPageSize.Value;
+
+        var storedSearch = await GetFromStorage<string>(nameof(Search));
+        if (storedSearch != null)
+            _search = storedSearch;
+
+        var storedFilterToggle = await GetFromStorage<bool?>(nameof(FilterToggle));
+        if (storedFilterToggle.HasValue)
+            _filterToggle = storedFilterToggle.Value;
+
+        var storedReleaseFilter = await GetFromStorage<IReadOnlyCollection<ReleaseFilter>>(nameof(SelectedReleaseFilter));
+        if (storedReleaseFilter != null)
+            _selectedReleaseFilter = storedReleaseFilter;
+
+        var storedOrderBy = await GetFromStorage<OrderBy?>(nameof(OrderBy));
+        if (storedOrderBy.HasValue)
+            _orderBy = storedOrderBy.Value;
+
+        var storedOrderIsAsc = await GetFromStorage<bool?>(nameof(OrderIsAsc));
+        if (storedOrderIsAsc.HasValue)
+            _orderIsAsc = storedOrderIsAsc.Value;
     }
 
     private async Task<T> GetFromStorage<T>(string key)
@@ -252,6 +304,7 @@
 
         return default!;
     }
+    
 
     private void ToggleFilters()
     {
