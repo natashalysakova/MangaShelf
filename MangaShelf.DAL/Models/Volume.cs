@@ -12,6 +12,7 @@ public class Volume : BaseEntity
 
     public string? CoverImageUrl { get; set; }
     public string? CoverImageUrlSmall { get; set; }
+
     public string? PurchaseUrl { get; set; }
 
     public string? Description { get; set; }

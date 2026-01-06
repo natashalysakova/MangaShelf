@@ -19,4 +19,5 @@ public interface IVolumeService : IService
 
     Task<UserVolumeStatus> GetVolumeUserStatusAsync(Guid volumeId, string userId, CancellationToken token = default);
     Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(Guid seriesId, CancellationToken token = default);
+    Task<bool> ChangePublishedStatus(Guid volumeId, CancellationToken token = default);
 }

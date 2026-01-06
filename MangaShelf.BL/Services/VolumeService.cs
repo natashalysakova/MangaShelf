@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Services;
 
-public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<MangaDbContext> dbContextFactory) : IVolumeService
+public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<MangaDbContext> dbContextFactory, IImageManager imageManager) : IVolumeService
 {
     public async Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IFilterOptions? paginationOptions = default, CancellationToken token = default)
     {
@@ -80,7 +80,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
 
         var volume = await volumeDomainService.GetAllFull().FirstOrDefaultAsync(x => x.Id == id);
 
-        return volume?.ToFullDto();
+        return volume!.ToFullDto();
     }
 
     public async Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions)
@@ -207,6 +207,19 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             .OrderBy(v=>v.Number);
 
         return await volumes.Select(v => v.ToDto()).ToListAsync(token);
+    }
+
+    public async Task<bool> ChangePublishedStatus(Guid volumeId, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+
+        var volume = context.Volumes.FirstOrDefault(v => v.Id == volumeId);
+
+        volume.IsPublishedOnSite = !volume.IsPublishedOnSite;
+
+        await context.SaveChangesAsync(token);
+
+        return volume.IsPublishedOnSite;
     }
 }
 

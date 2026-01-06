@@ -52,11 +52,11 @@
                 <CellTemplate>
                     @if (context.Item.IsPublishedOnSite)
                     {
-                        <MudButton Color="Color.Warning">Unpublish</MudButton>
+                        <MudButton @onclick="() => ChangePublishStatus(context.Item)" Color="Color.Warning">Unpublish</MudButton>
                     }
                     else
                     {
-                        <MudButton Color="Color.Success">Publish</MudButton>
+                        <MudButton @onclick="() => ChangePublishStatus(context.Item)" Color="Color.Success">Publish</MudButton>
                     }
                 </CellTemplate>
             </PropertyColumn>
@@ -138,4 +138,16 @@
         }
     }
 
+    private async Task ChangePublishStatus(Volume volume)
+    {
+        try
+        {
+            volume.IsPublishedOnSite = await volumeService.ChangePublishedStatus(volume.Id);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
 }

@@ -300,7 +300,7 @@ public class ParserService : IParseService
             volume.AgeRestriction = volumeInfo.AgeRestrictions.Value;
         }
 
-        if (volume.CoverImageUrl is null || volume.CoverImageUrlSmall is null)
+        //if (volume.CoverImageUrl is null || volume.CoverImageUrlSmall is null)
         {
             using var scope = _serviceProvider.CreateScope();
             var _imageManager = scope.ServiceProvider.GetRequiredService<IImageManager>();

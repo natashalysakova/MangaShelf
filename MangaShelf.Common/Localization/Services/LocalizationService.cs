@@ -42,6 +42,10 @@ public abstract class LocalizationService<T>(IStringLocalizer<T> localizer, ILog
         }
     }
 
+    public LocalizedString this[Enum name] => this[name.ToString()];
+
+    public LocalizedString this[Enum name, params object[] arguments] => this[name.ToString(), arguments];
+
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
         return localizer.GetAllStrings(includeParentCultures);
@@ -52,7 +56,7 @@ public abstract class LocalizationService<T>(IStringLocalizer<T> localizer, ILog
         if (result.ResourceNotFound || string.IsNullOrEmpty(result.Value))
         {
             result = new LocalizedString(result.Name, "{" + result.Name + "}", result.ResourceNotFound, result.SearchedLocation);
-            logger.LogTrace("Translation for '{name}' {state}. Fallback value {value}", result.Name, result.ResourceNotFound ? "not found" : "is empty", result.Value);
+            logger.LogWarning("Translation for '{name}' {state}. Fallback value {value}", result.Name, result.ResourceNotFound ? "not found" : "is empty", result.Value);
         }
 
         return result;

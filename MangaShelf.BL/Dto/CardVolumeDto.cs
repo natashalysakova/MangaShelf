@@ -14,4 +14,6 @@ public class CardVolumeDto
     public bool IsPreorder { get; set; }
     public string? ReleaseDate { get; set; }
     public double AvgRating { get; set; }
+
+    public bool CoverNeedAdjustment { get; set; }
 }
