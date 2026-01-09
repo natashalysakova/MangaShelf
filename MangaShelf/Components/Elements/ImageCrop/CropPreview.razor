@@ -1,0 +1,70 @@
+@using MangaShelf.BL.Interfaces
+@using MangaShelf.BL.Dto
+@using MangaShelf.Common.Interfaces
+@using MangaShelf.DAL.Models
+@using Microsoft.AspNetCore.Components.Forms
+
+<svg @key="@($"{Left}-{Top}-{Right}-{Bottom}")" 
+     viewBox="0 0 @ImageWidth @ImageHeight"
+     preserveAspectRatio="xMidYMid slice"
+     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+    <!-- Semi-transparent overlay for excluded areas -->
+    <defs>
+        <mask id="cropMask-@MaskId">
+            <rect width="@ImageWidth" height="@ImageHeight" fill="white" />
+            <rect x="@Left"
+                  y="@Top"
+                  width="@(Right - Left)"
+                  height="@(Bottom - Top)"
+                  fill="black" />
+        </mask>
+    </defs>
+
+    <rect width="@ImageWidth" height="@ImageHeight" fill="rgba(0,0,0,0.6)" mask="url(#cropMask-@MaskId)" />
+
+    <!-- Crop rectangle border -->
+    <rect x="@Left"
+          y="@Top"
+          width="@(Right - Left)"
+          height="@(Bottom - Top)"
+          fill="none"
+          stroke="#FF0000"
+          stroke-width="1"
+          stroke-dasharray="10,5"
+          vector-effect="non-scaling-stroke" />
+
+    <!-- Corner markers -->
+    <circle cx="@Left"
+            cy="@Top"
+            r="4" fill="#FF0000"
+            vector-effect="non-scaling-stroke" />
+    <circle cx="@Right"
+            cy="@Top"
+            r="4" fill="#FF0000"
+            vector-effect="non-scaling-stroke" />
+    <circle cx="@Left"
+            cy="@Bottom"
+            r="4" fill="#FF0000"
+            vector-effect="non-scaling-stroke" />
+    <circle cx="@Right"
+            cy="@Bottom"
+            r="4" fill="#FF0000"
+            vector-effect="non-scaling-stroke" />
+</svg>
+
+@code {
+    [Parameter]
+    public int Right { get; set; }
+    [Parameter]
+    public int Left { get; set; }
+    [Parameter]
+    public int Top { get; set; }
+    [Parameter]
+    public int Bottom { get; set; }
+    [Parameter]
+    public int ImageWidth { get; set; }
+    [Parameter]
+    public int ImageHeight { get; set; }
+
+    private string MaskId => $"{Left}-{Top}-{Right}-{Bottom}";
+}

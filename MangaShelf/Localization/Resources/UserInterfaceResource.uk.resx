@@ -246,8 +246,14 @@
   <data name="Unknown" xml:space="preserve">
     <value>Невідомо</value>
   </data>
+  <data name="Ongoing" xml:space="preserve">
+    <value>Публікується</value>
+  </data>
   <data name="Completed" xml:space="preserve">
     <value>Закінчена</value>
+  </data>
+  <data name="Hiatus" xml:space="preserve">
+    <value>Перерва</value>
   </data>
   <data name="Cancelled" xml:space="preserve">
     <value>Покинута</value>
@@ -255,10 +261,10 @@
   <data name="OneShot" xml:space="preserve">
     <value>Ваншот</value>
   </data>
-  <data name="Hiatus" xml:space="preserve">
-    <value>Перерва</value>
+  <data name="ThisIsPreorderVolume" xml:space="preserve">
+    <value>Цей том доступний до передзамовлення до</value>
   </data>
-  <data name="Ongoing" xml:space="preserve">
-    <value>Публікується</value>
+  <data name="NoReviews" xml:space="preserve">
+    <value>Немає відгуків для цього тому</value>
   </data>
 </root>

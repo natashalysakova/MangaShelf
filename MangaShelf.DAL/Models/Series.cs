@@ -2,6 +2,7 @@
 
 public class Series : BaseEntity
 {
+    public Guid PublicId { get; set; } = Guid.NewGuid();
     public required string Title { get; set; }
     public string? OriginalName { get; set; }
     public ICollection<string> Aliases { get; set; } = new List<string>();

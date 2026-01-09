@@ -1,0 +1,139 @@
+﻿@page "/volume/{PublicId}"
+@using MangaShelf.Components.Pages.VolumePage.Elements
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+@using MangaShelf.Services
+
+@inject IVolumeService VolumeService
+@inject IVolumeStateService VolumeState
+@inject IVolumePageLocalizationService Localizer
+@inject ILogger<VolumePage> Logger
+@inject ISnackbar Snackbar
+
+@implements IDisposable
+
+@if (Volume != null)
+{
+    <MudGrid Spacing="6">
+
+        <MudItem xs="12">
+            <MudText Typo="Typo.h4">@Volume.Series.Title @Volume.Title</MudText>
+            <MudText Typo="Typo.caption">@Volume.Series.OriginalName</MudText>
+            <MudText Typo="Typo.h4"></MudText>
+        </MudItem>
+        @if (Volume.IsPreorder)
+        {
+            <MudItem xs="12">
+                <MudAlert Severity="Severity.Warning" Elevation="0">
+                    @Localizer["ThisIsPreorderVolume"]
+                    @Volume.ReleaseDate?.ToString("dd.MM.yyyy")
+                </MudAlert>
+            </MudItem>
+        }
+        <MudItem xs="12">
+            <MudStack Row Breakpoint="Breakpoint.Xs">
+                <MudItem xs="12" sm="4">
+                    <MudItem Class="mb-4">
+                        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                            <FallbackImage Class="img-fluid" ImageUrl="@Volume.CoverImageUrl"></FallbackImage>
+                            <RatingComponent RatingValue="@Volume.AvgRating"></RatingComponent>
+                            <UserActionsComponent Volume="@Volume" />
+                        </MudStack>
+                    </MudItem>
+                </MudItem>
+                <MudItem xs="12" sm="8">
+                    <VolumeInfoComponent Volume="@Volume" />
+                    <VolumeStatsComponent />
+                </MudItem>
+                <MudItem>
+                </MudItem>
+            </MudStack>
+        </MudItem>
+        <MudItem xs="12">
+            <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                <MudItem xs="12" md="7">
+                    <Reviews VolumePublicId="@Volume.PublicId" />
+
+                </MudItem>
+                <MudItem xs="12" md="5">
+                    <MudStack>
+                        @if (@VolumeState.CurrentUserStatus != null && @VolumeState.CurrentUserStatus.Ownerships.Any())
+                        {
+                            <MudStack Row>
+                                <MudItem xs="6">
+                                    <OwnershipTimeline />
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudText Typo="Typo.h5" Class="mb-4">@Localizer["OwnershipData"]</MudText>
+                                    <MudItem xs="12" Class="mb-4">
+                                        <MudTextField Variant="Variant.Filled"
+                                                      Label="@Localizer["Status"]" ReadOnly="true"
+                                                      Adornment="Adornment.Start"
+                                                      AdornmentIcon="@Icons.Material.Filled.RemoveRedEye"
+                                                      Value="@VolumeState.CurrentUserStatus.CurrentOwnershipStatus.ToString()"></MudTextField>
+                                    </MudItem>
+                                </MudItem>
+                            </MudStack>
+                        }
+                    </MudStack>
+                </MudItem>
+            </MudStack>
+        </MudItem>
+        <MudItem xs="12">
+            <MoreInSeries Volume="@Volume" />
+            <MudSpacer></MudSpacer>
+        </MudItem>
+    </MudGrid>
+}
+else
+{
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+}
+
+@code {
+    [Parameter()]
+    public required string PublicId { get; set; }
+
+
+    private VolumeDto? Volume { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        VolumeState.Clear();
+
+        await LoadVolumeInfo();
+
+        await VolumeState.InitializeAsync(PublicId, await GetUserId());
+        VolumeState.OnUserStatusChanged += StateHasChanged;
+    }
+
+    private async Task LoadVolumeInfo()
+    {
+        try
+        {
+            Volume = await VolumeService.GetFullVolumeByPublicIdAsync(PublicId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading volume info for PublicId: {PublicId}", PublicId);
+        }
+    }
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthStateTask { get; set; }
+
+    private async Task<string?> GetUserId()
+    {
+        var authState = await AuthStateTask;
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return userId;
+    }
+
+    public void Dispose()
+    {
+        VolumeState.Clear();
+        VolumeState.OnUserStatusChanged -= StateHasChanged;
+    }
+}

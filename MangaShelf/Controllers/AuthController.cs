@@ -13,7 +13,7 @@ public class AuthController : Controller
         _serviceProvider = serviceProvider;
     }
     [HttpPost]
-    public async Task<IActionResult> Login(string username, string password, bool rememberMe = false)
+    public async Task<IActionResult> Login(string username, string password, bool rememberMe = false, string? returnUrl = null)
     {
         using var scope = HttpContext.RequestServices.CreateScope();
         var _signInManager = 
@@ -22,10 +22,17 @@ public class AuthController : Controller
         var result = await _signInManager.PasswordSignInAsync(
             username, password, 
             isPersistent: rememberMe, lockoutOnFailure: false);
+
+
         if (result.Succeeded)
         {
+            if (string.IsNullOrEmpty(returnUrl) || !Url.IsLocalUrl(returnUrl))
+            {
+                returnUrl = "/";
+            }
+
             // Redirect to home page with a full reload to refresh the Blazor circuit
-            return Redirect("/");
+            return Redirect(returnUrl);
         }
         // Redirect back to login with error
         return Redirect("/Account/Login?error=Invalid login attempt");

@@ -1,0 +1,27 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+<MudItem xs="4">
+    <MudTooltip Text="@TopText">
+        <MudStack Spacing="0" AlignItems="AlignItems.Center">
+@*             <MudText Typo="Typo.caption">@TopText</MudText>
+ *@            <MudIconButton Icon="@Icon" Variant="Variant.Text" Size="Size.Medium"
+                     Color="@IconColor"></MudIconButton>
+            <MudText Typo="Typo.caption">@BottomText</MudText>
+        </MudStack>
+    </MudTooltip>
+</MudItem>
+
+@code
+{
+    [Parameter]
+    public string TopText { get; set; }
+    [Parameter]
+    public int BottomText { get; set; }
+
+    [Parameter]
+    public string Icon { get; set; }
+    [Parameter]
+    public Color IconColor { get; set; }
+}

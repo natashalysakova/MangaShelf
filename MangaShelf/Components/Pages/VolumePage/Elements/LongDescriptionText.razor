@@ -1,0 +1,40 @@
+@inject IVolumePageLocalizationService Localizer
+
+@if (_isTextLong)
+{
+    @if (_expanded)
+    {
+        <MudText>@Text</MudText>
+        <MudLink Variant="Variant.Text" Underline="Underline.Always"  Color="Color.Default" OnClick="() => _expanded = false">@Localizer["ShowLess"]</MudLink>
+    }
+    else
+    {
+        <MudText>@_shortText</MudText>
+        <MudLink Variant="Variant.Text" Underline="Underline.Always" Color="Color.Default" OnClick="() => _expanded = true">@Localizer["ShowMore"]</MudLink>
+    }
+}
+else
+{
+    <MudText>@Text</MudText>
+}
+
+@code{
+    [Parameter]
+    public string Text { get; set; }
+
+    private string _shortText;
+
+    private bool _expanded = false;
+    private bool _isTextLong = false;
+    private const int _previewLength = 512;
+
+    override protected void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Text.Length > _previewLength)
+        {
+            _isTextLong = true;
+            _shortText = Text.Substring(0, _previewLength) + "...";
+        }
+    }
+}

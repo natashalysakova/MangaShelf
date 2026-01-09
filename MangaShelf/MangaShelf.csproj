@@ -26,6 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Localization\Resources\Components\VolumePageResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VolumePageResource.resx</DependentUpon>
+    </Compile>
     <Compile Update="Localization\Resources\UserInterfaceResource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -34,10 +39,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Localization\Resources\Components\VolumePageResource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>VolumePageResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Localization\Resources\UserInterfaceResource.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>UserInterfaceResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\js\" />
   </ItemGroup>
 
 </Project>

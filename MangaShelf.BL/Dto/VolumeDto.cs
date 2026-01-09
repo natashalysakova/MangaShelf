@@ -7,6 +7,7 @@ namespace MangaShelf.BL.Dto;
 public class VolumeDto
 {
     public Guid Id { get; set; }
+    public required string PublicId { get; set; }
 
     public required string Title { get; set; }
     public int Number { get; set; }
@@ -31,14 +32,4 @@ public class VolumeDto
     public VolumeType Type { get; set; }
 
     public SeriesSimpleDto Series { get; set; }
-
-    public VolumeStats Stats { get; set; }
-}
-
-public class VolumeStats
-{
-    public int OwnersCount { get; set; }
-    public int WishlistsCount { get; set; }
-    public int ReadersCount { get; set; }
-    public int CompletedCount { get; set; }
 }

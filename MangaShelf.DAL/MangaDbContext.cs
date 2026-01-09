@@ -13,6 +13,8 @@ public class MangaDbContext : DbContext
     public DbSet<Series> Series { get; set; }
     public DbSet<Volume> Volumes { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Ownership> Ownerships { get; set; }
+    public DbSet<Reading> Readings { get; set; }
     public DbSet<Author> Authors { get; set; }
 
     public MangaDbContext(DbContextOptions<MangaDbContext> options) : base(options)
@@ -45,6 +47,9 @@ public class MangaDbContext : DbContext
             .HasConversion(
                 v => string.Join('|', v),
                 v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
+
+        modelBuilder.Entity<Reading>().ToTable("Reading");
+        modelBuilder.Entity<Ownership>().ToTable("Ownership");
 
         //modelBuilder.Entity<Volume>()
         //    .HasIndex(v=> new { v.SeriesId, v.Number, v.Title }).IsUnique();

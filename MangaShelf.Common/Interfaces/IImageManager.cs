@@ -5,9 +5,11 @@ namespace MangaShelf.Common.Interfaces;
 public interface IImageManager
 {
     string CreateSmallImage(string coverImageUrl);
-    string? DownloadFileFromWeb(string url);
+    string? DownloadFileFromWeb(string url, Guid publicId);
     string SaveFlagFromCDN(string countryCode);
-    void CropImage(string coverImageUrl);
+    string CropImage(string coverImageUrl);
+    string? CropImage(string coverImageUrl, int left, int top, int right, int bottom);
+    (int width, int height) GetImageDimensions(string coverImageUrl);
 }
 
 public class ImageManager : IImageManager
@@ -15,91 +17,47 @@ public class ImageManager : IImageManager
     private const string serverRoot = "wwwroot";
     const string imageDir = "images";
 
-    public bool CheckIfCoverNeedAdjutment(string coverImageUrl)
+    public string? CropImage(string imageUrl)
     {
-        var sourceImage = Path.Combine(serverRoot, coverImageUrl);
+        var sourceImage = Path.Combine(serverRoot, imageUrl);
 
         if (!File.Exists(sourceImage))
-            return false;
+            return null;
 
         try
         {
             using var image = new MagickImage(sourceImage);
-            
-            var width = image.Width;
-            var height = image.Height;
-            
-            // Check left edge pixels (first 10% of width)
-            var checkWidth = Math.Max(1, (int)(width * 0.10));
-            
-            using var pixels = image.GetPixels();
 
-            var maxValue = Quantum.Max; // Typically 65535 for Q16
-            var alphaThreshold = maxValue * 0.1;
-            var whiteThreshold = maxValue * 0.95;
-
-            for (int x = 0; x < checkWidth; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    var pixel = pixels[x, y];
-                    var color = pixel.ToColor();
-
-                    // Check if pixel is colorful (not white and not transparent)
-                    if (color != null &&
-                        color.A >= alphaThreshold && // Not nearly transparent
-                        !(color.R > whiteThreshold && color.G > whiteThreshold && color.B > whiteThreshold)) // Not nearly white
-                    {
-                        return false; // Found a colorful pixel, no adjustment needed
-                    }
-                }
-            }
-            
-            // No colorful pixels found in the first 5% of the image
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
-
-    public void CropImage(string coverImageUrl)
-    {
-        var sourceImage = Path.Combine(serverRoot, coverImageUrl);
-
-        if (!File.Exists(sourceImage))
-            return;
-
-        try
-        {
-            using var image = new MagickImage(sourceImage);
-            
             var width = (int)image.Width;
             var height = (int)image.Height;
-            
+
             using var pixels = image.GetPixels();
-            
+
             var maxValue = Quantum.Max;
-            
+
+            var hasTransparent = HasTransparency(image);
+
             // Helper method to check if a pixel should be considered as border
             bool IsEmptyPixel(IMagickColor<ushort>? color)
             {
                 if (color == null)
                     return true;
-                
+
                 // Check if nearly transparent (alpha < 50%)
                 if (color.A < maxValue * 0.99)
                     return true;
-                
-                // Check if it's white or almost white (all channels > 95%)
-                var whiteThreshold = maxValue * 0.99;
-                if (color.R > whiteThreshold && color.G > whiteThreshold && color.B > whiteThreshold)
-                    return true;
-                
+
+                if (!hasTransparent)
+                {
+                    // Check if it's white or almost white (all channels > 95%)
+                    var whiteThreshold = maxValue * 0.50;
+                    if (color.R > whiteThreshold && color.G > whiteThreshold && color.B > whiteThreshold)
+                        return true;
+                }
+
                 return false;
             }
-            
+
             // Find top boundary
             int top = 0;
             for (int y = 0; y < height; y++)
@@ -109,14 +67,14 @@ public class ImageManager : IImageManager
                 {
                     var pixel = pixels[x, y];
                     var color = pixel?.ToColor();
-                    
+
                     if (!IsEmptyPixel(color))
                     {
                         hasContentPixel = true;
                         break;
                     }
                 }
-                
+
                 if (hasContentPixel)
                 {
                     top = y;
@@ -133,25 +91,25 @@ public class ImageManager : IImageManager
                 {
                     var pixel = pixels[x, y];
                     var color = pixel?.ToColor();
-                    
+
                     if (!IsEmptyPixel(color))
                     {
                         hasContentPixel = true;
                         break;
                     }
                 }
-                
+
                 if (hasContentPixel)
                 {
                     bottom = y;
                     break;
                 }
             }
-            
+
             // Find right boundary - check only top 85% of the image
             int right = width - 1;
-            var checkHeightForRight = (int)(height * 0.85);
-            
+            var checkHeightForRight = (int)(height * 0.9);
+
             for (int x = width - 1; x >= 0; x--)
             {
                 bool hasContentPixel = false;
@@ -160,14 +118,14 @@ public class ImageManager : IImageManager
                 {
                     var pixel = pixels[x, y];
                     var color = pixel?.ToColor();
-                    
+
                     if (!IsEmptyPixel(color))
                     {
                         hasContentPixel = true;
                         break;
                     }
                 }
-                
+
                 if (hasContentPixel)
                 {
                     right = x;
@@ -195,47 +153,69 @@ public class ImageManager : IImageManager
 
                 if (hasContentPixel)
                 {
-                    if(Math.Abs(right - x) > (x * 0.35)) // wide left and right fields
-                    {
-                        
-                        if (x > (width * 0.15))
-                        {
-                            x = (int)Math.Ceiling(width * 0.10);
-                        }
-                    }
-                    else // white covers 
-                    {
-                        
-                        if (x > (width * 0.15))
-                        {
-                            x = (int)Math.Ceiling(width * 0.10);
-                        }
-                    }
-
                     left = x;
                     break;
                 }
             }
 
+            return CropImage(imageUrl, left, top, right, bottom);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error cropping image: " + ex.Message);
+        }
+
+        return null;
+    }
+
+    public string? CropImage(string imageUrl, int left, int top, int right, int bottom)
+    {
+        var sourceImage = Path.Combine(serverRoot, imageUrl);
+
+        if (!File.Exists(sourceImage))
+            return null;
+
+        try
+        {
+            using var image = new MagickImage(sourceImage);
+
+            var width = (int)image.Width;
+            var height = (int)image.Height;
+
             // Calculate crop dimensions
             var cropWidth = right - left + 1;
             var cropHeight = bottom - top + 1;
-            
+
             // Only crop if we found valid boundaries
             if (cropWidth > 0 && cropHeight > 0 && (left > 0 || top > 0 || right < width - 1 || bottom < height - 1))
             {
                 var cropGeometry = new MagickGeometry(left, top, (uint)cropWidth, (uint)cropHeight);
                 image.Crop(cropGeometry);
                 image.ResetPage();
-                
+
                 // Overwrite the original image
-                image.Write(sourceImage);
+                var fileInfo = new FileInfo(sourceImage);
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.Name);
+                var extension = fileInfo.Extension;
+                var fileName = $"{fileNameWithoutExtension}_crop{extension}";
+                var croppedImagePath = Path.Combine(Path.GetDirectoryName(sourceImage)!, fileName);
+                image.Write(croppedImagePath);
+
+                var pathToReturn = Path.Combine(Path.GetDirectoryName(imageUrl)!, fileName);
+
+                CreateSmallImage(pathToReturn);
+
+                return pathToReturn;
+
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Silently fail if image processing fails
+            Console.WriteLine("Error cropping image: " + ex.Message);
         }
+
+        return null;
+
     }
 
     public string CreateSmallImage(string coverImageUrl)
@@ -271,16 +251,16 @@ public class ImageManager : IImageManager
         return coverImageUrl; // Return original if resize fails
     }
 
-    public string? DownloadFileFromWeb(string url)
+    public string? DownloadFileFromWeb(string url, Guid publicId)
     {
-        if(url.Contains('?'))
+        if (url.Contains('?'))
         {
             var indexOfQuestionMark = url.IndexOf('?');
             url = url.Substring(0, indexOfQuestionMark).Trim('?');
         }
 
         var extention = new FileInfo(url).Extension;
-        var destiantionFolder = Path.Combine(imageDir, "series", DateTime.Today.Year.ToString());
+        var destiantionFolder = Path.Combine(imageDir, "series", publicId.ToString());
         var filename = $"{Guid.NewGuid()}{extention}";
 
         try
@@ -304,8 +284,6 @@ public class ImageManager : IImageManager
             }
 
             var urlPath = Path.Combine(destiantionFolder, filename);
-
-            CropImage(urlPath);
 
             return urlPath;
         }
@@ -347,5 +325,49 @@ public class ImageManager : IImageManager
         }
 
         return Path.Combine(destiantionFolder, $"{countryCode}.webp");
+    }
+
+    public (int width, int height) GetImageDimensions(string coverImageUrl)
+    {
+        var sourceImage = Path.Combine(serverRoot, coverImageUrl);
+
+        if (!File.Exists(sourceImage))
+            throw new FileNotFoundException("Image not found", sourceImage);
+
+        using (var image = new MagickImage(sourceImage))
+        {
+            return ((int)image.Width, (int)image.Height);
+        }
+    }
+
+    private bool HasTransparency(MagickImage image)
+    {
+        // Check if image has an alpha channel
+        if (!image.HasAlpha)
+            return false;
+
+        var maxValue = Quantum.Max;
+        using var pixels = image.GetPixels();
+        
+        var width = (int)image.Width;
+        var height = (int)image.Height;
+
+        // Sample strategy: check every 10th pixel for performance
+        // Adjust sampling rate based on your needs
+        for (int y = 0; y < height; y += 10)
+        {
+            for (int x = 0; x < width; x += 10)
+            {
+                var pixel = pixels[x, y];
+                var color = pixel?.ToColor();
+                
+                if (color != null && color.A < maxValue)
+                {
+                    return true; // Found a transparent pixel
+                }
+            }
+        }
+
+        return false;
     }
 }

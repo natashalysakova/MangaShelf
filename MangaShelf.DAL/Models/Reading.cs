@@ -11,15 +11,14 @@ public class Reading : BaseEntity
     public ReadingStatus Status { get; set; }
     public int? Rating { get; set; }
     public string? Review { get; set; }
+}
 
-
-    public enum ReadingStatus
-    {
-        None = 0,
-        PlanToRead = 1,
-        Reading = 2,
-        Completed = 3,
-        OnHold = 4,
-        Dropped = 5,
-    }
+public enum ReadingStatus
+{
+    None = 0,
+    PlanToRead = 1,
+    Reading = 2,
+    Completed = 3,
+    OnHold = 4,
+    Dropped = 5,
 }

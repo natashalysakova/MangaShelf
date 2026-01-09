@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using MangaShelf.BL.Dto;
+﻿using MangaShelf.BL.Dto;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
 using MangaShelf.Common;
@@ -10,6 +9,9 @@ using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
+using static MangaShelf.DAL.Models.Ownership;
+using static MangaShelf.DAL.Models.Reading;
 
 namespace MangaShelf.BL.Services;
 
@@ -73,12 +75,14 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return await volumes.Select(v => v.ToDto()).ToListAsync(token);
     }
 
-    public async Task<VolumeDto?> GetFullVolumeByIdAsync(Guid id, CancellationToken token = default)
+    public async Task<VolumeDto?> GetFullVolumeByPublicIdAsync(string volumePublicId, CancellationToken token = default)
     {
+        var publicId = Guid.Parse(volumePublicId);
+
         using var context = dbContextFactory.CreateDbContext();
         var volumeDomainService = new DomainServiceFactory(context).GetDomainService<IVolumeDomainService>();
 
-        var volume = await volumeDomainService.GetAllFull().FirstOrDefaultAsync(x => x.Id == id);
+        var volume = await volumeDomainService.GetAllFull().FirstOrDefaultAsync(x => x.PublicId == publicId);
 
         return volume!.ToFullDto();
     }
@@ -141,70 +145,49 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return await titles.ToListAsync(stoppingToken);
     }
 
-    public async Task<UserVolumeStatus> GetVolumeUserStatusAsync(Guid volumeId, string userId, CancellationToken token = default)
+    public async Task<UserVolumeStatusDto> GetVolumeStatusInfo(string volumePublicId, string? userId, CancellationToken token = default)
     {
-        var context = dbContextFactory.CreateDbContext();
-        var user = await context.Users
-            .Include(x => x.OwnedVolumes)
-            .Include(x => x.Readings)
-            .Include(x => x.Likes)
-        .FirstOrDefaultAsync(u => u.IdentityUserId == userId);
+        var publicId = Guid.Parse(volumePublicId);
+        using var context = dbContextFactory.CreateDbContext();
+
+        User? user = default;
+
+        user = await context.Users
+                    .Include(x => x.OwnedVolumes.Where(x => x.Volume.PublicId == publicId).OrderBy(v => v.Date))
+                        .ThenInclude(x => x.Volume)
+                    .Include(x => x.Readings.Where(x => x.Volume.PublicId == publicId).OrderBy(x => x.StartedAt))
+                    .Include(x => x.Likes.Where(x => x.Volume.PublicId == publicId))
+                        .ThenInclude(x => x.Volume)
+                .FirstOrDefaultAsync(u => u.IdentityUserId == userId);
 
         if (user == null)
         {
             throw new Exception("User not found");
         }
 
-        var status = new UserVolumeStatus
-        {
-            IsInWishlist = IsInWishlist(user, volumeId),
-            LikeStatus = GetLikeStatus(user, volumeId),
-            ReadingStatus = GetReadingStatus(user, volumeId),
-            Rating = GetRating(user, volumeId),
-            OwnersipStatus = GetOwnershipStatus(user, volumeId)
-        };
 
-        return status;
+        var volume = context.Volumes
+            .Include(v => v.Owners)
+            .Include(v => v.Readers)
+            .Include(v => v.Likes)
+            .FirstOrDefault(v => v.PublicId == publicId);
+
+
+        return user.ToUserVolumeStatusDto();
     }
 
-    private string GetOwnershipStatus(User user, Guid volumeId)
-    {
-        var ownership = user.OwnedVolumes.FirstOrDefault(o => o.VolumeId == volumeId);
-        return ownership?.Status.ToString() ?? "None";
-    }
 
-    private int GetRating(User user, Guid volumeId)
-    {
-        var reading = user.Readings.FirstOrDefault(r => r.VolumeId == volumeId);
-        return reading?.Rating ?? 0;
-    }
 
-    private LikeStatus GetLikeStatus(User user, Guid volumeId)
+    public async Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(string seriesPublicId, CancellationToken token = default)
     {
-        var like = user.Likes.FirstOrDefault(l => l.VolumeId == volumeId);
-        return like?.Status ?? LikeStatus.None;
-    }
+        var sPublicId = Guid.Parse(seriesPublicId);
 
-    private string GetReadingStatus(User user, Guid volumeId)
-    {
-        var reading = user.Readings.FirstOrDefault(r => r.VolumeId == volumeId);
-        return reading?.Status.ToString() ?? "None";
-    }
-
-    private bool IsInWishlist(User user, Guid volumeId)
-    {
-        var ownership = user.OwnedVolumes.FirstOrDefault(o => o.VolumeId == volumeId);
-        return ownership != null && ownership.Status == Ownership.VolumeStatus.Wishlist;
-    }
-
-    public async Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(Guid seriesId, CancellationToken token = default)
-    {
         using var context = dbContextFactory.CreateDbContext();
 
         var volumes = context.Volumes
             .Include(v => v.Series)
-            .Where(v=>v.SeriesId == seriesId)
-            .OrderBy(v=>v.Number);
+            .Where(v => v.Series.PublicId == sPublicId)
+            .OrderBy(v => v.Number);
 
         return await volumes.Select(v => v.ToDto()).ToListAsync(token);
     }
@@ -220,6 +203,191 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         await context.SaveChangesAsync(token);
 
         return volume.IsPublishedOnSite;
+    }
+
+    public async Task<IEnumerable<ReviewDto>> GetReviews(string volumePublicId)
+    {
+        var publicId = Guid.Parse(volumePublicId);
+
+        using var context = dbContextFactory.CreateDbContext();
+
+        var usersThatReviewed = context.Users
+            .Include(u => u.Readings)
+            .Where(u => u.Readings.Any(r => r.Volume.PublicId == publicId && (!string.IsNullOrEmpty(r.Review) || r.Rating != null)));
+
+        return await usersThatReviewed
+            .SelectMany(u => u.Readings
+                .Where(r => r.Volume.PublicId == publicId && (!string.IsNullOrEmpty(r.Review) || r.Rating != null))
+                .Select(r => r.ToReviewDto()))
+            .ToListAsync();
+    }
+
+    public async Task<Volume?> GetFullVolumeByIdAsync(Guid id, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var volumeDomainService = new DomainServiceFactory(context).GetDomainService<IVolumeDomainService>();
+
+        var volume = await volumeDomainService.GetAllFull().FirstOrDefaultAsync(x => x.Id == id);
+
+        return volume;
+
+    }
+
+    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> ToggleWishlist(string volumePublicId, string userId)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var publicId = Guid.Parse(volumePublicId);
+
+        var user = context.Users
+            .Include(u => u.OwnedVolumes)
+                .ThenInclude(ov => ov.Volume)
+            .FirstOrDefault(u => u.IdentityUserId == userId);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        var wishlistRecord = user.OwnedVolumes.FirstOrDefault(ov => ov.Volume.PublicId == publicId && ov.Status == VolumeStatus.Wishlist);
+        if (wishlistRecord != null)
+        {
+            wishlistRecord.IsDeleted = true;
+        }
+        else
+        {
+            var volume = context.Volumes.FirstOrDefault(v => v.PublicId == publicId);
+            if (volume == null)
+            {
+                throw new Exception("Volume not found");
+            }
+            wishlistRecord = new Ownership
+            {
+                User = user,
+                Volume = volume,
+                Date = DateTime.Now,
+                Status = VolumeStatus.Wishlist
+            };
+            user.OwnedVolumes.Add(wishlistRecord);
+        }
+
+        await context.SaveChangesAsync();
+
+        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+    }
+
+    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> ToggleLike(string volumePublicId, string userId)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var publicId = Guid.Parse(volumePublicId);
+
+        var user = context.Users
+            .Include(u => u.Likes)
+                .ThenInclude(ov => ov.Volume)
+            .FirstOrDefault(u => u.IdentityUserId == userId);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        var likeRecord = user.Likes.FirstOrDefault(ov => ov.Volume.PublicId == publicId);
+        if (likeRecord != null)
+        {
+            likeRecord.Status = likeRecord.Status switch
+            {
+                LikeStatus.Liked => LikeStatus.None,
+                LikeStatus.None => LikeStatus.Liked,
+                _ => LikeStatus.Liked,
+            };
+        }
+        else
+        {
+            var volume = context.Volumes.FirstOrDefault(v => v.PublicId == publicId);
+            if (volume == null)
+            {
+                throw new Exception("Volume not found");
+            }
+
+            likeRecord = new Likes
+            {
+                User = user,
+                Volume = volume,
+                Status = LikeStatus.Liked
+            };
+            user.Likes.Add(likeRecord);
+        }
+
+        await context.SaveChangesAsync();
+
+
+        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+    }
+
+    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> AddOwnershipAsync(string volumePublicId, string userId, Ownership ownership)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var publicId = Guid.Parse(volumePublicId);
+        var volume = await context.Volumes
+            .Include(x => x.Owners)
+            .FirstOrDefaultAsync(v => v.PublicId == publicId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId);
+
+        var ownershipToAdd = new Ownership
+        {
+            UserId = user.Id,
+            VolumeId = volume.Id,
+            Date = ownership.Date,
+            Status = ownership.Status,
+            Type = ownership.Type
+        };
+
+        volume.Owners.Add(ownershipToAdd);
+        await context.SaveChangesAsync();
+
+        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+    }
+
+    public async Task<VolumeStatsDto> GetVolumeStats(string volumePublicId, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var publicId = Guid.Parse(volumePublicId);
+
+        var volume = await context.Volumes
+            .Include(v => v.Likes)
+            .Include(v => v.Owners)
+            .Include(v => v.Readers)
+            .FirstOrDefaultAsync(v => v.PublicId == publicId);
+
+        return new VolumeStatsDto
+        {
+            OwnersCount = volume.Owners.Count(x => x.Status is VolumeStatus.Own) - volume.Owners.Count(x => x.Status is VolumeStatus.Gone),
+            PreordersCount = volume.Owners.Count(o => o.Status is VolumeStatus.Preorder),
+            WishlistsCount = volume.Owners.Count(o => o.Status is VolumeStatus.Wishlist),
+            ReadersCount = volume.Readers.Count(x => x.Status is ReadingStatus.Reading),
+            CompletedCount = volume.Readers.Count(r => r.Status is ReadingStatus.Completed),
+            LikesCount = volume.Likes.Count(r => r.Status is LikeStatus.Liked)
+        };
+    }
+
+    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveOwnershipAsync(Guid ownershipId)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+
+        var ownership = await context.Ownerships
+            .Include(o => o.User)
+            .Include(o => o.Volume)
+            .FirstOrDefaultAsync(o => o.Id == ownershipId);
+        if (ownership == null)
+        {
+            throw new Exception("Ownership not found");
+        }
+
+        context.Ownerships.Remove(ownership);
+        await context.SaveChangesAsync();
+
+        return (
+            await GetVolumeStatusInfo(ownership.Volume.PublicId.ToString(), ownership.User.IdentityUserId),
+            await GetVolumeStats(ownership.Volume.PublicId.ToString()));
     }
 }
 

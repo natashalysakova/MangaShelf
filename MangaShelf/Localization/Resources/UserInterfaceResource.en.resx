@@ -246,19 +246,25 @@
   <data name="Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
+  <data name="Ongoing" xml:space="preserve">
+    <value>Ongoing</value>
+  </data>
   <data name="Completed" xml:space="preserve">
     <value>Completed</value>
-  </data>
-  <data name="OneShot" xml:space="preserve">
-    <value>OneShot</value>
-  </data>
-  <data name="Cancelled" xml:space="preserve">
-    <value>Cancelled</value>
   </data>
   <data name="Hiatus" xml:space="preserve">
     <value>Hiatus</value>
   </data>
-  <data name="Ongoing" xml:space="preserve">
-    <value>Ongoing</value>
+  <data name="Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="OneShot" xml:space="preserve">
+    <value>OneShot</value>
+  </data>
+  <data name="ThisIsPreorderVolume" xml:space="preserve">
+    <value>This volume is available for preorder until</value>
+  </data>
+  <data name="NoReviews" xml:space="preserve">
+    <value>No reviews for this volume</value>
   </data>
 </root>

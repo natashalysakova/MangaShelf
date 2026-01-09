@@ -2,14 +2,14 @@
 @using MangaShelf.DAL.Models
 @using System.Security.Claims
 
-@inject IUiLocalizationService Localizer
+@inject IVolumePageLocalizationService Localizer
 
-@if (Volumes != null)
+@if (Volumes != null && Volumes.Any())
 {
     <MudText Typo="Typo.h5" Class="mb-4">@Localizer["MoreInSeries"]</MudText>
-    <MangaLine Volumes="Volumes" ItemsPerLine="5"></MangaLine>
+    <MangaLine Volumes="Volumes" ItemsPerLine="8"></MangaLine>
 }
-else
+else if(Volumes == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
@@ -36,8 +36,8 @@ else
     {
         try
         {
-            var result = await VolumeService.GetVolumesBySeriesId(Volume.Series.Id);
-            var toRemove = result.Where(x => x.Id == Volume.Id);
+            var result = await VolumeService.GetVolumesBySeriesId(Volume.Series.PublicId);
+            var toRemove = result.Where(x => x.PublicId == Volume.PublicId);
             result = result.Except(toRemove);
 
             Volumes = result;

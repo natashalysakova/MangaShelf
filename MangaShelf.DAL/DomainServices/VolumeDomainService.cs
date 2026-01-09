@@ -36,6 +36,7 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
             .Include(v => v.Series)
                 .ThenInclude(x => x.Authors);
 
+
         return query;
     }
 

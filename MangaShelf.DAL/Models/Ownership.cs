@@ -10,11 +10,13 @@ public class Ownership : BaseEntity
     public VolumeType Type { get; set; }
     public DateTimeOffset Date { get; set; }
 
-    public enum VolumeStatus
-    {
-        Wishlist = 0,
-        Preorder = 1,
-        Own = 2,
-        Gone = 3,
-    }
+
+}
+public enum VolumeStatus
+{
+    Wishlist = 0,
+    Preorder = 1,
+    Own = 2,
+    Gone = 3,
+    None = 4,
 }

@@ -70,6 +70,8 @@ public class Program
         builder.AddLocalizationServices();
         builder.AddUILocalizationServices();
 
+        builder.AddUiStateServices();
+
         builder.Services.AddHttpContextAccessor();
 
         if (builder.Environment.IsDevelopment())

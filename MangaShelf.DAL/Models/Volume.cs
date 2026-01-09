@@ -2,6 +2,7 @@
 
 public class Volume : BaseEntity
 {
+    public Guid PublicId { get; set; } = Guid.NewGuid();
     public required string Title { get; set; }
     public int Number { get; set; }
     public string? ISBN { get; set; }
@@ -12,6 +13,7 @@ public class Volume : BaseEntity
 
     public string? CoverImageUrl { get; set; }
     public string? CoverImageUrlSmall { get; set; }
+    public string? OriginalCoverUrl { get; set; }
 
     public string? PurchaseUrl { get; set; }
 

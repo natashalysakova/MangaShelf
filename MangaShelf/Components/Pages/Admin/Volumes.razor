@@ -62,9 +62,8 @@
             </PropertyColumn>
             <TemplateColumn>
                 <CellTemplate>
-                    <MudButton Color="Color.Warning">Edit</MudButton>
+                    <MudButton Href="@($"/admin/volumes/edit/{context.Item.Id}")" Color="Color.Warning">Edit</MudButton>
                     <MudButton Href="@context.Item.PurchaseUrl" Target="_blank" Color="Color.Warning">Go to site</MudButton>
-
                 </CellTemplate>
             </TemplateColumn>
         </Columns>

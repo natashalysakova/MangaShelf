@@ -1,0 +1,52 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+@inject IVolumePageLocalizationService Localizer
+
+<MudStack Class="mb-3">
+    <MudTextField Variant="Variant.Filled" Label="@Localizer["Author"]" ReadOnly="true" ShrinkLabel="true"
+                  Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
+
+    <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+        <MudTextField Variant="Variant.Filled" Label="@Localizer["Publisher"]" ReadOnly="true"
+                      Value="@Volume.Series.Publisher.Name"></MudTextField>
+        <MudStack Row>
+
+            <MudTextField Variant="Variant.Filled" Label="@Localizer["ISBN"]" ReadOnly="true"
+                          Value="@Volume.ISBN"></MudTextField>
+            <MudTextField Variant="Variant.Filled" Label="@Localizer["Age"]" ReadOnly="true"
+                          Value="@Volume.AgeRestriction"></MudTextField>
+        </MudStack>
+
+    </MudStack>
+
+    <MudStack Row>
+        <MudTextField Variant="Variant.Filled" Label="@Localizer["Status"]" ReadOnly="true"
+                      Value="@Localizer[Volume.Series.Status]"></MudTextField>
+        <MudStack Row>
+            <MudTextField Variant="Variant.Filled" Label="@Localizer["VolumeNumber"]" ReadOnly="true"
+                          Value="@Volume.Number"></MudTextField>
+            <MudTextField Variant="Variant.Filled" Label="@Localizer["TotalVolumes"]" ReadOnly="true"
+                          Value="@Volume.Series.TotalVolumes"></MudTextField>
+        </MudStack>
+    </MudStack>
+    <MudStack Row>
+
+        <MudTextField ShrinkLabel="true" Variant="Variant.Filled" Label="@Localizer["PreorderStarted"]"
+                      ReadOnly="true" Value="@Volume.PreorderStart?.ToString("dd.MM.yyyy")">
+        </MudTextField>
+        <MudTextField Variant="Variant.Filled" Label="@Localizer["Released"]" ReadOnly="true"
+                      Value="@Volume.ReleaseDate?.ToString("dd.MM.yyyy")"></MudTextField>
+    </MudStack>
+
+
+    <MudItem>
+        <LongDescriptionText Text="@Volume.Description"/>
+    </MudItem>
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired]
+    public VolumeDto Volume { get; set; }
+}

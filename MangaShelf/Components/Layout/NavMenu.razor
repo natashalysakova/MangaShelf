@@ -48,7 +48,7 @@
     </AuthorizeView>
     <AuthorizeView>
         <NotAuthorized>
-            <MudButton Href="/Account/Login"
+            <MudButton Href="@loginUrl"
                        StartIcon="@Icons.Material.Outlined.Login"
                        Variant="Variant.Text"
                        Class="manga-header-menu-item">
@@ -76,4 +76,29 @@
 </MudContainer>
 
 @code {
+    private string loginUrl = "/login";
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        UpdateLoginUrl();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateLoginUrl();
+        StateHasChanged();
+    }
+
+    private void UpdateLoginUrl()
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var currentUrl = string.IsNullOrEmpty(relativePath) ? "/" : "/" + relativePath;
+        loginUrl = $"/login?returnUrl={Uri.EscapeDataString(currentUrl)}";
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
 }

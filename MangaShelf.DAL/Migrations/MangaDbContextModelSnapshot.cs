@@ -355,6 +355,9 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<string>("OriginalName")
                         .HasColumnType("longtext");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("char(36)");
+
                     b.Property<Guid>("PublisherId")
                         .HasColumnType("char(36)");
 
@@ -439,9 +442,6 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<string>("CoverImageUrlSmall")
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("CoverNeedAdjustment")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -473,8 +473,14 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<bool>("OneShot")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("OriginalCoverUrl")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTimeOffset?>("PreorderStart")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("PurchaseUrl")
                         .HasColumnType("longtext");

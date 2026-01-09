@@ -1,0 +1,58 @@
+@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+
+@inject IVolumePageLocalizationService Localizer
+
+@if (ReviewsList != null)
+{
+    <MudText Typo="Typo.h5" Class="mb-4">@Localizer["Reviews"]</MudText>
+    if (ReviewsList.Any())
+    {
+
+        <MudStack>
+            @foreach (var review in ReviewsList)
+            {
+                <MudText>@review</MudText>
+            } 
+        </MudStack>
+    }
+    else
+    {
+        <MudText>@Localizer["NoReviews"]</MudText>
+
+    }
+}
+else if (ReviewsList == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+
+@code {
+
+    [Parameter]
+    [EditorRequired]
+    public required string VolumePublicId { get; set; }
+
+    [Inject]
+    public required IVolumeService VolumeService { get; set; }
+
+    private IEnumerable<ReviewDto>? ReviewsList { get; set; }
+
+
+    override protected async Task OnParametersSetAsync()
+    {
+        await LoadReviews();
+    }
+
+    private async Task LoadReviews()
+    {
+        try
+        {
+            ReviewsList = await VolumeService.GetReviews(VolumePublicId);
+        }
+        catch (Exception)
+        {
+        }
+    }
+}

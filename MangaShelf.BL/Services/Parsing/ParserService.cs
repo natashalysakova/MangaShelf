@@ -300,12 +300,16 @@ public class ParserService : IParseService
             volume.AgeRestriction = volumeInfo.AgeRestrictions.Value;
         }
 
-        //if (volume.CoverImageUrl is null || volume.CoverImageUrlSmall is null)
+        if (!string.IsNullOrEmpty(volumeInfo.Cover))
         {
             using var scope = _serviceProvider.CreateScope();
             var _imageManager = scope.ServiceProvider.GetRequiredService<IImageManager>();
 
-            volume.CoverImageUrl = _imageManager.DownloadFileFromWeb(volumeInfo.Cover);
+            volume.OriginalCoverUrl = _imageManager.DownloadFileFromWeb(volumeInfo.Cover, volume.Series.PublicId);
+
+            var croppedImage = _imageManager.CropImage(volume.OriginalCoverUrl);
+
+            volume.CoverImageUrl = croppedImage ?? volume.OriginalCoverUrl;
             volume.CoverImageUrlSmall = _imageManager.CreateSmallImage(volume.CoverImageUrl);
         }
 

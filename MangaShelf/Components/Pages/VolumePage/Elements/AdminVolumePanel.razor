@@ -1,0 +1,17 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+<MudStack Row Justify="Justify.Center">
+    <MudPaper>
+        <MudIconButton Href="@($"/admin/volumes/edit/{VolumeId}")"
+                       Color="Color.Warning"
+                       Size="Size.Large"
+                       Icon="@Icons.Material.Filled.Edit" />
+    </MudPaper>
+</MudStack>
+
+@code{
+    [Parameter]
+    public Guid VolumeId { get; set; }
+}

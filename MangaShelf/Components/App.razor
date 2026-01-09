@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Localization
 @using System.Globalization
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@CultureInfo.CurrentCulture.Name">
 
 <head>
     <meta charset="utf-8" />
@@ -25,6 +25,7 @@
     <Routes @rendermode="@RenderMode.InteractiveServer" />
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
     <script src="_framework/blazor.web.js"></script>
+    <script src="js/image-crop.js"></script>
 </body>
 </html>
 

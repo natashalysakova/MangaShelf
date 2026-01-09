@@ -68,7 +68,7 @@
         @foreach (var volume in volumes)
         {
             <MudItem xs="6" sm="3" md="2" lg="2">
-                <SmallCard Volume="@volume" />
+                <SmallCard Volume="@volume" ShowBadges="true" />
             </MudItem>
         }
     </MudGrid>
@@ -241,10 +241,7 @@
             await ProtectedLocalStorage.SetAsync(nameof(SelectedPage), SelectedPage);
             await ProtectedLocalStorage.SetAsync(nameof(PageSize), PageSize);
 
-            if (Search != null)
-            {
                 await ProtectedLocalStorage.SetAsync(nameof(Search), Search);
-            }
 
             await ProtectedLocalStorage.SetAsync(nameof(SelectedReleaseFilter), SelectedReleaseFilter);
             await ProtectedLocalStorage.SetAsync(nameof(OrderBy), OrderBy);

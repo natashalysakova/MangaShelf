@@ -268,6 +268,15 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NoReviews.
+        /// </summary>
+        public static string NoReviews {
+            get {
+                return ResourceManager.GetString("NoReviews", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to .
         /// </summary>
         public static string OneShot {
@@ -444,6 +453,15 @@ namespace MangaShelf.Localization.Resources {
         public static string Status {
             get {
                 return ResourceManager.GetString("Status", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ThisIsPreorderVolume.
+        /// </summary>
+        public static string ThisIsPreorderVolume {
+            get {
+                return ResourceManager.GetString("ThisIsPreorderVolume", resourceCulture);
             }
         }
         

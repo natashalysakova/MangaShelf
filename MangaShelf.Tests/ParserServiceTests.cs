@@ -63,7 +63,7 @@ public class ParserServiceTests
         });
 
         // Setup image manager mock
-        _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>()))
+        _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<Guid>()))
             .Returns("images/cover.jpg");
         _imageManagerMock.Setup(x => x.CreateSmallImage(It.IsAny<string>()))
             .Returns("images/small/cover.jpg");
@@ -1407,7 +1407,7 @@ public class ParserServiceTests
         Assert.AreEqual(State.Updated, result);
 
         // Verify image download was NOT called since both cover images already exist
-        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>()), Times.Never());
+        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<Guid>()), Times.Never());
         _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Never());
     }
 
@@ -1908,7 +1908,7 @@ public class ParserServiceTests
         Assert.AreEqual(State.Updated, result);
 
         // Verify image download WAS called because CoverImageUrlSmall was null
-        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>()), Times.Once());
+        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<Guid>()), Times.Once());
         _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Once());
     }
 

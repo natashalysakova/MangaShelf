@@ -1,0 +1,50 @@
+﻿@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using static MangaShelf.DAL.Models.Ownership
+
+@inject IVolumePageLocalizationService Localizer
+
+<MudDialog>
+    <DialogContent>
+        <MudSelect @bind-Value="@Ownership.Status">
+            @foreach (var status in Enum.GetValues(typeof(VolumeStatus)).Cast<VolumeStatus>())
+            {
+                <MudSelectItem Value="status">@Localizer[status]</MudSelectItem>
+            }
+        </MudSelect>
+        <MudDatePicker @bind-Date="@selectedDate" Required="true" RequiredError="@Localizer["DateRequired"]" ></MudDatePicker>
+        <MudRadioGroup @bind-Value="@Ownership.Type">
+            @foreach (var type in Enum.GetValues(typeof(VolumeType)).Cast<VolumeType>())
+            {
+                <MudRadio Value="@type" Color="Color.Primary" UncheckedColor="Color.Default">@Localizer[type]</MudRadio>
+            }
+        </MudRadioGroup>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@Localizer["Cancel"]</MudButton>
+        <MudButton OnClick="Submit" Variant="Variant.Filled" Color="@Color.Primary">@Localizer["Save"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private DateTime? selectedDate = DateTime.Now;
+
+    [Parameter]
+    public Ownership Ownership { get; set; }
+
+    private void Submit()
+    {
+        if (selectedDate.HasValue)
+        {
+            Ownership.Date = DateTime.SpecifyKind(selectedDate.Value, DateTimeKind.Local);
+            MudDialog.Close(DialogResult.Ok(Ownership));
+        }
+    }
+
+    private void Cancel() => MudDialog.CancelAll();
+
+}

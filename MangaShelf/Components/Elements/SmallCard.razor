@@ -1,5 +1,4 @@
-﻿@using MangaShelf.Components.Elements.VolumeDetails
-@inject IDialogService Dialog
+﻿@inject IDialogService Dialog
 
 
 @if (Volume != null)
@@ -8,18 +7,20 @@
         <div class="image-container">
             <FallbackImage ImageUrl="@Volume.CoverImageUrlSmall" Class="@sideImageClass" Alt="@Volume.SeriesName" />
         </div>
+        @if (Volume.IsPreorder && ShowBadges)
+        {
+            <div class="preorder-badge">
+                <MudText Typo="Typo.caption" Align="Align.Center">@Localizer["Preorder"]</MudText>
+            </div>
+            <div class="preorder-date-badge">
+                <MudText Typo="Typo.caption" Align="Align.Center">@Volume.ReleaseDate</MudText>
+            </div>
+        }
     </MudCard>
 }
 else
 {
     <MudCard Style="position:relative;" Class="manga-card ">
-        @if (Volume.IsPreorder)
-        {
-            <div class="mud-theme-tertiary py-2 px-4 mx-2 rounded-bl-xl" style="position: absolute; top:0; right:0; margin-right:0 !important;">
-                <MudText Typo="Typo.caption" Align="Align.Center">@Localizer["Preorder"]</MudText>
-                <MudText Typo="Typo.caption" Align="Align.Center">@Volume.ReleaseDate</MudText>
-            </div>
-        }
         <div class="image-container">
             <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Rectangle"></MudSkeleton>
         </div>
@@ -34,8 +35,12 @@ else
 </style>
 
 @code {
+    [EditorRequired]
     [Parameter]
     public CardVolumeDto? Volume { get; set; }
+
+    [Parameter]
+    public bool ShowBadges { get; set; } = false;
 
     [Inject]
     NavigationManager NavigationManager { get; set; }
@@ -68,7 +73,7 @@ else
         // await Dialog.ShowAsync<VolumeDetailedModal>(string.Empty, parameters, options);
         if (Volume != null)
         {
-            NavigationManager.NavigateTo($"volume/{Volume.Id}");
+            NavigationManager.NavigateTo($"volume/{Volume.PublicId}");
         }
     }
 }
