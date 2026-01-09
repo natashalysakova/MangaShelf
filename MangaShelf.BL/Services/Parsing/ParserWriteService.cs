@@ -4,6 +4,7 @@ using MangaShelf.BL.Interfaces;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace MangaShelf.BL.Services.Parsing;
 
@@ -357,6 +358,25 @@ public class ParserWriteService : IParserWriteService
         job.Status = RunStatus.Finished;
         job.Finished = DateTimeOffset.Now;
         job.Progress = 100.0;
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task SetSingleJobToErrorStatus(Guid jobId)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+
+        var job = await context.Runs.Include(x => x.ParserStatus).SingleOrDefaultAsync(x => x.Id == jobId);
+        if (job == null || job.Type != ParserRunType.SingleUrl)
+        {
+            return;
+        }
+
+        job.Status = RunStatus.Error;
+        job.Finished = DateTimeOffset.Now;
+        job.Progress = -1;
+
+        job.ParserStatus.Status = ParserStatus.Idle;
 
         await context.SaveChangesAsync();
     }

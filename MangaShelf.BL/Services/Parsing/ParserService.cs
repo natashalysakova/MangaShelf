@@ -185,6 +185,7 @@ public class ParserService : IParseService
         {
             await service.RecordError(jobId, url, volumeInfo.Json, ex, token);
             _logger.LogWarning($"{parser.GetType().Name}: Cannot create volume {volumeInfo.Series} - {volumeInfo.Title}: {ex.Message}");
+            await service.SetSingleJobToErrorStatus(jobId);
             return result;
         }
 

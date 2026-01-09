@@ -174,3 +174,7 @@ h1:focus {
     color: var(--mud-palette-info-text) !important;
     background-color: var(--mud-palette-info) !important;
 }
+
+.paper-manga-panel {
+    background-color: rgba(255, 255,255, 0.1) !important; 
+}

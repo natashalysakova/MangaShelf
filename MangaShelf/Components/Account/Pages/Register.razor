@@ -1,4 +1,5 @@
 ﻿@page "/Account/Register"
+@page "/register"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -56,13 +57,14 @@
 </div>
 
 @code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    private string? ReturnUrl { get; set; }
+
+
     private IEnumerable<IdentityError>? identityErrors;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
-
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 

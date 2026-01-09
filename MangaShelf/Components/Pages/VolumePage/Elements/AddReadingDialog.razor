@@ -1,0 +1,52 @@
+﻿@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+
+@inject IVolumePageLocalizationService Localizer
+
+<MudDialog>
+    <DialogContent>
+        <MudSelect @bind-Value="@Reading.Status">
+            @foreach (var status in Enum.GetValues(typeof(ReadingStatus)).Cast<ReadingStatus>())
+            {
+                <MudSelectItem Value="status">@Localizer[status]</MudSelectItem>
+            }
+        </MudSelect>
+        <MudStack Row>
+
+            <MudDatePicker @bind-Date="@selectedStartDate"></MudDatePicker>
+            <MudDatePicker @bind-Date="@selectedEndDate"></MudDatePicker>
+        </MudStack>
+        <MudRating @bind-SelectedValue="@_selectedRating"></MudRating>
+        <MudTextField @bind-Value="@Reading.Review"></MudTextField>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@Localizer["Cancel"]</MudButton>
+        <MudButton OnClick="Submit" Variant="Variant.Filled" Color="@Color.Primary">@Localizer["Save"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private DateTime? selectedStartDate = DateTime.Now;
+    private DateTime? selectedEndDate = DateTime.Now;
+
+    private int _selectedRating;
+
+    [Parameter]
+    public Reading Reading { get; set; }
+
+    private void Submit()
+    {
+        Reading.StartedAt = DateTime.SpecifyKind(selectedStartDate.Value, DateTimeKind.Utc);
+        Reading.FinishedAt = DateTime.SpecifyKind(selectedEndDate.Value, DateTimeKind.Utc);
+        Reading.Rating = _selectedRating;
+
+        MudDialog.Close(DialogResult.Ok(Reading));
+    }
+
+    private void Cancel() => MudDialog.CancelAll();
+
+}

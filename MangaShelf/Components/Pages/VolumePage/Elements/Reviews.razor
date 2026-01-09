@@ -1,8 +1,12 @@
 @using MangaShelf.Components.Pages
 @using MangaShelf.DAL.Models
 @using System.Security.Claims
+@using System.Threading.Tasks
 
 @inject IVolumePageLocalizationService Localizer
+@inject IVolumeStateService VolumeState
+
+@implements IDisposable
 
 @if (ReviewsList != null)
 {
@@ -13,8 +17,8 @@
         <MudStack>
             @foreach (var review in ReviewsList)
             {
-                <MudText>@review</MudText>
-            } 
+                <ReviewComponent Review="@review" />
+            }
         </MudStack>
     }
     else
@@ -32,24 +36,44 @@ else if (ReviewsList == null)
 
     [Parameter]
     [EditorRequired]
-    public required string VolumePublicId { get; set; }
+    public required Guid VolumeId { get; set; }
 
     [Inject]
     public required IVolumeService VolumeService { get; set; }
 
     private IEnumerable<ReviewDto>? ReviewsList { get; set; }
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        VolumeState.OnUserStatusChanged += HandleReviewsUpdated;
+    }
 
     override protected async Task OnParametersSetAsync()
     {
         await LoadReviews();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        VolumeState.OnUserStatusChanged -= HandleReviewsUpdated;
+    }
+
+    private void HandleReviewsUpdated()
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadReviews();
+            StateHasChanged();
+        });
     }
 
     private async Task LoadReviews()
     {
         try
         {
-            ReviewsList = await VolumeService.GetReviews(VolumePublicId);
+            ReviewsList = await VolumeService.GetReviews(VolumeId);
         }
         catch (Exception)
         {

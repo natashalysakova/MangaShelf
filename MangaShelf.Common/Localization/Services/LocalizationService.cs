@@ -17,8 +17,6 @@ public static class LocalizationService
 
 public abstract class LocalizationService<T>(IStringLocalizer<T> localizer, ILogger<LocalizationService<T>> logger) : ILocalizationService<T> where T : class
 {
-
-
     public LocalizedString this[string name]
     {
         get

@@ -17,7 +17,9 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
         return _context.Volumes
             .Where(x => x.Number == volumeNumber && x.Title == volumeTitle)
             .Include(x => x.Series)
-            .Where(x => x.Series!.Title == series).SingleOrDefault();
+            .Where(x => x.Series!.Title == series)
+            .IgnoreQueryFilters()
+            .SingleOrDefault();
     }
 
     public IQueryable<Volume> GetAllFullPaginated(IFilterOptions? paginationOptions = default)

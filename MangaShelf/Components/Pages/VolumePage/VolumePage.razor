@@ -1,4 +1,5 @@
 ﻿@page "/volume/{PublicId}"
+@using MangaShelf.Components.Pages.Admin.Elements
 @using MangaShelf.Components.Pages.VolumePage.Elements
 @using MangaShelf.DAL.Models
 @using System.Security.Claims
@@ -22,6 +23,9 @@
             <MudText Typo="Typo.caption">@Volume.Series.OriginalName</MudText>
             <MudText Typo="Typo.h4"></MudText>
         </MudItem>
+        <MudItem xs="12">
+            <AdminVolumePanel Volume="@Volume" />
+        </MudItem>
         @if (Volume.IsPreorder)
         {
             <MudItem xs="12">
@@ -32,58 +36,47 @@
             </MudItem>
         }
         <MudItem xs="12">
-            <MudStack Row Breakpoint="Breakpoint.Xs">
-                <MudItem xs="12" sm="4">
-                    <MudItem Class="mb-4">
-                        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
-                            <FallbackImage Class="img-fluid" ImageUrl="@Volume.CoverImageUrl"></FallbackImage>
-                            <RatingComponent RatingValue="@Volume.AvgRating"></RatingComponent>
-                            <UserActionsComponent Volume="@Volume" />
+            <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+                <MudItem xs="12" md="9">
+                    <MudStack Row Breakpoint="Breakpoint.Xs">
+                        <MudItem xs="12" md="4" Class="mb-4">
+                            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+                                <FallbackImage Class="img-fluid" ImageUrl="@Volume.CoverImageUrl"></FallbackImage>
+                                @if (VolumeState.CurrentStats != null)
+                                {
+                                    <RatingComponent RatingValue="@VolumeState.CurrentStats.AvgRating"></RatingComponent>
+                                }
+                                <UserActionsComponent Volume="@Volume" />
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12" md="8">
+                            <VolumeInfoComponent Volume="@Volume" />
+                            <VolumeStatsComponent />
+                        </MudItem>
+                    </MudStack>
+                    <MudItem xs="12" Class="d-block d-md-none">
+                        <MudStack Row>
+                            <MudItem xs="6">
+                                <OwnershipDataComponent Volume="@Volume" />
+
+                            </MudItem>
+                            <MudItem xs="6">
+                                <ReaderDataComponent Volume="@Volume" />
+                            </MudItem>
                         </MudStack>
                     </MudItem>
+                    <MudItem xs="12">
+                        <MoreInSeries Volume="@Volume" />
+                        <Reviews VolumeId="@Volume.Id" />
+                    </MudItem>
                 </MudItem>
-                <MudItem xs="12" sm="8">
-                    <VolumeInfoComponent Volume="@Volume" />
-                    <VolumeStatsComponent />
-                </MudItem>
-                <MudItem>
+                <MudItem xs="12" md="3" Class="d-none d-md-block">
+                    <OwnershipDataComponent Volume="@Volume" />
+                    <ReaderDataComponent Volume="@Volume" />
                 </MudItem>
             </MudStack>
         </MudItem>
-        <MudItem xs="12">
-            <MudStack Row Breakpoint="Breakpoint.SmAndDown">
-                <MudItem xs="12" md="7">
-                    <Reviews VolumePublicId="@Volume.PublicId" />
 
-                </MudItem>
-                <MudItem xs="12" md="5">
-                    <MudStack>
-                        @if (@VolumeState.CurrentUserStatus != null && @VolumeState.CurrentUserStatus.Ownerships.Any())
-                        {
-                            <MudStack Row>
-                                <MudItem xs="6">
-                                    <OwnershipTimeline />
-                                </MudItem>
-                                <MudItem xs="6">
-                                    <MudText Typo="Typo.h5" Class="mb-4">@Localizer["OwnershipData"]</MudText>
-                                    <MudItem xs="12" Class="mb-4">
-                                        <MudTextField Variant="Variant.Filled"
-                                                      Label="@Localizer["Status"]" ReadOnly="true"
-                                                      Adornment="Adornment.Start"
-                                                      AdornmentIcon="@Icons.Material.Filled.RemoveRedEye"
-                                                      Value="@VolumeState.CurrentUserStatus.CurrentOwnershipStatus.ToString()"></MudTextField>
-                                    </MudItem>
-                                </MudItem>
-                            </MudStack>
-                        }
-                    </MudStack>
-                </MudItem>
-            </MudStack>
-        </MudItem>
-        <MudItem xs="12">
-            <MoreInSeries Volume="@Volume" />
-            <MudSpacer></MudSpacer>
-        </MudItem>
     </MudGrid>
 }
 else
@@ -136,4 +129,6 @@ else
         VolumeState.Clear();
         VolumeState.OnUserStatusChanged -= StateHasChanged;
     }
+
+
 }

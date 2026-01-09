@@ -3,6 +3,6 @@ using MangaShelf.Localization.Resources;
 
 namespace MangaShelf.Localization.Interfaces;
 
-public interface IUiLocalizationService : ILocalizationService<UserInterfaceResource>
+public interface IAdminLocalizationService : ILocalizationService<AdminInterfaceResource>
 {
 }

@@ -87,13 +87,18 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return volume!.ToFullDto();
     }
 
-    public async Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions)
+    public async Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions, bool showDeleted = false)
     {
         using var context = dbContextFactory.CreateDbContext();
         var volumeDomainService = new DomainServiceFactory(context).GetDomainService<IVolumeDomainService>();
 
 
         var result = volumeDomainService.GetAllFull();
+        if(showDeleted)
+        {
+            result = result.IgnoreQueryFilters().Where(x => x.IsDeleted);
+        }
+
         if (sortDefinitions.Any())
         {
             var firstSort = sortDefinitions.First();
@@ -186,7 +191,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
 
         var volumes = context.Volumes
             .Include(v => v.Series)
-            .Where(v => v.Series.PublicId == sPublicId)
+            .Where(v => v.Series.PublicId == sPublicId && v.IsPublishedOnSite)
             .OrderBy(v => v.Number);
 
         return await volumes.Select(v => v.ToDto()).ToListAsync(token);
@@ -205,21 +210,17 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return volume.IsPublishedOnSite;
     }
 
-    public async Task<IEnumerable<ReviewDto>> GetReviews(string volumePublicId)
+    public async Task<IEnumerable<ReviewDto>> GetReviews(Guid volumeId)
     {
-        var publicId = Guid.Parse(volumePublicId);
-
         using var context = dbContextFactory.CreateDbContext();
 
-        var usersThatReviewed = context.Users
-            .Include(u => u.Readings)
-            .Where(u => u.Readings.Any(r => r.Volume.PublicId == publicId && (!string.IsNullOrEmpty(r.Review) || r.Rating != null)));
-
-        return await usersThatReviewed
-            .SelectMany(u => u.Readings
-                .Where(r => r.Volume.PublicId == publicId && (!string.IsNullOrEmpty(r.Review) || r.Rating != null))
-                .Select(r => r.ToReviewDto()))
+        var readings = await context.Readings
+            .Include(r => r.User)
+            .Where(r => r.VolumeId == volumeId && (!string.IsNullOrEmpty(r.Review) || r.Rating != null))
+            .OrderByDescending(x=>x.CreatedAt)
             .ToListAsync();
+
+        return readings.Select(r => r.ToReviewDto());
     }
 
     public async Task<Volume?> GetFullVolumeByIdAsync(Guid id, CancellationToken token = default)
@@ -365,7 +366,8 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             WishlistsCount = volume.Owners.Count(o => o.Status is VolumeStatus.Wishlist),
             ReadersCount = volume.Readers.Count(x => x.Status is ReadingStatus.Reading),
             CompletedCount = volume.Readers.Count(r => r.Status is ReadingStatus.Completed),
-            LikesCount = volume.Likes.Count(r => r.Status is LikeStatus.Liked)
+            LikesCount = volume.Likes.Count(r => r.Status is LikeStatus.Liked),
+            AvgRating = volume.AvgRating
         };
     }
 
@@ -388,6 +390,78 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return (
             await GetVolumeStatusInfo(ownership.Volume.PublicId.ToString(), ownership.User.IdentityUserId),
             await GetVolumeStats(ownership.Volume.PublicId.ToString()));
+    }
+
+    public async Task<bool> DeleteVolume(Guid volumeId)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var volume = await context.Volumes
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(v => v.Id == volumeId);
+        if (volume == null)
+        {
+            throw new Exception("Volume not found");
+        }
+
+        if (volume.IsDeleted)
+        {
+            volume.IsDeleted = false;
+        }
+        else
+        {
+            context.Volumes.Remove(volume);
+        }
+
+        await context.SaveChangesAsync();
+        return volume.IsDeleted;
+    }
+
+    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> AddReadingAsync(string volumePublicId, string userId, Reading reading)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var publicId = Guid.Parse(volumePublicId);
+        var volume = await context.Volumes
+            .Include(x => x.Readers)
+            .FirstOrDefaultAsync(v => v.PublicId == publicId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId);
+
+        var readingToAdd = new Reading
+        {
+            UserId = user.Id,
+            VolumeId = volume.Id,
+            StartedAt = reading.StartedAt,
+            FinishedAt = reading.FinishedAt,
+            Status = reading.Status,
+            Rating = reading.Rating,
+            Review = reading.Review
+        };
+
+        volume.Readers.Add(readingToAdd);
+        volume.AvgRating = volume.Readers.Where(x => x.Rating != null && x.Rating.Value != 0).Average(x => x.Rating!.Value);
+        await context.SaveChangesAsync();
+
+        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+    }
+
+    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveReadingAsync(Guid readingId)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+
+        var reading = await context.Readings
+            .Include(o => o.User)
+            .Include(o => o.Volume)
+            .FirstOrDefaultAsync(o => o.Id == readingId);
+        if (reading == null)
+        {
+            throw new Exception("Reading not found");
+        }
+
+        context.Readings.Remove(reading);
+        await context.SaveChangesAsync();
+
+        return (
+            await GetVolumeStatusInfo(reading.Volume.PublicId.ToString(), reading.User.IdentityUserId),
+            await GetVolumeStats(reading.Volume.PublicId.ToString()));
     }
 }
 

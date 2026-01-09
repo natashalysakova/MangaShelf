@@ -19,8 +19,8 @@
                                      ToggledIcon="@CustomIcons.filledHeart" ToggledColor="@Color.Error" />
                 <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
 
-                <MudMenu Icon="@Icons.Material.Rounded.PlaylistAdd" Size="Size.Large"
-                         Color="Color.Tertiary"
+                <MudMenu Icon="@CustomIcons.bookshelf" Size="Size.Large"
+                         Color="Color.Warning"
                          AriaLabel="Open user menu">
 
                     @foreach (var action in availableActions)
@@ -29,16 +29,9 @@
                     }
                 </MudMenu>
 
+                <MudIconButton OnClick="ShowAddReadingDialog" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
+
             </MudStack>
-            <AuthorizeView Roles="Admin" Context="adminContext">
-                <Authorized>
-                    <AdminVolumePanel VolumeId="@Volume.Id" />
-                </Authorized>
-            </AuthorizeView>
-            @if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Preorder)
-            {
-                <MudButton Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Primary">@Localizer["ConfirmDelivery"]</MudButton>
-            }
         </Authorized>
     </AuthorizeView>
 }
@@ -162,6 +155,49 @@
                 }
 
                 var (userStatus, stats) = await VolumeService.AddOwnershipAsync(Volume.PublicId, await GetUserId(), ownership);
+                VolumeState.UpdateBoth(userStatus, stats);
+            }
+            catch (Exception)
+            {
+                Logger.LogError("Error adding ownership for volume {PublicId}", Volume.PublicId);
+            }
+
+        }
+    }
+
+    private async Task ShowAddReadingDialog()
+    {
+        var dialogOptions = new DialogOptions()
+        {
+            FullWidth = false,
+            Position = DialogPosition.Center,
+        };
+        var parameters = new DialogParameters
+        {
+            {   nameof(AddReadingDialog.Reading),
+                new Reading()
+                {
+                    Rating = 0,
+                    StartedAt = DateTime.UtcNow
+                }
+            }
+        };
+        var dialog = await Dialog.ShowAsync<AddReadingDialog>(string.Empty, parameters, dialogOptions);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            try
+            {
+                var reading = result.Data as Reading;
+
+                if (reading is null)
+                {
+                    throw new InvalidOperationException("reading data is null");
+                }
+
+                var (userStatus, stats) = await VolumeService.AddReadingAsync(Volume.PublicId, await GetUserId(), reading);
                 VolumeState.UpdateBoth(userStatus, stats);
             }
             catch (Exception)

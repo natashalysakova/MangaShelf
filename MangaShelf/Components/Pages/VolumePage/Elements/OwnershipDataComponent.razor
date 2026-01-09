@@ -1,0 +1,134 @@
+@using MangaShelf.Components.Pages.Admin.Elements
+@using MangaShelf.Components.Pages.VolumePage.Elements
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+@using MangaShelf.Services
+
+@inject IVolumeService VolumeService
+@inject IVolumeStateService VolumeState
+@inject IVolumePageLocalizationService Localizer
+@inject ILogger<VolumePage> Logger
+@inject NavigationManager NavigationManager
+
+<MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
+    <MudStack Row>
+        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
+            <MudText Typo="Typo.h5">@Localizer["OwnershipData"]</MudText>
+            <AuthorizeView>
+                <Authorized>
+                    @if (VolumeState != null && VolumeState.CurrentUserStatus != null)
+                    {
+                        <MudStack Row>
+                            <MudTextField Variant="Variant.Filled"
+                                          Label="@Localizer["Status"]" ReadOnly="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.RemoveRedEye"
+                                          Value="@VolumeState.CurrentUserStatus.CurrentOwnershipStatus.ToString()"></MudTextField>
+                            @if (VolumeState.CurrentUserStatus.Ownerships.Any(x => x.Status != VolumeStatus.None))
+                            {
+                                <MudIconButton Variant="Variant.Text" OnClick="@(() => { _showTimeline = !_showTimeline; })" Color="@Color.Default" Icon="@Icons.Material.Filled.History"></MudIconButton>
+                            }
+                        </MudStack>
+
+                        @if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Preorder)
+                        {
+                            <MudButton Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Primary">@Localizer["ConfirmDelivery"]</MudButton>
+                        }
+
+                        @if (_showTimeline)
+                        {
+                            <OwnershipTimeline />
+                        }
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    <MudText>@Localizer["LoginToSeeData"]</MudText>
+                    <MudButton OnClick="OpenLoginPage">@Localizer["Login"]</MudButton>
+                    <MudButton OnClick="OpenRegisterPage">@Localizer["Register"]</MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
+
+        </MudStack>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public VolumeDto? Volume { get; set; }
+
+    private bool _showTimeline = false;
+
+
+    @inject IDialogService Dialog
+
+    private async Task OpenSetOwnershipDialog(VolumeStatus status)
+    {
+        var dialogOptions = new DialogOptions()
+        {
+            FullWidth = false,
+            Position = DialogPosition.Center,
+        };
+        var parameters = new DialogParameters
+        {
+            {   nameof(SetOwnershipDialog.Ownership),
+                new Ownership()
+                {
+                    Status = status,
+                    Date = DateTime.Now,
+                    Type = VolumeType.Physical
+                }
+            }
+        };
+        var dialog = await Dialog.ShowAsync<SetOwnershipDialog>(string.Empty, parameters, dialogOptions);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            try
+            {
+                var ownership = result.Data as Ownership;
+
+                if (ownership is null)
+                {
+                    throw new InvalidOperationException("Ownership data is null");
+                }
+
+                var (userStatus, stats) = await VolumeService.AddOwnershipAsync(Volume.PublicId, await GetUserId(), ownership);
+                VolumeState.UpdateBoth(userStatus, stats);
+            }
+            catch (Exception)
+            {
+                Logger.LogError("Error adding ownership for volume {PublicId}", Volume.PublicId);
+            }
+
+        }
+    }
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthStateTask { get; set; }
+
+    private async Task<string?> GetUserId()
+    {
+        var authState = await AuthStateTask;
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return userId;
+    }
+    private void OpenLoginPage(MouseEventArgs args)
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var currentUrl = string.IsNullOrEmpty(relativePath) ? "/" : "/" + relativePath;
+        string loginUrl = $"/login?returnUrl={Uri.EscapeDataString(currentUrl)}";
+        NavigationManager.NavigateTo(loginUrl);
+    }
+
+    private void OpenRegisterPage(MouseEventArgs args)
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var currentUrl = string.IsNullOrEmpty(relativePath) ? "/" : "/" + relativePath;
+        string loginUrl = $"/register?returnUrl={Uri.EscapeDataString(currentUrl)}";
+        NavigationManager.NavigateTo(loginUrl);
+    }
+}

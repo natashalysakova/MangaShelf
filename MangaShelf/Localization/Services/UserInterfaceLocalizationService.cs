@@ -22,3 +22,11 @@ internal class VolumePageLocalizationService : LocalizationService<VolumePageRes
     {
     }
 }
+
+internal class AdminLocalizationService : LocalizationService<VolumePageResource>, IAdminLocalizationService
+{
+    public AdminLocalizationService(IStringLocalizer<VolumePageResource> localizer, ILogger<AdminLocalizationService> logger)
+        : base(localizer, logger)
+    {
+    }
+}

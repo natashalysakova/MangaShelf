@@ -25,8 +25,8 @@ public class OwnershipHistoryDto
 public class ReadingHistoryDto
 {
     public ReadingStatus Status { get; set; }
-    public DateTimeOffset Started { get; set; }
-    public DateTimeOffset Finished { get; set; }
+    public DateTimeOffset StartedAt { get; set; }
+    public DateTimeOffset? FinishedAt { get; set; }
     public int? Rating { get; set; }
     public string? Review { get; set; }
 }

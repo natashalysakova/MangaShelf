@@ -8,8 +8,8 @@
 
 @if (VolumeState.CurrentStats != null)
 {
-    <MudItem Class="d-flex justify-center">
-        <MudPaper Outlined="true" Class="p-2 pt-1 fit-content" Style="background-color: rgba(255, 255,255, 0.1);">
+    <MudItem Class="d-flex justify-center mb-3">
+        <MudPaper Outlined="true" Class="p-2 pt-1 fit-content paper-manga-panel">
             <MudStack Row="@_isRow" Breakpoint="Breakpoint.Sm" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="@_spacing">
                 <MudStack Row="@_isRow" Spacing="@_spacing" Justify="Justify.Center">
                     <StatIcon TopText="@Localizer["Liked"]"
@@ -21,11 +21,11 @@
                     <StatIcon TopText="@Localizer["Preordered"]"
                               BottomText="@VolumeState.CurrentStats.PreordersCount"
                               Icon="@Icons.Material.Filled.PunchClock" IconColor="@Color.Default" />
+                </MudStack>
+                <MudStack Row="@_isRow" Spacing="@_spacing" Justify="Justify.Center">
                     <StatIcon TopText="@Localizer["InLibrary"]"
                               BottomText="@VolumeState.CurrentStats.OwnersCount"
                               Icon="@CustomIcons.bookshelf" IconColor="@Color.Default" />
-                </MudStack>
-                <MudStack Row="@_isRow" Spacing="@_spacing" Justify="Justify.Center">
                     <StatIcon TopText="@Localizer["Reading"]"
                               BottomText="@VolumeState.CurrentStats.ReadersCount"
                               Icon="@CustomIcons.reading" IconColor="@Color.Default" />

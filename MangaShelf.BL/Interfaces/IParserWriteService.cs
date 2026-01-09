@@ -26,4 +26,5 @@ public interface IParserWriteService : IService
     Task InitializeParsers(IEnumerable<string> parsers, bool resetTime);
     Task RunSingleJob(Guid jobId);
     Task SetSingleJobToFinishedStatus(Guid jobId);
+    Task SetSingleJobToErrorStatus(Guid jobId);
 }

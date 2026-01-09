@@ -1,0 +1,31 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@inject IVolumePageLocalizationService Localizer
+@inject IVolumeStateService VolumeState
+@inject IVolumeService VolumeService
+@inject IDialogService Dialog
+@inject ILogger<ReaderDataComponent> Logger
+
+@if (VolumeState.CurrentUserStatus != null)
+{
+
+    <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
+        <MudStack Row>
+            <MudStack AlignItems="AlignItems.Center" Spacing="4">
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudText Typo="Typo.h5">@Localizer["ReaderData"]</MudText>
+                    <MudSpacer />
+                </MudStack>
+                @foreach (var reading in VolumeState.CurrentUserStatus.Readings)
+                {
+                    <ReadingHistoryComponent ReadingHistory="@reading" />
+                }
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    [Parameter]
+    public VolumeDto? Volume { get; set; }
+}

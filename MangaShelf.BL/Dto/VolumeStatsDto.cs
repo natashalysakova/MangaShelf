@@ -8,4 +8,5 @@ public class VolumeStatsDto
     public int ReadersCount { get; set; }
     public int CompletedCount { get; set; }
     public int LikesCount { get; set; }
+    public double AvgRating { get; internal set; }
 }

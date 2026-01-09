@@ -6,8 +6,11 @@
 
 @if (Volumes != null && Volumes.Any())
 {
+    <MudItem Class="mb-3 pe-2">
+
     <MudText Typo="Typo.h5" Class="mb-4">@Localizer["MoreInSeries"]</MudText>
     <MangaLine Volumes="Volumes" ItemsPerLine="8"></MangaLine>
+    </MudItem>
 }
 else if(Volumes == null)
 {

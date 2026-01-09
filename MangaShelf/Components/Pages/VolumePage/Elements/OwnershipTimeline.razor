@@ -9,7 +9,10 @@
 
 @if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Ownerships.Any())
 {
-    <MudTimeline TimelineOrientation="TimelineOrientation.Vertical" TimelinePosition="TimelinePosition.Start" TimelineAlign="TimelineAlign.Start">
+    <MudTimeline TimelineOrientation="TimelineOrientation.Vertical"
+                 Style="width: 100%"
+                 TimelinePosition="TimelinePosition.Start"
+                 TimelineAlign="TimelineAlign.Start">
         @foreach (var ownership in VolumeState.CurrentUserStatus.Ownerships.OrderByDescending(x => x.Date))
         {
             <MudTimelineItem TimelineAlign="TimelineAlign.End">

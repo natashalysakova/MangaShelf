@@ -119,13 +119,13 @@
             }
         </MudTd>
         <MudTd DataLabel="Parser">@row.ParserStatus.ParserName</MudTd>
-        <MudTd DataLabel="Created">@row.Created.ToLocalTime()</MudTd>
-        <MudTd DataLabel="Started">@row.Started.ToLocalTime()</MudTd>
+        <MudTd DataLabel="Created">@row.Created.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")</MudTd>
+        <MudTd DataLabel="Started">@row.Started.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")</MudTd>
         @{
             var className = "cell-" + @row.Status;
         }
         <MudTd Class="@className" DataLabel="Status">@row.Status</MudTd>
-        <MudTd DataLabel="Finished">@row.Finished?.ToLocalTime()</MudTd>
+        <MudTd DataLabel="Finished">@row.Finished?.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")</MudTd>
         <MudTd DataLabel="Url">@row.Url</MudTd>
         <MudTd DataLabel="Progress">@row.Progress.ToString("N2")</MudTd>
         <MudTd DataLabel="Error">
@@ -133,11 +133,11 @@
             {
                 @if (error.ExceptionMessage != null)
                 {
-                    <li>@error.ExceptionMessage</li>
+                    <li>@error.Url @error.ExceptionMessage</li>
                 }
                 if (error.ErrorMessage != null)
                 {
-                    <li>@error.ErrorMessage</li>
+                    <li>@error.Url @error.ErrorMessage</li>
                 }
             }
         </MudTd>
@@ -208,10 +208,18 @@
     }
     private async Task RunForUrl(MouseEventArgs args)
     {
-        if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+        try
         {
-            await jobManager.CreateSingleJob(url);
+            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                await jobManager.CreateSingleJob(url);
+            }
         }
+        catch (Exception)
+        {
+            
+        }
+        
     }
     private async Task CancelJob(Guid? id)
     {
