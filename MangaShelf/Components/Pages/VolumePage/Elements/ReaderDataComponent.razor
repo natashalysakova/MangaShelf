@@ -10,18 +10,15 @@
 {
 
     <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
-        <MudStack Row>
-            <MudStack AlignItems="AlignItems.Center" Spacing="4">
-                <MudStack Row AlignItems="AlignItems.Center">
-                    <MudText Typo="Typo.h5">@Localizer["ReaderData"]</MudText>
-                    <MudSpacer />
-                </MudStack>
+        <MudItem xs="12">
+            <MudText Class="mb-3" Typo="Typo.h5">@Localizer["ReaderData"]</MudText>
+            <MudStack AlignItems="AlignItems.Stretch" Spacing="2">
                 @foreach (var reading in VolumeState.CurrentUserStatus.Readings)
                 {
                     <ReadingHistoryComponent ReadingHistory="@reading" />
                 }
             </MudStack>
-        </MudStack>
+        </MudItem>
     </MudPaper>
 }
 
