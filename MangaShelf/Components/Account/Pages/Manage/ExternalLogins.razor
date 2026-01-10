@@ -1,13 +1,14 @@
 ﻿@page "/Account/Manage/ExternalLogins"
 
+@using MangaShelf.Components.Account
+@using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
-@using MangaShelf.Data
 
-@inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
+@inject SignInManager<MangaIdentityUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
-@inject IUserStore<ApplicationUser> UserStore
+@inject IUserStore<MangaIdentityUser> UserStore
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Manage your external logins</PageTitle>
@@ -66,7 +67,7 @@
 @code {
     public const string LinkLoginCallbackAction = "LinkLoginCallback";
 
-    private ApplicationUser user = default!;
+    private MangaIdentityUser user = default!;
     private IList<UserLoginInfo>? currentLogins;
     private IList<AuthenticationScheme>? otherLogins;
     private bool showRemoveButton;
@@ -92,7 +93,7 @@
             .ToList();
 
         string? passwordHash = null;
-        if (UserStore is IUserPasswordStore<ApplicationUser> userPasswordStore)
+        if (UserStore is IUserPasswordStore<MangaIdentityUser> userPasswordStore)
         {
             passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
         }

@@ -1,11 +1,12 @@
 ﻿@page "/Account/LoginWith2fa"
 
 @using System.ComponentModel.DataAnnotations
+@using MangaShelf.Components.Account
+@using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Identity
-@using MangaShelf.Data
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<MangaIdentityUser> SignInManager
+@inject UserManager<MangaIdentityUser> UserManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<LoginWith2fa> Logger
 
@@ -46,7 +47,7 @@
 
 @code {
     private string? message;
-    private ApplicationUser user = default!;
+    private MangaIdentityUser user = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();

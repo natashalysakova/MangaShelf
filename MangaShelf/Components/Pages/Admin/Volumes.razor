@@ -1,0 +1,200 @@
+﻿@page "/admin/volumes"
+@using MangaShelf.DAL.Interfaces
+@using MangaShelf.DAL.Models
+@using Microsoft.EntityFrameworkCore
+
+@inject IUiLocalizationService Localizer
+@inject ISnackbar Snackbar
+
+
+<MudPaper>
+    <MudSwitch @bind-Value="ShowDeleted" Label="Show deleted"></MudSwitch>
+    <MudText>@ShowDeleted</MudText>
+</MudPaper>
+
+<MudPaper>
+    <MudDataGrid T="Volume" ServerData="ServerReload" @ref="_dataGrid"
+                 MultiSelection="true"
+                 Hideable="true"
+                 Class="m-8" Hover="true"
+                 Filterable FilterCaseSensitivity="DataGridFilterCaseSensitivity.CaseInsensitive" FilterMode="DataGridFilterMode.ColumnFilterRow"
+                 SortMode="SortMode.Multiple">
+        @*         <ToolBarContent>
+            <MudText Typo="Typo.h6">@Localizer["AdminVolumes"]</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="@Localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent> *@
+        <Columns>
+            <SelectColumn T="Volume" />
+            <TemplateColumn Title="Cover">
+                <CellTemplate>
+                    <MudImage Width="40" Height="60" Src="@context.Item.CoverImageUrl" Class="rounded-lg"></MudImage>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.Series.Title"
+                            Title="@Localizer["Title"]">
+                <CellTemplate>
+                    @{
+                        var url = $"/volume/{@context.Item.PublicId}";
+                    }
+                    <MudLink Href="@url" Color="Color.Default">
+                        <MudText>@context.Item.Series.Title</MudText>
+                        @if (context.Item.Series.Title != context.Item.Title)
+                        {
+                            <MudText>@context.Item.Title</MudText>
+                        }
+                        <MudText>@string.Join(',', context.Item.Series.Authors.Select(x => x.Name))</MudText>
+                    </MudLink>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.IsPreorder" Title="@Localizer["Preorder"]">
+                <CellTemplate>
+                    <MudCheckBox ReadOnly="true" Value="@context.Item.IsPreorder"></MudCheckBox>
+                    <MudText>@context.Item.PreorderStart?.ToString("dd.MM.yyyy")</MudText>
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.ReleaseDate" Format="dd.MM.yyyy" Filterable="false" Title="@Localizer["ReleaseDate"]" />
+            <PropertyColumn Property="x => x.Series.Publisher.Name" Title="@Localizer["Publisher"]" />
+            <PropertyColumn Property="x => x.AvgRating" Filterable="false" Title="@Localizer["Rating"]" />
+            <PropertyColumn Property="x => x.IsPublishedOnSite" Title="@Localizer["Published"]" HeaderStyle="width: 50px">
+                <CellTemplate>
+                    @if (context.Item.IsPublishedOnSite)
+                    {
+                        <MudButton @onclick="() => ChangePublishStatus(context.Item)" Color="Color.Warning">Unpublish</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton @onclick="() => ChangePublishStatus(context.Item)" Color="Color.Success">Publish</MudButton>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.IsDeleted" Filterable="false" Title="@Localizer["IsDeleted"]">
+                <CellTemplate>
+                    @if (context.Item.IsDeleted)
+                    {
+                        <MudButton @onclick="() => ChangeDeletedState(context.Item)" Color="Color.Warning">Restore</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton @onclick="() => ChangeDeletedState(context.Item)" Color="Color.Success">Delete</MudButton>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn>
+                <CellTemplate>
+                    <MudButton Href="@($"/admin/volumes/edit/{context.Item.Id}")" Color="Color.Warning">Edit</MudButton>
+                    <MudButton Href="@context.Item.PurchaseUrl" Target="_blank" Color="Color.Warning">Go to site</MudButton>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Volume" s PageSizeOptions="new int[] { 10, 20, 50, int.MaxValue }" />
+        </PagerContent>
+        <RowLoadingContent>
+            <tr class="mud-table-row">
+                <td class="mud-table-cell" colspan="1000">
+                    Loading...
+                </td>
+            </tr>
+        </RowLoadingContent>
+    </MudDataGrid>
+</MudPaper>
+
+
+@code {
+
+    private MudDataGrid<Volume> _dataGrid { get; set; }
+    private string _searchString;
+
+
+    bool _loading = false;
+
+    int _rowsPerPage = 10;
+    bool _showDeleted = false;
+    public bool ShowDeleted { get => _showDeleted; set { _showDeleted = value; _dataGrid.ReloadServerData(); } }
+
+    [Inject]
+    IVolumeService volumeService { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+
+    private async Task<GridData<Volume>> ServerReload(GridState<Volume> state)
+    {
+        try
+        {
+            Console.WriteLine($"Fetching data: StartIndex={state.Page}, Count={state.PageSize}");
+
+            //Console.WriteLine($"Fetching data: StartIndex={gridState.StartIndex}, Count={gridState.Count}");
+            var paginationOptions = new Common.FilterOptions
+            {
+                PageNumber = state.Page,
+                PageSize = state.PageSize
+            };
+
+            var filterFunctions = state.FilterDefinitions.Select(x => x.GenerateFilterFunction());
+            var sortDefinitions = state.SortDefinitions.Select(x => new BL.Services.SortDefinitions<Volume>
+            {
+                Descending = x.Descending,
+                SortFunction = x.SortFunc
+            });
+
+            var (resultList, totalVolumes) = await volumeService.GetAllFullVolumesAsync(paginationOptions, filterFunctions, sortDefinitions, _showDeleted);
+
+
+            return new GridData<Volume>
+            {
+                Items = resultList,
+                TotalItems = totalVolumes
+            };
+        }
+        catch (TaskCanceledException)
+        {
+            return new GridData<Volume>
+            {
+                Items = [],
+                TotalItems = 0
+            };
+        }
+    }
+
+    private async Task ChangePublishStatus(Volume volume)
+    {
+        try
+        {
+            volume.IsPublishedOnSite = await volumeService.ChangePublishedStatus(volume.Id);
+            Snackbar.Add($"Volume {volume.Series.Title} {volume.Title} publish was {(volume.IsPublishedOnSite ? "published" : "unpublished")}", Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task ChangeDeletedState(Volume volume)
+    {
+        try
+        {
+            volume.IsDeleted = await volumeService.DeleteVolume(volume.Id);
+            if (volume.IsDeleted)
+            {
+                Snackbar.Add($"Volume {volume.Series.Title} {volume.Title} was deleted", Severity.Info);
+            }
+            else
+            {
+                Snackbar.Add($"Volume {volume.Series.Title} {volume.Title} was restored", Severity.Info);
+
+            }
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+}

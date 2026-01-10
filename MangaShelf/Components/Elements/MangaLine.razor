@@ -1,0 +1,45 @@
+﻿@if (Volumes.Any())
+{
+    <MudGrid Justify="@justification" Spacing="@spacing">
+        @RenderVolumeLines()
+    </MudGrid>
+}
+
+
+@code {
+    [EditorRequired]
+    [Parameter]
+    public IEnumerable<CardVolumeDto> Volumes { get; set; }
+
+    [Parameter]
+    public int ItemsPerLine { get; set; } = 6;
+
+    Justify justification = Justify.FlexStart;
+    int spacing = 3;
+
+
+    private RenderFragment RenderVolumeLines() => __builder =>
+    {
+        var volumeList = Volumes.ToList();
+        var lineCount = (int)Math.Ceiling((double)volumeList.Count / ItemsPerLine);
+
+        for (int lineIndex = 0; lineIndex < lineCount; lineIndex++)
+        {
+            var startIndex = lineIndex * ItemsPerLine;
+            var endIndex = Math.Min(startIndex + ItemsPerLine, volumeList.Count);
+
+            <MudItem xs="12" Class="pe-5">
+                <MudStack Row Justify="Justify.FlexStart" Style="flex-wrap: nowrap;">
+                    @for (int i = startIndex; i < endIndex; i++)
+                    {
+                        var currentIndex = i;
+                        var style = $"flex: 0 0 auto; width: calc((100% - ({ItemsPerLine - 1} * { spacing * 4 }px)) / {ItemsPerLine});";
+                        <div style="@style">
+                            <SmallCard Volume="@volumeList[currentIndex]" />
+                        </div>
+                    }
+                </MudStack>
+            </MudItem>
+        }
+    };
+}

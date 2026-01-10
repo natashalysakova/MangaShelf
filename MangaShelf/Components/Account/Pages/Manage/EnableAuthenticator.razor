@@ -4,10 +4,11 @@
 @using System.Globalization
 @using System.Text
 @using System.Text.Encodings.Web
+@using MangaShelf.Components.Account
+@using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Identity
-@using MangaShelf.Data
 
-@inject UserManager<ApplicationUser> UserManager
+@inject UserManager<MangaIdentityUser> UserManager
 @inject IdentityUserAccessor UserAccessor
 @inject UrlEncoder UrlEncoder
 @inject IdentityRedirectManager RedirectManager
@@ -70,7 +71,7 @@ else
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
     private string? message;
-    private ApplicationUser user = default!;
+    private MangaIdentityUser user = default!;
     private string? sharedKey;
     private string? authenticatorUri;
     private IEnumerable<string>? recoveryCodes;
@@ -118,7 +119,7 @@ else
         }
     }
 
-    private async ValueTask LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
+    private async ValueTask LoadSharedKeyAndQrCodeUriAsync(MangaIdentityUser user)
     {
         // Load the authenticator key & QR code URI to display on the form
         var unformattedKey = await UserManager.GetAuthenticatorKeyAsync(user);

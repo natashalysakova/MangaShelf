@@ -1,23 +1,112 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Identity
+@inherits LayoutComponentBase
+@inject IUiLocalizationService Localizer
+@inject AuthenticationStateProvider AuthStateProvider
 
-<div class="page">
-    <div class="sidebar">
+@* Required *@
+<MudThemeProvider IsDarkMode="true" Theme="MangaShelfTheme" />
+<MudPopoverProvider />
+@* Needed for dialogs *@
+<MudDialogProvider FullWidth="true"
+                   MaxWidth="MaxWidth.Large"
+                   CloseButton="true"
+                   BackdropClick="false"
+                   Position="DialogPosition.TopCenter"
+                   CloseOnEscapeKey="true"/>
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Class="manga-gradient-background">
         <NavMenu />
-    </div>
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="catalog-container">
+            <MudPaper Width="100%" Square="true" Class="catalog-paper">
+                @Body
+            </MudPaper>
+        </MudContainer>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <MudScrollToTop>
+            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
+        </MudScrollToTop>
+        <MudAppBar Elevation="0" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
+            <MudGrid Justify="Justify.Center">
+                <MudText Style="font-size:small">COPYRIGHT</MudText>
+            </MudGrid>
+        </MudAppBar>
+    </MudMainContent>
+</MudLayout>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code
+{
+    private bool _open = false;
+
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
+
+    @code {
+    [Inject] private SignInManager<MangaIdentityUser> AuthService { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            var user = await AuthService.UserManager.GetUserAsync(AuthService.Context.User);
+            // A hard refresh or the user just navigated to the application for the first time
+            if (firstRender && user != null && !AuthService.Context.User.Identity!.IsAuthenticated)
+            {
+                var url = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).ToString();
+                if (url.Contains("/login"))
+                {
+                    return;
+                }
+
+                @* var restoredFromState = await AuthService.GetStateFromTokenAsync();
+                //The user lost their server side session, but still has a valid JWT
+                if (restoredFromState) *@
+                {
+                    NavigationManager.Refresh();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Authentication check failed: {ex.Message}");
+            // Don't let authentication checks crash the circuit
+        }
+    }
+
+    MudTheme MangaShelfTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Primary = Colors.Indigo.Lighten1,
+            Secondary = Colors.DeepPurple.Accent3,
+            Tertiary = Colors.Purple.Accent2,
+            TextPrimary = Colors.BlueGray.Lighten4,
+            ActionDefault = Colors.Indigo.Lighten3,
+            Surface = "#1e1e2e",
+            Background = "#0f0f1a",
+            AppbarBackground = "#2d3561"
+        },
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography()
+            {
+                FontFamily = new[] { "Poppins", "Helvetica", "Arial", "sans-serif" }
+            }
+        }
+    };
+}
+}

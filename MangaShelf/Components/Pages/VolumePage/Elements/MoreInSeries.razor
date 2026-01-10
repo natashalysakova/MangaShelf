@@ -1,0 +1,53 @@
+@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+
+@inject IVolumePageLocalizationService Localizer
+
+@if (Volumes != null && Volumes.Any())
+{
+    <MudItem Class="mb-3 pe-2">
+
+    <MudText Typo="Typo.h5" Class="mb-4">@Localizer["MoreInSeries"]</MudText>
+    <MangaLine Volumes="Volumes" ItemsPerLine="8"></MangaLine>
+    </MudItem>
+}
+else if(Volumes == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+
+@code {
+
+    [Parameter]
+    [EditorRequired]
+    public required VolumeDto Volume { get; set; }
+
+
+    [Inject]
+    public required IVolumeService VolumeService { get; set; }
+
+    private IEnumerable<CardVolumeDto> Volumes { get; set; }
+
+
+    override protected async Task OnParametersSetAsync()
+    {
+        await LoadMoreVolumes();
+    }
+
+    private async Task LoadMoreVolumes()
+    {
+        try
+        {
+            var result = await VolumeService.GetVolumesBySeriesId(Volume.Series.PublicId);
+            var toRemove = result.Where(x => x.PublicId == Volume.PublicId);
+            result = result.Except(toRemove);
+
+            Volumes = result;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+}

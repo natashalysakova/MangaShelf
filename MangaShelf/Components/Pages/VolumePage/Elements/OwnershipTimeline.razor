@@ -1,0 +1,60 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+@inject IVolumePageLocalizationService Localizer
+@inject IVolumeService VolumeService
+@inject IVolumeStateService VolumeState
+@inject ILogger<OwnershipTimeline> Logger
+
+@if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Ownerships.Any())
+{
+    <MudTimeline TimelineOrientation="TimelineOrientation.Vertical"
+                 Style="width: 100%"
+                 TimelinePosition="TimelinePosition.Start"
+                 TimelineAlign="TimelineAlign.Start">
+        @foreach (var ownership in VolumeState.CurrentUserStatus.Ownerships.OrderByDescending(x => x.Date))
+        {
+            <MudTimelineItem TimelineAlign="TimelineAlign.End">
+
+                <MudStack Spacing="0">
+                    <MudStack Row>
+                        <MudText Typo="Typo.button">@Localizer[ownership.Status]</MudText>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteFromHistory(ownership.Id))"></MudIconButton>
+                    </MudStack>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@ownership.Date.ToLocalTime().ToString("dd.MM.yyyy")</MudText>
+                </MudStack>
+            </MudTimelineItem>
+        }
+    </MudTimeline>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        VolumeState.OnUserStatusChanged += HandleUserStatusChanged;
+    }
+
+    private void HandleUserStatusChanged()
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        VolumeState.OnUserStatusChanged -= HandleUserStatusChanged;
+    }
+
+    private async Task DeleteFromHistory(Guid id)
+    {
+        try
+        {
+            var (status, stats) = await VolumeService.RemoveOwnershipAsync(id);
+            VolumeState.UpdateBoth(status, stats);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error removing ownership with Id: {Id}", id);
+        }
+    }
+}

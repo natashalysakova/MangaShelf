@@ -2,7 +2,6 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -11,6 +10,8 @@ EXPOSE 8081
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
+RUN dotnet dev-certs https
+RUN dotnet dev-certs https --trust
 WORKDIR /src
 COPY ["MangaShelf/MangaShelf.csproj", "MangaShelf/"]
 RUN dotnet restore "./MangaShelf/MangaShelf.csproj"

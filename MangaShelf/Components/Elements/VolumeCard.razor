@@ -1,0 +1,44 @@
+﻿@inject IUiLocalizationService Localizer
+
+@if (Volume != null)
+{
+
+
+    <MudCard Class="manga-card" Elevation="3">
+        @*         <MudCardHeader Style="" Class="hidden-child manga-panel">
+            <CardHeaderContent>
+                <MudText Typo="Typo.body2" Style="width: 80%">@Volume.SeriesName</MudText>
+            </CardHeaderContent>
+        </MudCardHeader> *@
+        <div class="image-container">
+        
+            <FallbackImage 
+                ImageUrl="@Volume.CoverImageUrlSmall" 
+                Class="card-image" 
+                Alt="@Volume.SeriesName" />
+        </div>
+
+        @*         <MudAvatar Class="card-avatar m-2">@Volume.VolumeNumber</MudAvatar>
+ *@
+        @if (Volume.IsPreorder)
+        {
+            <div class="mud-theme-tertiary py-2 px-4 mx-2 rounded-bl-xl" style="position: absolute; top:0; right:0; margin-right:0 !important;">
+                <MudText Typo="Typo.caption" Align="Align.Center">@Localizer["Preorder"]</MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center">@Volume.ReleaseDate</MudText>
+            </div>
+        }
+        <MudCardActions Class="hidden-child manga-panel">
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Primary"/>
+            <MudIconButton Size="Size.Large" Icon="@Icons.Material.Filled.Add" Color="Color.Secondary" />
+            <MudIconButton  Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Primary" Href="@Volume.PurchaseUrl" Target="_blank" />
+            <MudSpacer />
+        </MudCardActions>
+    </MudCard>
+
+}
+
+@code {
+    [Parameter]
+    public CardVolumeDto? Volume { get; set; }
+}

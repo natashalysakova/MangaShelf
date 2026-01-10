@@ -1,0 +1,124 @@
+﻿@page "/admin/volumes/edit/{VolumeId:guid}"
+@using MangaShelf.BL.Interfaces
+@using MangaShelf.BL.Dto
+@using MangaShelf.Common.Interfaces
+@using MangaShelf.Components.Elements.ImageCrop
+@using MangaShelf.DAL.Models
+@using Microsoft.AspNetCore.Components.Forms
+@inject IVolumeService VolumeService
+@inject IImageManager ImageManager
+@inject IUiLocalizationService Localizer
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@Localizer["EditVolume"]</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    @if (_loading)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    }
+    else if (_volume != null)
+    {
+        <MudText Typo="Typo.h4" Class="mb-4">@Localizer["EditVolume"]: @_volume.Series.Title @_volume.Title</MudText>
+
+        <CropComponent OriginalCover="@_volume.OriginalCoverUrl" CroppedCover="@_volume.CoverImageUrl" />
+        <!-- Bottom: Action Buttons -->
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudStack Row="true" Justify="Justify.SpaceBetween">
+                    <MudButton OnClick="NavigateBack"
+                               Variant="Variant.Text"
+                               StartIcon="@Icons.Material.Filled.ArrowBack">
+                        @Localizer["BackToList"]
+                    </MudButton>
+
+                    <MudButton OnClick="SaveChanges"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               Disabled="_processing || !_hasChanges">
+                        @Localizer["SaveChanges"]
+                    </MudButton>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Error">@Localizer["VolumeNotFound"]</MudAlert>
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public Guid VolumeId { get; set; }
+
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public string PublicId { get; set; }
+
+    private Volume _volume;
+
+    private bool _loading = false;
+    private bool _processing = false;
+    private bool _hasChanges = false;
+
+
+        protected override async Task OnInitializedAsync()
+    {
+        await LoadVolume();
+    }
+
+    private async Task LoadVolume()
+    {
+        try
+        {
+            _loading = true;
+            _volume = await VolumeService.GetFullVolumeByIdAsync(VolumeId);
+
+            if (_volume != null && !string.IsNullOrEmpty(_volume.OriginalCoverUrl))
+            {
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading volume: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+            _processing = true;
+
+            if (_volume != null)
+            {
+                Snackbar.Add(Localizer["ChangesSaved"], Severity.Success);
+                _hasChanges = false;
+
+                await Task.Delay(1000);
+                NavigateBack();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving changes: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/volume/" + _volume.PublicId);
+    }
+}

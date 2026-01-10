@@ -6,4 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="1.4.0" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.10.1" />
+    <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MangaShelf.Common\MangaShelf.Common.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL.System\MangaShelf.DAL.System.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
+  </ItemGroup>
+
 </Project>
