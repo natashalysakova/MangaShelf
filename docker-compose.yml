@@ -10,6 +10,7 @@ services:
     environment:
         ASPNETCORE_ENVIRONMENT: Production
         ASPNETCORE_HTTP_PORTS: 8080
+        ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
     env_file:
       - .env
     volumes:
@@ -27,6 +28,7 @@ services:
     environment:
       DOTNET_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
     volumes:
       - images:/app/wwwroot/images:rw
     env_file:
