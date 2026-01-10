@@ -1,0 +1,85 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+@inject IVolumePageLocalizationService Localizer
+@inject IVolumeStateService VolumeState
+@inject ILogger<VolumeStatsComponent> Logger
+
+@if (VolumeState.CurrentStats != null)
+{
+    <MudItem Class="d-flex justify-center mb-3">
+        <MudPaper Outlined="true" Class="p-2 pt-1 fit-content paper-manga-panel">
+            <MudStack Row="@_isRow" Breakpoint="Breakpoint.Sm" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="@_spacing">
+                <MudStack Row="@_isRow" Spacing="@_spacing" Justify="Justify.Center">
+                    <StatIcon TopText="@Localizer["Liked"]"
+                              BottomText="@VolumeState.CurrentStats.LikesCount"
+                              Icon="@CustomIcons.filledHeart" IconColor="@Color.Default" />
+                    <StatIcon TopText="@Localizer["Wishlisted"]"
+                              BottomText="@VolumeState.CurrentStats.WishlistsCount"
+                              Icon="@Icons.Material.Filled.Bookmark" IconColor="@Color.Default" />
+                    <StatIcon TopText="@Localizer["Preordered"]"
+                              BottomText="@VolumeState.CurrentStats.PreordersCount"
+                              Icon="@Icons.Material.Filled.PunchClock" IconColor="@Color.Default" />
+                </MudStack>
+                <MudStack Row="@_isRow" Spacing="@_spacing" Justify="Justify.Center">
+                    <StatIcon TopText="@Localizer["InLibrary"]"
+                              BottomText="@VolumeState.CurrentStats.OwnersCount"
+                              Icon="@CustomIcons.bookshelf" IconColor="@Color.Default" />
+                    <StatIcon TopText="@Localizer["Reading"]"
+                              BottomText="@VolumeState.CurrentStats.ReadersCount"
+                              Icon="@CustomIcons.reading" IconColor="@Color.Default" />
+                    <StatIcon TopText="@Localizer["Finished"]"
+                              BottomText="@VolumeState.CurrentStats.CompletedCount"
+                              Icon="@CustomIcons.done" IconColor="@Color.Default" />
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+}
+
+@code {
+    [Parameter]
+    public StatsOrientation Orientation { get; set; }
+
+
+    private int _spacing = 0;
+    private bool _isRow = true;
+
+    protected override void OnInitialized()
+    {
+        VolumeState.OnStatsChanged += HandleStatsChanged;
+
+        SetStatsOrientation();
+    }
+
+    private void SetStatsOrientation()
+    {
+        if (Orientation == StatsOrientation.Horizontal)
+        {
+            _spacing = 3;
+            _isRow = true;
+        }
+        else
+        {
+            _spacing = 0;
+            _isRow = false;
+        }
+    }
+
+    private void HandleStatsChanged()
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        VolumeState.OnStatsChanged -= HandleStatsChanged;
+    }
+
+    public enum StatsOrientation
+    {
+        Horizontal,
+        Vertical
+    }
+}

@@ -4,17 +4,12 @@
 @inject IVolumeService VolumeService
 @inject IUiLocalizationService Localizer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>@Localizer["Home"]</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-
-<MudText Typo="Typo.h5">@Localizer["NewManga"]</MudText>
+<MudText Typo="Typo.h4" Class="mb-3">@Localizer["NewManga"]</MudText>
 <MangaLine Volumes="@NewReleasedManga" />
 
-<MudText Typo="Typo.h5">@Localizer["NewPreorders"]</MudText>
+<MudText Typo="Typo.h4" Class="m-3">@Localizer["NewPreorders"]</MudText>
 <MangaLine Volumes="@Preorders" />
 
 

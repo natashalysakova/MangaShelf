@@ -16,9 +16,11 @@ public sealed class Test1
     }
 
     [TestMethod]
-    [ExpectedException(typeof(AssertFailedException))]
-    public void AlwaysFail()
+    public async Task AlwaysFail()
     {
-        Assert.IsFalse(true, "This test should always fail.");
+        Assert.ThrowsExactly<AssertFailedException>(() =>
+        {
+            Assert.IsFalse(true, "This test should always fail.");
+        });
     }
 }

@@ -46,7 +46,7 @@ public class ArtbooksParseTest : BaseParserTestClass<ArtbooksParser>
         Authors = "Наоші Аракава",
         Isbn = "978-617-523-324-5",
         IsPreorder = true,
-        Release = DateTime.SpecifyKind(new DateTime(2025, 09, 15), DateTimeKind.Local),
+        Release = DateTime.SpecifyKind(new DateTime(2025, 10, 1), DateTimeKind.Local),
         PreorderStartDate = null,
         Publisher = "Artbooks",
         Series = "Твоя квітнева брехня",

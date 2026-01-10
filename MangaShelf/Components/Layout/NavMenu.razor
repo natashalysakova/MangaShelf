@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager NavigationManager
 @inject IUiLocalizationService Localizer
+@rendermode InteractiveServer
 
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-center px-0 my-0">
@@ -23,28 +24,81 @@
 
     <MudSpacer />
 
-    <MudButton Href="/preorders"
-               StartIcon="@Icons.Material.Outlined.ViewList"
-               Variant="Variant.Text"
-               Class="manga-header-menu-item">
-        @Localizer["Preorders"]
-    </MudButton>
-    <MudButton Href="/my-shelf"
-               StartIcon="@Icons.Material.Outlined.Home"
-               Variant="Variant.Text"
-               Class="manga-header-menu-item">
-        @Localizer["MyShelf"]
-    </MudButton>
-    <MudButton Href="/admin"
-               StartIcon="@Icons.Material.Outlined.Key"
-               Variant="Variant.Text"
-               Class="manga-header-menu-item">
-        @Localizer["Admin"]
-    </MudButton>
+    <AuthorizeView Roles="User">
+        <MudButton Href="/preorders"
+                StartIcon="@Icons.Material.Outlined.ViewList"
+                Variant="Variant.Text"
+                Class="manga-header-menu-item">
+            @Localizer["Preorders"]
+        </MudButton>
+        <MudButton Href="/my-shelf"
+                StartIcon="@Icons.Material.Outlined.Home"
+                Variant="Variant.Text"
+                Class="manga-header-menu-item">
+            @Localizer["MyShelf"]
+        </MudButton>
+    </AuthorizeView>
+    <AuthorizeView Roles="Admin">
+        <MudButton Href="/admin"
+                   StartIcon="@Icons.Material.Outlined.Key"
+                   Variant="Variant.Text"
+                   Class="manga-header-menu-item">
+            @Localizer["Admin"]
+        </MudButton>
+    </AuthorizeView>
+    <AuthorizeView>
+        <NotAuthorized>
+            <MudButton Href="@loginUrl"
+                       StartIcon="@Icons.Material.Outlined.Login"
+                       Variant="Variant.Text"
+                       Class="manga-header-menu-item">
+                @Localizer["Login"]
+            </MudButton>
+        </NotAuthorized>
+        <Authorized>
+            <MudButton Href="/Account/Manage"
+                       StartIcon="@Icons.Material.Outlined.AccountCircle"
+                       Variant="Variant.Text"
+                       Class="manga-header-menu-item">
+                @Localizer["Account"]
+            </MudButton>
+            <form method="post" action="/Auth/Logout" style="display:inline-block;">
+                <MudButton ButtonType="ButtonType.Submit"
+                           StartIcon="@Icons.Material.Outlined.Logout"
+                           Variant="Variant.Text"
+                           Class="manga-header-menu-item">
+                    @Localizer["Logout"]
+                </MudButton>
+            </form>
+        </Authorized>
+    </AuthorizeView>
     <CultureSelector />
 </MudContainer>
 
 @code {
+    private string loginUrl = "/login";
 
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        UpdateLoginUrl();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateLoginUrl();
+        StateHasChanged();
+    }
+
+    private void UpdateLoginUrl()
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var currentUrl = string.IsNullOrEmpty(relativePath) ? "/" : "/" + relativePath;
+        loginUrl = $"/login?returnUrl={Uri.EscapeDataString(currentUrl)}";
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
 }
-

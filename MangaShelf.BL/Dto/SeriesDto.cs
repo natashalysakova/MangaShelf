@@ -1,10 +1,12 @@
-﻿using MangaShelf.DAL.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.BL.Dto;
 
+[ExcludeFromCodeCoverage]
 public class SeriesSimpleDto
 {
-    public Guid Id { get; set; }
+    public string PublicId { get; set; }
 
     public required string Title { get; set; }
     public string? OriginalName { get; set; }
@@ -19,7 +21,7 @@ public class SeriesSimpleDto
     public bool IsPublishedOnSite { get; set; }
 
     public Guid PublisherId { get; set; }
-    public PublisherSimpleDto? Publisher { get; set; }
+    public PublisherSimpleDto Publisher { get; set; }
 
     public ICollection<string> Authors { get; set; } = new List<string>();
 }

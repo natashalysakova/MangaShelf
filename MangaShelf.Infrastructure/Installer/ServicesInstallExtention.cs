@@ -1,14 +1,15 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Enums;
+using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Parsers;
 using MangaShelf.BL.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using MangaShelf.BL.Services.Parsing;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Localization.Interfaces;
 using MangaShelf.Common.Localization.Services;
-using MangaShelf.BL.Enums;
-using MangaShelf.BL.Parsers;
 using MangaShelf.Infrastructure.Network;
-using MangaShelf.Common.Interfaces;
-using MangaShelf.BL.Services.Parsing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Identity.Client;
 
 namespace MangaShelf.Infrastructure.Installer;
 
@@ -30,6 +31,7 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
         builder.Services.AddKeyedScoped<IHtmlDownloader, BasicHtmlDownloader>(HtmlDownloaderKeys.Basic);
         builder.Services.AddKeyedScoped<IHtmlDownloader, AdvancedHtmlDownloader>(HtmlDownloaderKeys.Advanced);
+        builder.Services.AddKeyedScoped<IHtmlDownloader, MalopusHtmlDownloader>(HtmlDownloaderKeys.Malopus);
         builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
         builder.Services.AddScoped<IParserFactory, ParserFactory>();
         builder.Services.AddScoped<IParseService, ParserService>();
@@ -42,6 +44,10 @@ public static class ServicesInstallExtention
 
         // Seed services
         builder.RegisterSeedServices();
+
+        // Cache services
+        builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<ICacheService, CacheService>();
 
         return builder;
     }

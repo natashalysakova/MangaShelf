@@ -1,0 +1,23 @@
+@using MangaShelf.Components.Pages
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+<MudPaper Outlined="true" Class="paper-manga-panel p-3">
+    <MudStack Row>
+        <MudText Typo="Typo.h6">@Review.UserName</MudText>
+        <MudSpacer></MudSpacer>
+        <MudStack Spacing="0">
+
+            <MudRating SelectedValue="@Review.Rating" ReadOnly="true"></MudRating>
+            <MudText Color="Color.Default" Typo="Typo.caption">@Review.Date.ToString("dd.MM.yyyy HH:mm:ss")</MudText>
+        </MudStack>
+    </MudStack>
+    <MudText>@Review.Review</MudText>
+
+</MudPaper>
+
+@code {
+    [Parameter]
+    public ReviewDto Review { get; set; }
+}

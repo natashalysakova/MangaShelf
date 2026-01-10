@@ -1,0 +1,116 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+@inject IAdminLocalizationService Localizer
+@inject IDialogService Dialog
+@inject IVolumeService VolumeService
+@inject NavigationManager NavigationManager
+@inject ILogger<AdminVolumePanel> Logger
+@inject ISnackbar Snackbar
+
+<AuthorizeView Roles="Admin" Context="adminContext">
+    <Authorized>
+        <MudPaper Class="">
+            <MudToolBar WrapContent="true">
+                <MudText Typo="Typo.button">@Localizer["AdminPanel"]</MudText>
+                <MudButton Href="@($"/admin/volumes/edit/{Volume.Id}")"
+                           Color="Color.Warning"
+                           Size="Size.Large"
+                           StartIcon="@Icons.Material.Filled.Edit">Edit</MudButton>
+                <MudButton Color="@(Volume.IsPublishedOnSite? Color.Error: Color.Success)"
+                           Size="Size.Large"
+                           StartIcon="@(Volume.IsPublishedOnSite ? Icons.Material.Filled.PublicOff : Icons.Material.Filled.Public)"
+                           OnClick="ChangePublishState">@(Volume.IsPublishedOnSite ? Localizer["UnPublish"] : Localizer["Publish"])</MudButton>
+                <MudSpacer />
+                <MudButton Color="Color.Error"
+                           Size="Size.Large"
+                           StartIcon="@Icons.Material.Filled.RestoreFromTrash" OnClick="RemoveVolume">@Localizer["Delete"]</MudButton>
+            </MudToolBar>
+        </MudPaper>
+    </Authorized>
+</AuthorizeView>
+
+
+@code {
+    [Parameter]
+    public VolumeDto Volume { get; set; }
+
+    private string _publishIcon; private Color _publishIconColor;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthTask { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+
+    private async Task RemoveVolume()
+    {
+        using var scope = Logger.BeginScope(Volume.Id);
+
+        var dialogOptions = new DialogOptions()
+        {
+            FullWidth = false,
+            Position = DialogPosition.Center,
+        };
+
+        var result = await Dialog.ShowMessageBox(Localizer["RemoveVolumeDialogTitle"], Localizer["RemoveVolumeDialogText"], Localizer["YesText"], Localizer["NoText"], options: dialogOptions);
+
+        if (result != null && result is true)
+        {
+            try
+            {
+                var adminName = AuthTask.Result.User.FindFirst(ClaimTypes.Name)?.Value;
+                var deleteResult = await VolumeService.DeleteVolume(Volume.Id);
+                if (deleteResult)
+                {
+                    Logger.LogInformation("Volume removed by admin {name}");
+                    Snackbar.Add("Volume removed", Severity.Info);
+                }
+                else
+                {
+                    Logger.LogInformation("Volume restored by admin {name}");
+                    Snackbar.Add("Volume restored", Severity.Info);
+                }
+            }
+            catch (Exception)
+            {
+                Logger.LogError("Error deleting the volume");
+                Snackbar.Add("Error deleting the volume", Severity.Error);
+            }
+
+        }
+
+    }
+
+    private async Task ChangePublishState()
+    {
+        using var scope = Logger.BeginScope(Volume.Id);
+
+        try
+        {
+            var adminName = AuthTask.Result.User.FindFirst(ClaimTypes.Name)?.Value;
+            Volume.IsPublishedOnSite = await VolumeService.ChangePublishedStatus(Volume.Id);
+            StateHasChanged();
+            if (Volume.IsPublishedOnSite)
+            {
+                Logger.LogInformation("Volume removed by admin {name}");
+                Snackbar.Add("Volume pubished", Severity.Info);
+
+            }
+            else
+            {
+                Logger.LogInformation("Volume restored by admin {name}");
+                Snackbar.Add("Volume unpubished", Severity.Info);
+            }
+        }
+        catch (Exception)
+        {
+            Logger.LogError("Error deleting the volume");
+            Snackbar.Add("Error when changing published status", Severity.Error);
+        }
+
+    }
+}

@@ -72,6 +72,13 @@ public class ParserService : IParseService
                 await statusService.RecordErrorAndStop(jobId, ex, token);
                 break;
             }
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                pageExists = false;
+                _logger.LogInformation($"{parser.GetType().Name}: Page not found {pageUrl} : {httpEx.Message}");
+                await statusService.RecordError(jobId, pageUrl, httpEx, token);
+                break;
+            }
             catch (Exception ex)
             {
                 pageExists = false;
@@ -88,6 +95,13 @@ public class ParserService : IParseService
                 _logger.LogDebug($"{parser.GetType().Name}: No volumes found on page {pageUrl}, last page reached");
                 break;
             }
+            if(volumes.Except(volumesToParse).Count() == 0)
+            {
+                pageExists = false;
+                _logger.LogDebug($"{parser.GetType().Name}: No new volumes found on page {pageUrl}, last page reached");
+                break;
+            }   
+
             volumesToParse.AddRange(volumes);
 
             var jobStatus = await readService.GetJobStatusById(jobId, token);
@@ -109,7 +123,7 @@ public class ParserService : IParseService
             _logger.LogDebug($"{volumesToParse.Count()} volumes left after filtering");
         }
 
-        await statusService.SetToParsingStatus(jobId, token);
+        await statusService.SetToParsingStatus(jobId, volumesToParse, token);
 
         var progress = 0.0;
         var step = 100.0 / volumesToParse.Count;
@@ -130,10 +144,10 @@ public class ParserService : IParseService
 
             await Task.Delay(_options.DelayBetweenParse, token);
 
-            await ParsePageInternal(jobId, volume, parser, token);
+            var result = await ParsePageInternal(jobId, volume, parser, token);
 
             progress += step;
-            await statusService.SetProgress(jobId, progress, token);
+            await statusService.SetProgress(jobId, progress, volume, result == State.Updated, token);
         }
 
         await statusService.SetToFinishedStatus(jobId, token);
@@ -142,12 +156,13 @@ public class ParserService : IParseService
     }
 
 
-    private async Task<bool> ParsePageInternal(Guid jobId, string url, IPublisherParser parser, CancellationToken token)
+    private async Task<State> ParsePageInternal(Guid jobId, string url, IPublisherParser parser, CancellationToken token)
     {
         using var scope = _serviceProvider.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<IParserWriteService>();
 
         await service.RunSingleJob(jobId);
+        State result = default;
 
         ParsedInfo volumeInfo;
         try
@@ -159,25 +174,26 @@ public class ParserService : IParseService
         {
             await service.RecordError(jobId, url, ex, token: token);
             _logger.LogWarning($"{parser.GetType().Name}: Cannot parse volume {url} : {ex.Message}");
-            return false;
+            return result;
         }
 
         try
         {
-            await CreateOrUpdateFromParsedInfoAsync(volumeInfo, token);
+            result = await CreateOrUpdateFromParsedInfoAsync(volumeInfo, token);
         }
         catch (Exception ex)
         {
             await service.RecordError(jobId, url, volumeInfo.Json, ex, token);
             _logger.LogWarning($"{parser.GetType().Name}: Cannot create volume {volumeInfo.Series} - {volumeInfo.Title}: {ex.Message}");
-            return false;
+            await service.SetSingleJobToErrorStatus(jobId);
+            return result;
         }
 
         await service.SetSingleJobToFinishedStatus(jobId);
-        return true;
+        return result;
     }
 
-    public async Task CreateOrUpdateFromParsedInfoAsync(ParsedInfo volumeInfo, CancellationToken token = default)
+    public async Task<State> CreateOrUpdateFromParsedInfoAsync(ParsedInfo volumeInfo, CancellationToken token = default)
     {
         using var context = await _dbContextFactory.CreateDbContextAsync();
         var domainContextFactory = new DomainServiceFactory(context);
@@ -240,7 +256,7 @@ public class ParserService : IParseService
             };
         }
 
-        if (volume.Description is null && volumeInfo.Description is not null)
+        if (volumeInfo.Description is not null && volume.Description != volumeInfo.Description)
         {
             volume.Description = volumeInfo.Description;
         }
@@ -262,7 +278,7 @@ public class ParserService : IParseService
             volume.Series.TotalVolumes = volumeInfo.TotalVolumes;
         }
 
-        if (volumeInfo.Release is not null && volumeInfo.Release < DateTime.Now)
+        if (volumeInfo.Release is not null && volumeInfo.Release > DateTime.Now)
         {
             volume.ReleaseDate = volumeInfo.Release;
         }
@@ -285,16 +301,23 @@ public class ParserService : IParseService
             volume.AgeRestriction = volumeInfo.AgeRestrictions.Value;
         }
 
-        if (volume.CoverImageUrl is null)
+        if (!string.IsNullOrEmpty(volumeInfo.Cover) && volume.OriginalCoverUrl is null)
         {
             using var scope = _serviceProvider.CreateScope();
             var _imageManager = scope.ServiceProvider.GetRequiredService<IImageManager>();
 
-            volume.CoverImageUrl = _imageManager.DownloadFileFromWeb(volumeInfo.Cover);
+            volume.OriginalCoverUrl = _imageManager.DownloadFileFromWeb(volumeInfo.Cover, volume.Series.PublicId);
+
+            var croppedImage = _imageManager.CropImage(volume.OriginalCoverUrl);
+
+            volume.CoverImageUrl = croppedImage ?? volume.OriginalCoverUrl;
+            volume.CoverImageUrlSmall = _imageManager.CreateSmallImage(volume.CoverImageUrl);
         }
 
         var result = await volumeDomainService.AddOrUpdate(volume, true, token);
         _logger.LogInformation($"{result.Entity.Series.Title} {volume.Title} {volume.Number} was {result.State}");
+
+        return result.State;
     }
 
     public async Task RunParseJob(Guid jobId, CancellationToken token)
@@ -321,20 +344,26 @@ public class ParserService : IParseService
             throw new InvalidOperationException($"Parser {job.ParserStatus.ParserName} not found");
         }
 
-
-
-        switch (job.Type)
+        try
         {
-            case ParserRunType.SingleUrl:
+            switch (job.Type)
+            {
+                case ParserRunType.SingleUrl:
 
-                await ParsePageInternal(jobId, job.Url!, parsers, token);
-                break;
-            case ParserRunType.FullSite:
-                await ParseSite(parsers, jobId, token);
-                break;
-            default:
-                break;
+                    await ParsePageInternal(jobId, job.Url!, parsers, token);
+                    break;
+                case ParserRunType.FullSite:
+                    await ParseSite(parsers, jobId, token);
+                    break;
+                default:
+                    break;
+            }
         }
-
+        catch (Exception ex)
+        {
+            var parserWriteService = scope.ServiceProvider.GetRequiredService<IParserWriteService>();
+            await parserWriteService.RecordErrorAndStop(jobId, ex, token);
+            throw;
+        }
     }
 }

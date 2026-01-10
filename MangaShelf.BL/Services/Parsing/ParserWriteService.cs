@@ -4,6 +4,7 @@ using MangaShelf.BL.Interfaces;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace MangaShelf.BL.Services.Parsing;
 
@@ -114,12 +115,12 @@ public class ParserWriteService : IParserWriteService
         return true;
     }
 
-    public async Task SetToParsingStatus(Guid runId, CancellationToken token)
+    public async Task SetToParsingStatus(Guid runId, IEnumerable<string> volumes, CancellationToken token)
     {
-        await SetStatusInternal(runId, ParserStatus.Parsing, token);
+        await SetStatusInternal(runId, ParserStatus.Parsing, volumes, token);
     }
 
-    public async Task SetProgress(Guid runId, double progress, CancellationToken token)
+    public async Task SetProgress(Guid runId, double progress, string url, bool isUpdated, CancellationToken token)
     {
         using var context = _dbContextFactory.CreateDbContext();
 
@@ -140,16 +141,26 @@ public class ParserWriteService : IParserWriteService
         }
 
         run.Progress = progress;
+        if(isUpdated)
+        {
+            run.VolumesUpdated.Add(url);
+        }
+        else
+        {
+            run.VolumesAdded.Add(url);
+        }
+
+        context.Entry(run).State = EntityState.Modified;
 
         await context.SaveChangesAsync(token);
     }
 
     public async Task SetToFinishedStatus(Guid runId, CancellationToken token)
     {
-        await SetStatusInternal(runId, ParserStatus.Idle, token);
+        await SetStatusInternal(runId, ParserStatus.Idle, null, token);
     }
 
-    private async Task SetStatusInternal(Guid runId, ParserStatus status, CancellationToken token)
+    private async Task SetStatusInternal(Guid runId, ParserStatus status, IEnumerable<string>? volumes, CancellationToken token)
     {
         using var context = _dbContextFactory.CreateDbContext();
 
@@ -170,6 +181,11 @@ public class ParserWriteService : IParserWriteService
         }
 
         parserStatus.Status = status;
+
+        if(status == ParserStatus.Parsing && volumes is not null)
+        {
+           run.VolumesFound = volumes.Count();
+        }
 
         if (status == ParserStatus.Idle)
         {
@@ -319,7 +335,7 @@ public class ParserWriteService : IParserWriteService
         {
             return;
         }
-
+        job.VolumesFound = 1;
         job.Status = RunStatus.Running;
         job.ParserStatus.Status = ParserStatus.Parsing;
         job.Started = DateTimeOffset.Now;
@@ -342,6 +358,25 @@ public class ParserWriteService : IParserWriteService
         job.Status = RunStatus.Finished;
         job.Finished = DateTimeOffset.Now;
         job.Progress = 100.0;
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task SetSingleJobToErrorStatus(Guid jobId)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+
+        var job = await context.Runs.Include(x => x.ParserStatus).SingleOrDefaultAsync(x => x.Id == jobId);
+        if (job == null || job.Type != ParserRunType.SingleUrl)
+        {
+            return;
+        }
+
+        job.Status = RunStatus.Error;
+        job.Finished = DateTimeOffset.Now;
+        job.Progress = -1;
+
+        job.ParserStatus.Status = ParserStatus.Idle;
 
         await context.SaveChangesAsync();
     }

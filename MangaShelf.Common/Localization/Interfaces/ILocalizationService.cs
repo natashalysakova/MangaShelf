@@ -2,7 +2,7 @@
 
 namespace MangaShelf.Common.Localization.Interfaces;
 
-public interface ILocalizationService<T>
+public interface ILocalizationService<T> : IAutoRegisterLocalizationService
     where T : class
 {
     /// <summary>
@@ -18,6 +18,11 @@ public interface ILocalizationService<T>
     /// <param name="arguments">The arguments to format the string with.</param>
     /// <returns>The localized string.</returns>
     LocalizedString this[string name, params object[] arguments] { get; }
+
+    LocalizedString this[Enum name] { get; }
+    LocalizedString this[Enum name, params object[] arguments] { get; }
+
+
     /// <summary>
     /// Gets all localized strings.
     /// </summary>
@@ -25,3 +30,5 @@ public interface ILocalizationService<T>
     /// <returns>An enumerable of all localized strings.</returns>
     IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures);
 }
+
+public interface IAutoRegisterLocalizationService { }

@@ -17,12 +17,16 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
         return _context.Volumes
             .Where(x => x.Number == volumeNumber && x.Title == volumeTitle)
             .Include(x => x.Series)
-            .Where(x => x.Series!.Title == series).SingleOrDefault();
+            .Where(x => x.Series!.Title == series)
+            .IgnoreQueryFilters()
+            .SingleOrDefault();
     }
 
-    public IQueryable<Volume> GetAllFullPaginated(IPaginationOptions? paginationOptions = default)
+    public IQueryable<Volume> GetAllFullPaginated(IFilterOptions? paginationOptions = default)
     {
-        return GetAllFull().ApplyPagination(paginationOptions);
+        return GetAllFull()
+            .Filter(paginationOptions)
+            .ApplyPagination(paginationOptions);
     }
 
     public IQueryable<Volume> GetAllFull()
@@ -34,13 +38,15 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
             .Include(v => v.Series)
                 .ThenInclude(x => x.Authors);
 
+
         return query;
     }
 
-    public IQueryable<Volume> GetAllWithSeries(IPaginationOptions? paginationOptions = default)
+    public IQueryable<Volume> GetAllWithSeries(IFilterOptions? paginationOptions = default)
     {
         return _context.Volumes
             .Include(v => v.Series)
+            .Filter(paginationOptions)
             .ApplyPagination(paginationOptions);
     }
 
@@ -68,49 +74,4 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
             .OrderByDescending(v => v.ReleaseDate)
             .Take(count);
     }
-}
-
-public static class PaginationExtention
-{
-    public static IQueryable<Volume> ApplyPagination(this IQueryable<Volume> query, IPaginationOptions? paginationOptions)
-    {
-        if (paginationOptions is null)
-        {
-            return query;
-        }
-
-        if (paginationOptions.SortDescending)
-        {
-            query = query.OrderByDescending(v => EF.Property<Volume>(v, paginationOptions.SortBy ?? nameof(Volume.CreatedAt)));
-        }
-        else
-        {
-            query = query.OrderBy(v => EF.Property<Volume>(v, paginationOptions.SortBy ?? nameof(Volume.CreatedAt)));
-        }
-
-
-        if (paginationOptions.Search is not null)
-        {
-            query = query.Where(volume =>
-                // Search in the Volume title
-                (volume.Title != null && volume.Title.Contains(paginationOptions.Search)) ||
-                // Search in Series title
-                (volume.Series != null && volume.Series.Title != null && volume.Series.Title.Contains(paginationOptions.Search)) ||
-                // Search in Publisher name
-                (volume.Series != null && volume.Series.Publisher != null && volume.Series.Publisher.Name != null && volume.Series.Publisher.Name.Contains(paginationOptions.Search)) ||
-                // Also search in Series Authors if no override authors
-                (volume.Series != null && volume.Series.Authors.Any(a => a.Name != null && a.Name.Contains(paginationOptions.Search)))
-            );
-        }
-
-
-
-        query = query
-            .Skip(paginationOptions.Skip)
-            .Take(paginationOptions.Take);
-
-
-        return query;
-    }
-
 }

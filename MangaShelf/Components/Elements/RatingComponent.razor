@@ -1,0 +1,27 @@
+﻿<MudStack Row="true" Spacing="0">
+    <MudTooltip Text="@RatingValue.ToString("F2")">
+        @for (int i = 0; i < FullStars; i++)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.Star" Color="Color.Warning" />
+        }
+
+        @if (HasHalfStar)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.StarHalf" Color="Color.Warning" />
+        }
+
+        @for (int i = 0; i < EmptyStars; i++)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.StarBorder" Color="Color.Warning" />
+        }
+    </MudTooltip>
+</MudStack>
+
+@code {
+    [Parameter]
+    public double RatingValue { get; set; }
+
+    private int FullStars => (int)Math.Floor(RatingValue);
+    private bool HasHalfStar => RatingValue % 1 > 0;
+    private int EmptyStars => 5 - FullStars - (HasHalfStar ? 1 : 0);
+}

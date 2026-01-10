@@ -1,0 +1,248 @@
+@using MangaShelf.DAL.Models
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+@inject IVolumePageLocalizationService Localizer
+@inject IVolumeService VolumeService
+@inject IVolumeStateService VolumeState
+@inject ILogger<UserActionsComponent> Logger
+
+@if (VolumeState.CurrentUserStatus != null)
+{
+    <AuthorizeView>
+        <Authorized>
+            <MudStack Row Justify="Justify.Center">
+                <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsLiked"
+                                     Size="Size.Large"
+                                     @onclick="ToggleLike"
+                                     Icon="@CustomIcons.notFiledHeart" Color="@Color.Default"
+                                     ToggledIcon="@CustomIcons.filledHeart" ToggledColor="@Color.Error" />
+                <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+
+                <MudMenu Icon="@CustomIcons.bookshelf" Size="Size.Large"
+                         Color="Color.Warning"
+                         AriaLabel="Open user menu">
+
+                    @foreach (var action in availableActions)
+                    {
+                        <MudMenuItem Icon="@action.Icon" IconColor="@action.Color" Label="@Localizer[action.Lable]" @onclick="@action.Handler" />
+                    }
+                </MudMenu>
+
+                <MudIconButton OnClick="ShowAddReadingDialog" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
+
+            </MudStack>
+        </Authorized>
+    </AuthorizeView>
+}
+
+
+@code {
+    [Parameter, EditorRequired]
+    public VolumeDto Volume { get; set; }
+
+    protected override void OnInitialized()
+    {
+        VolumeState.OnUserStatusChanged += HandleUserStatusChanged;
+        BuildListAvailableActions();
+    }
+
+    private void HandleUserStatusChanged()
+    {
+        BuildListAvailableActions();
+        StateHasChanged();
+    }
+
+    private record AvailableAction(string Lable, string Icon, Color Color, Func<Task> Handler);
+    private List<AvailableAction> availableActions;
+
+    private void BuildListAvailableActions()
+    {
+        availableActions = new List<AvailableAction>();
+        if (VolumeState.CurrentUserStatus == null)
+        {
+            return;
+        }
+
+        if (Volume.IsPreorder)
+        {
+            availableActions.Add(new AvailableAction("SetPreorder", Icons.Material.Filled.Schedule, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder)));
+        }
+        else
+        {
+            if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Own)
+            {
+                availableActions.Add(new AvailableAction("SetGone", Icons.Material.Filled.RemoveCircle, Color.Error, () => OpenSetOwnershipDialog(VolumeStatus.Gone)));
+            }
+            else
+            {
+                availableActions.Add(new AvailableAction("SetOwn", Icons.Material.Filled.LibraryBooks, Color.Success, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
+            }
+        }
+
+        if (VolumeState.CurrentUserStatus.IsInWishlist)
+        {
+            availableActions.Add(new AvailableAction("RemoveFromWishlist", Icons.Material.Filled.RemoveShoppingCart, Color.Warning, () => ToggleWishList()));
+        }
+        else
+        {
+            availableActions.Add(new AvailableAction("AddToWishlist", Icons.Material.Filled.AddShoppingCart, Color.Success, () => ToggleWishList()));
+        }
+    }
+
+    private async Task ToggleWishList()
+    {
+        try
+        {
+
+            var (userStatus, stats) = await VolumeService.ToggleWishlist(Volume.PublicId, await GetUserId());
+            VolumeState.UpdateBoth(userStatus, stats);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error toggling wishlist for PublicId: {PublicId}", Volume.PublicId);
+        }
+    }
+
+    private async Task ToggleLike(MouseEventArgs args)
+    {
+        try
+        {
+            var (userStatus, stats) = await VolumeService.ToggleLike(Volume.PublicId, await GetUserId());
+            VolumeState.UpdateBoth(userStatus, stats);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error toggling like for PublicId: {PublicId}", Volume.PublicId);
+        }
+    }
+
+
+
+    @inject IDialogService Dialog
+
+    private async Task OpenSetOwnershipDialog(VolumeStatus status)
+    {
+        var dialogOptions = new DialogOptions()
+        {
+            FullWidth = false,
+            Position = DialogPosition.Center,
+        };
+        var parameters = new DialogParameters
+        {
+            {   nameof(SetOwnershipDialog.Ownership),
+                new Ownership()
+                {
+                    Status = status,
+                    Date = DateTime.Now,
+                    Type = VolumeType.Physical
+                }
+            }
+        };
+        var dialog = await Dialog.ShowAsync<SetOwnershipDialog>(string.Empty, parameters, dialogOptions);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            try
+            {
+                var ownership = result.Data as Ownership;
+
+                if (ownership is null)
+                {
+                    throw new InvalidOperationException("Ownership data is null");
+                }
+
+                var (userStatus, stats) = await VolumeService.AddOwnershipAsync(Volume.PublicId, await GetUserId(), ownership);
+                VolumeState.UpdateBoth(userStatus, stats);
+            }
+            catch (Exception)
+            {
+                Logger.LogError("Error adding ownership for volume {PublicId}", Volume.PublicId);
+            }
+
+        }
+    }
+
+    private async Task ShowAddReadingDialog()
+    {
+        var dialogOptions = new DialogOptions()
+        {
+            FullWidth = false,
+            Position = DialogPosition.Center,
+        };
+        var parameters = new DialogParameters
+        {
+            {   nameof(AddReadingDialog.Reading),
+                new Reading()
+                {
+                    Rating = 0,
+                    StartedAt = DateTime.UtcNow
+                }
+            }
+        };
+        var dialog = await Dialog.ShowAsync<AddReadingDialog>(string.Empty, parameters, dialogOptions);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            try
+            {
+                var reading = result.Data as Reading;
+
+                if (reading is null)
+                {
+                    throw new InvalidOperationException("reading data is null");
+                }
+
+                var (userStatus, stats) = await VolumeService.AddReadingAsync(Volume.PublicId, await GetUserId(), reading);
+                VolumeState.UpdateBoth(userStatus, stats);
+            }
+            catch (Exception)
+            {
+                Logger.LogError("Error adding ownership for volume {PublicId}", Volume.PublicId);
+            }
+
+        }
+    }
+
+
+    private async Task LoadVolumeUserStatus()
+    {
+        try
+        {
+            var userStatus = await VolumeService.GetVolumeStatusInfo(Volume.PublicId, await GetUserId());
+            VolumeState.UpdateUserStatus(userStatus);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading volume user status for PublicId: {PublicId}", Volume.PublicId);
+        }
+    }
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthStateTask { get; set; }
+
+    private async Task<string> GetUserId()
+    {
+        var authState = await AuthStateTask;
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            throw new InvalidOperationException("User is not authenticated");
+        }
+        return userId;
+    }
+
+    private async Task<bool> IsUserAuthenticated()
+    {
+        if (AuthStateTask == null)
+            return false;
+
+        var authState = await AuthStateTask;
+        return authState.User?.Identity?.IsAuthenticated ?? false;
+    }
+}

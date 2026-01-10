@@ -19,6 +19,7 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Clear();
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+        _httpClient.Timeout = TimeSpan.FromMilliseconds(_options.RequestTimeout);
     }
     public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
@@ -34,7 +35,13 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
                 await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
                 {
                     Headless = true,
-                    Args = new[] { "--no-sandbox" },
+                    Args = new[]
+                    {
+                        "--disable-gpu",
+                        "--disable-dev-shm-usage",
+                        "--disable-setuid-sandbox",
+                        "--no-sandbox"
+                    }
                 });
 
                 await using var page = await browser.NewPageAsync();
@@ -50,7 +57,7 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
             }
             catch (Exception ex)
             {
-                await Task.Delay(1000, token);
+                await Task.Delay(_options.DelayBetweenRetries, token);
                 Console.WriteLine($"Error accessing {url}: {ex.Message}");
                 Console.WriteLine("retry");
                 retry += 1;

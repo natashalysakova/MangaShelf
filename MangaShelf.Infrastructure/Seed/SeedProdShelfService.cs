@@ -53,9 +53,11 @@ public class SeedProdShelfService : ISeedDataService
         {
             foreach (var id in notExisting)
             {
+                var visibleName = _identityContext.Users.SingleOrDefault(x => x.Id == id)?.UserName;
                 context.Users.Add(new User()
                 {
-                    IdentityUserId = id
+                    IdentityUserId = id,
+                    VisibleUsername = visibleName
                 });
             }
 

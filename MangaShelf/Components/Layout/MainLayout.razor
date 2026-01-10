@@ -1,6 +1,8 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Identity
+@inherits LayoutComponentBase
 @inject IUiLocalizationService Localizer
+@inject AuthenticationStateProvider AuthStateProvider
 
 @* Required *@
 <MudThemeProvider IsDarkMode="true" Theme="MangaShelfTheme" />
@@ -52,16 +54,51 @@
         _open = !_open;
     }
 
+    @code {
+    [Inject] private SignInManager<MangaIdentityUser> AuthService { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            var user = await AuthService.UserManager.GetUserAsync(AuthService.Context.User);
+            // A hard refresh or the user just navigated to the application for the first time
+            if (firstRender && user != null && !AuthService.Context.User.Identity!.IsAuthenticated)
+            {
+                var url = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).ToString();
+                if (url.Contains("/login"))
+                {
+                    return;
+                }
+
+                @* var restoredFromState = await AuthService.GetStateFromTokenAsync();
+                //The user lost their server side session, but still has a valid JWT
+                if (restoredFromState) *@
+                {
+                    NavigationManager.Refresh();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Authentication check failed: {ex.Message}");
+            // Don't let authentication checks crash the circuit
+        }
+    }
+
     MudTheme MangaShelfTheme = new MudTheme()
     {
         PaletteDark = new PaletteDark()
         {
-            Primary = Colors.DeepOrange.Darken2,
-            Secondary = Colors.Blue.Darken4,
-            Tertiary = Colors.Teal.Accent4,
-            TextPrimary = Colors.Blue.Lighten3,
-            ActionDefault = Colors.Blue.Lighten3,
-            Surface = "#30333c"
+            Primary = Colors.Indigo.Lighten1,
+            Secondary = Colors.DeepPurple.Accent3,
+            Tertiary = Colors.Purple.Accent2,
+            TextPrimary = Colors.BlueGray.Lighten4,
+            ActionDefault = Colors.Indigo.Lighten3,
+            Surface = "#1e1e2e",
+            Background = "#0f0f1a",
+            AppbarBackground = "#2d3561"
         },
         Typography = new Typography()
         {
@@ -71,4 +108,5 @@
             }
         }
     };
+}
 }

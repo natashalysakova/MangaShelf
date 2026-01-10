@@ -41,7 +41,7 @@ public class NashaIdeaParser : BaseParser
         var tag = document.QuerySelector("h1.product_title");
         var title = tag.InnerHtml;
 
-        return GetVolumeTitleFromDefaultTitle(title);  
+        return GetVolumeTitleFromDefaultTitle(title);
     }
 
     protected override int GetVolumeNumber(IDocument document)
@@ -127,13 +127,37 @@ public class NashaIdeaParser : BaseParser
         if (monthNumber == default)
             return null;
 
-        var year = DateTime.Today.Month > monthNumber.number ? DateTime.Today.Year + 1 : DateTime.Today.Year;
+        var year = TryToGetFromDate(text);
+        if (year == -1)
+        {
+            year = DateTime.Today.Month > monthNumber.number ? DateTime.Today.Year + 1 : DateTime.Today.Year;
+
+        }
 
         if (day == 0)
             day = DateTime.DaysInMonth(year, monthNumber.number);
 
 
         return DateTime.SpecifyKind(new DateTime(year, monthNumber.number, day), DateTimeKind.Local);
+    }
+
+    private int TryToGetFromDate(string text)
+    {
+        var split = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        var potentialYear = split.Where(x => x.Length == 4);
+        if(potentialYear.Any())
+        {
+            foreach (var item in potentialYear)
+            {
+                if(int.TryParse(item, out var year))
+                {
+                    return year;
+                }
+            }
+        }
+
+        return -1;
     }
 
     private bool StartsWithMonth(string text)
@@ -160,21 +184,28 @@ public class NashaIdeaParser : BaseParser
 
     protected override string GetISBN(IDocument document)
     {
-        var node = document.QuerySelector(".book-product-table-ibn");
-        var text = node.TextContent.Substring(node.TextContent.IndexOf(":") + 1).Trim();
-        return text;
+        // var node = document.QuerySelector(".book-product-table-ibn");
+        // var text = node?.TextContent.Substring(node.TextContent.IndexOf(":") + 1).Trim();
+        // return text;
+        return string.Empty;
     }
 
     protected override int GetTotalVolumes(IDocument document)
     {
-        var nodes = document.QuerySelectorAll(".book-product-table-data-weight");
-
-
-        var oldNode = nodes.SingleOrDefault(x => x.TextContent.Contains("Статус серії"));
-        if (oldNode == null)
+        var node = document.QuerySelector(".book-product-table-data-status");
+        if (node is null)
             return -1;
 
-        var text = oldNode.TextContent;
+        if (node.TextContent.Contains("Серія завершена"))
+        {
+            var volumeNumberNode = document.QuerySelector(".book-product-table-data-volumes > span");
+            if (volumeNumberNode != null && int.TryParse(volumeNumberNode.TextContent.Trim(), out var volumeNumber))
+            {
+                return volumeNumber;
+            }
+        }
+
+        var text = node.TextContent;
 
         if (text.Contains("Однотомник") || text.Contains("Однотомна"))
         {
@@ -189,21 +220,6 @@ public class NashaIdeaParser : BaseParser
         if (text.Contains("Серія з "))
         {
             return GetFromStatus(text, "Серія з ");
-        }
-
-        var volumeNode = nodes.SingleOrDefault(x => x.TextContent.Contains("Кількість томів"));
-        if (volumeNode != null)
-        {
-            var volumeText = volumeNode.TextContent;
-            var index = volumeText.IndexOf(":");
-            if (index != -1)
-            {
-                var numberPart = volumeText.Substring(index + 1).Trim();
-                if (int.TryParse(numberPart, out var volumeCount))
-                {
-                    return volumeCount;
-                }
-            }
         }
 
         return -1;
@@ -238,7 +254,7 @@ public class NashaIdeaParser : BaseParser
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
-        var node = document.QuerySelectorAll(".book-product-table-data-weight");
+        var node = document.QuerySelectorAll(".book-product-table-data-status");
         foreach (var item in node)
         {
             if (item.TextContent.Contains("Статус серії:"))

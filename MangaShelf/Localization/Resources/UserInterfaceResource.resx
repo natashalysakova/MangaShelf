@@ -118,15 +118,32 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Catalog" xml:space="preserve">
-    <value>Каталог</value>
+    <value />
   </data>
   <data name="HomePage" xml:space="preserve">
-    <value>Головна сторінка</value>
+    <value />
   </data>
   <data name="MangaShelf" xml:space="preserve">
-    <value>Поличка манги</value>
+    <value />
   </data>
   <data name="MyShelf" xml:space="preserve">
-    <value>Моя манга</value>
+    <value />
   </data>
+  <data name="Login" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ThisIsPreorderVolume" xml:space="preserve">
+    <value>ThisIsPreorderVolume</value>
+  </data>
+  <data name="NoReviews" xml:space="preserve">
+    <value>NoReviews</value>
+  </data>
+  <!-- OrderBy Enum - English values -->
+  <!-- Admin Panel -->
 </root>

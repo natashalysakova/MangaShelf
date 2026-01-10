@@ -18,6 +18,19 @@ public class AuthorService : IAuthorService
         _dbContextFactory = dbContextFactory;
     }
 
+    public async Task<IEnumerable<string>> GetAllNamesAsync(CancellationToken stoppingToken)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        _logger.LogInformation("Getting all author names.{0}", context.ContextId);
+
+        var names = await context.Authors
+            .AsNoTracking()
+            .Select(a => a.Name)
+            .ToListAsync(stoppingToken);
+
+        return names;
+    }
+
     public async Task<IEnumerable<AuthorDto>> GetByNamesAsync(IEnumerable<string> authors, CancellationToken token = default)
     {
         using var context = _dbContextFactory.CreateDbContext();

@@ -10,6 +10,15 @@ public class AuthorDomainService : BaseDomainService<Author>, IAuthorDomainServi
     {
     }
 
+    public async Task<IEnumerable<string>> GetAllNames(CancellationToken stoppingToken)
+    {
+        var names = await _context.Authors
+            .AsNoTracking()
+            .Select(a => a.Name)
+            .ToListAsync(stoppingToken);
+        return names;
+    }
+
     public Author? GetByName(string name)
     {
         return _context.Authors.FirstOrDefault(x => x.Name == name);

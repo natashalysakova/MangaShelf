@@ -10,6 +10,14 @@ public class PublisherDomainService : BaseDomainService<Publisher>, IPublisherDo
     {
     }
 
+    public async Task<IEnumerable<string>> GetAllNamesAsync(CancellationToken stoppingToken)
+    {
+        return await _context.Publishers
+            .AsNoTracking()
+            .OrderBy(p => p.Name)
+            .Select(p => p.Name).ToListAsync(stoppingToken);
+    }
+
     public async Task<Publisher?> GetByNameAsync(string name, CancellationToken token = default)
     {
         return await _context.Publishers.FirstOrDefaultAsync(x => x.Name == name, token);

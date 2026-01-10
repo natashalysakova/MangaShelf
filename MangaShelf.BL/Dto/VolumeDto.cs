@@ -1,10 +1,13 @@
-﻿using MangaShelf.DAL.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.BL.Dto;
 
+[ExcludeFromCodeCoverage]   
 public class VolumeDto
 {
     public Guid Id { get; set; }
+    public required string PublicId { get; set; }
 
     public required string Title { get; set; }
     public int Number { get; set; }
@@ -28,5 +31,5 @@ public class VolumeDto
     public bool IsPublishedOnSite { get; set; }
     public VolumeType Type { get; set; }
 
-    public SeriesSimpleDto? Series { get; set; }
+    public SeriesSimpleDto Series { get; set; }
 }

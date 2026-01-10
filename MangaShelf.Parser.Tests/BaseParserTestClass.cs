@@ -21,11 +21,17 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
             {
                 {"HtmlDownloaders:MaxRetries", "5"}
             })
+            .AddJsonFile("appsettings.json")
             .Build();
 
         var services = new ServiceCollection();
 
         services.AddSingleton<IConfiguration>(configuration);
+
+        services
+            .Configure<HtmlDownloadOptions>(
+                configuration
+                .GetSection(HtmlDownloadOptions.SectionName));
 
         services.AddLogging(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
@@ -33,6 +39,7 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
         services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
         services.AddKeyedScoped<IHtmlDownloader, BasicHtmlDownloader>(HtmlDownloaderKeys.Basic);
         services.AddKeyedScoped<IHtmlDownloader, AdvancedHtmlDownloader>(HtmlDownloaderKeys.Advanced);
+        services.AddKeyedScoped<IHtmlDownloader, MalopusHtmlDownloader>(HtmlDownloaderKeys.Malopus);
 
         services.AddScoped<T>();
 

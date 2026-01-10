@@ -11,7 +11,11 @@
             </CardHeaderContent>
         </MudCardHeader> *@
         <div class="image-container">
-            <img class="card-image" src="@Volume.CoverImageUrl" alt="@Volume.SeriesName" />
+        
+            <FallbackImage 
+                ImageUrl="@Volume.CoverImageUrlSmall" 
+                Class="card-image" 
+                Alt="@Volume.SeriesName" />
         </div>
 
         @*         <MudAvatar Class="card-avatar m-2">@Volume.VolumeNumber</MudAvatar>

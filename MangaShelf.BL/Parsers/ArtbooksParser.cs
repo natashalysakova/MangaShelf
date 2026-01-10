@@ -160,7 +160,8 @@ public class ArtbooksParser : BaseParser
 
     protected override string? GetDescription(IDocument document)
     {
-        var descNode = document.QuerySelector(".description");
-        return descNode?.TextContent;
+        var descNode = document.QuerySelector(".description__text");
+        var text = descNode?.TextContent.Trim();
+        return text;
     }
 }

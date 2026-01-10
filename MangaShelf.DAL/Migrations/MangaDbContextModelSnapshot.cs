@@ -17,6 +17,7 @@ namespace MangaShelf.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseCollation("utf8mb4_unicode_ci")
                 .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
@@ -34,7 +35,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("AuthorSeries", (string)null);
+                    b.ToTable("AuthorSeries");
                 });
 
             modelBuilder.Entity("AuthorVolume", b =>
@@ -49,7 +50,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("VolumesId");
 
-                    b.ToTable("AuthorVolume", (string)null);
+                    b.ToTable("AuthorVolume");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Author", b =>
@@ -85,7 +86,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Authors", (string)null);
+                    b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Country", b =>
@@ -129,7 +130,51 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Countries", (string)null);
+                    b.ToTable("Countries");
+                });
+
+            modelBuilder.Entity("MangaShelf.DAL.Models.Likes", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("VolumeId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VolumeId");
+
+                    b.HasIndex("UserId", "VolumeId")
+                        .IsUnique();
+
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Ownership", b =>
@@ -178,7 +223,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("VolumeId");
 
-                    b.ToTable("Ownership", (string)null);
+                    b.ToTable("Ownership");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Publisher", b =>
@@ -220,7 +265,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Publishers", (string)null);
+                    b.ToTable("Publishers");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Reading", b =>
@@ -275,7 +320,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("VolumeId");
 
-                    b.ToTable("Reading", (string)null);
+                    b.ToTable("Reading");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Series", b =>
@@ -310,6 +355,9 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<string>("OriginalName")
                         .HasColumnType("longtext");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("char(36)");
+
                     b.Property<Guid>("PublisherId")
                         .HasColumnType("char(36)");
 
@@ -336,7 +384,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("Series", (string)null);
+                    b.ToTable("Series");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.User", b =>
@@ -373,7 +421,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
@@ -389,6 +437,9 @@ namespace MangaShelf.DAL.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("CoverImageUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CoverImageUrlSmall")
                         .HasColumnType("longtext");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -422,8 +473,14 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<bool>("OneShot")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("OriginalCoverUrl")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTimeOffset?>("PreorderStart")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("PurchaseUrl")
                         .HasColumnType("longtext");
@@ -454,7 +511,7 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasIndex("SeriesId");
 
-                    b.ToTable("Volumes", (string)null);
+                    b.ToTable("Volumes");
                 });
 
             modelBuilder.Entity("AuthorSeries", b =>
@@ -485,6 +542,25 @@ namespace MangaShelf.DAL.Migrations
                         .HasForeignKey("VolumesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MangaShelf.DAL.Models.Likes", b =>
+                {
+                    b.HasOne("MangaShelf.DAL.Models.User", "User")
+                        .WithMany("Likes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MangaShelf.DAL.Models.Volume", "Volume")
+                        .WithMany("Likes")
+                        .HasForeignKey("VolumeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Volume");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Ownership", b =>
@@ -575,6 +651,8 @@ namespace MangaShelf.DAL.Migrations
 
             modelBuilder.Entity("MangaShelf.DAL.Models.User", b =>
                 {
+                    b.Navigation("Likes");
+
                     b.Navigation("OwnedVolumes");
 
                     b.Navigation("Readings");
@@ -582,6 +660,8 @@ namespace MangaShelf.DAL.Migrations
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
                 {
+                    b.Navigation("Likes");
+
                     b.Navigation("Owners");
 
                     b.Navigation("Readers");

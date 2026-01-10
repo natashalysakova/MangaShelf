@@ -10,6 +10,11 @@ public class SeriesDomainService : BaseDomainService<Series>, ISeriesDomainServi
     {
     }
 
+    public async Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken)
+    {
+        return await _context.Series.Select(x=>x.Title).ToListAsync(stoppingToken);
+    }
+
     public async Task<Series?> GetByTitleAsync(string series, CancellationToken token = default)
     {
         return await _context.Series
