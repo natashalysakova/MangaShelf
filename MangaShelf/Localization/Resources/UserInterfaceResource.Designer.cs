@@ -196,6 +196,15 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Is Deleted.
+        /// </summary>
+        public static string IsDeleted {
+            get {
+                return ResourceManager.GetString("IsDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to .
         /// </summary>
         public static string Login {
@@ -439,7 +448,7 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Series Title.
         /// </summary>
         public static string SeriesTitle {
             get {

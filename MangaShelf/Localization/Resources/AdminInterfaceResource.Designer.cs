@@ -68,5 +68,14 @@ namespace MangaShelf.Localization.Resources {
                 return ResourceManager.GetString("Admin", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Is Deleted.
+        /// </summary>
+        public static string IsDeleted {
+            get {
+                return ResourceManager.GetString("IsDeleted", resourceCulture);
+            }
+        }
     }
 }

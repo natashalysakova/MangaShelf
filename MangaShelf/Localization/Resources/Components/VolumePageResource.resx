@@ -123,4 +123,160 @@
   <data name="Status" xml:space="preserve">
     <value>Status</value>
   </data>
+	<!-- User Actions & Dialogs -->
+	<data name="ConfirmDelivery" xml:space="preserve">
+      <value>Confirm Delivery</value>
+    </data>
+	    <data name="LoginToSeeData" xml:space="preserve">
+      <value>Log in to see your data</value>
+    </data>
+	    <data name="Register" xml:space="preserve">
+      <value>Register</value>
+    </data>
+	    <data name="ReaderData" xml:space="preserve">
+      <value>Reader Data</value>
+    </data>
+	    <data name="Cancel" xml:space="preserve">
+      <value>Cancel</value>
+    </data>
+	    <data name="Save" xml:space="preserve">
+      <value>Save</value>
+    </data>
+	    <data name="DateRequired" xml:space="preserve">
+      <value>Date is required</value>
+    </data>
+	    <data name="SetPreorder" xml:space="preserve">
+      <value>Set Preorder</value>
+    </data>
+	    <data name="SetGone" xml:space="preserve">
+      <value>Mark as Gone</value>
+    </data>
+	    <data name="SetOwn" xml:space="preserve">
+      <value>Add to Library</value>
+    </data>
+	    <data name="RemoveFromWishlist" xml:space="preserve">
+      <value>Remove from Wishlist</value>
+    </data>
+	    <data name="AddToWishlist" xml:space="preserve">
+      <value>Add to Wishlist</value>
+    </data>
+
+	    <!-- Statistics & States -->
+	    <data name="Liked" xml:space="preserve">
+      <value>Liked</value>
+    </data>
+	    <data name="Preordered" xml:space="preserve">
+      <value>Preordered</value>
+    </data>
+	    <data name="Wishlisted" xml:space="preserve">
+      <value>Wishlisted</value>
+    </data>
+	    <data name="InLibrary" xml:space="preserve">
+      <value>In Library</value>
+    </data>
+	    <data name="Reading" xml:space="preserve">
+      <value>Reading</value>
+    </data>
+	    <data name="Finished" xml:space="preserve">
+      <value>Finished</value>
+    </data>
+
+	    <!-- Volume Ownership Status Enum (VolumeStatus) -->
+	    <data name="Wishlist" xml:space="preserve">
+      <value>Wishlist</value>
+    </data>
+	    <data name="Preorder" xml:space="preserve">
+      <value>Preorder</value>
+    </data>
+	    <data name="Own" xml:space="preserve">
+      <value>Own</value>
+    </data>
+	    <data name="Gone" xml:space="preserve">
+      <value>Gone</value>
+    </data>
+	    <data name="None" xml:space="preserve">
+      <value>None</value>
+    </data>
+
+	    <!-- Reading Status Enum (ReadingStatus) -->
+	    <data name="PlanToRead" xml:space="preserve">
+      <value>Plan to Read</value>
+    </data>
+	    <data name="OnHold" xml:space="preserve">
+      <value>On Hold</value>
+    </data>
+	    <data name="Dropped" xml:space="preserve">
+      <value>Dropped</value>
+    </data>
+	    <data name="Completed" xml:space="preserve">
+      <value>Completed</value>
+    </data>
+
+	    <!-- Volume Type Enum (VolumeType) -->
+	    <data name="Physical" xml:space="preserve">
+      <value>Physical</value>
+    </data>
+	    <data name="Digital" xml:space="preserve">
+      <value>Digital</value>
+    </data>
+
+	    <!-- Volume Info Fields -->
+	    <data name="Author" xml:space="preserve">
+      <value>Author</value>
+    </data>
+	    <data name="Publisher" xml:space="preserve">
+      <value>Publisher</value>
+    </data>
+	    <data name="ISBN" xml:space="preserve">
+      <value>ISBN</value>
+    </data>
+	    <data name="Age" xml:space="preserve">
+      <value>Age Rating</value>
+    </data>
+	    <data name="VolumeNumber" xml:space="preserve">
+      <value>Volume Number</value>
+    </data>
+	    <data name="TotalVolumes" xml:space="preserve">
+      <value>Total Volumes</value>
+    </data>
+	    <data name="PreorderStarted" xml:space="preserve">
+      <value>Preorder Started</value>
+    </data>
+	    <data name="Released" xml:space="preserve">
+      <value>Released</value>
+    </data>
+
+	    <!-- Series Status Enum (SeriesStatus) -->
+	    <data name="Unknown" xml:space="preserve">
+      <value>Unknown</value>
+    </data>
+	    <data name="Ongoing" xml:space="preserve">
+      <value>Ongoing</value>
+    </data>
+	    <data name="Hiatus" xml:space="preserve">
+      <value>Hiatus</value>
+    </data>
+	    <data name="Cancelled" xml:space="preserve">
+      <value>Cancelled</value>
+    </data>
+	    <data name="OneShot" xml:space="preserve">
+      <value>One Shot</value>
+    </data>
+
+	    <!-- Other -->
+	    <data name="MoreInSeries" xml:space="preserve">
+      <value>More in Series</value>
+    </data>
+	    <data name="Reviews" xml:space="preserve">
+      <value>Reviews</value>
+    </data>
+	    <data name="NoReviews" xml:space="preserve">
+      <value>No reviews yet</value>
+    </data>
+	    <data name="ThisIsPreorderVolume" xml:space="preserve">
+      <value>This is a preorder volume. Expected release date:</value>
+    </data>
+	    <data name="Login" xml:space="preserve">
+      <value>Login</value>
+    </data>
 </root>

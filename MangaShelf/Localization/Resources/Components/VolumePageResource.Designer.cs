@@ -61,6 +61,231 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add to Wishlist.
+        /// </summary>
+        public static string AddToWishlist {
+            get {
+                return ResourceManager.GetString("AddToWishlist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Age Rating.
+        /// </summary>
+        public static string Age {
+            get {
+                return ResourceManager.GetString("Age", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Author.
+        /// </summary>
+        public static string Author {
+            get {
+                return ResourceManager.GetString("Author", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancelled.
+        /// </summary>
+        public static string Cancelled {
+            get {
+                return ResourceManager.GetString("Cancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Completed.
+        /// </summary>
+        public static string Completed {
+            get {
+                return ResourceManager.GetString("Completed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm Delivery.
+        /// </summary>
+        public static string ConfirmDelivery {
+            get {
+                return ResourceManager.GetString("ConfirmDelivery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date is required.
+        /// </summary>
+        public static string DateRequired {
+            get {
+                return ResourceManager.GetString("DateRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Digital.
+        /// </summary>
+        public static string Digital {
+            get {
+                return ResourceManager.GetString("Digital", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dropped.
+        /// </summary>
+        public static string Dropped {
+            get {
+                return ResourceManager.GetString("Dropped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Finished.
+        /// </summary>
+        public static string Finished {
+            get {
+                return ResourceManager.GetString("Finished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gone.
+        /// </summary>
+        public static string Gone {
+            get {
+                return ResourceManager.GetString("Gone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hiatus.
+        /// </summary>
+        public static string Hiatus {
+            get {
+                return ResourceManager.GetString("Hiatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In Library.
+        /// </summary>
+        public static string InLibrary {
+            get {
+                return ResourceManager.GetString("InLibrary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ISBN.
+        /// </summary>
+        public static string ISBN {
+            get {
+                return ResourceManager.GetString("ISBN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Liked.
+        /// </summary>
+        public static string Liked {
+            get {
+                return ResourceManager.GetString("Liked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        public static string Login {
+            get {
+                return ResourceManager.GetString("Login", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log in to see your data.
+        /// </summary>
+        public static string LoginToSeeData {
+            get {
+                return ResourceManager.GetString("LoginToSeeData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More in Series.
+        /// </summary>
+        public static string MoreInSeries {
+            get {
+                return ResourceManager.GetString("MoreInSeries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to None.
+        /// </summary>
+        public static string None {
+            get {
+                return ResourceManager.GetString("None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No reviews yet.
+        /// </summary>
+        public static string NoReviews {
+            get {
+                return ResourceManager.GetString("NoReviews", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to One Shot.
+        /// </summary>
+        public static string OneShot {
+            get {
+                return ResourceManager.GetString("OneShot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ongoing.
+        /// </summary>
+        public static string Ongoing {
+            get {
+                return ResourceManager.GetString("Ongoing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to On Hold.
+        /// </summary>
+        public static string OnHold {
+            get {
+                return ResourceManager.GetString("OnHold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Own.
+        /// </summary>
+        public static string Own {
+            get {
+                return ResourceManager.GetString("Own", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to OwnershipData.
         /// </summary>
         public static string OwnershipData {
@@ -70,11 +295,209 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Physical.
+        /// </summary>
+        public static string Physical {
+            get {
+                return ResourceManager.GetString("Physical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Plan to Read.
+        /// </summary>
+        public static string PlanToRead {
+            get {
+                return ResourceManager.GetString("PlanToRead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preorder.
+        /// </summary>
+        public static string Preorder {
+            get {
+                return ResourceManager.GetString("Preorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preordered.
+        /// </summary>
+        public static string Preordered {
+            get {
+                return ResourceManager.GetString("Preordered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preorder Started.
+        /// </summary>
+        public static string PreorderStarted {
+            get {
+                return ResourceManager.GetString("PreorderStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publisher.
+        /// </summary>
+        public static string Publisher {
+            get {
+                return ResourceManager.GetString("Publisher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reader Data.
+        /// </summary>
+        public static string ReaderData {
+            get {
+                return ResourceManager.GetString("ReaderData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reading.
+        /// </summary>
+        public static string Reading {
+            get {
+                return ResourceManager.GetString("Reading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Register.
+        /// </summary>
+        public static string Register {
+            get {
+                return ResourceManager.GetString("Register", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Released.
+        /// </summary>
+        public static string Released {
+            get {
+                return ResourceManager.GetString("Released", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove from Wishlist.
+        /// </summary>
+        public static string RemoveFromWishlist {
+            get {
+                return ResourceManager.GetString("RemoveFromWishlist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reviews.
+        /// </summary>
+        public static string Reviews {
+            get {
+                return ResourceManager.GetString("Reviews", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string Save {
+            get {
+                return ResourceManager.GetString("Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark as Gone.
+        /// </summary>
+        public static string SetGone {
+            get {
+                return ResourceManager.GetString("SetGone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add to Library.
+        /// </summary>
+        public static string SetOwn {
+            get {
+                return ResourceManager.GetString("SetOwn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set Preorder.
+        /// </summary>
+        public static string SetPreorder {
+            get {
+                return ResourceManager.GetString("SetPreorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Status.
         /// </summary>
         public static string Status {
             get {
                 return ResourceManager.GetString("Status", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is a preorder volume. Expected release date:.
+        /// </summary>
+        public static string ThisIsPreorderVolume {
+            get {
+                return ResourceManager.GetString("ThisIsPreorderVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total Volumes.
+        /// </summary>
+        public static string TotalVolumes {
+            get {
+                return ResourceManager.GetString("TotalVolumes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown.
+        /// </summary>
+        public static string Unknown {
+            get {
+                return ResourceManager.GetString("Unknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Volume Number.
+        /// </summary>
+        public static string VolumeNumber {
+            get {
+                return ResourceManager.GetString("VolumeNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wishlist.
+        /// </summary>
+        public static string Wishlist {
+            get {
+                return ResourceManager.GetString("Wishlist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wishlisted.
+        /// </summary>
+        public static string Wishlisted {
+            get {
+                return ResourceManager.GetString("Wishlisted", resourceCulture);
             }
         }
     }

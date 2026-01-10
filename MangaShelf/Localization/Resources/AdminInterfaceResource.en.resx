@@ -120,4 +120,7 @@
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
   </data>
+  <data name="IsDeleted" xml:space="preserve">
+    <value>Is Deleted</value>
+  </data>
 </root>
