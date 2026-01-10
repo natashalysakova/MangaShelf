@@ -40,7 +40,7 @@ services:
     container_name: mangashelf.db
     image: mysql:8.0
     ports:
-      - 3306:3306
+      - 3303:3306
     networks:
       - manga-network
     volumes:
