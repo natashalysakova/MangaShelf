@@ -7,10 +7,14 @@ name: Release images
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: 
+      - "main"
+      - "**docker**"
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: 
+      - "main"
+      - "**docker**"
     
 
 env:
@@ -87,7 +91,8 @@ jobs:
           images: ${{ matrix.image }}
           tags: |
             type=raw,value=${{ needs.build-and-test.outputs.NEW_TAG }}
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=dev,enable=${{ github.ref != 'refs/heads/main' }}
 
       - name: Build and push Docker image
         id: build-and-push
