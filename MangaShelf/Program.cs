@@ -100,7 +100,7 @@ public class Program
             app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
+        // app.UseHttpsRedirection(); // Disabled - HTTPS not required
 
         app.UseStaticFiles();
         app.MapStaticAssets();
