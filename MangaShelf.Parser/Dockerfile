@@ -41,9 +41,22 @@ ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/chromium"
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
+# Copy all csproj files first to leverage Docker layer caching for restore
 COPY ["MangaShelf.Parser/MangaShelf.Parser.csproj", "MangaShelf.Parser/"]
-RUN dotnet restore "./MangaShelf.Parser/MangaShelf.Parser.csproj"
+COPY ["MangaShelf.DAL/MangaShelf.DAL.csproj", "MangaShelf.DAL/"]
+COPY ["MangaShelf.Infrastructure/MangaShelf.Infrastructure.csproj", "MangaShelf.Infrastructure/"]
+COPY ["MangaShelf.BL/MangaShelf.BL.csproj", "MangaShelf.BL/"]
+COPY ["MangaShelf.DAL.Identity/MangaShelf.DAL.Identity.csproj", "MangaShelf.DAL.Identity/"]
+COPY ["MangaShelf.DAL.System/MangaShelf.DAL.System.csproj", "MangaShelf.DAL.System/"]
+COPY ["MangaShelf.Common/MangaShelf.Common.csproj", "MangaShelf.Common/"]
+
+# Restore dependencies - this layer will be cached unless csproj files change
+RUN dotnet restore "MangaShelf.Parser/MangaShelf.Parser.csproj"
+
+# Copy the rest of the source code
 COPY . .
+
 WORKDIR "/src/MangaShelf.Parser"
 RUN dotnet build "./MangaShelf.Parser.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

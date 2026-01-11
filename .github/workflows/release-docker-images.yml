@@ -7,10 +7,14 @@ name: Release images
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - "main"
+      - "*docker*"
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - "main"
+      - "*docker*"
     
 
 env:
@@ -87,7 +91,8 @@ jobs:
           images: ${{ matrix.image }}
           tags: |
             type=raw,value=${{ needs.build-and-test.outputs.NEW_TAG }}
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=dev,enable=${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/') }}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -100,7 +105,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
 
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
