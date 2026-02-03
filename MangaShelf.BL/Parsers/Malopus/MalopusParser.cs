@@ -305,7 +305,7 @@ public class MalopusParser : BaseParser
     protected override string? GetDescription(IDocument document)
     {
         // Get the description container
-        var descriptionDiv = document.QuerySelector(".product-description");
+        var descriptionDiv = document.QuerySelector(".product-description .text");
 
         if(descriptionDiv == null)
             return null;
@@ -317,6 +317,10 @@ public class MalopusParser : BaseParser
                 .Select(p => p.TextContent.Trim())
                 .Where(text => !string.IsNullOrWhiteSpace(text))
         );
+
+        if (description.Length == 0)
+            return descriptionDiv.TextContent.Trim();
+
         return description;
     }
 }
