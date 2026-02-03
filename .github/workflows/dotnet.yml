@@ -56,6 +56,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+          cache: true
+          cache-dependency-path: '${{ matrix.directory }}/**/*.csproj'
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -63,7 +65,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: build 
+    needs: version 
     strategy:
       fail-fast: false
       matrix:
@@ -83,6 +85,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+          cache: true
+          cache-dependency-path: '${{ matrix.directory }}/**/*.csproj'
       - name: Restore dependencies
         run: dotnet restore
       - name: Test
