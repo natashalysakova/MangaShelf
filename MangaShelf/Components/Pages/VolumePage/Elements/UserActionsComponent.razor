@@ -12,24 +12,32 @@
     <AuthorizeView>
         <Authorized>
             <MudStack Row Justify="Justify.Center">
-                <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsLiked"
-                                     Size="Size.Large"
-                                     @onclick="ToggleLike"
-                                     Icon="@CustomIcons.notFiledHeart" Color="@Color.Default"
-                                     ToggledIcon="@CustomIcons.filledHeart" ToggledColor="@Color.Error" />
-                <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["Like"]" >
 
-                <MudMenu Icon="@CustomIcons.bookshelf" Size="Size.Large"
-                         Color="Color.Warning"
-                         AriaLabel="Open user menu">
+                    <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsLiked"
+                                         Size="Size.Large"
+                                         @onclick="ToggleLike"
+                                         Icon="@CustomIcons.notFiledHeart" Color="@Color.Default"
+                                         ToggledIcon="@CustomIcons.filledHeart" ToggledColor="@Color.Error" />
+                </MudTooltip>
+                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["GoToWebsite"]">
+                    <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+                </MudTooltip>
 
-                    @foreach (var action in availableActions)
-                    {
-                        <MudMenuItem Icon="@action.Icon" IconColor="@action.Color" Label="@Localizer[action.Lable]" @onclick="@action.Handler" />
-                    }
-                </MudMenu>
+                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["LibraryMenu"]">
+                    <MudMenu Icon="@CustomIcons.bookshelf" Size="Size.Large"
+                             Color="Color.Warning"
+                             AriaLabel="Open user menu">
 
-                <MudIconButton OnClick="ShowAddReadingDialog" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
+                        @foreach (var action in availableActions)
+                        {
+                            <MudMenuItem Icon="@action.Icon" IconColor="@action.Color" Label="@Localizer[action.Lable]" @onclick="@action.Handler" />
+                        }
+                    </MudMenu>
+                </MudTooltip>
+                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["ReadingMenu"]">
+                    <MudIconButton OnClick="ShowAddReadingDialog" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
+                </MudTooltip>
 
             </MudStack>
         </Authorized>
@@ -64,9 +72,18 @@
             return;
         }
 
-        if (Volume.IsPreorder)
+        if (VolumeState.CurrentUserStatus.IsInWishlist)
         {
-            availableActions.Add(new AvailableAction("SetPreorder", Icons.Material.Filled.Schedule, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder)));
+            availableActions.Add(new AvailableAction("RemoveFromWishlist", Icons.Material.Filled.RemoveShoppingCart, Color.Warning, () => ToggleWishList()));
+        }
+        else
+        {
+            availableActions.Add(new AvailableAction("AddToWishlist", CustomIcons.wishlist, Color.Success, () => ToggleWishList()));
+        }
+
+        if (Volume.IsPreorder && VolumeState.CurrentUserStatus.CurrentOwnershipStatus != VolumeStatus.Preorder)
+        {
+            availableActions.Add(new AvailableAction("SetPreorder", CustomIcons.preorder, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder)));
         }
         else
         {
@@ -76,18 +93,11 @@
             }
             else
             {
-                availableActions.Add(new AvailableAction("SetOwn", Icons.Material.Filled.LibraryBooks, Color.Success, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
+                availableActions.Add(new AvailableAction("SetOwn", CustomIcons.bookshelf, Color.Success, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
             }
         }
 
-        if (VolumeState.CurrentUserStatus.IsInWishlist)
-        {
-            availableActions.Add(new AvailableAction("RemoveFromWishlist", Icons.Material.Filled.RemoveShoppingCart, Color.Warning, () => ToggleWishList()));
-        }
-        else
-        {
-            availableActions.Add(new AvailableAction("AddToWishlist", Icons.Material.Filled.AddShoppingCart, Color.Success, () => ToggleWishList()));
-        }
+
     }
 
     private async Task ToggleWishList()

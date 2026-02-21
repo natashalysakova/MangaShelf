@@ -78,6 +78,10 @@
                     Date = DateTime.Now,
                     Type = VolumeType.Physical
                 }
+            },
+            {
+                nameof(SetOwnershipDialog.IsDisabledStatus),
+                true
             }
         };
         var dialog = await Dialog.ShowAsync<SetOwnershipDialog>(string.Empty, parameters, dialogOptions);

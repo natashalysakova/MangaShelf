@@ -7,6 +7,7 @@ namespace MangaShelf.BL.Dto;
 [ExcludeFromCodeCoverage]
 public class UserVolumeStatusDto
 {
+    public required string VolumePublicId { get; set; }
     public bool IsLiked { get; set; }
     public bool IsInWishlist { get; set; }
 

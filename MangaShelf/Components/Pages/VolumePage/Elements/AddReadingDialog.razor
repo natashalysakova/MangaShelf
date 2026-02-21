@@ -5,6 +5,9 @@
 @inject IVolumePageLocalizationService Localizer
 
 <MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@Localizer["LogReading"]</MudText>
+    </TitleContent>
     <DialogContent>
         <MudSelect @bind-Value="@Reading.Status">
             @foreach (var status in Enum.GetValues(typeof(ReadingStatus)).Cast<ReadingStatus>())

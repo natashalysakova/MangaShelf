@@ -94,7 +94,6 @@ h1:focus {
         backface-visibility: hidden;
         z-index: 3 !important;
         box-shadow: 5px 5px 5px rgba(0,0,0,0.5) !important;
-        padding: 0;
         cursor: pointer;
     }
 
@@ -177,4 +176,16 @@ h1:focus {
 
 .paper-manga-panel {
     background-color: rgba(255, 255,255, 0.1) !important; 
+}
+
+.catalog-button-panel {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    width: auto;
+    transform: translate(-50%);
+    visibility: hidden;
+}
+.manga-card:hover .catalog-button-panel {
+    visibility: visible;
 }

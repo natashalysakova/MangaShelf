@@ -178,7 +178,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             .FirstOrDefault(v => v.PublicId == publicId);
 
 
-        return user.ToUserVolumeStatusDto();
+        return user.ToUserVolumeStatusDto(volumePublicId);
     }
 
 
@@ -462,6 +462,24 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return (
             await GetVolumeStatusInfo(reading.Volume.PublicId.ToString(), reading.User.IdentityUserId),
             await GetVolumeStats(reading.Volume.PublicId.ToString()));
+    }
+
+    public async Task<(IEnumerable<CardVolumeDto>, int, IEnumerable<UserVolumeStatusDto>)> GetAllVolumesAsyncWithUserInfo(string? userId, IFilterOptions? paginationOptions = null)
+    {
+        var volumes = await GetAllVolumesAsync(paginationOptions);
+
+        var userVolumeStatuses = new List<UserVolumeStatusDto>();
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            foreach (var volume in volumes.Item1)
+            {
+                var status = await GetVolumeStatusInfo(volume.PublicId, userId);
+                userVolumeStatuses.Add(status);
+            }
+        }
+
+        return (volumes.Item1, volumes.Item2, userVolumeStatuses);
     }
 }
 

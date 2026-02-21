@@ -16,4 +16,5 @@ public class CardVolumeDto
     public double AvgRating { get; set; }
 
     public bool CoverNeedAdjustment { get; set; }
+
 }

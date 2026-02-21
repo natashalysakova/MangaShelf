@@ -52,6 +52,21 @@ public class VolumeStateService : IVolumeStateService, IDisposable
         // If same volume, don't reload
         if (_currentVolumePublicId == volumePublicId)
         {
+            if (_currentUserId == userId)
+            {
+                return;
+            }
+
+            _currentUserId = userId;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _currentUserStatus = null;
+                NotifyUserStatusChanged();
+                return;
+            }
+
+            await LoadUserStatusAsync(volumePublicId, userId);
             return;
         }
 

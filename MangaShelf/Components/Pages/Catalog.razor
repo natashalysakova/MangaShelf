@@ -2,6 +2,7 @@
 @using MangaShelf.BL.Dto
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using MudBlazor.Services
+@using System.Security.Claims
 @rendermode InteractiveServer
 
 @inject IVolumeService VolumeService
@@ -68,7 +69,7 @@
         @foreach (var volume in volumes)
         {
             <MudItem xs="6" sm="4" md="3" lg="2">
-                <SmallCard Volume="@volume" ShowBadges="true" />
+                <SmallCard Volume="@volume" ShowBadges="true" ShowButtons="true" UserVolumeStatus="userStatuses.FirstOrDefault(x=>x.VolumePublicId == volume.PublicId)"/>
             </MudItem>
         }
     </MudGrid>
@@ -191,6 +192,7 @@
     Justify justification = Justify.FlexStart;
 
     IEnumerable<CardVolumeDto> volumes = Enumerable.Empty<CardVolumeDto>();
+    IEnumerable<UserVolumeStatusDto> userStatuses = Enumerable.Empty<UserVolumeStatusDto>();
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
@@ -226,7 +228,7 @@
             OrderIsAsc = this.OrderIsAsc
         };
 
-        (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
+        (volumes, _totalPages, userStatuses) = await VolumeService.GetAllVolumesAsyncWithUserInfo(await GetUserId(), paginationOption);
 
         await SaveToStorage();
 
@@ -355,4 +357,15 @@
         // Score decreases as position increases and as length difference increases
         return 0.5 - (0.01 * position) - (0.001 * (normalizedItem.Length - normalizedSearch.Length));
     }
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthStateTask { get; set; }
+
+    private async Task<string?> GetUserId()
+    {
+        var authState = await AuthStateTask;
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return userId;
+    }   
 }
