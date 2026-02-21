@@ -9,11 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using Xunit;
 
 namespace MangaShelf.Tests;
 
-[TestClass]
-public class ParserServiceTests
+public class ParserServiceTests : IDisposable
 {
     private Mock<ILogger<ParserService>> _loggerMock;
     private Mock<IServiceProvider> _serviceProviderMock;
@@ -25,8 +25,7 @@ public class ParserServiceTests
     private ParserService _parserService;
     private string _databaseName;
 
-    [TestInitialize]
-    public void Setup()
+    public ParserServiceTests()
     {
         _databaseName = $"TestDb_{Guid.NewGuid()}";
         
@@ -80,8 +79,7 @@ public class ParserServiceTests
         );
     }
 
-    [TestCleanup]
-    public void Cleanup()
+    public void Dispose()
     {
         using var context = _dbContextFactory.CreateDbContext();
         context.Database.EnsureDeleted();
@@ -115,7 +113,7 @@ public class ParserServiceTests
         await context.SaveChangesAsync();
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_NewVolume_CreatesVolume()
     {
         // Arrange
@@ -147,7 +145,7 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -155,30 +153,30 @@ public class ParserServiceTests
             .ThenInclude(s => s!.Authors)
             .FirstOrDefaultAsync(v => v.Title == "Volume 1");
 
-        Assert.IsNotNull(volume);
-        Assert.AreEqual("Volume 1", volume.Title);
-        Assert.AreEqual(1, volume.Number);
-        Assert.AreEqual("978-1234567890", volume.ISBN);
-        Assert.AreEqual(16, volume.AgeRestriction);
-        Assert.IsFalse(volume.IsPreorder);
-        Assert.AreEqual("This is a test volume description.", volume.Description);
-        Assert.AreEqual("https://example.com/volume1", volume.PurchaseUrl);
-        Assert.AreEqual("images/cover.jpg", volume.CoverImageUrl);
-        Assert.AreEqual("images/small/cover.jpg", volume.CoverImageUrlSmall);
+        Assert.NotNull(volume);
+        Assert.Equal("Volume 1", volume.Title);
+        Assert.Equal(1, volume.Number);
+        Assert.Equal("978-1234567890", volume.ISBN);
+        Assert.Equal(16, volume.AgeRestriction);
+        Assert.False(volume.IsPreorder);
+        Assert.Equal("This is a test volume description.", volume.Description);
+        Assert.Equal("https://example.com/volume1", volume.PurchaseUrl);
+        Assert.Equal("images/cover.jpg", volume.CoverImageUrl);
+        Assert.Equal("images/small/cover.jpg", volume.CoverImageUrlSmall);
 
-        Assert.IsNotNull(volume.Series);
-        Assert.AreEqual("Test Series", volume.Series.Title);
-        Assert.AreEqual("テストシリーズ", volume.Series.OriginalName);
-        Assert.AreEqual(SeriesStatus.Ongoing, volume.Series.Status);
-        Assert.AreEqual(5, volume.Series.TotalVolumes);
-        Assert.AreEqual(SeriesType.Manga, volume.Series.Type);
-        Assert.IsTrue(volume.Series.IsPublishedOnSite);
+        Assert.NotNull(volume.Series);
+        Assert.Equal("Test Series", volume.Series.Title);
+        Assert.Equal("テストシリーズ", volume.Series.OriginalName);
+        Assert.Equal(SeriesStatus.Ongoing, volume.Series.Status);
+        Assert.Equal(5, volume.Series.TotalVolumes);
+        Assert.Equal(SeriesType.Manga, volume.Series.Type);
+        Assert.True(volume.Series.IsPublishedOnSite);
 
-        Assert.AreEqual(1, volume.Series.Authors.Count);
-        Assert.AreEqual("Test Author", volume.Series.Authors.First().Name);
+        Assert.Equal(1, volume.Series.Authors.Count);
+        Assert.Equal("Test Author", volume.Series.Authors.First().Name);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_ExistingVolume_UpdatesVolume()
     {
         // Arrange - Create initial volume
@@ -236,22 +234,22 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Updated, result);
+        Assert.Equal(State.Updated, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .Include(v => v.Series)
             .FirstOrDefaultAsync(v => v.Title == "Volume 1");
 
-        Assert.IsNotNull(volume);
-        Assert.AreEqual("Updated description", volume.Description);
-        Assert.AreEqual("https://example.com/volume1-new", volume.PurchaseUrl);
-        Assert.AreEqual(18, volume.AgeRestriction);
-        Assert.AreEqual(SeriesStatus.Completed, volume.Series!.Status);
-        Assert.AreEqual(5, volume.Series.TotalVolumes);
+        Assert.NotNull(volume);
+        Assert.Equal("Updated description", volume.Description);
+        Assert.Equal("https://example.com/volume1-new", volume.PurchaseUrl);
+        Assert.Equal(18, volume.AgeRestriction);
+        Assert.Equal(SeriesStatus.Completed, volume.Series!.Status);
+        Assert.Equal(5, volume.Series.TotalVolumes);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_MultipleAuthors_CreatesAllAuthors()
     {
         // Arrange
@@ -283,23 +281,23 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
             .FirstOrDefaultAsync(s => s.Title == "Multi-Author Series");
 
-        Assert.IsNotNull(series);
+        Assert.NotNull(series);
         // Authors are split but not trimmed, so they have leading spaces
-        Assert.AreEqual(3, series.Authors.Count);
+        Assert.Equal(3, series.Authors.Count);
         var authorNames = series.Authors.Select(a => a.Name.Trim()).ToList();
-        Assert.IsTrue(authorNames.Contains("Author One"));
-        Assert.IsTrue(authorNames.Contains("Author Two"));
-        Assert.IsTrue(authorNames.Contains("Author Three"));
+        Assert.True(authorNames.Contains("Author One"));
+        Assert.True(authorNames.Contains("Author Two"));
+        Assert.True(authorNames.Contains("Author Three"));
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_PreorderVolume_SetsPreorderFields()
     {
         // Arrange
@@ -332,25 +330,25 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "Preorder Volume");
 
-        Assert.IsNotNull(volume);
-        Assert.IsTrue(volume.IsPreorder);
-        Assert.IsNotNull(volume.PreorderStart);
-        Assert.IsNotNull(volume.ReleaseDate);
+        Assert.NotNull(volume);
+        Assert.True(volume.IsPreorder);
+        Assert.NotNull(volume.PreorderStart);
+        Assert.NotNull(volume.ReleaseDate);
         // PreorderStart gets set to volumeInfo.PreorderStartDate (which is 5 days in the future)
-        Assert.AreEqual(preorderStart.Date, volume.PreorderStart!.Value.Date);
+        Assert.Equal(preorderStart.Date, volume.PreorderStart!.Value.Date);
         // ReleaseDate gets set to Now since Release is null and IsPreorder is true
         var now = DateTimeOffset.Now;
-        Assert.IsTrue(Math.Abs((volume.ReleaseDate!.Value - now).TotalSeconds) < 5, 
+        Assert.True(Math.Abs((volume.ReleaseDate!.Value - now).TotalSeconds) < 5, 
             $"ReleaseDate {volume.ReleaseDate.Value} should be close to now {now}");
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_OneShot_SetsOneShotFlag()
     {
         // Arrange
@@ -382,17 +380,17 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "One Shot");
 
-        Assert.IsNotNull(volume);
-        Assert.IsTrue(volume.OneShot);
+        Assert.NotNull(volume);
+        Assert.True(volume.OneShot);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_NoAgeRestrictions_DefaultsTo18()
     {
         // Arrange
@@ -424,17 +422,17 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "Adult Volume");
 
-        Assert.IsNotNull(volume);
-        Assert.AreEqual(18, volume.AgeRestriction);
+        Assert.NotNull(volume);
+        Assert.Equal(18, volume.AgeRestriction);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_ExistingPublisher_UsesExistingPublisher()
     {
         // Arrange - Create first volume with publisher
@@ -492,23 +490,23 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var publishers = await context.Publishers
             .Where(p => p.Name == "Shared Publisher")
             .ToListAsync();
 
-        Assert.AreEqual(1, publishers.Count);
+        Assert.Equal(1, publishers.Count);
 
         var seriesCount = await context.Series
             .Where(s => s.Publisher!.Name == "Shared Publisher")
             .CountAsync();
 
-        Assert.AreEqual(2, seriesCount);
+        Assert.Equal(2, seriesCount);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_FutureReleaseDate_UsesProvidedDate()
     {
         // Arrange
@@ -541,19 +539,19 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "Future Volume");
 
-        Assert.IsNotNull(volume);
-        Assert.IsNotNull(volume.ReleaseDate);
+        Assert.NotNull(volume);
+        Assert.NotNull(volume.ReleaseDate);
         // Future dates should not be used, current date should be set instead
-        Assert.IsTrue(volume.ReleaseDate!.Value.Date >= DateTime.Now.Date);
+        Assert.True(volume.ReleaseDate!.Value.Date >= DateTime.Now.Date);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_InvalidCountryCode_UsesDefaultUkraine()
     {
         // Arrange
@@ -585,7 +583,7 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -593,13 +591,13 @@ public class ParserServiceTests
             .ThenInclude(p => p!.Country)
             .FirstOrDefaultAsync(s => s.Title == "Test Series");
 
-        Assert.IsNotNull(series);
-        Assert.IsNotNull(series.Publisher);
-        Assert.IsNotNull(series.Publisher.Country);
-        Assert.AreEqual("uk", series.Publisher.Country.CountryCode);
+        Assert.NotNull(series);
+        Assert.NotNull(series.Publisher);
+        Assert.NotNull(series.Publisher.Country);
+        Assert.Equal("uk", series.Publisher.Country.CountryCode);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_ExistingSeries_AddNewVolumeToSeries()
     {
         // Arrange - Create first volume in series
@@ -657,23 +655,23 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var seriesCount = await context.Series
             .Where(s => s.Title == "Shared Series")
             .CountAsync();
 
-        Assert.AreEqual(1, seriesCount, "Should have only one series");
+        Assert.Equal(1, seriesCount);
 
         var volumes = await context.Volumes
             .Where(v => v.Series!.Title == "Shared Series")
             .ToListAsync();
 
-        Assert.AreEqual(2, volumes.Count, "Should have two volumes in the series");
+        Assert.Equal(2, volumes.Count);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_NullAuthors_CreatesSeriesWithoutAuthors()
     {
         // Arrange
@@ -705,18 +703,18 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
             .FirstOrDefaultAsync(s => s.Title == "No Author Series");
 
-        Assert.IsNotNull(series);
-        Assert.AreEqual(0, series.Authors.Count);
+        Assert.NotNull(series);
+        Assert.Equal(0, series.Authors.Count);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_NotPreorderWithPreorderStartDate_ReleaseDateIs30DaysLater()
     {
         // Arrange
@@ -749,19 +747,19 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "Released Volume");
 
-        Assert.IsNotNull(volume);
+        Assert.NotNull(volume);
         // ReleaseDate should be PreorderStartDate + 30 days
         var expectedReleaseDate = preorderStartDate.AddDays(30);
-        Assert.AreEqual(expectedReleaseDate.Date, volume.ReleaseDate!.Value.Date);
+        Assert.Equal(expectedReleaseDate.Date, volume.ReleaseDate!.Value.Date);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_SeriesStatusChange_UpdatesSeriesStatus()
     {
         // Arrange - Create initial volume with Ongoing status
@@ -819,17 +817,17 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Updated, result);
+        Assert.Equal(State.Updated, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .FirstOrDefaultAsync(s => s.Title == "Status Change Series");
 
-        Assert.IsNotNull(series);
-        Assert.AreEqual(SeriesStatus.Completed, series.Status);
+        Assert.NotNull(series);
+        Assert.Equal(SeriesStatus.Completed, series.Status);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_TotalVolumesIncrease_UpdatesTotalVolumes()
     {
         // Arrange - Create initial volume with 3 total volumes
@@ -887,17 +885,17 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Updated, result);
+        Assert.Equal(State.Updated, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .FirstOrDefaultAsync(s => s.Title == "Volume Count Series");
 
-        Assert.IsNotNull(series);
-        Assert.AreEqual(5, series.TotalVolumes);
+        Assert.NotNull(series);
+        Assert.Equal(5, series.TotalVolumes);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_TotalVolumesDecrease_DoesNotUpdateTotalVolumes()
     {
         // Arrange - Create initial volume with 5 total volumes
@@ -959,11 +957,11 @@ public class ParserServiceTests
         var series = await context.Series
             .FirstOrDefaultAsync(s => s.Title == "No Decrease Series");
 
-        Assert.IsNotNull(series);
-        Assert.AreEqual(5, series.TotalVolumes, "TotalVolumes should not decrease");
+        Assert.NotNull(series);
+        Assert.Equal(5, series.TotalVolumes);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_PreorderWithNullPreorderStart_SetsPreorderStartToNow()
     {
         // Arrange
@@ -999,20 +997,20 @@ public class ParserServiceTests
         var afterTest = DateTimeOffset.Now;
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "New Preorder");
 
-        Assert.IsNotNull(volume);
-        Assert.IsTrue(volume.IsPreorder);
-        Assert.IsNotNull(volume.PreorderStart);
-        Assert.IsTrue(volume.PreorderStart >= beforeTest && volume.PreorderStart <= afterTest,
+        Assert.NotNull(volume);
+        Assert.True(volume.IsPreorder);
+        Assert.NotNull(volume.PreorderStart);
+        Assert.True(volume.PreorderStart >= beforeTest && volume.PreorderStart <= afterTest,
             "PreorderStart should be set to approximately now");
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_NullDescription_DoesNotUpdateDescription()
     {
         // Arrange - Create initial volume with description
@@ -1074,11 +1072,11 @@ public class ParserServiceTests
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "Volume 1" && v.Series!.Title == "Description Series");
 
-        Assert.IsNotNull(volume);
-        Assert.AreEqual("Original description", volume.Description, "Description should not be overwritten with null");
+        Assert.NotNull(volume);
+        Assert.Equal("Original description", volume.Description);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_SameDescription_DoesNotTriggerUpdate()
     {
         // Arrange - Create initial volume with description
@@ -1136,10 +1134,10 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
 
         // Assert - Since nothing changed, should still be Updated (EF marks it as unchanged but method returns Updated)
-        Assert.AreEqual(State.Updated, result);
+        Assert.Equal(State.Updated, result);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_CanBePublishedFalse_SetsIsPublishedOnSiteFalse()
     {
         // Arrange
@@ -1171,19 +1169,19 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .Include(v => v.Series)
             .FirstOrDefaultAsync(v => v.Title == "Unpublished Volume");
 
-        Assert.IsNotNull(volume);
-        Assert.IsFalse(volume.IsPublishedOnSite);
-        Assert.IsFalse(volume.Series!.IsPublishedOnSite);
+        Assert.NotNull(volume);
+        Assert.False(volume.IsPublishedOnSite);
+        Assert.False(volume.Series!.IsPublishedOnSite);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_NewlineInAuthors_SplitsCorrectly()
     {
         // Arrange
@@ -1215,18 +1213,18 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
             .FirstOrDefaultAsync(s => s.Title == "Newline Authors Series");
 
-        Assert.IsNotNull(series);
-        Assert.AreEqual(3, series.Authors.Count);
+        Assert.NotNull(series);
+        Assert.Equal(3, series.Authors.Count);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_ZeroTotalVolumes_DoesNotUpdateTotalVolumes()
     {
         // Arrange - Create initial volume with total volumes
@@ -1288,11 +1286,11 @@ public class ParserServiceTests
         var series = await context.Series
             .FirstOrDefaultAsync(s => s.Title == "Zero Total Series");
 
-        Assert.IsNotNull(series);
-        Assert.AreEqual(5, series.TotalVolumes, "TotalVolumes should not be updated when new value is 0");
+        Assert.NotNull(series);
+        Assert.Equal(5, series.TotalVolumes);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task CreateOrUpdateFromParsedInfoAsync_DifferentSeriesType_SetsCorrectType()
     {
         // Arrange - Test with Manhwa type
@@ -1324,17 +1322,17 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .FirstOrDefaultAsync(s => s.Title == "Manhwa Series");
 
-        Assert.IsNotNull(series);
-        Assert.AreEqual(SeriesType.Manhwa, series.Type);
+        Assert.NotNull(series);
+        Assert.Equal(SeriesType.Manhwa, series.Type);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_ExistingVolumeWithCoverImages_SkipsImageDownload()
     {
         // Arrange - Create initial volume with cover images
@@ -1368,9 +1366,9 @@ public class ParserServiceTests
         using (var context = _dbContextFactory.CreateDbContext())
         {
             var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Cover Test Volume");
-            Assert.IsNotNull(vol);
-            Assert.AreEqual("images/cover.jpg", vol.CoverImageUrl);
-            Assert.AreEqual("images/small/cover.jpg", vol.CoverImageUrlSmall);
+            Assert.NotNull(vol);
+            Assert.Equal("images/cover.jpg", vol.CoverImageUrl);
+            Assert.Equal("images/small/cover.jpg", vol.CoverImageUrlSmall);
         }
 
         // Reset mock to track new calls
@@ -1404,14 +1402,14 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Updated, result);
+        Assert.Equal(State.Updated, result);
 
         // Verify image download was NOT called since both cover images already exist
         _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<Guid>()), Times.Never());
         _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Never());
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_ReleaseDateInPast_SetsReleaseDateToNow()
     {
         // Arrange - Release date in the past (not > DateTime.Now)
@@ -1448,20 +1446,20 @@ public class ParserServiceTests
         var afterTest = DateTimeOffset.Now;
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "Past Release Volume");
 
-        Assert.IsNotNull(volume);
+        Assert.NotNull(volume);
         // Since Release is in the past and PreorderStartDate is null, ReleaseDate should be set to Now
-        Assert.IsNotNull(volume.ReleaseDate);
-        Assert.IsTrue(volume.ReleaseDate >= beforeTest && volume.ReleaseDate <= afterTest,
+        Assert.NotNull(volume.ReleaseDate);
+        Assert.True(volume.ReleaseDate >= beforeTest && volume.ReleaseDate <= afterTest,
             "ReleaseDate should be set to approximately now when Release is in the past and no PreorderStartDate");
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_SameSeriesNumberDifferentTitle_CreatesNewVolume()
     {
         // Arrange - Create first volume
@@ -1519,17 +1517,17 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
 
         // Assert - Should create a new volume since title is different
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volumes = await context.Volumes
             .Where(v => v.Series!.Title == "Multi Title Series" && v.Number == 1)
             .ToListAsync();
 
-        Assert.AreEqual(2, volumes.Count, "Should have two volumes with same number but different titles");
+        Assert.Equal(2, volumes.Count);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_EmptyAuthorsString_CreatesSeriesWithoutAuthors()
     {
         // Arrange - Empty string (not null)
@@ -1561,19 +1559,19 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
             .FirstOrDefaultAsync(s => s.Title == "Empty Author Series");
 
-        Assert.IsNotNull(series);
+        Assert.NotNull(series);
         // Split with RemoveEmptyEntries should result in 0 authors
-        Assert.AreEqual(0, series.Authors.Count, "Empty string should result in no authors");
+        Assert.Equal(0, series.Authors.Count);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_AgeRestrictionsUpdateSameValue_DoesNotTriggerChange()
     {
         // Arrange - Create initial volume with age 16
@@ -1635,11 +1633,11 @@ public class ParserServiceTests
         var volume = await context.Volumes
             .FirstOrDefaultAsync(v => v.Title == "Age Test Volume");
 
-        Assert.IsNotNull(volume);
-        Assert.AreEqual(16, volume.AgeRestriction);
+        Assert.NotNull(volume);
+        Assert.Equal(16, volume.AgeRestriction);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_SeriesWithNullTotalVolumes_UpdatesWhenNewValueIsPositive()
     {
         // Arrange - Create volume with 0 total volumes (will be stored as 0 or null equivalent)
@@ -1673,8 +1671,8 @@ public class ParserServiceTests
         using (var context = _dbContextFactory.CreateDbContext())
         {
             var series = await context.Series.FirstOrDefaultAsync(s => s.Title == "Null Total Series");
-            Assert.IsNotNull(series);
-            Assert.AreEqual(0, series.TotalVolumes);
+            Assert.NotNull(series);
+            Assert.Equal(0, series.TotalVolumes);
         }
 
         // Act - Update with positive total volumes
@@ -1708,11 +1706,11 @@ public class ParserServiceTests
         using var context2 = _dbContextFactory.CreateDbContext();
         var updatedSeries = await context2.Series.FirstOrDefaultAsync(s => s.Title == "Null Total Series");
 
-        Assert.IsNotNull(updatedSeries);
-        Assert.AreEqual(10, updatedSeries.TotalVolumes, "TotalVolumes should be updated from 0 to 10");
+        Assert.NotNull(updatedSeries);
+        Assert.Equal(10, updatedSeries.TotalVolumes);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_NotPreorderWithExistingPreorderStart_KeepsPreorderStart()
     {
         // Arrange - Create preorder volume first
@@ -1747,8 +1745,8 @@ public class ParserServiceTests
         using (var context = _dbContextFactory.CreateDbContext())
         {
             var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Was Preorder Volume");
-            Assert.IsNotNull(vol);
-            Assert.IsNotNull(vol.PreorderStart);
+            Assert.NotNull(vol);
+            Assert.NotNull(vol.PreorderStart);
             originalPreorderStart = vol.PreorderStart;
         }
 
@@ -1780,18 +1778,18 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(releasedParsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Updated, result);
+        Assert.Equal(State.Updated, result);
 
         using var context2 = _dbContextFactory.CreateDbContext();
         var volume = await context2.Volumes.FirstOrDefaultAsync(v => v.Title == "Was Preorder Volume");
 
-        Assert.IsNotNull(volume);
-        Assert.IsFalse(volume.IsPreorder);
+        Assert.NotNull(volume);
+        Assert.False(volume.IsPreorder);
         // PreorderStart should still be set (code doesn't clear it)
-        Assert.IsNotNull(volume.PreorderStart);
+        Assert.NotNull(volume.PreorderStart);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_NewPublisher_SetsPublisherUrl()
     {
         // Arrange
@@ -1823,18 +1821,18 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var publisher = await context.Publishers
             .FirstOrDefaultAsync(p => p.Name == "Brand New Publisher");
 
-        Assert.IsNotNull(publisher);
+        Assert.NotNull(publisher);
         // Publisher URL should be set to the full URL from volumeInfo.Url
-        Assert.AreEqual("https://newpublisher.com/shop/volume1", publisher.Url);
+        Assert.Equal("https://newpublisher.com/shop/volume1", publisher.Url);
     }
 
-    [TestMethod]
+    [Fact]
     public async Task AiGen_ValidCountryCode_UsesCorrectCountry()
     {
         // Arrange - Use Japan country code which exists in test data
@@ -1866,7 +1864,7 @@ public class ParserServiceTests
         var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
 
         // Assert
-        Assert.AreEqual(State.Added, result);
+        Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -1874,11 +1872,11 @@ public class ParserServiceTests
             .ThenInclude(p => p!.Country)
             .FirstOrDefaultAsync(s => s.Title == "Japan Series");
 
-        Assert.IsNotNull(series);
-        Assert.IsNotNull(series.Publisher);
-        Assert.IsNotNull(series.Publisher.Country);
-        Assert.AreEqual("jp", series.Publisher.Country.CountryCode);
-        Assert.AreEqual("Japan", series.Publisher.Country.Name);
+        Assert.NotNull(series);
+        Assert.NotNull(series.Publisher);
+        Assert.NotNull(series.Publisher.Country);
+        Assert.Equal("jp", series.Publisher.Country.CountryCode);
+        Assert.Equal("Japan", series.Publisher.Country.Name);
     }
 }
 

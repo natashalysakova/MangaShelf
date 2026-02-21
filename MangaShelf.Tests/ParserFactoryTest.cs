@@ -1,13 +1,13 @@
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Parsers;
 using Moq;
+using Xunit;
 
 namespace MangaShelf.BL.Parsers
 {
-    [TestClass]
     public class ParserFactoryTest
     {
-        [TestMethod]
+        [Fact]
         public void GetParsers_ReturnsAllParsers()
         {
             // Arrange
@@ -20,10 +20,10 @@ namespace MangaShelf.BL.Parsers
             var result = factory.GetParsers();
 
             // Assert
-            CollectionAssert.AreEqual(parsers, result.ToList());
+            Assert.Equal(parsers, result.ToList());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetParserForUrl_WhenParserCanParse_ReturnsParser()
         {
             // Arrange
@@ -41,10 +41,10 @@ namespace MangaShelf.BL.Parsers
             var result = factory.GetParserForUrl(url);
 
             // Assert
-            Assert.AreEqual(parser2.Object, result);
+            Assert.Equal(parser2.Object, result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetParserForUrl_WhenNoParserCanParse_ReturnsNull()
         {
             // Arrange
@@ -62,10 +62,10 @@ namespace MangaShelf.BL.Parsers
             var result = factory.GetParserForUrl(url);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.Null(result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetParserForUrl_WithEmptyParsersList_ReturnsNull()
         {
             // Arrange
@@ -77,7 +77,7 @@ namespace MangaShelf.BL.Parsers
             var result = factory.GetParserForUrl(url);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.Null(result);
         }
     }
 }
