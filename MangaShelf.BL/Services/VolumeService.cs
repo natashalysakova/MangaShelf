@@ -8,6 +8,7 @@ using MangaShelf.DAL.DomainServices;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using static MangaShelf.DAL.Models.Ownership;
@@ -416,31 +417,24 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return volume.IsDeleted;
     }
 
-    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> AddReadingAsync(string volumePublicId, string userId, Reading reading)
+    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> AddEditReadingAsync(Reading reading)
     {
         using var context = dbContextFactory.CreateDbContext();
-        var publicId = Guid.Parse(volumePublicId);
         var volume = await context.Volumes
             .Include(x => x.Readers)
-            .FirstOrDefaultAsync(v => v.PublicId == publicId);
-        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId);
+            .FirstOrDefaultAsync(v => v.Id == reading.VolumeId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == reading.UserId.ToString());
 
-        var readingToAdd = new Reading
+        var avgRating = volume.Readers.Where(x => x.Rating != null && x.Rating.Value != 0);
+        if (avgRating.Any())
         {
-            UserId = user.Id,
-            VolumeId = volume.Id,
-            StartedAt = reading.StartedAt,
-            FinishedAt = reading.FinishedAt,
-            Status = reading.Status,
-            Rating = reading.Rating,
-            Review = reading.Review
-        };
+            volume.AvgRating = avgRating.Average(x => x.Rating!.Value);
+        }
 
-        volume.Readers.Add(readingToAdd);
-        volume.AvgRating = volume.Readers.Where(x => x.Rating != null && x.Rating.Value != 0).Average(x => x.Rating!.Value);
+        context.Entry(reading).State = reading.Id == Guid.Empty ? EntityState.Added : EntityState.Modified;
         await context.SaveChangesAsync();
 
-        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+        return (await GetVolumeStatusInfo(volume.PublicId.ToString(), user.IdentityUserId), await GetVolumeStats(volume.PublicId.ToString()));
     }
 
     public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveReadingAsync(Guid readingId)

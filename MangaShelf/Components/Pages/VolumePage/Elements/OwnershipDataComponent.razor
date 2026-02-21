@@ -24,7 +24,7 @@
                                           Label="@Localizer["Status"]" ReadOnly="true"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.RemoveRedEye"
-                                          Value="@VolumeState.CurrentUserStatus.CurrentOwnershipStatus.ToString()"></MudTextField>
+                                          Value="@Localizer[VolumeState.CurrentUserStatus.CurrentOwnershipStatus]"></MudTextField>
                             @if (VolumeState.CurrentUserStatus.Ownerships.Any(x => x.Status != VolumeStatus.None))
                             {
                                 <MudIconButton Variant="Variant.Text" OnClick="@(() => { _showTimeline = !_showTimeline; })" Color="@Color.Default" Icon="@Icons.Material.Filled.History"></MudIconButton>

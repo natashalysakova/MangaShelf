@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MangaShelf.Localization.Resources {
+namespace MangaShelf.Localization.Resources.Elements {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace MangaShelf.Localization.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class AdminInterfaceResource {
+    public class SmallCardResource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal AdminInterfaceResource() {
+        internal SmallCardResource() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace MangaShelf.Localization.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MangaShelf.Localization.Resources.AdminInterfaceResource", typeof(AdminInterfaceResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MangaShelf.Localization.Resources.Elements.SmallCardResource", typeof(SmallCardResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,101 +61,74 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Admin.
+        ///   Looks up a localized string similar to Added to library.
         /// </summary>
-        public static string Admin {
+        public static string AddedToLibrary {
             get {
-                return ResourceManager.GetString("Admin", resourceCulture);
+                return ResourceManager.GetString("AddedToLibrary", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Admin Panel.
+        ///   Looks up a localized string similar to Added to preorder.
         /// </summary>
-        public static string AdminPanel {
+        public static string AddedToPreorder {
             get {
-                return ResourceManager.GetString("AdminPanel", resourceCulture);
+                return ResourceManager.GetString("AddedToPreorder", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete.
+        ///   Looks up a localized string similar to Add to library.
         /// </summary>
-        public static string Delete {
+        public static string AddToLibrary {
             get {
-                return ResourceManager.GetString("Delete", resourceCulture);
+                return ResourceManager.GetString("AddToLibrary", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Edit.
+        ///   Looks up a localized string similar to An error occurred.
         /// </summary>
-        public static string Edit {
+        public static string Error {
             get {
-                return ResourceManager.GetString("Edit", resourceCulture);
+                return ResourceManager.GetString("Error", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Is Deleted.
+        ///   Looks up a localized string similar to Own.
         /// </summary>
-        public static string IsDeleted {
+        public static string Own {
             get {
-                return ResourceManager.GetString("IsDeleted", resourceCulture);
+                return ResourceManager.GetString("Own", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No.
+        ///   Looks up a localized string similar to Preorder.
         /// </summary>
-        public static string NoText {
+        public static string Preorder {
             get {
-                return ResourceManager.GetString("NoText", resourceCulture);
+                return ResourceManager.GetString("Preorder", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Publish.
+        ///   Looks up a localized string similar to Preorder arrived.
         /// </summary>
-        public static string Publish {
+        public static string PreorderArrived {
             get {
-                return ResourceManager.GetString("Publish", resourceCulture);
+                return ResourceManager.GetString("PreorderArrived", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure you want to remove this volume?.
+        ///   Looks up a localized string similar to Wishlist.
         /// </summary>
-        public static string RemoveVolumeDialogText {
+        public static string Wishlist {
             get {
-                return ResourceManager.GetString("RemoveVolumeDialogText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Remove volume.
-        /// </summary>
-        public static string RemoveVolumeDialogTitle {
-            get {
-                return ResourceManager.GetString("RemoveVolumeDialogTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unpublish.
-        /// </summary>
-        public static string UnPublish {
-            get {
-                return ResourceManager.GetString("UnPublish", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Yes.
-        /// </summary>
-        public static string YesText {
-            get {
-                return ResourceManager.GetString("YesText", resourceCulture);
+                return ResourceManager.GetString("Wishlist", resourceCulture);
             }
         }
     }

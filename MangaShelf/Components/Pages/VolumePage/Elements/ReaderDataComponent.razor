@@ -6,7 +6,7 @@
 @inject IDialogService Dialog
 @inject ILogger<ReaderDataComponent> Logger
 
-@if (VolumeState.CurrentUserStatus != null)
+@if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Readings.Any())
 {
 
     <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">

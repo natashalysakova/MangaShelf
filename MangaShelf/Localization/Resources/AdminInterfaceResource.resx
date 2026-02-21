@@ -123,4 +123,31 @@
   <data name="IsDeleted" xml:space="preserve">
     <value>Is Deleted</value>
   </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Admin Panel</value>
+  </data>
+  <data name="Publish" xml:space="preserve">
+    <value>Publish</value>
+  </data>
+  <data name="UnPublish" xml:space="preserve">
+    <value>Unpublish</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="RemoveVolumeDialogTitle" xml:space="preserve">
+    <value>Remove volume</value>
+  </data>
+  <data name="RemoveVolumeDialogText" xml:space="preserve">
+    <value>Are you sure you want to remove this volume?</value>
+  </data>
+  <data name="YesText" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="NoText" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
 </root>

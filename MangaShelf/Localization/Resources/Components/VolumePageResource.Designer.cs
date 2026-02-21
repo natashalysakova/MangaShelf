@@ -106,6 +106,15 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Change Volume Status.
+        /// </summary>
+        public static string ChangeVolumeStatus {
+            get {
+                return ResourceManager.GetString("ChangeVolumeStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Completed.
         /// </summary>
         public static string Completed {
@@ -169,6 +178,15 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Go to Website.
+        /// </summary>
+        public static string GoToWebsite {
+            get {
+                return ResourceManager.GetString("GoToWebsite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hiatus.
         /// </summary>
         public static string Hiatus {
@@ -196,6 +214,24 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Library Menu.
+        /// </summary>
+        public static string LibraryMenu {
+            get {
+                return ResourceManager.GetString("LibraryMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Like.
+        /// </summary>
+        public static string Like {
+            get {
+                return ResourceManager.GetString("Like", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Liked.
         /// </summary>
         public static string Liked {
@@ -219,6 +255,15 @@ namespace MangaShelf.Localization.Resources.Components {
         public static string LoginToSeeData {
             get {
                 return ResourceManager.GetString("LoginToSeeData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log Reading.
+        /// </summary>
+        public static string LogReading {
+            get {
+                return ResourceManager.GetString("LogReading", resourceCulture);
             }
         }
         
@@ -363,6 +408,15 @@ namespace MangaShelf.Localization.Resources.Components {
         public static string Reading {
             get {
                 return ResourceManager.GetString("Reading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reading Menu.
+        /// </summary>
+        public static string ReadingMenu {
+            get {
+                return ResourceManager.GetString("ReadingMenu", resourceCulture);
             }
         }
         

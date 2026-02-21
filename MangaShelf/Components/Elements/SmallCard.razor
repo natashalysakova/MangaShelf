@@ -5,6 +5,8 @@
 @inject IVolumeService VolumeService
 @inject ILogger<SmallCard> Logger
 @inject ISnackbar Snackbar
+@inject ISmallCardLocalizationService Localizer
+
 
 
 @if (Volume != null)
@@ -122,8 +124,6 @@ else
     [Inject]
     NavigationManager NavigationManager { get; set; }
 
-    [Inject]
-    IUiLocalizationService Localizer { get; set; }
 
     [CascadingParameter]
     public required Task<AuthenticationState> AuthStateTask { get; set; }

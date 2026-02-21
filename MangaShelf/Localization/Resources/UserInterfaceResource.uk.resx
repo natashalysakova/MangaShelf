@@ -144,5 +144,70 @@
   <data name="NoReviews" xml:space="preserve">
     <value>Немає відгуків для цього тому</value>
   </data>
-  <!-- Admin Panel -->
+  <data name="Main" xml:space="preserve">
+    <value>Головна</value>
+  </data>
+  <data name="Preorders" xml:space="preserve">
+    <value>Передзамовлення</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Адмін</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Фільтр</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Скинути</value>
+  </data>
+  <data name="ResultPerPage" xml:space="preserve">
+    <value>Результатів на сторінці</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Всі</value>
+  </data>
+  <data name="OrderBy" xml:space="preserve">
+    <value>Сортувати за</value>
+  </data>
+  <data name="SeriesTitle" xml:space="preserve">
+    <value>Назва серії</value>
+  </data>
+  <data name="ReleaseDate" xml:space="preserve">
+    <value>Дата виходу</value>
+  </data>
+  <data name="Popularity" xml:space="preserve">
+    <value>Популярність</value>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>Рейтинг</value>
+  </data>
+  <data name="PreorderDate" xml:space="preserve">
+    <value>Дата передзамовлення</value>
+  </data>
+  <data name="Preorder" xml:space="preserve">
+    <value>Передзамовлення</value>
+  </data>
+  <data name="Released" xml:space="preserve">
+    <value>Вийшло</value>
+  </data>
+  <data name="Wishlist" xml:space="preserve">
+    <value>Список бажань</value>
+  </data>
+  <data name="AddToLibrary" xml:space="preserve">
+    <value>Додати до бібліотеки</value>
+  </data>
+  <data name="PreorderArrived" xml:space="preserve">
+    <value>Передзамовлення прийшло</value>
+  </data>
+  <data name="Own" xml:space="preserve">
+    <value>У власності</value>
+  </data>
+  <data name="NewManga" xml:space="preserve">
+    <value>Нова манга</value>
+  </data>
+  <data name="NewPreorders" xml:space="preserve">
+    <value>Нові передзамовлення</value>
+  </data>
 </root>

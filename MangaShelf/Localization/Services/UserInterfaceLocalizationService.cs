@@ -2,6 +2,7 @@
 using MangaShelf.Localization.Interfaces;
 using MangaShelf.Localization.Resources;
 using MangaShelf.Localization.Resources.Components;
+using MangaShelf.Localization.Resources.Elements;
 using Microsoft.Extensions.Localization;
 
 namespace MangaShelf.Localization.Services;
@@ -23,9 +24,17 @@ internal class VolumePageLocalizationService : LocalizationService<VolumePageRes
     }
 }
 
-internal class AdminLocalizationService : LocalizationService<VolumePageResource>, IAdminLocalizationService
+internal class AdminLocalizationService : LocalizationService<AdminInterfaceResource>, IAdminLocalizationService
 {
-    public AdminLocalizationService(IStringLocalizer<VolumePageResource> localizer, ILogger<AdminLocalizationService> logger)
+    public AdminLocalizationService(IStringLocalizer<AdminInterfaceResource> localizer, ILogger<AdminLocalizationService> logger)
+        : base(localizer, logger)
+    {
+    }
+}
+
+internal class SmallCardLocalizationService : LocalizationService<SmallCardResource>, ISmallCardLocalizationService
+{
+    public SmallCardLocalizationService(IStringLocalizer<SmallCardResource> localizer, ILogger<SmallCardLocalizationService> logger)
         : base(localizer, logger)
     {
     }

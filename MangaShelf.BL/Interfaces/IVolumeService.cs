@@ -32,7 +32,7 @@ public interface IVolumeService : IService
     Task<(UserVolumeStatusDto, VolumeStatsDto)> AddOwnershipAsync(string volumePublicId, string userId, Ownership ownership);
     Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveOwnershipAsync(Guid ownershipId);
 
-    Task<(UserVolumeStatusDto, VolumeStatsDto)> AddReadingAsync(string volumePublicId, string userId, Reading reading);
+    Task<(UserVolumeStatusDto, VolumeStatsDto)> AddEditReadingAsync(Reading reading);
     Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveReadingAsync(Guid readingId);
 
 

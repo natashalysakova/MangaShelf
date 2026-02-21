@@ -15,13 +15,27 @@
                 <MudSelectItem Value="status">@Localizer[status]</MudSelectItem>
             }
         </MudSelect>
-        <MudStack Row>
-
-            <MudDatePicker @bind-Date="@selectedStartDate"></MudDatePicker>
-            <MudDatePicker @bind-Date="@selectedEndDate"></MudDatePicker>
-        </MudStack>
-        <MudRating @bind-SelectedValue="@_selectedRating"></MudRating>
-        <MudTextField @bind-Value="@Reading.Review"></MudTextField>
+        @switch(Reading.Status)
+        {
+            case ReadingStatus.PlanToRead:
+                break;
+            case ReadingStatus.Reading:
+                <MudStack Row>
+                    <MudDatePicker @bind-Date="@selectedStartDate"></MudDatePicker>
+                </MudStack>
+                <MudRating @bind-SelectedValue="@_selectedRating"></MudRating>
+                <MudTextField @bind-Value="@Reading.Review"></MudTextField>
+                break;
+            case ReadingStatus.Completed
+            or ReadingStatus.Dropped or ReadingStatus.OnHold:
+                <MudStack Row>
+                    <MudDatePicker @bind-Date="@selectedStartDate"></MudDatePicker>
+                    <MudDatePicker @bind-Date="@selectedEndDate"></MudDatePicker>
+                </MudStack>
+                <MudRating @bind-SelectedValue="@_selectedRating"></MudRating>
+                <MudTextField @bind-Value="@Reading.Review"></MudTextField>
+                break;
+        }
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">@Localizer["Cancel"]</MudButton>

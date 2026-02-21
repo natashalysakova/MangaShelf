@@ -6,13 +6,14 @@
 @inject IVolumeService VolumeService
 @inject IVolumeStateService VolumeState
 @inject ILogger<UserActionsComponent> Logger
+@inject ISnackbar Snackbar
 
 @if (VolumeState.CurrentUserStatus != null)
 {
     <AuthorizeView>
         <Authorized>
             <MudStack Row Justify="Justify.Center">
-                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["Like"]" >
+                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["Like"]">
 
                     <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsLiked"
                                          Size="Size.Large"
@@ -36,7 +37,7 @@
                     </MudMenu>
                 </MudTooltip>
                 <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["ReadingMenu"]">
-                    <MudIconButton OnClick="ShowAddReadingDialog" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
+                    <MudIconButton OnClick="()=>ShowAddEditReadingDialog(null)" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
                 </MudTooltip>
 
             </MudStack>
@@ -175,24 +176,34 @@
         }
     }
 
-    private async Task ShowAddReadingDialog()
+    private async Task ShowAddEditReadingDialog(Reading? reading = null)
     {
         var dialogOptions = new DialogOptions()
         {
             FullWidth = false,
             Position = DialogPosition.Center,
         };
+
+        if (reading == null)
+        {
+            reading = new Reading()
+            {
+                Rating = 0,
+                StartedAt = DateTime.UtcNow,
+                Status = ReadingStatus.PlanToRead,
+                VolumeId = Volume.Id,
+                UserId = await GetUserIdGuid()
+            };
+        }
+
         var parameters = new DialogParameters
         {
-            {   nameof(AddReadingDialog.Reading),
-                new Reading()
-                {
-                    Rating = 0,
-                    StartedAt = DateTime.UtcNow
-                }
+            {
+                nameof(AddEditReadingDialog.Reading),
+                reading
             }
         };
-        var dialog = await Dialog.ShowAsync<AddReadingDialog>(string.Empty, parameters, dialogOptions);
+        var dialog = await Dialog.ShowAsync<AddEditReadingDialog>(string.Empty, parameters, dialogOptions);
 
         var result = await dialog.Result;
 
@@ -200,19 +211,13 @@
         {
             try
             {
-                var reading = result.Data as Reading;
-
-                if (reading is null)
-                {
-                    throw new InvalidOperationException("reading data is null");
-                }
-
-                var (userStatus, stats) = await VolumeService.AddReadingAsync(Volume.PublicId, await GetUserId(), reading);
+                var (userStatus, stats) = await VolumeService.AddEditReadingAsync(reading);
                 VolumeState.UpdateBoth(userStatus, stats);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Logger.LogError("Error adding ownership for volume {PublicId}", Volume.PublicId);
+                Logger.LogError("Error adding ownership for volume {PublicId}. Exception:{ex}", Volume.PublicId, ex.Message);
+                Snackbar.Add(Localizer["ErrorAddingReading"], Severity.Error);
             }
 
         }
@@ -245,6 +250,11 @@
             throw new InvalidOperationException("User is not authenticated");
         }
         return userId;
+    }
+
+    private async Task<Guid> GetUserIdGuid()
+    {
+        return Guid.Parse(await GetUserId());
     }
 
     private async Task<bool> IsUserAuthenticated()
