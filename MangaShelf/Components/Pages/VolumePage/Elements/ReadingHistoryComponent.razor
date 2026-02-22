@@ -1,40 +1,47 @@
-@using MangaShelf.DAL.Models
-@using System.Security.Claims
+@inject IJSRuntime JS
 
-<MudStack Row>
-    @{
-        string date;
-        if (ReadingHistory.FinishedAt != null)
-        {
-            date = ReadingHistory.FinishedAt.Value.ToString("dd.MM.yyyy");
-        }
-        else
-        {
-            date = ReadingHistory.StartedAt.ToString("dd.MM.yyyy");
-        }
-    }
+@inherits VolumeActionBase
 
-    <MudText Typo="Typo.body2">@date</MudText>
-    @if (!string.IsNullOrEmpty(ReadingHistory.Review))
-    {
-        <MudIconButton Size="Size.Small" Variant="Variant.Text" OnClick="@(() => { _showReview = !_showReview; })" Color="@Color.Default" Icon="@Icons.Material.Filled.Reviews"></MudIconButton>
-    }
-
-    <MudSpacer />
-
-    <MudText Typo="Typo.body1">@ReadingHistory.Rating </MudText>
-    <MudIcon Icon="@Icons.Material.Filled.Star"></MudIcon>
-</MudStack>
-@if (_showReview)
-{
-    <MudPaper Class="p-3 paper-manga-panel">
-        <MudText Typo="Typo.body1">@ReadingHistory.Review </MudText>
-    </MudPaper>
+@{
+    var classes = $"reading-history{(ReadingHistory.ReviewId != null ? " has-review" : string.Empty)}";
 }
+<div @onclick="ScrollToReview" class="@classes">
+    <MudStack Row Justify="Justify.SpaceBetween" Spacing="1">
+        @{
+            string date;
+            if (ReadingHistory.FinishedAt != null)
+            {
+                date = ReadingHistory.FinishedAt.Value.ToString("dd.MM.yyyy");
+            }
+            else
+            {
+                date = ReadingHistory.StartedAt.ToString("dd.MM.yyyy");
+            }
+        }
+
+        <MudText Typo="Typo.body2">@date</MudText>
+
+        <MudSpacer/>
+
+        <MudText Typo="Typo.body2">@Localizer[ReadingHistory.Status]</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="()=>ShowAddEditReadingDialog(ReadingHistory)" Size="Size.Small"></MudIconButton>
+    </MudStack>
+</div>
 
 @code {
+
     [Parameter]
     public ReadingHistoryDto ReadingHistory { get; set; }
 
-    private bool _showReview = false;
+    private async Task ScrollToReview()
+    {
+
+        if (ReadingHistory.ReviewId == null)
+        {
+            return;
+        }
+
+        var reviewId = $"review-{ReadingHistory.ReviewId}";
+        await JS.InvokeVoidAsync("scrollToElement", reviewId);
+    }
 }

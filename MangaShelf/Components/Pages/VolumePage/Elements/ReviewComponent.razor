@@ -3,7 +3,11 @@
 @using System.Security.Claims
 @using System.Threading.Tasks
 
-<MudPaper Outlined="true" Class="paper-manga-panel p-3">
+@{
+    var id = $"review-{Review.Id}";
+}
+
+<MudPaper Outlined="true" Class="paper-manga-panel p-3" id="@id">
     <MudStack Row>
         <MudText Typo="Typo.h6">@Review.UserName</MudText>
         <MudSpacer></MudSpacer>

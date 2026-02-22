@@ -123,4 +123,31 @@
   <data name="IsDeleted" xml:space="preserve">
     <value>Видалено</value>
   </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Адмін панель</value>
+  </data>
+  <data name="Publish" xml:space="preserve">
+    <value>Опублікувати</value>
+  </data>
+  <data name="UnPublish" xml:space="preserve">
+    <value>Зняти з публікації</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="RemoveVolumeDialogTitle" xml:space="preserve">
+    <value>Видалення тому</value>
+  </data>
+  <data name="RemoveVolumeDialogText" xml:space="preserve">
+    <value>Ви впевнені, що хочете видалити цей том?</value>
+  </data>
+  <data name="YesText" xml:space="preserve">
+    <value>Так</value>
+  </data>
+  <data name="NoText" xml:space="preserve">
+    <value>Ні</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Редагувати</value>
+  </data>
 </root>

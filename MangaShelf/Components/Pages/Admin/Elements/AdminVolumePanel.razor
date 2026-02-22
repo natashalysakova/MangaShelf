@@ -17,7 +17,7 @@
                 <MudButton Href="@($"/admin/volumes/edit/{Volume.Id}")"
                            Color="Color.Warning"
                            Size="Size.Large"
-                           StartIcon="@Icons.Material.Filled.Edit">Edit</MudButton>
+                           StartIcon="@Icons.Material.Filled.Edit">@Localizer["Edit"]</MudButton>
                 <MudButton Color="@(Volume.IsPublishedOnSite? Color.Error: Color.Success)"
                            Size="Size.Large"
                            StartIcon="@(Volume.IsPublishedOnSite ? Icons.Material.Filled.PublicOff : Icons.Material.Filled.Public)"
@@ -56,7 +56,7 @@
             Position = DialogPosition.Center,
         };
 
-        var result = await Dialog.ShowMessageBox(Localizer["RemoveVolumeDialogTitle"], Localizer["RemoveVolumeDialogText"], Localizer["YesText"], Localizer["NoText"], options: dialogOptions);
+        var result = await Dialog.ShowMessageBoxAsync(Localizer["RemoveVolumeDialogTitle"], Localizer["RemoveVolumeDialogText"], Localizer["YesText"], Localizer["NoText"], options: dialogOptions);
 
         if (result != null && result is true)
         {

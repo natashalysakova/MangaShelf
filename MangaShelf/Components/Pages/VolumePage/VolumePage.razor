@@ -6,13 +6,7 @@
 @using System.Threading.Tasks
 @using MangaShelf.Services
 
-@inject IVolumeService VolumeService
-@inject IVolumeStateService VolumeState
-@inject IVolumePageLocalizationService Localizer
-@inject ILogger<VolumePage> Logger
-@inject ISnackbar Snackbar
-
-@implements IDisposable
+@inherits VolumeActionBase
 
 @if (Volume != null)
 {
@@ -58,7 +52,6 @@
                         <MudStack Row>
                             <MudItem xs="6">
                                 <OwnershipDataComponent Volume="@Volume" />
-
                             </MudItem>
                             <MudItem xs="6">
                                 <ReaderDataComponent Volume="@Volume" />
@@ -91,13 +84,24 @@ else
 
     private VolumeDto? Volume { get; set; }
 
-    protected override async Task OnParametersSetAsync()
+    protected override Guid? ResolvedVolumeId { get => Volume?.Id; }
+
+    override protected async Task OnParametersSetAsync()
     {
+
         VolumeState.Clear();
 
         await LoadVolumeInfo();
 
-        await VolumeState.InitializeAsync(PublicId, await GetUserId());
+        var user = await GetUserId();
+
+        if (ResolvedVolumeId == null || user is null)
+        {
+            Logger.LogTrace("VolumeId is null. Cannot load volume status.");
+            return;
+        }
+
+        await VolumeState.InitializeAsync(ResolvedVolumeId.Value, user);
         VolumeState.OnUserStatusChanged += StateHasChanged;
     }
 
@@ -112,23 +116,4 @@ else
             Logger.LogError(ex, "Error loading volume info for PublicId: {PublicId}", PublicId);
         }
     }
-
-    [CascadingParameter]
-    public required Task<AuthenticationState> AuthStateTask { get; set; }
-
-    private async Task<string?> GetUserId()
-    {
-        var authState = await AuthStateTask;
-        var user = authState.User;
-        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return userId;
-    }
-
-    public void Dispose()
-    {
-        VolumeState.Clear();
-        VolumeState.OnUserStatusChanged -= StateHasChanged;
-    }
-
-
 }

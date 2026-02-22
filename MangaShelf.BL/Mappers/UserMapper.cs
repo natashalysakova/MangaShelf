@@ -13,7 +13,7 @@ public static partial class UserMapper
     [MapPropertyFromSource(nameof(UserVolumeStatusDto.IsInWishlist), Use = nameof(IsInWishlist))]
     [MapPropertyFromSource(nameof(UserVolumeStatusDto.IsLiked), Use = nameof(IsLiked))]
     [MapPropertyFromSource(nameof(UserVolumeStatusDto.CurrentOwnershipStatus), Use = nameof(GetCurrentOwnershipStatus))]
-    public static partial UserVolumeStatusDto ToUserVolumeStatusDto(this User reading);
+    public static partial UserVolumeStatusDto ToUserVolumeStatusDto(this User reading, Guid volumeId);
 
     private static VolumeStatus GetCurrentOwnershipStatus(User user)
     {

@@ -2,10 +2,7 @@
 @using System.Security.Claims
 @using System.Threading.Tasks
 
-@inject IVolumePageLocalizationService Localizer
-@inject IVolumeService VolumeService
-@inject IVolumeStateService VolumeState
-@inject ILogger<OwnershipTimeline> Logger
+@inherits VolumeActionBase
 
 @if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Ownerships.Any())
 {
@@ -30,31 +27,5 @@
 }
 
 @code {
-    protected override void OnInitialized()
-    {
-        VolumeState.OnUserStatusChanged += HandleUserStatusChanged;
-    }
 
-    private void HandleUserStatusChanged()
-    {
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        VolumeState.OnUserStatusChanged -= HandleUserStatusChanged;
-    }
-
-    private async Task DeleteFromHistory(Guid id)
-    {
-        try
-        {
-            var (status, stats) = await VolumeService.RemoveOwnershipAsync(id);
-            VolumeState.UpdateBoth(status, stats);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error removing ownership with Id: {Id}", id);
-        }
-    }
 }

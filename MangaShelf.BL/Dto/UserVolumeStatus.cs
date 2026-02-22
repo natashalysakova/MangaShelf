@@ -7,12 +7,13 @@ namespace MangaShelf.BL.Dto;
 [ExcludeFromCodeCoverage]
 public class UserVolumeStatusDto
 {
+    public required Guid VolumeId { get; set; }
     public bool IsLiked { get; set; }
     public bool IsInWishlist { get; set; }
 
     public VolumeStatus CurrentOwnershipStatus { get; set; }
-    public IEnumerable<OwnershipHistoryDto> Ownerships { get; set; }
-    public IEnumerable<ReadingHistoryDto> Readings { get; set; }
+    public IEnumerable<OwnershipHistoryDto> Ownerships { get; set; } = [];
+    public IEnumerable<ReadingHistoryDto> Readings { get; set; } = [];
 }
 
 public class OwnershipHistoryDto
@@ -28,5 +29,5 @@ public class ReadingHistoryDto
     public DateTimeOffset StartedAt { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }
     public int? Rating { get; set; }
-    public string? Review { get; set; }
+    public string? ReviewId { get; set; }
 }

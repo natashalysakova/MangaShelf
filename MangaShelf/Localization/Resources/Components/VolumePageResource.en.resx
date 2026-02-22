@@ -198,6 +198,59 @@
 	  <value>None</value>
 	</data>
 
+		<!-- User Action Tooltips -->
+		<data name="Like" xml:space="preserve">
+	  <value>Like</value>
+	</data>
+		<data name="GoToWebsite" xml:space="preserve">
+	  <value>Go to Website</value>
+	</data>
+		<data name="LibraryMenu" xml:space="preserve">
+	  <value>Library Menu</value>
+	</data>
+		<data name="ReadingMenu" xml:space="preserve">
+	  <value>Reading Menu</value>
+	</data>
+		<data name="Login" xml:space="preserve">
+	  <value>Login</value>
+	</data>
+
+		<!-- Dialogs -->
+		<data name="ChangeVolumeStatus" xml:space="preserve">
+	  <value>Change Volume Status</value>
+	</data>
+		<data name="LogReading" xml:space="preserve">
+	  <value>Log Reading</value>
+	</data>
+		<data name="ThisIsPreorderVolume" xml:space="preserve">
+	  <value>This is a preorder volume. Expected release date:</value>
+	</data>
+
+		<!-- VolumeType Enum -->
+		<data name="Physical" xml:space="preserve">
+	  <value>Physical</value>
+	</data>
+		<data name="Digital" xml:space="preserve">
+	  <value>Digital</value>
+	</data>
+
+		<!-- ReadingStatus Enum -->
+		<data name="PlanToRead" xml:space="preserve">
+	  <value>Plan to Read</value>
+	</data>
+		<data name="Completed" xml:space="preserve">
+	  <value>Completed</value>
+	</data>
+		<data name="OnHold" xml:space="preserve">
+	  <value>On Hold</value>
+	</data>
+		<data name="Dropped" xml:space="preserve">
+	  <value>Dropped</value>
+	</data>
+
+
+
+
 		<!-- Reading Status Enum (ReadingStatus) -->
 		<data name="PlanToRead" xml:space="preserve">
 	  <value>Plan to Read</value>

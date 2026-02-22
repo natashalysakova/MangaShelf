@@ -8,6 +8,7 @@ using MangaShelf.DAL.DomainServices;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using static MangaShelf.DAL.Models.Ownership;
@@ -77,17 +78,20 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
 
     public async Task<VolumeDto?> GetFullVolumeByPublicIdAsync(string volumePublicId, CancellationToken token = default)
     {
-        var publicId = Guid.Parse(volumePublicId);
-
         using var context = dbContextFactory.CreateDbContext();
         var volumeDomainService = new DomainServiceFactory(context).GetDomainService<IVolumeDomainService>();
 
-        var volume = await volumeDomainService.GetAllFull().FirstOrDefaultAsync(x => x.PublicId == publicId);
+        var volume = await volumeDomainService.GetAllFull().FirstOrDefaultAsync(x => x.PublicId == volumePublicId);
+        if(volume == null)
+        {
+            
+        }
+
 
         return volume!.ToFullDto();
     }
 
-    public async Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions, bool showDeleted = false)
+    public async Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions, bool showDeleted = false, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
         var volumeDomainService = new DomainServiceFactory(context).GetDomainService<IVolumeDomainService>();
@@ -119,7 +123,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
                     .ThenBy(x => x.Number);
         }
 
-        var resultList = result.ToList();
+        var resultList = await result.ToListAsync();
 
         if (filterFunctions != null && filterFunctions.Any())
         {
@@ -150,19 +154,16 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return await titles.ToListAsync(stoppingToken);
     }
 
-    public async Task<UserVolumeStatusDto> GetVolumeStatusInfo(string volumePublicId, string? userId, CancellationToken token = default)
+    public async Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string? userId, CancellationToken token = default)
     {
-        var publicId = Guid.Parse(volumePublicId);
         using var context = dbContextFactory.CreateDbContext();
 
         User? user = default;
 
         user = await context.Users
-                    .Include(x => x.OwnedVolumes.Where(x => x.Volume.PublicId == publicId).OrderBy(v => v.Date))
-                        .ThenInclude(x => x.Volume)
-                    .Include(x => x.Readings.Where(x => x.Volume.PublicId == publicId).OrderBy(x => x.StartedAt))
-                    .Include(x => x.Likes.Where(x => x.Volume.PublicId == publicId))
-                        .ThenInclude(x => x.Volume)
+                    .Include(x => x.OwnedVolumes.Where(x => x.VolumeId == volumeId).OrderBy(v => v.Date))
+                    .Include(x => x.Readings.Where(x => x.VolumeId == volumeId).OrderBy(x => x.StartedAt))
+                    .Include(x => x.Likes.Where(x => x.VolumeId == volumeId))
                 .FirstOrDefaultAsync(u => u.IdentityUserId == userId);
 
         if (user == null)
@@ -170,28 +171,18 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             throw new Exception("User not found");
         }
 
-
-        var volume = context.Volumes
-            .Include(v => v.Owners)
-            .Include(v => v.Readers)
-            .Include(v => v.Likes)
-            .FirstOrDefault(v => v.PublicId == publicId);
-
-
-        return user.ToUserVolumeStatusDto();
+        return user.ToUserVolumeStatusDto(volumeId);
     }
 
 
 
-    public async Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(string seriesPublicId, CancellationToken token = default)
+    public async Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(Guid seriesId, CancellationToken token = default)
     {
-        var sPublicId = Guid.Parse(seriesPublicId);
-
         using var context = dbContextFactory.CreateDbContext();
 
         var volumes = context.Volumes
             .Include(v => v.Series)
-            .Where(v => v.Series.PublicId == sPublicId && v.IsPublishedOnSite)
+            .Where(v => v.Series.Id == seriesId && v.IsPublishedOnSite)
             .OrderBy(v => v.Number);
 
         return await volumes.Select(v => v.ToDto()).ToListAsync(token);
@@ -210,15 +201,15 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         return volume.IsPublishedOnSite;
     }
 
-    public async Task<IEnumerable<ReviewDto>> GetReviews(Guid volumeId)
+    public async Task<IEnumerable<ReviewDto>> GetReviews(Guid volumeId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
 
         var readings = await context.Readings
             .Include(r => r.User)
-            .Where(r => r.VolumeId == volumeId && (!string.IsNullOrEmpty(r.Review) || r.Rating != null))
+            .Where(r => r.VolumeId == volumeId && (r.Status != ReadingStatus.None || r.Status != ReadingStatus.PlanToRead) && (!string.IsNullOrEmpty(r.Review) || (r.Rating != null && r.Rating != 0)))
             .OrderByDescending(x=>x.CreatedAt)
-            .ToListAsync();
+            .ToListAsync(token);
 
         return readings.Select(r => r.ToReviewDto());
     }
@@ -234,29 +225,28 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
 
     }
 
-    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> ToggleWishlist(string volumePublicId, string userId)
+    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> ToggleWishlist(Guid volumeId, string userIdentityId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
-        var publicId = Guid.Parse(volumePublicId);
 
-        var user = context.Users
+        var user = await context.Users
             .Include(u => u.OwnedVolumes)
                 .ThenInclude(ov => ov.Volume)
-            .FirstOrDefault(u => u.IdentityUserId == userId);
+            .FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
 
         if (user == null)
         {
             throw new Exception("User not found");
         }
 
-        var wishlistRecord = user.OwnedVolumes.FirstOrDefault(ov => ov.Volume.PublicId == publicId && ov.Status == VolumeStatus.Wishlist);
+        var wishlistRecord = user.OwnedVolumes.FirstOrDefault(ov => ov.VolumeId == volumeId && ov.Status == VolumeStatus.Wishlist);
         if (wishlistRecord != null)
         {
             wishlistRecord.IsDeleted = true;
         }
         else
         {
-            var volume = context.Volumes.FirstOrDefault(v => v.PublicId == publicId);
+            var volume = await context.Volumes.FirstOrDefaultAsync(v => v.Id == volumeId, token);
             if (volume == null)
             {
                 throw new Exception("Volume not found");
@@ -271,27 +261,26 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             user.OwnedVolumes.Add(wishlistRecord);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(token);
 
-        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+        return (await GetVolumeStatusInfo(volumeId, userIdentityId, token), await GetVolumeStats(volumeId, token));
     }
 
-    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> ToggleLike(string volumePublicId, string userId)
+    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> ToggleLike(Guid volumeId, string userIdentityId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
-        var publicId = Guid.Parse(volumePublicId);
 
-        var user = context.Users
+        var user = await context.Users
             .Include(u => u.Likes)
                 .ThenInclude(ov => ov.Volume)
-            .FirstOrDefault(u => u.IdentityUserId == userId);
+            .FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
 
         if (user == null)
         {
             throw new Exception("User not found");
         }
 
-        var likeRecord = user.Likes.FirstOrDefault(ov => ov.Volume.PublicId == publicId);
+        var likeRecord = user.Likes.FirstOrDefault(ov => ov.VolumeId == volumeId);
         if (likeRecord != null)
         {
             likeRecord.Status = likeRecord.Status switch
@@ -303,7 +292,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         }
         else
         {
-            var volume = context.Volumes.FirstOrDefault(v => v.PublicId == publicId);
+            var volume = await context.Volumes.FirstOrDefaultAsync(v => v.Id == volumeId, token);
             if (volume == null)
             {
                 throw new Exception("Volume not found");
@@ -318,46 +307,39 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             user.Likes.Add(likeRecord);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(token);
 
 
-        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+        return (await GetVolumeStatusInfo(volumeId, userIdentityId, token), await GetVolumeStats(volumeId, token));
     }
 
-    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> AddOwnershipAsync(string volumePublicId, string userId, Ownership ownership)
+    public async Task<(UserVolumeStatusDto?, VolumeStatsDto)> AddEditOwnershipAsync(Ownership ownership, string userIdentityId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
-        var publicId = Guid.Parse(volumePublicId);
         var volume = await context.Volumes
             .Include(x => x.Owners)
-            .FirstOrDefaultAsync(v => v.PublicId == publicId);
-        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId);
+            .FirstOrDefaultAsync(v => v.Id == ownership.VolumeId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
+        if (user == null) {
+            throw new Exception("User not found");
+        }
 
-        var ownershipToAdd = new Ownership
-        {
-            UserId = user.Id,
-            VolumeId = volume.Id,
-            Date = ownership.Date,
-            Status = ownership.Status,
-            Type = ownership.Type
-        };
+        ownership.UserId = user.Id;
+        context.Entry(ownership).State = ownership.Id == Guid.Empty ? EntityState.Added : EntityState.Modified;
+        await context.SaveChangesAsync(token);
 
-        volume.Owners.Add(ownershipToAdd);
-        await context.SaveChangesAsync();
-
-        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+        return (await GetVolumeStatusInfo(volume.Id, user.IdentityUserId, token), await GetVolumeStats(volume.Id, token));
     }
 
-    public async Task<VolumeStatsDto> GetVolumeStats(string volumePublicId, CancellationToken token = default)
+    public async Task<VolumeStatsDto> GetVolumeStats(Guid volumeId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
-        var publicId = Guid.Parse(volumePublicId);
 
         var volume = await context.Volumes
             .Include(v => v.Likes)
             .Include(v => v.Owners)
             .Include(v => v.Readers)
-            .FirstOrDefaultAsync(v => v.PublicId == publicId);
+            .FirstOrDefaultAsync(v => v.Id == volumeId);
 
         return new VolumeStatsDto
         {
@@ -371,14 +353,14 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         };
     }
 
-    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveOwnershipAsync(Guid ownershipId)
+    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveOwnershipAsync(Guid ownershipId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
 
         var ownership = await context.Ownerships
             .Include(o => o.User)
             .Include(o => o.Volume)
-            .FirstOrDefaultAsync(o => o.Id == ownershipId);
+            .FirstOrDefaultAsync(o => o.Id == ownershipId, token);
         if (ownership == null)
         {
             throw new Exception("Ownership not found");
@@ -388,16 +370,16 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         await context.SaveChangesAsync();
 
         return (
-            await GetVolumeStatusInfo(ownership.Volume.PublicId.ToString(), ownership.User.IdentityUserId),
-            await GetVolumeStats(ownership.Volume.PublicId.ToString()));
+            await GetVolumeStatusInfo(ownership.VolumeId, ownership.User.IdentityUserId, token),
+            await GetVolumeStats(ownership.VolumeId, token));
     }
 
-    public async Task<bool> DeleteVolume(Guid volumeId)
+    public async Task<bool> DeleteVolume(Guid volumeId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(v => v.Id == volumeId);
+            .FirstOrDefaultAsync(v => v.Id == volumeId, token);
         if (volume == null)
         {
             throw new Exception("Volume not found");
@@ -412,38 +394,40 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             context.Volumes.Remove(volume);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(token);
         return volume.IsDeleted;
     }
 
-    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> AddReadingAsync(string volumePublicId, string userId, Reading reading)
+    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> AddEditReadingAsync(Reading reading, string userIdentityId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
-        var publicId = Guid.Parse(volumePublicId);
         var volume = await context.Volumes
             .Include(x => x.Readers)
-            .FirstOrDefaultAsync(v => v.PublicId == publicId);
-        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId);
+            .FirstOrDefaultAsync(v => v.Id == reading.VolumeId);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
+        reading.UserId = user.Id;
 
-        var readingToAdd = new Reading
+        var avgRating = volume.Readers.Where(x => x.Rating != null && x.Rating.Value != 0);
+        if (avgRating.Any())
         {
-            UserId = user.Id,
-            VolumeId = volume.Id,
-            StartedAt = reading.StartedAt,
-            FinishedAt = reading.FinishedAt,
-            Status = reading.Status,
-            Rating = reading.Rating,
-            Review = reading.Review
-        };
+            volume.AvgRating = avgRating.Average(x => x.Rating!.Value);
+        }
 
-        volume.Readers.Add(readingToAdd);
-        volume.AvgRating = volume.Readers.Where(x => x.Rating != null && x.Rating.Value != 0).Average(x => x.Rating!.Value);
-        await context.SaveChangesAsync();
+        var existingEntry = context.ChangeTracker.Entries<Reading>()
+            .FirstOrDefault(e => e.Entity.Id == reading.Id);
 
-        return (await GetVolumeStatusInfo(volumePublicId, userId), await GetVolumeStats(volumePublicId));
+        if (existingEntry != null)
+        {
+            existingEntry.State = EntityState.Detached;
+        }
+
+        context.Readings.Update(reading);
+        await context.SaveChangesAsync(token);
+
+        return (await GetVolumeStatusInfo(volume.Id, user.IdentityUserId), await GetVolumeStats(volume.Id));
     }
 
-    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveReadingAsync(Guid readingId)
+    public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveReadingAsync(Guid readingId, CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
 
@@ -460,8 +444,32 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         await context.SaveChangesAsync();
 
         return (
-            await GetVolumeStatusInfo(reading.Volume.PublicId.ToString(), reading.User.IdentityUserId),
-            await GetVolumeStats(reading.Volume.PublicId.ToString()));
+            await GetVolumeStatusInfo(reading.VolumeId, reading.User.IdentityUserId),
+            await GetVolumeStats(reading.VolumeId));
+    }
+
+    public async Task<(IEnumerable<CardVolumeDto>, int, IEnumerable<UserVolumeStatusDto>)> GetAllVolumesAsyncWithUserInfo(string? userId, IFilterOptions? paginationOptions = null, CancellationToken token = default)
+    {
+        var volumes = await GetAllVolumesAsync(paginationOptions, token);
+
+        var userVolumeStatuses = new List<UserVolumeStatusDto>();
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            foreach (var volume in volumes.Item1)
+            {
+                var status = await GetVolumeStatusInfo(volume.Id, userId, token);
+                userVolumeStatuses.Add(status);
+            }
+        }
+
+        return (volumes.Item1, volumes.Item2, userVolumeStatuses);
+    }
+
+    public async Task<Reading?> GetReading(Guid id, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        return  await context.Readings.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, token);
     }
 }
 

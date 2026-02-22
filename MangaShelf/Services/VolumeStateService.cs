@@ -14,7 +14,7 @@ public class VolumeStateService : IVolumeStateService, IDisposable
 
     private VolumeStatsDto? _currentStats;
     private UserVolumeStatusDto? _currentUserStatus;
-    private string? _currentVolumePublicId;
+    private Guid? _currentVolumeId;
     private string? _currentUserId;
 
     public VolumeStateService(IVolumeService volumeService, ILogger<VolumeStateService> logger)
@@ -47,57 +47,72 @@ public class VolumeStateService : IVolumeStateService, IDisposable
     /// Initialize state for a specific volume and user.
     /// Loads data from server if not already cached.
     /// </summary>
-    public async Task InitializeAsync(string volumePublicId, string? userId = null)
+    public async Task InitializeAsync(Guid volumeId, string? userId = null)
     {
         // If same volume, don't reload
-        if (_currentVolumePublicId == volumePublicId)
+        if (_currentVolumeId == volumeId)
         {
+            if (_currentUserId == userId)
+            {
+                return;
+            }
+
+            _currentUserId = userId;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _currentUserStatus = null;
+                NotifyUserStatusChanged();
+                return;
+            }
+
+            await LoadUserStatusAsync(volumeId, userId);
             return;
         }
 
         Clear();
-        _currentVolumePublicId = volumePublicId;
+        _currentVolumeId = volumeId;
         _currentUserId = userId;
 
         // Load stats (public data)
-        await LoadStatsAsync(volumePublicId);
+        await LoadStatsAsync(volumeId);
 
         // Load user-specific data if authenticated
         if (!string.IsNullOrEmpty(userId))
         {
-            await LoadUserStatusAsync(volumePublicId, userId);
+            await LoadUserStatusAsync(volumeId, userId);
         }
     }
 
     /// <summary>
     /// Load volume statistics from server
     /// </summary>
-    private async Task LoadStatsAsync(string volumePublicId)
+    private async Task LoadStatsAsync(Guid volumeId)
     {
         try
         {
-            _currentStats = await _volumeService.GetVolumeStats(volumePublicId);
+            _currentStats = await _volumeService.GetVolumeStats(volumeId);
             NotifyStatsChanged();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading volume stats for PublicId: {PublicId}", volumePublicId);
+            _logger.LogError(ex, "Error loading volume stats for Id: {Id}", volumeId);
         }
     }
 
     /// <summary>
     /// Load user's volume status from server
     /// </summary>
-    private async Task LoadUserStatusAsync(string volumePublicId, string userId)
+    private async Task LoadUserStatusAsync(Guid volumeId, string userId)
     {
         try
         {
-            _currentUserStatus = await _volumeService.GetVolumeStatusInfo(volumePublicId, userId);
+            _currentUserStatus = await _volumeService.GetVolumeStatusInfo(volumeId, userId);
             NotifyUserStatusChanged();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading user volume status for PublicId: {PublicId}", volumePublicId);
+            _logger.LogError(ex, "Error loading user volume status for Id: {Id}", volumeId);
         }
     }
 
@@ -139,7 +154,7 @@ public class VolumeStateService : IVolumeStateService, IDisposable
     {
         _currentStats = null;
         _currentUserStatus = null;
-        _currentVolumePublicId = null;
+        _currentVolumeId = null;
         _currentUserId = null;
     }
 

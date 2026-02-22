@@ -57,18 +57,31 @@
             <PropertyColumn Property="x => x.ReleaseDate" Format="dd.MM.yyyy" Filterable="false" Title="@Localizer["ReleaseDate"]" />
             <PropertyColumn Property="x => x.Series.Publisher.Name" Title="@Localizer["Publisher"]" />
             <PropertyColumn Property="x => x.AvgRating" Filterable="false" Title="@Localizer["Rating"]" />
-            <PropertyColumn Property="x => x.IsPublishedOnSite" Title="@Localizer["Published"]" HeaderStyle="width: 50px">
+            <TemplateColumn T="Volume" Title="@Localizer["Published"]" CellStyle="text-align: center;" Filterable="true">
                 <CellTemplate>
-                    @if (context.Item.IsPublishedOnSite)
-                    {
-                        <MudButton @onclick="() => ChangePublishStatus(context.Item)" Color="Color.Warning">Unpublish</MudButton>
-                    }
-                    else
-                    {
-                        <MudButton @onclick="() => ChangePublishStatus(context.Item)" Color="Color.Success">Publish</MudButton>
+                    @{      
+                        var changingStatus = _changingPublishStatusVolumeId == context.Item.Id;
+                        var color = context.Item.IsPublishedOnSite ? Color.Warning : Color.Success;
+
+                        if (changingStatus)
+                        {
+                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="@color"></MudProgressCircular>
+                        }
+                        else
+                        {
+                            var text = context.Item.IsPublishedOnSite ? "Unpublish" : "Publish";
+                            <MudButton @onclick="() => ChangePublishStatus(context.Item)" Color="@color">@text</MudButton>
+                        }
                     }
                 </CellTemplate>
-            </PropertyColumn>
+                <FilterTemplate>
+                    <MudSelect T="bool?" Value="GetFilterValue(context.FilterDefinition)" ValueChanged="(bool? value) => SetFilterValue(context.FilterDefinition, value)" Placeholder="All" Clearable>
+                        <MudSelectItem T="bool?" Value="true">Published</MudSelectItem>
+                        <MudSelectItem T="bool?" Value="false">Unpublished</MudSelectItem>                
+                    </MudSelect>
+                </FilterTemplate>
+
+            </TemplateColumn>
             <PropertyColumn Property="x => x.IsDeleted" Filterable="false" Title="@Localizer["IsDeleted"]">
                 <CellTemplate>
                     @if (context.Item.IsDeleted)
@@ -123,7 +136,7 @@
     }
 
 
-    private async Task<GridData<Volume>> ServerReload(GridState<Volume> state)
+    private async Task<GridData<Volume>> ServerReload(GridState<Volume> state, CancellationToken token)
     {
         try
         {
@@ -162,16 +175,23 @@
         }
     }
 
+    private Guid? _changingPublishStatusVolumeId = null;
     private async Task ChangePublishStatus(Volume volume)
     {
+        _changingPublishStatusVolumeId = volume.Id;
         try
         {
             volume.IsPublishedOnSite = await volumeService.ChangePublishedStatus(volume.Id);
+            await Task.Delay(2000);
             Snackbar.Add($"Volume {volume.Series.Title} {volume.Title} publish was {(volume.IsPublishedOnSite ? "published" : "unpublished")}", Severity.Info);
         }
         catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _changingPublishStatusVolumeId = null;
         }
     }
 
@@ -195,6 +215,19 @@
         {
 
             throw;
+        }
+    }
+
+    private static bool? GetFilterValue<T>(IFilterDefinition<T>? filterDefinition)
+    {
+        return filterDefinition?.Value as bool?;
+    }
+
+    private static void SetFilterValue<T>(IFilterDefinition<T>? filterDefinition, bool? value)
+    {
+        if(filterDefinition != null)
+        {
+            filterDefinition.Value = value;
         }
     }
 }
