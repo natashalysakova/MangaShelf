@@ -1,0 +1,148 @@
+﻿@using System.Security.Claims
+@using MangaShelf.Components.Pages.VolumePage
+@using MangaShelf.Components.Pages.VolumePage.Elements
+@using MangaShelf.DAL.Models
+
+@inherits VolumeActionBase
+
+@if (Volume != null)
+{
+    <MudCard @onclick="OpenVolumeAsync" Style="position:relative;" Class="manga-card ">
+        <div class="image-container">
+            <FallbackImage ImageUrl="@Volume.CoverImageUrlSmall" Class="@sideImageClass" Alt="@Volume.SeriesName" />
+
+        </div>
+        @if (Volume.IsPreorder && ShowBadges)
+        {
+            <div class="preorder-badge">
+                <MudText Typo="Typo.caption" Align="Align.Center">@Localizer["ItsPreorder"]</MudText>
+            </div>
+            <div class="preorder-date-badge">
+                <MudText Typo="Typo.caption" Align="Align.Center">@Volume.ReleaseDate</MudText>
+            </div>
+        }
+        @if (ShowButtons || ShowStatus)
+        {
+            <AuthorizeView>
+                @if (CurrentUserStatus != null)
+                {
+                    var status = CurrentUserStatus.CurrentOwnershipStatus;
+                    var inWishList = CurrentUserStatus.IsInWishlist;
+
+                    var panelClass = $"catalog-button-panel{(ShowStatusIcon ? " visible" : string.Empty)}";
+                    <div class="@panelClass">
+                        <MudStack Spacing="1" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            @if (ShowStatus)
+                            {
+                                <StatusDetails InWishList="inWishList" Status="status" ShowStatusIcon="ShowStatusIcon"></StatusDetails>
+                            }
+                            @if (ShowButtons)
+                            {
+                                <SmallCardButtonGroup Status="status" IsInWishlist="inWishList" IsPreorder="Volume.IsPreorder"
+                                   HandleAddToLibraryAsync="HandleAddToLibraryAsync" 
+                                   HandlePreorderAsync="HandlePreorderAsync" 
+                                   HandleWishListAsync="HandleWishListAsync"
+                                ></SmallCardButtonGroup>
+                            }
+                        </MudStack>
+                    </div>
+                }
+            </AuthorizeView>
+        }
+    </MudCard>
+}
+else
+{
+    <MudCard Style="position:relative;" Class="manga-card ">
+        <div class="image-container">
+            <MudSkeleton Animation="Animation.Wave" SkeletonType="SkeletonType.Rectangle"></MudSkeleton>
+        </div>
+    </MudCard>
+
+}
+
+<style>
+    .my-custom-class {
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+@code {
+    [Parameter]
+    public CardVolumeDto? Volume { get; set; }
+
+    [Parameter]
+    public bool ShowBadges { get; set; } = false;
+
+    [Parameter]
+    public bool ShowButtons { get; set; }
+
+    [Parameter]
+    public bool ShowStatus { get; set; }
+
+    [Parameter]
+    public bool ShowStatusIcon { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    new ISmallCardLocalizationService Localizer { get; set; }
+
+    public UserVolumeStatusDto? CurrentUserStatus { get; set; }
+
+    protected override Guid? ResolvedVolumeId => Volume?.Id;
+
+    private string sideImageClass = "card-image";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Volume == null || (ShowButtons == false && ShowStatus == false))
+        {
+            return;
+        }
+
+        try
+        {
+            CurrentUserStatus = await VolumeService.GetVolumeStatusInfo(Volume.Id, await GetUserId());
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading volume status for volume {VolumeId}", Volume.Id);
+        }
+    }
+
+    private async Task OpenVolumeAsync()
+    {
+        if (Volume != null)
+        {
+            NavigationManager.NavigateTo($"volume/{Volume.PublicId}");
+        }
+    }
+
+    protected async Task HandleOwnershipChange(VolumeStatus status)
+    {
+        var newStatus = await OpenSetOwnershipDialog(status);
+        if (newStatus != null)
+        {
+            CurrentUserStatus = newStatus;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleWishListAsync()
+    {
+        await HandleOwnershipChange(VolumeStatus.Wishlist);
+    }
+
+    private async Task HandlePreorderAsync()
+    {
+        await HandleOwnershipChange(VolumeStatus.Preorder);
+    }
+
+    private async Task HandleAddToLibraryAsync()
+    {
+        await HandleOwnershipChange(VolumeStatus.Own);
+    }
+}

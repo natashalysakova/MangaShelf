@@ -282,4 +282,7 @@
   <data name="NoReviews" xml:space="preserve">
     <value>Відгуків поки немає</value>
   </data>
+  <data name="ShowMore" xml:space="preserve">
+    <value>Показати більше</value>
+  </data>
 </root>

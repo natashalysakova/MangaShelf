@@ -1,0 +1,60 @@
+﻿@using MangaShelf.DAL.Models
+@inject ISmallCardLocalizationService Localizer
+
+<MudButtonGroup Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success">
+    @switch (Status)
+    {
+        case VolumeStatus.None or VolumeStatus.Gone or VolumeStatus.Wishlist:
+            {
+                if (IsInWishlist == false)
+                {
+                    <CardButtonTooltip Text="@Localizer["AddWishlist"]">
+                        <MudIconButton Icon="@CustomIcons.wishlist" OnClick="HandleWishListAsync"></MudIconButton>
+                    </CardButtonTooltip>
+                }
+
+
+                @if (IsPreorder)
+                {
+                    <CardButtonTooltip Text="@Localizer["AddPreorder"]">
+                        <MudIconButton Icon="@CustomIcons.preorder" OnClick="HandlePreorderAsync"></MudIconButton>
+                    </CardButtonTooltip>
+                }
+                else
+                {
+                    <CardButtonTooltip Text="@Localizer["AddToLibrary"]">
+                        <MudIconButton Icon="@CustomIcons.bookshelf" OnClick="HandleAddToLibraryAsync"></MudIconButton>
+                    </CardButtonTooltip>
+                }
+            }
+            break;
+        case VolumeStatus.Preorder:
+            {
+                <CardButtonTooltip Text="@Localizer["PreorderArrived"]">
+                    <MudIconButton Icon="@CustomIcons.delivered" OnClick="HandleAddToLibraryAsync"></MudIconButton>
+                </CardButtonTooltip>
+            }
+            break;
+        default:
+            break;
+    }
+</MudButtonGroup>
+
+@code {
+
+    [Parameter]
+    public VolumeStatus Status { get; set; }
+    [Parameter]
+    public bool IsInWishlist { get; set; }
+    [Parameter]
+    public bool IsPreorder { get; set; }
+
+    [Parameter]
+    public EventCallback HandleWishListAsync { get; set; }
+
+    [Parameter]
+    public EventCallback HandlePreorderAsync { get; set; }
+
+    [Parameter]
+    public EventCallback HandleAddToLibraryAsync { get; set; }    
+}

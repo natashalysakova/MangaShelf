@@ -493,6 +493,15 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ShowMore.
+        /// </summary>
+        public static string ShowMore {
+            get {
+                return ResourceManager.GetString("ShowMore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Status.
         /// </summary>
         public static string Status {

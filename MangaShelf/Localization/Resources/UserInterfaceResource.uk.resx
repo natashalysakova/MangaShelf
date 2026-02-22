@@ -210,4 +210,7 @@
   <data name="NewPreorders" xml:space="preserve">
     <value>Нові передзамовлення</value>
   </data>
+  <data name="Home" xml:space="preserve">
+    <value>Головна</value>
+  </data>
 </root>

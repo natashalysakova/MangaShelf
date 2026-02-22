@@ -101,7 +101,7 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         }
     }
 
-    protected async Task<UserVolumeStatusDto?> OpenSetOwnershipDialog(VolumeStatus status)
+    protected async Task<UserVolumeStatusDto?> OpenSetOwnershipDialog(VolumeStatus status, bool disableStatus = true)
     {
         var dialogOptions = new DialogOptions()
         {
@@ -118,6 +118,10 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
                     Type = VolumeType.Physical,
                     VolumeId = ResolvedVolumeId!.Value,
                 }
+            },
+            {
+                nameof(SetOwnershipDialog.IsDisabledStatus),
+                disableStatus
             }
         };
         var dialog = await Dialog.ShowAsync<SetOwnershipDialog>(string.Empty, parameters, dialogOptions);
