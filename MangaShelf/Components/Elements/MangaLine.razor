@@ -1,4 +1,5 @@
-﻿@if (Volumes.Any())
+﻿@using MangaShelf.Components.Elements.SmallCard
+@if (Volumes.Any())
 {
     <MudGrid Justify="@justification" Spacing="@spacing">
         @RenderVolumeLines()
@@ -35,7 +36,7 @@
                         var currentIndex = i;
                         var style = $"flex: 0 0 auto; width: calc((100% - ({ItemsPerLine - 1} * { spacing * 4 }px)) / {ItemsPerLine});";
                         <div style="@style">
-                            <SmallCard Volume="@volumeList[currentIndex]" />
+                            <SmallCard Volume="@volumeList[currentIndex]" ShowStatus="true" ShowStatusIcon ="true"/>
                         </div>
                     }
                 </MudStack>

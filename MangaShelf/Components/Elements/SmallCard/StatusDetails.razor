@@ -1,0 +1,58 @@
+﻿@using MangaShelf.DAL.Models
+@inject ISmallCardLocalizationService Localizer
+
+@if (Status == VolumeStatus.Own || Status == VolumeStatus.Preorder || InWishList)
+{
+    if (InWishList && Status == VolumeStatus.None)
+    {
+        if (ShowStatusIcon)
+        {
+            <CardButtonTooltip Text="@Localizer["Wishlisted"]">
+                <MudIconButton Icon="@CustomIcons.wishlist" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"></MudIconButton>
+            </CardButtonTooltip>
+        }
+        else
+        {
+            <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+                @Localizer["Wishlisted"]
+            </MudChip>
+        }
+    }
+    else
+    {
+        if (ShowStatusIcon)
+        {
+            var icon = Status switch
+            {
+                VolumeStatus.Own => CustomIcons.bookshelf,
+                VolumeStatus.Preorder => CustomIcons.preorder,
+                _ => CustomIcons.done
+            };
+            <CardButtonTooltip Text="@Localizer[Status]">
+                <MudIconButton Icon="@icon" Color="Color.Success" Size="Size.Small" Variant="Variant.Filled"></MudIconButton>
+            </CardButtonTooltip>
+        }
+        else
+        {
+            <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+                @Localizer[Status]
+            </MudChip>
+        }
+    }
+}
+
+@code {
+    [Parameter]
+    public bool ShowStatus { get; set; }
+
+    [Parameter]
+    public bool ShowStatusIcon { get; set; }
+
+    [Parameter]
+    public VolumeStatus Status { get; set; }
+
+    [Parameter]
+    public bool InWishList { get; set; }
+
+
+}
