@@ -173,7 +173,7 @@ else
 
     private async Task HandleOwnershipChange(VolumeStatus status)
     {
-        var newStatus = await OpenSetOwnershipDialog(VolumeStatus.Wishlist);
+        var newStatus = await OpenSetOwnershipDialog(status);
         if(newStatus != null)
         {
             CurrentUserStatus = newStatus;
