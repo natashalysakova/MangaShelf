@@ -475,6 +475,15 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SetHistoricStatus.
+        /// </summary>
+        public static string SetHistoricStatus {
+            get {
+                return ResourceManager.GetString("SetHistoricStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add to Library.
         /// </summary>
         public static string SetOwn {

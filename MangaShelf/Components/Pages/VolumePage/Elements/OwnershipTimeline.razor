@@ -6,24 +6,20 @@
 
 @if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Ownerships.Any())
 {
-    <MudTimeline TimelineOrientation="TimelineOrientation.Vertical"
-                 Style="width: 100%"
-                 TimelinePosition="TimelinePosition.Start"
-                 TimelineAlign="TimelineAlign.Start">
-        @foreach (var ownership in VolumeState.CurrentUserStatus.Ownerships.OrderByDescending(x => x.Date))
-        {
-            <MudTimelineItem TimelineAlign="TimelineAlign.End">
 
-                <MudStack Spacing="0">
-                    <MudStack Row>
-                        <MudText Typo="Typo.button">@Localizer[ownership.Status]</MudText>
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteFromHistory(ownership.Id))"></MudIconButton>
-                    </MudStack>
-                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@ownership.Date.ToLocalTime().ToString("dd.MM.yyyy")</MudText>
-                </MudStack>
-            </MudTimelineItem>
-        }
-    </MudTimeline>
+    @foreach (var ownership in VolumeState.CurrentUserStatus.Ownerships.OrderByDescending(x => x.Date))
+    {
+        <div class="reading-history">
+            <MudStack Row Justify="Justify.SpaceBetween" Spacing="1">
+                <MudText Typo="Typo.body2">@ownership.Date.ToString("dd.MM.yyyy")</MudText>
+
+                <MudSpacer />
+
+                <MudText Typo="Typo.body2">@Localizer[ownership.Status]</MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => DeleteFromHistory(ownership.Id)" Size="Size.Small"></MudIconButton>
+            </MudStack>
+        </div>
+    }
 }
 
 @code {

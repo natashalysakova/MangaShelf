@@ -93,5 +93,7 @@
                 availableActions.Add(new AvailableAction("SetOwn", CustomIcons.bookshelf, Color.Success, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
             }
         }
+
+        availableActions.Add(new AvailableAction("SetHistoricStatus", CustomIcons.historical, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder, false)));
     }
 }

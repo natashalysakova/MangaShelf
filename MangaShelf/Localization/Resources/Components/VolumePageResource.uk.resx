@@ -285,4 +285,7 @@
   <data name="ShowMore" xml:space="preserve">
     <value>Показати більше</value>
   </data>
+  <data name="SetHistoricStatus" xml:space="preserve">
+    <value>Додати історичний запис</value>
+  </data>
 </root>
