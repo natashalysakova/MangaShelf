@@ -136,7 +136,7 @@
     }
 
 
-    private async Task<GridData<Volume>> ServerReload(GridState<Volume> state)
+    private async Task<GridData<Volume>> ServerReload(GridState<Volume> state, CancellationToken token)
     {
         try
         {

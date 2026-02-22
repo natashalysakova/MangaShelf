@@ -76,7 +76,8 @@
                 {
                     Status = status,
                     Date = DateTime.Now,
-                    Type = VolumeType.Physical
+                    Type = VolumeType.Physical,
+                    VolumeId = Volume.Id
                 }
             },
             {
@@ -99,7 +100,7 @@
                     throw new InvalidOperationException("Ownership data is null");
                 }
 
-                var (userStatus, stats) = await VolumeService.AddOwnershipAsync(Volume.PublicId, await GetUserId(), ownership);
+                var (userStatus, stats) = await VolumeService.AddEditOwnershipAsync(ownership, await GetUserId());
                 VolumeState.UpdateBoth(userStatus, stats);
             }
             catch (Exception)

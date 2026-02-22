@@ -39,7 +39,7 @@ else if(Volumes == null)
     {
         try
         {
-            var result = await VolumeService.GetVolumesBySeriesId(Volume.Series.PublicId);
+            var result = await VolumeService.GetVolumesBySeriesId(Volume.Series.Id);
             var toRemove = result.Where(x => x.PublicId == Volume.PublicId);
             result = result.Except(toRemove);
 

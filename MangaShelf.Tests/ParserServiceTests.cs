@@ -62,7 +62,7 @@ public class ParserServiceTests : IDisposable
         });
 
         // Setup image manager mock
-        _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<Guid>()))
+        _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()))
             .Returns("images/cover.jpg");
         _imageManagerMock.Setup(x => x.CreateSmallImage(It.IsAny<string>()))
             .Returns("images/small/cover.jpg");
@@ -1405,7 +1405,7 @@ public class ParserServiceTests : IDisposable
         Assert.Equal(State.Updated, result);
 
         // Verify image download was NOT called since both cover images already exist
-        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<Guid>()), Times.Never());
+        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Never());
     }
 

@@ -7,7 +7,7 @@ namespace MangaShelf.BL.Dto;
 [ExcludeFromCodeCoverage]
 public class UserVolumeStatusDto
 {
-    public required string VolumePublicId { get; set; }
+    public required Guid VolumeId { get; set; }
     public bool IsLiked { get; set; }
     public bool IsInWishlist { get; set; }
 
@@ -29,5 +29,5 @@ public class ReadingHistoryDto
     public DateTimeOffset StartedAt { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }
     public int? Rating { get; set; }
-    public string? Review { get; set; }
+    public string? ReviewId { get; set; }
 }

@@ -2,7 +2,7 @@
 
 public class Volume : BaseEntity
 {
-    public Guid PublicId { get; set; } = Guid.NewGuid();
+    public string PublicId { get; set; } = Guid.NewGuid().ToString();
     public required string Title { get; set; }
     public int Number { get; set; }
     public string? ISBN { get; set; }

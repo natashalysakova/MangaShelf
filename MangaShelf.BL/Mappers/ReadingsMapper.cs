@@ -15,5 +15,16 @@ public static partial class ReadingsMapper
 
     private static int MapRaiting(Reading? reading) => reading.Rating ?? 0;
 
+    [MapPropertyFromSource(nameof(ReadingHistoryDto.ReviewId), Use = nameof(MapReviewId))]
     public static partial ReadingHistoryDto ToReadingHistoryDto(this Reading reading);
+
+    private static string? MapReviewId(Reading reading)
+    {
+        if((reading.Rating == null || reading.Rating == 0) && string.IsNullOrEmpty(reading.Review))
+        {
+            return null;
+        }
+
+        return reading.Id.ToString();
+    }
 }

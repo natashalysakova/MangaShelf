@@ -56,7 +56,7 @@
             Position = DialogPosition.Center,
         };
 
-        var result = await Dialog.ShowMessageBox(Localizer["RemoveVolumeDialogTitle"], Localizer["RemoveVolumeDialogText"], Localizer["YesText"], Localizer["NoText"], options: dialogOptions);
+        var result = await Dialog.ShowMessageBoxAsync(Localizer["RemoveVolumeDialogTitle"], Localizer["RemoveVolumeDialogText"], Localizer["YesText"], Localizer["NoText"], options: dialogOptions);
 
         if (result != null && result is true)
         {

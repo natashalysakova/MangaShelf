@@ -19,7 +19,7 @@
         @if (Volume.IsPreorder && ShowBadges)
         {
             <div class="preorder-badge">
-                <MudText Typo="Typo.caption" Align="Align.Center">@Localizer["Preorder"]</MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center">@Localizer["ItsPreorder"]</MudText>
             </div>
             <div class="preorder-date-badge">
                 <MudText Typo="Typo.caption" Align="Align.Center">@Volume.ReleaseDate</MudText>
@@ -31,59 +31,62 @@
                 @if (UserVolumeStatus != null)
                 {
                     <div class="catalog-button-panel">
-                        <MudButtonGroup Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success">
-                            @switch (UserVolumeStatus.CurrentOwnershipStatus)
+                        <MudStack Spacing="1" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            @if (UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.Own || UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.Preorder || UserVolumeStatus.IsInWishlist)
                             {
-                                case VolumeStatus.None or VolumeStatus.Gone or VolumeStatus.Wishlist:
-                                    {
-                                        if (UserVolumeStatus.IsInWishlist == false)
-                                        {
-                                            <MudTooltip Text="@Localizer["Wishlist"]" Placement="Placement.Top" Arrow="true" Delay="250" Duration="250">
-                                                <MudIconButton Icon="@CustomIcons.wishlist" OnClick="HandleWishListAsync">
-                                                    @Localizer["Wishlist"]
-                                                </MudIconButton>
-                                            </MudTooltip>
-                                        }
+                                if (UserVolumeStatus.IsInWishlist && UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.None)
+                                {
+                                    <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+                                        @Localizer["Wishlisted"]
+                                    </MudChip>
+                                }
+                                else
+                                {
 
-
-                                        @if (Volume.IsPreorder)
-                                        {
-                                            <MudTooltip Text="@Localizer["Preorder"]" Arrow="true" Placement="Placement.Top" Delay="250" Duration="250">
-                                                <MudIconButton Icon="@CustomIcons.preorder" OnClick="HandlePreorderAsync">
-                                                    @Localizer["Preorder"]
-                                                </MudIconButton>
-                                            </MudTooltip>
-                                        }
-                                        else
-                                        {
-                                            <MudTooltip Text="@Localizer["AddToLibrary"]" Arrow="true" Placement="Placement.Top" Delay="250" Duration="250">
-                                                <MudIconButton Icon="@CustomIcons.bookshelf" OnClick="HandleAddToLibraryAsync">
-                                                    @Localizer["AddToLibrary"]
-                                                </MudIconButton>
-                                            </MudTooltip>
-                                        }
-                                    }
-                                    break;
-                                case VolumeStatus.Preorder:
-                                    {
-                                        if (Volume.IsPreorder == false)
-                                        {
-                                            <MudButton StartIcon="@CustomIcons.bookshelf" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" OnClick="HandleAddToLibraryAsync">
-                                                @Localizer["PreorderArrived"]
-                                            </MudButton>
-                                        }
-                                    }
-                                    break;
-                                default:
-                                    break;
+                                    <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+                                        @Localizer[UserVolumeStatus.CurrentOwnershipStatus]
+                                    </MudChip>
+                                }
                             }
-                        </MudButtonGroup>
-                        @if (UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.Own || UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.Preorder)
-                        {
-                            <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
-                                @Localizer[UserVolumeStatus.CurrentOwnershipStatus]
-                            </MudChip>
-                        }
+                            <MudButtonGroup Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success">
+                                @switch (UserVolumeStatus.CurrentOwnershipStatus)
+                                {
+                                    case VolumeStatus.None or VolumeStatus.Gone or VolumeStatus.Wishlist:
+                                        {
+                                            if (UserVolumeStatus.IsInWishlist == false)
+                                            {
+                                                <CardButtonTooltip Text="@Localizer["AddWishlist"]">
+                                                    <MudIconButton Icon="@CustomIcons.wishlist" OnClick="HandleWishListAsync"></MudIconButton>
+                                                </CardButtonTooltip>
+                                            }
+
+
+                                            @if (Volume.IsPreorder)
+                                            {
+                                                <CardButtonTooltip Text="@Localizer["AddPreorder"]" >
+                                                    <MudIconButton Icon="@CustomIcons.preorder" OnClick="HandlePreorderAsync"></MudIconButton>
+                                                </CardButtonTooltip>
+                                            }
+                                            else
+                                            {
+                                                <CardButtonTooltip Text="@Localizer["AddToLibrary"]">
+                                                    <MudIconButton Icon="@CustomIcons.bookshelf" OnClick="HandleAddToLibraryAsync"></MudIconButton>
+                                                </CardButtonTooltip>
+                                            }
+                                        }
+                                        break;
+                                    case VolumeStatus.Preorder:
+                                        { 
+                                            <CardButtonTooltip Text="@Localizer["PreorderArrived"]">
+                                                <MudIconButton Icon="@CustomIcons.delivered" OnClick="HandleAddToLibraryAsync"></MudIconButton>
+                                            </CardButtonTooltip>
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            </MudButtonGroup>
+                        </MudStack>
                     </div>
                 }
             </AuthorizeView>
@@ -181,7 +184,8 @@ else
                 {
                     Status = status,
                     Date = DateTime.Now,
-                    Type = VolumeType.Physical
+                    Type = VolumeType.Physical,
+                    VolumeId = Volume.Id,
                 }
             },
             {
@@ -203,7 +207,7 @@ else
                     throw new InvalidOperationException("Ownership data is null");
                 }
 
-                var (userVolumeStatus, stats) = await VolumeService.AddOwnershipAsync(Volume.PublicId, await GetUserId(), ownership);
+                var (userVolumeStatus, stats) = await VolumeService.AddEditOwnershipAsync(ownership, await GetUserId());
                 if (UserVolumeStatus != null)
                 {
                     UserVolumeStatus.CurrentOwnershipStatus = userVolumeStatus.CurrentOwnershipStatus;

@@ -6,6 +6,7 @@ namespace MangaShelf.BL.Dto;
 [ExcludeFromCodeCoverage]
 public class SeriesSimpleDto
 {
+    public Guid Id { get; set; }
     public string PublicId { get; set; }
 
     public required string Title { get; set; }

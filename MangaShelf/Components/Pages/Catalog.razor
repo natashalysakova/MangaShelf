@@ -69,7 +69,7 @@
         @foreach (var volume in volumes)
         {
             <MudItem xs="6" sm="4" md="3" lg="2">
-                <SmallCard Volume="@volume" ShowBadges="true" ShowButtons="true" UserVolumeStatus="userStatuses.FirstOrDefault(x=>x.VolumePublicId == volume.PublicId)"/>
+                <SmallCard Volume="@volume" ShowBadges="true" ShowButtons="true" UserVolumeStatus="userStatuses.FirstOrDefault(x=>x.VolumeId == volume.Id)"/>
             </MudItem>
         }
     </MudGrid>

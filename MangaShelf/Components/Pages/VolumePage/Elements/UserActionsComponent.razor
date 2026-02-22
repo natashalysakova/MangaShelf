@@ -106,7 +106,7 @@
         try
         {
 
-            var (userStatus, stats) = await VolumeService.ToggleWishlist(Volume.PublicId, await GetUserId());
+            var (userStatus, stats) = await VolumeService.ToggleWishlist(Volume.Id, await GetUserId());
             VolumeState.UpdateBoth(userStatus, stats);
         }
         catch (Exception ex)
@@ -119,7 +119,7 @@
     {
         try
         {
-            var (userStatus, stats) = await VolumeService.ToggleLike(Volume.PublicId, await GetUserId());
+            var (userStatus, stats) = await VolumeService.ToggleLike(Volume.Id, await GetUserId());
             VolumeState.UpdateBoth(userStatus, stats);
         }
         catch (Exception ex)
@@ -146,7 +146,8 @@
                 {
                     Status = status,
                     Date = DateTime.Now,
-                    Type = VolumeType.Physical
+                    Type = VolumeType.Physical,
+                    VolumeId = Volume.Id,
                 }
             }
         };
@@ -165,7 +166,7 @@
                     throw new InvalidOperationException("Ownership data is null");
                 }
 
-                var (userStatus, stats) = await VolumeService.AddOwnershipAsync(Volume.PublicId, await GetUserId(), ownership);
+                var (userStatus, stats) = await VolumeService.AddEditOwnershipAsync(ownership, await GetUserId());
                 VolumeState.UpdateBoth(userStatus, stats);
             }
             catch (Exception)
@@ -191,8 +192,7 @@
                 Rating = 0,
                 StartedAt = DateTime.UtcNow,
                 Status = ReadingStatus.PlanToRead,
-                VolumeId = Volume.Id,
-                UserId = await GetUserIdGuid()
+                VolumeId = Volume.Id
             };
         }
 
@@ -211,7 +211,7 @@
         {
             try
             {
-                var (userStatus, stats) = await VolumeService.AddEditReadingAsync(reading);
+                var (userStatus, stats) = await VolumeService.AddEditReadingAsync(reading, await GetUserId());
                 VolumeState.UpdateBoth(userStatus, stats);
             }
             catch (Exception ex)
@@ -228,7 +228,7 @@
     {
         try
         {
-            var userStatus = await VolumeService.GetVolumeStatusInfo(Volume.PublicId, await GetUserId());
+            var userStatus = await VolumeService.GetVolumeStatusInfo(Volume.Id, await GetUserId());
             VolumeState.UpdateUserStatus(userStatus);
         }
         catch (Exception ex)
@@ -250,11 +250,6 @@
             throw new InvalidOperationException("User is not authenticated");
         }
         return userId;
-    }
-
-    private async Task<Guid> GetUserIdGuid()
-    {
-        return Guid.Parse(await GetUserId());
     }
 
     private async Task<bool> IsUserAuthenticated()

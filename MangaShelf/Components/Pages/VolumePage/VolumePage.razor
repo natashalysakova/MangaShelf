@@ -96,7 +96,7 @@ else
 
         await LoadVolumeInfo();
 
-        await VolumeState.InitializeAsync(PublicId, await GetUserId());
+        await VolumeState.InitializeAsync(Volume.Id, await GetUserId());
         VolumeState.OnUserStatusChanged += StateHasChanged;
     }
 

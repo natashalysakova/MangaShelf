@@ -5,6 +5,7 @@ namespace MangaShelf.BL.Dto;
 [ExcludeFromCodeCoverage]
 public class CardVolumeDto
 {
+    public Guid Id { get; set; }
     public string PublicId { get; set; }
     public string SeriesName { get; set; }
     public string Title { get; set; }

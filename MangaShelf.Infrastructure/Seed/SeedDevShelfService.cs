@@ -74,21 +74,21 @@ public class SeedDevShelfService : ISeedDataService
         var context = _dbContextFactory.CreateDbContext();
 
         var seriesList = await context.Series
-            .Where(s => s.PublicId == Guid.Empty)
+            .Where(s => string.IsNullOrEmpty(s.PublicId))
             .ToListAsync();
 
         foreach (var series in seriesList)
         {
-            series.PublicId = Guid.NewGuid();
+            series.PublicId = Guid.NewGuid().ToString();
         }
 
         var volumeList = await context.Volumes
-            .Where(v => v.PublicId == Guid.Empty)
+            .Where(v => string.IsNullOrEmpty(v.PublicId))
             .ToListAsync();
 
         foreach (var volume in volumeList)
         {
-            volume.PublicId = Guid.NewGuid();
+            volume.PublicId = Guid.NewGuid().ToString();
         }
 
         await context.SaveChangesAsync();

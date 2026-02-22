@@ -5,7 +5,7 @@ namespace MangaShelf.Common.Interfaces;
 public interface IImageManager
 {
     string CreateSmallImage(string coverImageUrl);
-    string? DownloadFileFromWeb(string url, Guid publicId);
+    string? DownloadFileFromWeb(string url, string publicId);
     string SaveFlagFromCDN(string countryCode);
     string CropImage(string coverImageUrl);
     string? CropImage(string coverImageUrl, int left, int top, int right, int bottom);
@@ -251,7 +251,7 @@ public class ImageManager : IImageManager
         return coverImageUrl; // Return original if resize fails
     }
 
-    public string? DownloadFileFromWeb(string url, Guid publicId)
+    public string? DownloadFileFromWeb(string url, string publicId)
     {
         if (url.Contains('?'))
         {
@@ -260,7 +260,7 @@ public class ImageManager : IImageManager
         }
 
         var extention = new FileInfo(url).Extension;
-        var destiantionFolder = Path.Combine(imageDir, "series", publicId.ToString());
+        var destiantionFolder = Path.Combine(imageDir, "series", publicId);
         var filename = $"{Guid.NewGuid()}{extention}";
 
         try

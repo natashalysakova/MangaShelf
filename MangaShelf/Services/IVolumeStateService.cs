@@ -8,7 +8,7 @@ public interface IVolumeStateService
     event Action? OnUserStatusChanged;
     VolumeStatsDto? CurrentStats { get; }
     UserVolumeStatusDto? CurrentUserStatus { get; }
-    Task InitializeAsync(string volumePublicId, string? userId = null);
+    Task InitializeAsync(Guid volumeId, string? userId = null);
     void UpdateStats(VolumeStatsDto stats);
     void UpdateUserStatus(UserVolumeStatusDto userStatus);
     void UpdateBoth(UserVolumeStatusDto userStatus, VolumeStatsDto stats);

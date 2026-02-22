@@ -79,6 +79,15 @@ namespace MangaShelf.Localization.Resources.Elements {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AddPreorder.
+        /// </summary>
+        public static string AddPreorder {
+            get {
+                return ResourceManager.GetString("AddPreorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add to library.
         /// </summary>
         public static string AddToLibrary {
@@ -88,11 +97,29 @@ namespace MangaShelf.Localization.Resources.Elements {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AddWishlist.
+        /// </summary>
+        public static string AddWishlist {
+            get {
+                return ResourceManager.GetString("AddWishlist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An error occurred.
         /// </summary>
         public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ItsPreorder.
+        /// </summary>
+        public static string ItsPreorder {
+            get {
+                return ResourceManager.GetString("ItsPreorder", resourceCulture);
             }
         }
         
@@ -129,6 +156,15 @@ namespace MangaShelf.Localization.Resources.Elements {
         public static string Wishlist {
             get {
                 return ResourceManager.GetString("Wishlist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wishlisted.
+        /// </summary>
+        public static string Wishlisted {
+            get {
+                return ResourceManager.GetString("Wishlisted", resourceCulture);
             }
         }
     }

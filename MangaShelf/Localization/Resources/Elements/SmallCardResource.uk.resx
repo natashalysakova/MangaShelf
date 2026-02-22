@@ -141,4 +141,16 @@
   <data name="Error" xml:space="preserve">
     <value>Сталася помилка</value>
   </data>
+  <data name="Wishlisted" xml:space="preserve">
+    <value>В бажаному</value>
+  </data>
+  <data name="AddPreorder" xml:space="preserve">
+    <value>Додати передзамовлення</value>
+  </data>
+  <data name="AddWishlist" xml:space="preserve">
+    <value>Додати в бажане</value>
+  </data>
+  <data name="ItsPreorder" xml:space="preserve">
+    <value>Передзамовлення</value>
+  </data>
 </root>
