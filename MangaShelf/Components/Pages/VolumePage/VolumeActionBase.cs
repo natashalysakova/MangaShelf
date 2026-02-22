@@ -211,7 +211,6 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
 
     public void Dispose()
     {
-        VolumeState.Clear();
         VolumeState.OnUserStatusChanged -= StateHasChanged;
     }
 }

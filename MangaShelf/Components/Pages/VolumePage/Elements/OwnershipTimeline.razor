@@ -24,4 +24,9 @@
 
 @code {
 
+    protected override void OnInitialized()
+    {
+        VolumeState.OnUserStatusChanged += StateHasChanged;
+    }
+
 }
