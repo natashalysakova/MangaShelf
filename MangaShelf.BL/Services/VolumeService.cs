@@ -413,7 +413,15 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             volume.AvgRating = avgRating.Average(x => x.Rating!.Value);
         }
 
-        context.Entry(reading).State = reading.Id == Guid.Empty ? EntityState.Added : EntityState.Modified;
+        var existingEntry = context.ChangeTracker.Entries<Reading>()
+            .FirstOrDefault(e => e.Entity.Id == reading.Id);
+
+        if (existingEntry != null)
+        {
+            existingEntry.State = EntityState.Detached;
+        }
+
+        context.Readings.Update(reading);
         await context.SaveChangesAsync(token);
 
         return (await GetVolumeStatusInfo(volume.Id, user.IdentityUserId), await GetVolumeStats(volume.Id));
@@ -456,6 +464,12 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         }
 
         return (volumes.Item1, volumes.Item2, userVolumeStatuses);
+    }
+
+    public async Task<Reading?> GetReading(Guid id, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        return  await context.Readings.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, token);
     }
 }
 

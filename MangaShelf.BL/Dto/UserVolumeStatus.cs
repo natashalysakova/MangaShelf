@@ -12,8 +12,8 @@ public class UserVolumeStatusDto
     public bool IsInWishlist { get; set; }
 
     public VolumeStatus CurrentOwnershipStatus { get; set; }
-    public IEnumerable<OwnershipHistoryDto> Ownerships { get; set; }
-    public IEnumerable<ReadingHistoryDto> Readings { get; set; }
+    public IEnumerable<OwnershipHistoryDto> Ownerships { get; set; } = [];
+    public IEnumerable<ReadingHistoryDto> Readings { get; set; } = [];
 }
 
 public class OwnershipHistoryDto

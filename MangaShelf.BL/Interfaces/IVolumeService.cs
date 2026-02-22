@@ -38,4 +38,5 @@ public interface IVolumeService : IService
 
 
     Task<IEnumerable<ReviewDto>> GetReviews(Guid volumeId, CancellationToken token = default);
+    Task<Reading?> GetReading(Guid id, CancellationToken token = default);
 }

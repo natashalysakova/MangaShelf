@@ -1,13 +1,9 @@
 ﻿@using System.Security.Claims
+@using MangaShelf.Components.Pages.VolumePage
 @using MangaShelf.Components.Pages.VolumePage.Elements
 @using MangaShelf.DAL.Models
-@inject IDialogService Dialog
-@inject IVolumeService VolumeService
-@inject ILogger<SmallCard> Logger
-@inject ISnackbar Snackbar
-@inject ISmallCardLocalizationService Localizer
 
-
+@inherits VolumeActionBase
 
 @if (Volume != null)
 {
@@ -28,13 +24,16 @@
         @if (ShowButtons)
         {
             <AuthorizeView>
-                @if (UserVolumeStatus != null)
+                @if (CurrentUserStatus != null)
                 {
+                    var status = CurrentUserStatus.CurrentOwnershipStatus;
+                    var inWishList = CurrentUserStatus.IsInWishlist;
+
                     <div class="catalog-button-panel">
                         <MudStack Spacing="1" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                            @if (UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.Own || UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.Preorder || UserVolumeStatus.IsInWishlist)
+                            @if (status == VolumeStatus.Own || status == VolumeStatus.Preorder || inWishList)
                             {
-                                if (UserVolumeStatus.IsInWishlist && UserVolumeStatus.CurrentOwnershipStatus == VolumeStatus.None)
+                                if (inWishList && status == VolumeStatus.None)
                                 {
                                     <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
                                         @Localizer["Wishlisted"]
@@ -44,16 +43,16 @@
                                 {
 
                                     <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
-                                        @Localizer[UserVolumeStatus.CurrentOwnershipStatus]
+                                        @Localizer[status]
                                     </MudChip>
                                 }
                             }
                             <MudButtonGroup Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success">
-                                @switch (UserVolumeStatus.CurrentOwnershipStatus)
+                                @switch (status)
                                 {
                                     case VolumeStatus.None or VolumeStatus.Gone or VolumeStatus.Wishlist:
                                         {
-                                            if (UserVolumeStatus.IsInWishlist == false)
+                                            if (inWishList == false)
                                             {
                                                 <CardButtonTooltip Text="@Localizer["AddWishlist"]">
                                                     <MudIconButton Icon="@CustomIcons.wishlist" OnClick="HandleWishListAsync"></MudIconButton>
@@ -63,7 +62,7 @@
 
                                             @if (Volume.IsPreorder)
                                             {
-                                                <CardButtonTooltip Text="@Localizer["AddPreorder"]" >
+                                                <CardButtonTooltip Text="@Localizer["AddPreorder"]">
                                                     <MudIconButton Icon="@CustomIcons.preorder" OnClick="HandlePreorderAsync"></MudIconButton>
                                                 </CardButtonTooltip>
                                             }
@@ -76,7 +75,7 @@
                                         }
                                         break;
                                     case VolumeStatus.Preorder:
-                                        { 
+                                        {
                                             <CardButtonTooltip Text="@Localizer["PreorderArrived"]">
                                                 <MudIconButton Icon="@CustomIcons.delivered" OnClick="HandleAddToLibraryAsync"></MudIconButton>
                                             </CardButtonTooltip>
@@ -110,40 +109,43 @@ else
 </style>
 
 @code {
-    [EditorRequired]
     [Parameter]
     public CardVolumeDto? Volume { get; set; }
-
-    [EditorRequired]
-    [Parameter]
-    public UserVolumeStatusDto? UserVolumeStatus { get; set; }
 
     [Parameter]
     public bool ShowBadges { get; set; } = false;
 
     [Parameter]
-    public bool ShowButtons { get; set; } = false;
+    public bool ShowButtons { get; set; }
 
     [Inject]
     NavigationManager NavigationManager { get; set; }
 
+    [Inject]
+    new ISmallCardLocalizationService Localizer { get; set; }
 
-    [CascadingParameter]
-    public required Task<AuthenticationState> AuthStateTask { get; set; }
+    public UserVolumeStatusDto? CurrentUserStatus { get; set; }
+
+    protected override Guid? ResolvedVolumeId => Volume?.Id;
 
     private string sideImageClass = "card-image";
 
-    private async Task<string?> GetUserId()
-    {
-        var authState = await AuthStateTask;
-        var user = authState.User;
-        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return userId;
-    }
-
     protected override async Task OnParametersSetAsync()
     {
-        base.OnParametersSet();
+        if(Volume == null || ShowButtons == false)
+        {
+            return;
+        }
+
+        try
+        {
+            CurrentUserStatus = await VolumeService.GetVolumeStatusInfo(Volume.Id, await GetUserId());
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading volume status for volume {VolumeId}", Volume.Id);
+        }
     }
 
     private async Task OpenVolumeAsync()
@@ -156,79 +158,26 @@ else
 
     private async Task HandleWishListAsync()
     {
-        await OpenSetOwnershipDialog(VolumeStatus.Wishlist);
+        await HandleOwnershipChange(VolumeStatus.Wishlist);
     }
 
     private async Task HandlePreorderAsync()
     {
-        await OpenSetOwnershipDialog(VolumeStatus.Preorder);
+        await HandleOwnershipChange(VolumeStatus.Preorder);
     }
 
     private async Task HandleAddToLibraryAsync()
     {
-        await OpenSetOwnershipDialog(VolumeStatus.Own);
+        await HandleOwnershipChange(VolumeStatus.Own);
     }
 
-    private async Task OpenSetOwnershipDialog(VolumeStatus status)
+    private async Task HandleOwnershipChange(VolumeStatus status)
     {
-        var dialogOptions = new DialogOptions()
+        var newStatus = await OpenSetOwnershipDialog(VolumeStatus.Wishlist);
+        if(newStatus != null)
         {
-            FullWidth = false,
-            Position = DialogPosition.Center,
-        };
-        var parameters = new DialogParameters
-        {
-            {
-                nameof(SetOwnershipDialog.Ownership),
-                new Ownership()
-                {
-                    Status = status,
-                    Date = DateTime.Now,
-                    Type = VolumeType.Physical,
-                    VolumeId = Volume.Id,
-                }
-            },
-            {
-                nameof(SetOwnershipDialog.IsDisabledStatus), true
-            }
-        };
-        var dialog = await Dialog.ShowAsync<SetOwnershipDialog>(string.Empty, parameters, dialogOptions);
-
-        var result = await dialog.Result;
-
-        if (result != null && !result.Canceled)
-        {
-            try
-            {
-                var ownership = result.Data as Ownership;
-
-                if (ownership is null)
-                {
-                    throw new InvalidOperationException("Ownership data is null");
-                }
-
-                var (userVolumeStatus, stats) = await VolumeService.AddEditOwnershipAsync(ownership, await GetUserId());
-                if (UserVolumeStatus != null)
-                {
-                    UserVolumeStatus.CurrentOwnershipStatus = userVolumeStatus.CurrentOwnershipStatus;
-                    UserVolumeStatus.IsInWishlist = userVolumeStatus.IsInWishlist;
-                }
-
-                if (status == VolumeStatus.Own)
-                {
-                    Snackbar.Add(Localizer["AddedToLibrary"]);
-                }
-                else
-                {
-                    Snackbar.Add(Localizer["AddedToPreorder"]);
-                }
-            }
-            catch (Exception)
-            {
-                Logger.LogError("Error adding ownership for volume {PublicId}", Volume.PublicId);
-                Snackbar.Add(Localizer["Error"]);
-            }
-
+            CurrentUserStatus = newStatus;
+            StateHasChanged();
         }
     }
 }

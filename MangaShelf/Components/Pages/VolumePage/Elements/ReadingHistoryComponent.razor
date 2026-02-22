@@ -1,7 +1,6 @@
-@using MangaShelf.DAL.Models
-@using System.Security.Claims
-@inject IVolumePageLocalizationService Localizer
 @inject IJSRuntime JS
+
+@inherits VolumeActionBase
 
 @{
     var classes = $"reading-history{(ReadingHistory.ReviewId != null ? " has-review" : string.Empty)}";
@@ -25,7 +24,7 @@
         <MudSpacer/>
 
         <MudText Typo="Typo.body2">@Localizer[ReadingHistory.Status]</MudText>
-        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"></MudIconButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="()=>ShowAddEditReadingDialog(ReadingHistory)" Size="Size.Small"></MudIconButton>
     </MudStack>
 </div>
 
