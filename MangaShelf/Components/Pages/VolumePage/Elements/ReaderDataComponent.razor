@@ -12,7 +12,7 @@
     <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
         <MudItem xs="12">
             <MudText Class="mb-3" Typo="Typo.h5">@Localizer["ReaderData"]</MudText>
-            <MudStack AlignItems="AlignItems.Stretch" Spacing="2">
+            <MudStack AlignItems="AlignItems.Stretch" Spacing="1">
                 @foreach (var reading in VolumeState.CurrentUserStatus.Readings)
                 {
                     <ReadingHistoryComponent ReadingHistory="@reading" />

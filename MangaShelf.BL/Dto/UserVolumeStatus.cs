@@ -25,6 +25,7 @@ public class OwnershipHistoryDto
 
 public class ReadingHistoryDto
 {
+    public Guid Id { get; set; }
     public ReadingStatus Status { get; set; }
     public DateTimeOffset StartedAt { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }

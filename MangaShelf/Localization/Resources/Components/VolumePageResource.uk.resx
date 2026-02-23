@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="OwnershipData" xml:space="preserve">
-    <value>В бібліотеці</value>
+    <value>Моя поличка</value>
   </data>
   <data name="Status" xml:space="preserve">
     <value>Статус</value>
@@ -133,7 +133,7 @@
     <value>Зареєструватися</value>
   </data>
   <data name="ReaderData" xml:space="preserve">
-    <value>Дані читача</value>
+    <value>Читання</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Скасувати</value>
@@ -184,7 +184,7 @@
     <value>Передзамовлення</value>
   </data>
   <data name="Own" xml:space="preserve">
-    <value>У власності</value>
+    <value>У бібліотеці</value>
   </data>
   <data name="Gone" xml:space="preserve">
     <value>Втрачено</value>
@@ -287,5 +287,11 @@
   </data>
   <data name="SetHistoricStatus" xml:space="preserve">
     <value>Додати історичний запис</value>
+  </data>
+  <data name="History" xml:space="preserve">
+    <value>Історія володіння</value>
+  </data>
+  <data name="ShowLess" xml:space="preserve">
+    <value>Показати менше</value>
   </data>
 </root>

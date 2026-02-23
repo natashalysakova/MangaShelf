@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 using System.Security.Claims;
+using static MangaShelf.Components.Pages.VolumePage.Elements.SetOwnershipDialog;
 
 namespace MangaShelf.Components.Pages.VolumePage;
 
@@ -40,9 +41,9 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
 
     }
 
-    protected async Task ShowAddEditReadingDialog(ReadingHistoryDto? reading)
+    protected async Task ShowAddEditReadingDialog(ReadingHistoryDto reading)
     {
-        var readingfromDb = await VolumeService.GetReading(Guid.Parse(reading.ReviewId));
+        var readingfromDb = await VolumeService.GetReading(reading.Id);
 
         if (readingfromDb == null)
         {
@@ -103,6 +104,33 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
 
     protected async Task<UserVolumeStatusDto?> OpenSetOwnershipDialog(VolumeStatus status, bool disableStatus = true)
     {
+        var ownership = new Ownership()
+        {
+            VolumeId = ResolvedVolumeId!.Value,
+            Status = status,
+            Date = DateTime.UtcNow,
+            Type = VolumeType.Physical
+        };
+        return await OpenSetOwnershipDialog(ownership, disableStatus);
+    }
+
+    protected async Task<UserVolumeStatusDto?> OpenSetOwnershipDialog(OwnershipHistoryDto ownership, bool disableStatus = true)
+    {
+
+        var ownershipFromDb = await VolumeService.GetOwnership(ownership.Id);
+
+        if (ownershipFromDb == null)
+        {
+            Logger.LogError("Ownership with Id {Id} not found in database.", ownership.Id);
+            Snackbar.Add(Localizer["ErrorLoadingOwnership"], Severity.Error);
+            return VolumeState.CurrentUserStatus;
+        }
+
+        return await OpenSetOwnershipDialog(ownershipFromDb, disableStatus);
+    }
+
+    protected async Task<UserVolumeStatusDto?> OpenSetOwnershipDialog(Ownership ownership, bool disableStatus)
+    {
         var dialogOptions = new DialogOptions()
         {
             FullWidth = false,
@@ -111,13 +139,7 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         var parameters = new DialogParameters
         {
             {   nameof(SetOwnershipDialog.Ownership),
-                new Ownership()
-                {
-                    Status = status,
-                    Date = DateTime.Now,
-                    Type = VolumeType.Physical,
-                    VolumeId = ResolvedVolumeId!.Value,
-                }
+                ownership
             },
             {
                 nameof(SetOwnershipDialog.IsDisabledStatus),
@@ -132,15 +154,22 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         {
             try
             {
-                var ownership = result.Data as Ownership;
-
-                if (ownership is null)
+                var resultData = result.Data as SetOwnershipDialogResult;
+                if(resultData == null)
                 {
-                    throw new InvalidOperationException("Ownership data is null");
+                    return VolumeState.CurrentUserStatus;
                 }
 
-                var (userStatus, stats) = await VolumeService.AddEditOwnershipAsync(ownership, await GetUserId());
-                VolumeState.UpdateBoth(userStatus, stats);
+                if (resultData.IsDeleted)
+                {
+                    var(userStatus, stats) = await VolumeService.RemoveOwnershipAsync(ownership.Id);
+                    VolumeState.UpdateBoth(userStatus, stats);
+                }
+                else
+                {
+                    var (userStatus, stats) = await VolumeService.AddEditOwnershipAsync(ownership, await GetUserId());
+                    VolumeState.UpdateBoth(userStatus, stats);
+                }
             }
             catch (Exception)
             {
@@ -149,6 +178,7 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
 
         }
         return VolumeState.CurrentUserStatus;
+
     }
 
     protected async Task<UserVolumeStatusDto?> ToggleWishList()

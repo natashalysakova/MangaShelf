@@ -12,43 +12,42 @@
 {
 
     <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
-        <MudStack Row>
-            <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
-                <MudText Typo="Typo.h5">@Localizer["OwnershipData"]</MudText>
-                <AuthorizeView>
-                    <Authorized>
-                        @if (VolumeState != null && VolumeState.CurrentUserStatus != null)
+        <MudStack AlignItems="AlignItems.Stretch" Justify="Justify.Center">
+            <MudText Typo="Typo.h5">@Localizer["OwnershipData"]</MudText>
+            <AuthorizeView>
+                <Authorized>
+                    @if (VolumeState != null && VolumeState.CurrentUserStatus != null)
+                    {
+                        <MudStack Row AlignItems="AlignItems.Center">
+                            <MudIcon Icon="@CustomIcons.bookshelf"></MudIcon>
+                            <MudText>@Localizer[VolumeState.CurrentUserStatus?.CurrentOwnershipStatus]</MudText>
+                            <MudSpacer></MudSpacer>
+                            @if (VolumeState.CurrentUserStatus?.Ownerships?.Any(x => x.Status != VolumeStatus.None) == true)
+                            {
+
+                                <MudIconButton Variant="Variant.Text" Color="Color.Default"
+                                               Icon="@Icons.Material.Filled.History"
+                                               OnClick="@(() => { _showTimeline = !_showTimeline; })">
+
+                                </MudIconButton>
+                            }
+                        </MudStack>
+                        @if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Preorder)
                         {
-                            <MudStack Row>
-                                <MudTextField Variant="Variant.Filled"
-                                              Label="@Localizer["Status"]" ReadOnly="true"
-                                              Adornment="Adornment.Start"
-                                              AdornmentIcon="@Icons.Material.Filled.RemoveRedEye"
-                                              Value="@Localizer[VolumeState.CurrentUserStatus?.CurrentOwnershipStatus]"></MudTextField>
-                                @if (VolumeState.CurrentUserStatus?.Ownerships?.Any(x => x.Status != VolumeStatus.None) == true)
-                                {
-                                    <MudIconButton Variant="Variant.Text" OnClick="@(() => { _showTimeline = !_showTimeline; })" Color="@Color.Default" Icon="@Icons.Material.Filled.History"></MudIconButton>
-                                }
-                            </MudStack>
-
-                            @if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Preorder)
-                            {
-                                <MudButton Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Primary">@Localizer["ConfirmDelivery"]</MudButton>
-                            }
-
-                            @if (_showTimeline)
-                            {
-                                <OwnershipTimeline VolumeId="@VolumeId" />
-                            }
+                            <MudButton EndIcon="@CustomIcons.delivered" Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Success">@Localizer["ConfirmDelivery"]</MudButton>
                         }
-                    </Authorized>
-                    <NotAuthorized>
-                        <MudText>@Localizer["LoginToSeeData"]</MudText>
-                        <MudButton OnClick="OpenLoginPage">@Localizer["Login"]</MudButton>
-                        <MudButton OnClick="OpenRegisterPage">@Localizer["Register"]</MudButton>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </MudStack>
+                        @if (_showTimeline)
+                        {
+                            <OwnershipTimeline VolumeId="@VolumeId" />
+                        }
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    <MudText>@Localizer["LoginToSeeData"]</MudText>
+                    <MudButton OnClick="OpenLoginPage">@Localizer["Login"]</MudButton>
+                    <MudButton OnClick="OpenRegisterPage">@Localizer["Register"]</MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
         </MudStack>
     </MudPaper>
 }

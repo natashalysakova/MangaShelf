@@ -6,20 +6,20 @@
 
 @if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Ownerships.Any())
 {
-
-    @foreach (var ownership in VolumeState.CurrentUserStatus.Ownerships.OrderByDescending(x => x.Date))
-    {
-        <div class="reading-history">
-            <MudStack Row Justify="Justify.SpaceBetween" Spacing="1">
+    <MudText>@Localizer["History"]</MudText>
+    <MudStack AlignItems="AlignItems.Stretch" Justify="Justify.Center" Spacing="1">
+        @foreach (var ownership in VolumeState.CurrentUserStatus.Ownerships.OrderByDescending(x => x.Date))
+        {
+            <MudStack AlignItems="AlignItems.Center" Row Spacing="1" Class="ownership-timeline-item" @onclick="() => OpenSetOwnershipDialog(ownership)">
                 <MudText Typo="Typo.body2">@ownership.Date.ToString("dd.MM.yyyy")</MudText>
-
-                <MudSpacer />
-
+                <MudSpacer></MudSpacer>
                 <MudText Typo="Typo.body2">@Localizer[ownership.Status]</MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => DeleteFromHistory(ownership.Id)" Size="Size.Small"></MudIconButton>
-            </MudStack>
-        </div>
-    }
+@*                 <MudIconButton OnClick="() => OpenSetOwnershipDialog(ownership)" Icon="@Icons.Material.Filled.Edit" Size="Size.Small"></MudIconButton>
+ *@            </MudStack>
+        }
+    </MudStack>
+
+
 }
 
 @code {
