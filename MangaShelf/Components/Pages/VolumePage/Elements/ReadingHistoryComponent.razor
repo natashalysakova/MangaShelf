@@ -6,7 +6,7 @@
     var classes = $"reading-history{(ReadingHistory.ReviewId != null ? " has-review" : string.Empty)}";
 }
 <div @onclick="ScrollToReview" class="@classes">
-    <MudStack Row Justify="Justify.SpaceBetween" Spacing="1">
+    <MudStack Row AlignItems="AlignItems.Center" Spacing="1" @onclick="()=>ShowAddEditReadingDialog(ReadingHistory)">
         @{
             string date;
             if (ReadingHistory.FinishedAt != null)
@@ -24,8 +24,8 @@
         <MudSpacer/>
 
         <MudText Typo="Typo.body2">@Localizer[ReadingHistory.Status]</MudText>
-        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="()=>ShowAddEditReadingDialog(ReadingHistory)" Size="Size.Small"></MudIconButton>
-    </MudStack>
+@*         <MudIconButton Variant="Variant.Text" Icon="@Icons.Material.Filled.Edit" OnClick="() => ShowAddEditReadingDialog(ReadingHistory)" Size="Size.Small"></MudIconButton>
+ *@    </MudStack>
 </div>
 
 @code {
@@ -36,12 +36,12 @@
     private async Task ScrollToReview()
     {
 
-        if (ReadingHistory.ReviewId == null)
-        {
-            return;
-        }
+        // if (ReadingHistory.ReviewId == null)
+        // {
+        //     return;
+        // }
 
-        var reviewId = $"review-{ReadingHistory.ReviewId}";
-        await JS.InvokeVoidAsync("scrollToElement", reviewId);
+        // var reviewId = $"review-{ReadingHistory.ReviewId}";
+        // await JS.InvokeVoidAsync("scrollToElement", reviewId);
     }
 }

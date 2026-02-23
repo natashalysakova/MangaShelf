@@ -256,7 +256,8 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
                 User = user,
                 Volume = volume,
                 Date = DateTime.Now,
-                Status = VolumeStatus.Wishlist
+                Status = VolumeStatus.Wishlist,
+                Type = VolumeType.Physical
             };
             user.OwnedVolumes.Add(wishlistRecord);
         }
@@ -324,8 +325,11 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             throw new Exception("User not found");
         }
 
+        DetachExisting(ownership, context);
+        
         ownership.UserId = user.Id;
-        context.Entry(ownership).State = ownership.Id == Guid.Empty ? EntityState.Added : EntityState.Modified;
+
+        context.Ownerships.Update(ownership);
         await context.SaveChangesAsync(token);
 
         return (await GetVolumeStatusInfo(volume.Id, user.IdentityUserId, token), await GetVolumeStats(volume.Id, token));
@@ -413,18 +417,23 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             volume.AvgRating = avgRating.Average(x => x.Rating!.Value);
         }
 
-        var existingEntry = context.ChangeTracker.Entries<Reading>()
-            .FirstOrDefault(e => e.Entity.Id == reading.Id);
-
-        if (existingEntry != null)
-        {
-            existingEntry.State = EntityState.Detached;
-        }
+        DetachExisting(reading, context);
 
         context.Readings.Update(reading);
         await context.SaveChangesAsync(token);
 
         return (await GetVolumeStatusInfo(volume.Id, user.IdentityUserId), await GetVolumeStats(volume.Id));
+    }
+
+    private static void DetachExisting<T>(T entity, MangaDbContext context) where T : BaseEntity
+    {
+        var existingEntry = context.ChangeTracker.Entries<T>()
+            .FirstOrDefault(e => e.Entity.Id == entity.Id);
+
+        if (existingEntry != null)
+        {
+            existingEntry.State = EntityState.Detached;
+        }
     }
 
     public async Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveReadingAsync(Guid readingId, CancellationToken token = default)
@@ -470,6 +479,12 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
     {
         var context = dbContextFactory.CreateDbContext();
         return  await context.Readings.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, token);
+    }
+
+    public Task<Ownership?> GetOwnership(Guid id, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        return context.Ownerships.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, token);
     }
 }
 

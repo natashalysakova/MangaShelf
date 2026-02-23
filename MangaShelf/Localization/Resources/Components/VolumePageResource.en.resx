@@ -285,4 +285,13 @@
   <data name="ShowMore" xml:space="preserve">
     <value>Show more</value>
   </data>
+  <data name="SetHistoricStatus" xml:space="preserve">
+    <value>Set historic status</value>
+  </data>
+  <data name="History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="ShowLess" xml:space="preserve">
+    <value>Show less</value>
+  </data>
 </root>

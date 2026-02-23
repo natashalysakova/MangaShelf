@@ -15,7 +15,7 @@
                 <MudSelectItem Value="status">@Localizer[status]</MudSelectItem>
             }
         </MudSelect>
-        <MudDatePicker @bind-Date="@selectedDate" Required="true" RequiredError="@Localizer["DateRequired"]" ></MudDatePicker>
+        <MudDatePicker @bind-Date="@selectedDate" Required="true" RequiredError="@Localizer["DateRequired"]"></MudDatePicker>
         <MudRadioGroup @bind-Value="@Ownership.Type">
             @foreach (var type in Enum.GetValues(typeof(VolumeType)).Cast<VolumeType>())
             {
@@ -24,6 +24,11 @@
         </MudRadioGroup>
     </DialogContent>
     <DialogActions>
+        @if (Ownership.Id != Guid.Empty)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => Delete(Ownership.Id)" Color="Color.Error">@Localizer["Delete"]</MudIconButton>
+        }
+
         <MudButton OnClick="Cancel">@Localizer["Cancel"]</MudButton>
         <MudButton OnClick="Submit" Variant="Variant.Filled" Color="@Color.Primary">@Localizer["Save"]</MudButton>
     </DialogActions>
@@ -46,10 +51,27 @@
         if (selectedDate.HasValue)
         {
             Ownership.Date = DateTime.SpecifyKind(selectedDate.Value, DateTimeKind.Local);
-            MudDialog.Close(DialogResult.Ok(Ownership));
+            MudDialog.Close(DialogResult.Ok(new SetOwnershipDialogResult
+                {
+                    Ownership = Ownership
+                }));
         }
     }
 
     private void Cancel() => MudDialog.CancelAll();
 
+    private void Delete(Guid ownershipId)
+    {
+        MudDialog.Close(DialogResult.Ok(new SetOwnershipDialogResult
+        {
+            Ownership = Ownership,
+            IsDeleted = true
+        }));
+    }
+
+    public class SetOwnershipDialogResult
+    {
+        public required Ownership Ownership { get; set; }
+        public bool IsDeleted { get; set; }
+    }
 }

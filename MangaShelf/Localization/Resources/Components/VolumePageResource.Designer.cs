@@ -196,6 +196,15 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to History.
+        /// </summary>
+        public static string History {
+            get {
+                return ResourceManager.GetString("History", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to In Library.
         /// </summary>
         public static string InLibrary {
@@ -475,6 +484,15 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SetHistoricStatus.
+        /// </summary>
+        public static string SetHistoricStatus {
+            get {
+                return ResourceManager.GetString("SetHistoricStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add to Library.
         /// </summary>
         public static string SetOwn {
@@ -489,6 +507,15 @@ namespace MangaShelf.Localization.Resources.Components {
         public static string SetPreorder {
             get {
                 return ResourceManager.GetString("SetPreorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ShowLess.
+        /// </summary>
+        public static string ShowLess {
+            get {
+                return ResourceManager.GetString("ShowLess", resourceCulture);
             }
         }
         
