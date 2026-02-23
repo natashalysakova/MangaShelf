@@ -40,7 +40,7 @@ jobs:
           echo "USER_NAME=${{ env.USER_NAME }}" >> $GITHUB_OUTPUT   
 
   build-docker-image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs: 
       - compute
       - build-and-test
