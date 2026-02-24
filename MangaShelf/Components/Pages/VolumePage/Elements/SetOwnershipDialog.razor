@@ -6,11 +6,11 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">@Localizer["ChangeVolumeStatus"]</MudText>
+        <MudText Typo="Typo.h6">@Localizer[Ownership.Id == Guid.Empty ? "AddOwnership" : "EditOwnership"]</MudText>
     </TitleContent>
     <DialogContent>
         <MudSelect @bind-Value="@Ownership.Status" Disabled="@IsDisabledStatus">
-            @foreach (var status in Enum.GetValues(typeof(VolumeStatus)).Cast<VolumeStatus>())
+            @foreach (var status in Enum.GetValues(typeof(VolumeStatus)).Cast<VolumeStatus>().Where(x => x != VolumeStatus.None))
             {
                 <MudSelectItem Value="status">@Localizer[status]</MudSelectItem>
             }
@@ -26,7 +26,7 @@
     <DialogActions>
         @if (Ownership.Id != Guid.Empty)
         {
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => Delete(Ownership.Id)" Color="Color.Error">@Localizer["Delete"]</MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="Delete" Color="Color.Error">@Localizer["Delete"]</MudIconButton>
         }
 
         <MudButton OnClick="Cancel">@Localizer["Cancel"]</MudButton>
@@ -52,15 +52,15 @@
         {
             Ownership.Date = DateTime.SpecifyKind(selectedDate.Value, DateTimeKind.Local);
             MudDialog.Close(DialogResult.Ok(new SetOwnershipDialogResult
-                {
-                    Ownership = Ownership
-                }));
+            {
+                Ownership = Ownership
+            }));
         }
     }
 
     private void Cancel() => MudDialog.CancelAll();
 
-    private void Delete(Guid ownershipId)
+    private void Delete()
     {
         MudDialog.Close(DialogResult.Ok(new SetOwnershipDialogResult
         {

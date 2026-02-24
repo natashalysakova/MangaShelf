@@ -61,6 +61,24 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AddOwnership.
+        /// </summary>
+        public static string AddOwnership {
+            get {
+                return ResourceManager.GetString("AddOwnership", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AddReading.
+        /// </summary>
+        public static string AddReading {
+            get {
+                return ResourceManager.GetString("AddReading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add to Wishlist.
         /// </summary>
         public static string AddToWishlist {
@@ -156,6 +174,24 @@ namespace MangaShelf.Localization.Resources.Components {
         public static string Dropped {
             get {
                 return ResourceManager.GetString("Dropped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EditOwnership.
+        /// </summary>
+        public static string EditOwnership {
+            get {
+                return ResourceManager.GetString("EditOwnership", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EditReading.
+        /// </summary>
+        public static string EditReading {
+            get {
+                return ResourceManager.GetString("EditReading", resourceCulture);
             }
         }
         
@@ -264,15 +300,6 @@ namespace MangaShelf.Localization.Resources.Components {
         public static string LoginToSeeData {
             get {
                 return ResourceManager.GetString("LoginToSeeData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Log Reading.
-        /// </summary>
-        public static string LogReading {
-            get {
-                return ResourceManager.GetString("LogReading", resourceCulture);
             }
         }
         

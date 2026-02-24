@@ -133,7 +133,7 @@ else
 
     private async Task HandleWishListAsync()
     {
-        await HandleOwnershipChange(VolumeStatus.Wishlist);
+        await ToggleWishList();
     }
 
     private async Task HandlePreorderAsync()

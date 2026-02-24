@@ -10,24 +10,24 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
     [TestMethod]
     public async Task NashaIdea_PreorderTest()
     {
-        var result = await Parser.Parse("https://nashaidea.com/product/ne-khlopets-tom-1/");
+        var result = await Parser.Parse("https://nashaidea.com/product/100-bazhan-do-peretvorennya-na-zombi-tom-6/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 1", result.Title);
-        Assert.AreEqual("Хлопець, який їй сподобався, — не хлопець", result.Series);
+        Assert.AreEqual("Том 6", result.Title);
+        Assert.AreEqual("100 бажань до перетворення на зомбі", result.Series);
         Assert.IsNull(result.Authors);
-        Assert.AreEqual(1, result.VolumeNumber);
+        Assert.AreEqual(6, result.VolumeNumber);
         Assert.IsNotNull(result.Cover);
         Assert.IsTrue(result.Cover.StartsWith("https://nashaidea.com/"));
         Assert.IsTrue(result.Cover.EndsWith(".webp"));
         Assert.AreEqual("Nasha Idea", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
         //Assert.AreEqual("978-617-8516-51-2", result.Isbn);
-        Assert.AreEqual(3, result.TotalVolumes);
+        Assert.AreEqual(20, result.TotalVolumes);
         Assert.AreEqual(SeriesStatus.Ongoing, result.SeriesStatus);
-        Assert.AreEqual("https://nashaidea.com/product/ne-khlopets-tom-1/", result.Url);
-        Assert.AreEqual(DateTime.Parse("2025-08-28"), result.PreorderStartDate);
-        Assert.AreEqual(DateTime.Parse("2025-09-30"), result.Release);
+        Assert.AreEqual("https://nashaidea.com/product/100-bazhan-do-peretvorennya-na-zombi-tom-6/", result.Url);
+        Assert.AreEqual(DateTime.Parse("2026-01-07"), result.PreorderStartDate);
+        Assert.AreEqual(DateTime.Parse("2026-04-10"), result.Release);
         Assert.AreEqual(true, result.IsPreorder);
     }
 

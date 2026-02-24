@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 using System.Security.Claims;
+using static MangaShelf.Components.Pages.VolumePage.Elements.AddEditReadingDialog;
 using static MangaShelf.Components.Pages.VolumePage.Elements.SetOwnershipDialog;
 
 namespace MangaShelf.Components.Pages.VolumePage;
@@ -35,11 +36,6 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
     private ILogger? _logger;
     // Creates a logger categorized under the actual derived type at runtime
     protected ILogger Logger => _logger ??= LoggerFactory.CreateLogger(GetType());
-
-    override protected async Task OnParametersSetAsync()
-    {
-
-    }
 
     protected async Task ShowAddEditReadingDialog(ReadingHistoryDto reading)
     {
@@ -68,12 +64,15 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         await ShowAddEditReadingDialog(reading);
     }
 
+
+
     protected async Task ShowAddEditReadingDialog(Reading reading)
     {
         var dialogOptions = new DialogOptions()
         {
-            FullWidth = false,
+            FullWidth = true,
             Position = DialogPosition.Center,
+            MaxWidth = MaxWidth.Small,
         };
 
         var parameters = new DialogParameters
@@ -89,10 +88,25 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
 
         if (result != null && !result.Canceled)
         {
+
             try
             {
-                var (userStatus, stats) = await VolumeService.AddEditReadingAsync(reading, await GetUserId());
-                VolumeState.UpdateBoth(userStatus, stats);
+                var resultData = result.Data as EditReadingDialogResult;
+                if (resultData == null)
+                {
+                    return;
+                }
+
+                if (resultData.IsDeleted)
+                {
+                    var (userStatus, stats) = await VolumeService.RemoveReadingAsync(reading.Id);
+                    VolumeState.UpdateBoth(userStatus, stats);
+                }
+                else
+                {
+                    var (userStatus, stats) = await VolumeService.AddEditReadingAsync(reading, await GetUserId());
+                    VolumeState.UpdateBoth(userStatus, stats);
+                }
             }
             catch (Exception ex)
             {
@@ -146,6 +160,7 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
                 disableStatus
             }
         };
+
         var dialog = await Dialog.ShowAsync<SetOwnershipDialog>(string.Empty, parameters, dialogOptions);
 
         var result = await dialog.Result;
@@ -155,14 +170,14 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
             try
             {
                 var resultData = result.Data as SetOwnershipDialogResult;
-                if(resultData == null)
+                if (resultData == null)
                 {
                     return VolumeState.CurrentUserStatus;
                 }
 
                 if (resultData.IsDeleted)
                 {
-                    var(userStatus, stats) = await VolumeService.RemoveOwnershipAsync(ownership.Id);
+                    var (userStatus, stats) = await VolumeService.RemoveOwnershipAsync(ownership.Id);
                     VolumeState.UpdateBoth(userStatus, stats);
                 }
                 else
@@ -187,6 +202,28 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         {
 
             var (userStatus, stats) = await VolumeService.ToggleWishlist(ResolvedVolumeId!.Value, await GetUserId());
+            VolumeState.UpdateBoth(userStatus, stats);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error toggling wishlist for Id: {id}", ResolvedVolumeId!.Value);
+        }
+
+        return VolumeState.CurrentUserStatus;
+    }
+
+    protected async Task<UserVolumeStatusDto?> AddPlanToRead()
+    {
+        try
+        {
+            var reading = new Reading()
+            {
+                VolumeId = ResolvedVolumeId!.Value,
+                Status = ReadingStatus.PlanToRead,
+                StartedAt = DateTimeOffset.Now.ToLocalTime()
+            };
+
+            var (userStatus, stats) = await VolumeService.AddEditReadingAsync(reading, await GetUserId());
             VolumeState.UpdateBoth(userStatus, stats);
         }
         catch (Exception ex)
@@ -239,7 +276,7 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         return authState.User?.Identity?.IsAuthenticated ?? false;
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         VolumeState.OnUserStatusChanged -= StateHasChanged;
     }

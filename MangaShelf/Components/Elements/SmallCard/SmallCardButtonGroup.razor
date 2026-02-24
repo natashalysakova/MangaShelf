@@ -1,7 +1,7 @@
 ﻿@using MangaShelf.DAL.Models
 @inject ISmallCardLocalizationService Localizer
 
-<MudButtonGroup Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success">
+<MudButtonGroup Variant="Variant.Filled" Size="Size.Medium" Color="Color.Dark">
     @switch (Status)
     {
         case VolumeStatus.None or VolumeStatus.Gone or VolumeStatus.Wishlist:

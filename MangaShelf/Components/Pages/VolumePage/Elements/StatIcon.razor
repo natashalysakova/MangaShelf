@@ -3,14 +3,14 @@
 @using System.Threading.Tasks
 
 <MudItem xs="4">
-    <MudTooltip Text="@TopText">
+    <CardButtonTooltip Text="@TopText">
         <MudStack Spacing="0" AlignItems="AlignItems.Center">
 @*             <MudText Typo="Typo.caption">@TopText</MudText>
  *@            <MudIconButton Icon="@Icon" Variant="Variant.Text" Size="Size.Medium"
                      Color="@IconColor"></MudIconButton>
             <MudText Typo="Typo.caption">@BottomText</MudText>
         </MudStack>
-    </MudTooltip>
+    </CardButtonTooltip>
 </MudItem>
 
 @code

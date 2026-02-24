@@ -210,7 +210,7 @@
   <data name="ChangeVolumeStatus" xml:space="preserve">
     <value>Change Volume Status</value>
   </data>
-  <data name="LogReading" xml:space="preserve">
+  <data name="AddReading" xml:space="preserve">
     <value>Log Reading</value>
   </data>
   <data name="ThisIsPreorderVolume" xml:space="preserve">
@@ -293,5 +293,14 @@
   </data>
   <data name="ShowLess" xml:space="preserve">
     <value>Show less</value>
+  </data>
+  <data name="EditReading" xml:space="preserve">
+    <value>Edit reading</value>
+  </data>
+  <data name="AddOwnership" xml:space="preserve">
+    <value>Add Ownership</value>
+  </data>
+  <data name="EditOwnership" xml:space="preserve">
+    <value>Edit Ownership</value>
   </data>
 </root>

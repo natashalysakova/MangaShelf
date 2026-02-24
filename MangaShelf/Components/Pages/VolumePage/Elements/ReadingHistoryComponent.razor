@@ -11,11 +11,11 @@
             string date;
             if (ReadingHistory.FinishedAt != null)
             {
-                date = ReadingHistory.FinishedAt.Value.ToString("dd.MM.yyyy");
+                date = ReadingHistory.FinishedAt.Value.ToLocalTime().ToString("dd.MM.yyyy");
             }
             else
             {
-                date = ReadingHistory.StartedAt.ToString("dd.MM.yyyy");
+                date = ReadingHistory.StartedAt.ToLocalTime().ToString("dd.MM.yyyy");
             }
         }
 
