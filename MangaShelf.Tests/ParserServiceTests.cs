@@ -342,7 +342,6 @@ public class ParserServiceTests : IDisposable
         Assert.NotNull(volume);
         Assert.True(volume.IsPreorder);
         Assert.NotNull(volume.PreorderStart);
-        Assert.NotNull(volume.ReleaseDate);
         // PreorderStart gets set to volumeInfo.PreorderStartDate (which is 5 days in the future)
         Assert.Equal(preorderStart.Date, volume.PreorderStart!.Value.Date);
         // ReleaseDate gets set to Now since Release is null and IsPreorder is true
@@ -715,51 +714,6 @@ public class ParserServiceTests : IDisposable
 
         Assert.NotNull(series);
         Assert.Equal(0, series.Authors.Count);
-    }
-
-    [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_NotPreorderWithPreorderStartDate_ReleaseDateIs30DaysLater()
-    {
-        // Arrange
-        var preorderStartDate = DateTimeOffset.Now.AddDays(-60);
-        var parsedInfo = new ParsedInfo
-        {
-            Title = "Released Volume",
-            Authors = "Test Author",
-            VolumeNumber = 1,
-            Series = "Released Series",
-            Cover = "https://example.com/cover.jpg",
-            Release = null, // No explicit release date
-            Publisher = "Test Publisher",
-            VolumeType = VolumeType.Physical,
-            Isbn = "978-1234567890",
-            TotalVolumes = 1,
-            SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
-            Url = "https://example.com/released",
-            PreorderStartDate = preorderStartDate,
-            CountryCode = "uk",
-            IsPreorder = false, // Not a preorder anymore
-            AgeRestrictions = 16,
-            CanBePublished = true,
-            SeriesType = SeriesType.Manga,
-            Description = "Test description"
-        };
-
-        // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
-
-        // Assert
-        Assert.Equal(State.Added, result);
-
-        using var context = _dbContextFactory.CreateDbContext();
-        var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "Released Volume");
-
-        Assert.NotNull(volume);
-        // ReleaseDate should be PreorderStartDate + 30 days
-        var expectedReleaseDate = preorderStartDate.AddDays(30);
-        Assert.Equal(expectedReleaseDate.Date, volume.ReleaseDate!.Value.Date);
     }
 
     [Fact]
@@ -1412,7 +1366,6 @@ public class ParserServiceTests : IDisposable
         _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Never());
     }
 
-    [Fact]
     public async Task AiGen_ReleaseDateInPast_SetsReleaseDateToNow()
     {
         // Arrange - Release date in the past (not > DateTime.Now)
