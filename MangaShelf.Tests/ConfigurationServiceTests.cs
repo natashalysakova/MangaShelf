@@ -65,15 +65,18 @@ public class ConfigurationServiceTests : IDisposable
         var cachedSettings = _service.BackgroundWorker;
         Assert.True(cachedSettings.Enabled);
 
-        await _service.UpdateSectionValueAsync<BackgroundWorkerSettings>("Enabled", "false");
+        using var context = CreateContext();
+        var setting = await context.Settings.SingleAsync(x => x.Section == "BackgroundWorker" && x.Key == "Enabled");
+        setting.Value = "false";
+        await _service.UpdateSectionValueAsync(setting);
 
         var updatedSettings = _service.BackgroundWorker;
 
         Assert.False(updatedSettings.Enabled);
 
-        using var context = CreateContext();
-        var setting = await context.Settings.SingleAsync(x => x.Section == "BackgroundWorker" && x.Key == "Enabled");
-        Assert.Equal("false", setting.Value);
+        using var context2 = CreateContext();
+        var setting2 = await context2.Settings.SingleAsync(x => x.Section == "BackgroundWorker" && x.Key == "Enabled");
+        Assert.Equal("false", setting2.Value);
     }
 
     public void Dispose()
