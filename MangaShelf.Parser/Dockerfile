@@ -1,24 +1,25 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+# AMD64-specific base stage: installs Google Chrome
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base-amd64
+RUN apt-get update && apt-get install curl gnupg -y \
+    && curl --location --silent https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install google-chrome-stable -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 
+# ARM64-specific base stage: installs Chromium from Debian repos
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base-arm64
+RUN apt-get update && apt-get install -y chromium --no-install-recommends \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
+    && rm -rf /var/lib/apt/lists/*
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# Select the correct base stage based on target architecture
 ARG TARGETARCH
-RUN if [ "$TARGETARCH" != "arm64" ] ; then \
-	  ##Install dependencies for PuppeteerSharp (Chromium)
-	  ## 25.02.2026 works on AMD64, but not on ARM64. .NET 10.0.3
-	  apt-get update && apt-get install curl gnupg -y \
-	  && curl --location --silent https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-	  && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-	  && apt-get update \
-	  && apt-get install google-chrome-stable -y --no-install-recommends \
-	  && rm -rf /var/lib/apt/lists/*; \
-	  export PUPPETEER_EXECUTABLE_PATH="/usr/bin/google-chrome"; \
-    else \
-	  ## 25.02.2026 works on ARM64, but only on .NET 8
-	  apt-get update && apt-get install -y chromium --no-install-recommends --allow-downgrades fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf; \
-	  export PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium"; \
-	fi
+FROM base-${TARGETARCH} AS base
 
 WORKDIR /app
 # This stage is used to build the service project
