@@ -4,37 +4,24 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 
-##Install dependencies for PuppeteerSharp (Chromium)
-RUN apt-get update && apt-get install curl gnupg -y \
-  && curl --location --silent https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-  && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-  && apt-get update \
-  && apt-get install google-chrome-stable -y --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
-ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/google-chrome"
-#
-######################
-##PUPPETEER RECIPE based on https://github.com/hardkoded/puppeteer-sharp/issues/1180#issuecomment-1015532968
-######################
-#RUN apt-get update && apt-get -f install && apt-get -y install wget gnupg2 apt-utils
-#RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-#RUN echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' >> /etc/apt/sources.list
-#RUN apt-get update \
-#&& apt-get install -y google-chrome-stable --no-install-recommends --allow-downgrades fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf
-#######################
-##END PUPPETEER RECIPE
-#######################
-#ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/google-chrome-stable"
+ARG TARGETARCH
 
-######################
-##PUPPETEER RECIPE 
-######################
-#RUN apt-get update && apt-get install -y chromium --no-install-recommends --allow-downgrades fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf
-#######################
-##END PUPPETEER RECIPE
-#######################
-#ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/chromium"
-
+RUN if [ "$TARGETARCH" != "arm64" ]; then
+	  ##Install dependencies for PuppeteerSharp (Chromium)
+	  ## 25.02.2026 works on AMD64, but not on ARM64. .NET 10.0.3
+	  RUN apt-get update && apt-get install curl gnupg -y \
+		&& curl --location --silent https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+		&& sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+		&& apt-get update \
+		&& apt-get install google-chrome-stable -y --no-install-recommends \
+		&& rm -rf /var/lib/apt/lists/*
+	  ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/google-chrome"
+	  #
+    else
+	  ## 25.02.2026 works on ARM64, but only on .NET 8
+	  RUN apt-get update && apt-get install -y chromium --no-install-recommends --allow-downgrades fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf
+	  ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/chromium"
+	fi
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build

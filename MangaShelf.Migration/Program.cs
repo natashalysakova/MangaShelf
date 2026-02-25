@@ -8,8 +8,8 @@ internal class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
 
-        builder.RegisterContextAndServices();
         builder.RegisterIdentityContextAndServices();
+        builder.RegisterContextAndServices();
         builder.AddBusinessServices();
 
         using (IHost host = builder.Build())

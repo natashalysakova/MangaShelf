@@ -7,6 +7,7 @@ using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Seed;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -131,7 +132,7 @@ public static class ContextInstallExtention
         {
             await MakeSureDbCreatedAsync<MangaSystemDbContext>(scope);
             await MakeSureDbCreatedAsync<MangaDbContext>(scope);
-            await MakeSureDbCreatedAsync<MangaIdentityDbContext>(scope);
+            await MakeSureIdentityDbCreatedAsync(scope);
 
             //var systemContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
             //var SystemDbContext = systemContextFactory.CreateDbContext();
@@ -170,10 +171,19 @@ public static class ContextInstallExtention
         }
 
         await context.Database.MigrateAsync();
-
-        var IdentityDbContext = scope.ServiceProvider.GetRequiredService<T>();
-        await IdentityDbContext.Database.MigrateAsync();
     }
+
+    public static async Task MakeSureIdentityDbCreatedAsync(IServiceScope scope)
+    {
+        var context = scope.ServiceProvider.GetRequiredService<MangaIdentityDbContext>();
+        if (context.Database.HasPendingModelChanges())
+        {
+            throw new InvalidOperationException($"System database model ({nameof(MangaIdentityDbContext)}) has pending changes. Please apply migrations before starting the application.");
+        }
+
+        await context.Database.MigrateAsync();
+    }
+
 
     public static async Task SeedDatabase(this IHost host)
     {
