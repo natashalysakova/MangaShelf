@@ -1,30 +1,29 @@
-using MangaShelf.DAL.System.Models;
+using AngleSharp;
+using MangaShelf.BL.Configuration;
 
 namespace MangaShelf.Infrastructure.Seed;
 
 public static class DefaultSettings
 {
-    public static IEnumerable<SeedSetting> Settings => new List<SeedSetting>
-    {
-        new("BackgroundWorker", "Enabled", "true", SettingType.Bool),
-        new("BackgroundWorker", "StartDelay", "00:01:00", SettingType.TimeSpan),
-        new("BackgroundWorker", "LoopDelay", "00:00:03", SettingType.TimeSpan),
-
-        new("JobManager", "DelayBetweenRuns", "12:00:00", SettingType.TimeSpan),
-        new("JobManager", "MaxParallelParsers", "3", SettingType.Int),
-        new("JobManager", "ResetNextRun", "false", SettingType.Bool),
-
-        new("ParserService", "DelayBetweenParse", "00:00:05", SettingType.TimeSpan),
-        new("ParserService", "IgnoreExistingVolumes", "true", SettingType.Bool),
-
-        new("HtmlDownloader", "RequestTimeout", "00:00:30", SettingType.TimeSpan),
-        new("HtmlDownloader", "MaxRetries", "3", SettingType.Int),
-        new("HtmlDownloader", "DelayBetweenRetries", "00:00:05", SettingType.TimeSpan),
-
-        new("Cache", "Enabled", "true", SettingType.Bool),
-        new("Cache", "AbsoluteExpiration", "06:00:00", SettingType.TimeSpan),
-        new("Cache", "UpdateInterval", "00:01:00", SettingType.TimeSpan),
-    };
-
-    public record SeedSetting(string Section, string Key, string Value, SettingType type);
+    public static IEnumerable<SeedSetting> Settings = new SettingBuilder()
+        .Add<BackgroundWorkerSettings>(nameof(BackgroundWorkerSettings.Enabled), true)
+        .Add<BackgroundWorkerSettings>(nameof(BackgroundWorkerSettings.StartDelay), TimeSpan.FromMinutes(1))
+        .Add<BackgroundWorkerSettings>(nameof(BackgroundWorkerSettings.LoopDelay), TimeSpan.FromSeconds(3))
+        .Add<JobManagerSettings>(nameof(JobManagerSettings.DelayBetweenRuns), TimeSpan.FromHours(12))
+        .Add<JobManagerSettings>(nameof(JobManagerSettings.MaxParallelParsers), 3)
+        .Add<JobManagerSettings>(nameof(JobManagerSettings.ResetNextRun), false)
+        .Add<ParserServiceSettings>(nameof(ParserServiceSettings.DelayBetweenParse), TimeSpan.FromSeconds(5))
+        .Add<ParserServiceSettings>(nameof(ParserServiceSettings.IgnoreExistingVolumes), true)
+        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.RequestTimeout), TimeSpan.FromSeconds(30))
+        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.MaxRetries), 3)
+        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.DelayBetweenRetries), TimeSpan.FromSeconds(5))
+#if DEBUG
+        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.PuppetreeExecPath), "/usr/bin/google-chrome")
+#else
+        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.PuppetreeExecPath), "/usr/bin/chromium")
+#endif
+        .Add<CacheSettings>(nameof(CacheSettings.Enabled), true)
+        .Add<CacheSettings>(nameof(CacheSettings.AbsoluteExpiration), TimeSpan.FromHours(6))
+        .Add<CacheSettings>(nameof(CacheSettings.UpdateInterval), TimeSpan.FromMinutes(1))
+        .Build();
 }

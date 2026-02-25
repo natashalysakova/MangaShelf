@@ -23,9 +23,6 @@ public class ConfigurationService(
     public HtmlDownloaderSettings HtmlDownloader => GetSection<HtmlDownloaderSettings>();
     public CacheSettings CacheSettings => GetSection<CacheSettings>();
 
-
-
-
     public async Task<Settings> UpdateSectionValueAsync(Settings settings, CancellationToken token = default)
     {
         await using var context = dbContextFactory.CreateDbContext();

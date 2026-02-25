@@ -42,6 +42,7 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
                         "--disable-setuid-sandbox",
                         "--no-sandbox"
                     },
+                    ExecutablePath = _options.PuppetreeExecPath
                 });
 
                 await using var page = await browser.NewPageAsync();

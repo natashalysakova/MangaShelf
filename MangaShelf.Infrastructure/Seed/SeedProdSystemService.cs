@@ -36,7 +36,8 @@ public class SeedProdSystemService : ISeedDataService
                 {
                     Section = item.Section,
                     Key = item.Key,
-                    Value = item.Value
+                    Value = item.Value,
+                    Type = item.type
                 });
                 _logger.LogInformation("Added setting {Section}:{Key} with value {Value}", item.Section, item.Key, item.Value);
             }
