@@ -65,6 +65,8 @@ public class ParserWriteService : IParserWriteService
             StackTrace = exception.StackTrace,
             RunTime = DateTimeOffset.Now
         });
+
+        await context.SaveChangesAsync(token);
     }
 
     public async Task RecordErrorAndStop(Guid runId, Exception? exception, CancellationToken token = default)
