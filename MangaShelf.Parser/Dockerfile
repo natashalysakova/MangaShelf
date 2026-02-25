@@ -6,21 +6,20 @@ WORKDIR /app
 
 ARG TARGETARCH
 
-RUN if [ "$TARGETARCH" != "arm64" ]; then
+RUN if [ "$TARGETARCH" != "arm64" ] ; then \
 	  ##Install dependencies for PuppeteerSharp (Chromium)
 	  ## 25.02.2026 works on AMD64, but not on ARM64. .NET 10.0.3
-	  RUN apt-get update && apt-get install curl gnupg -y \
-		&& curl --location --silent https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-		&& sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-		&& apt-get update \
-		&& apt-get install google-chrome-stable -y --no-install-recommends \
-		&& rm -rf /var/lib/apt/lists/*
-	  ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/google-chrome"
-	  #
-    else
+	  apt-get update && apt-get install curl gnupg -y \
+	  && curl --location --silent https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+	  && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+	  && apt-get update \
+	  && apt-get install google-chrome-stable -y --no-install-recommends \
+	  && rm -rf /var/lib/apt/lists/*; \
+	  export PUPPETEER_EXECUTABLE_PATH="/usr/bin/google-chrome"; \
+    else \
 	  ## 25.02.2026 works on ARM64, but only on .NET 8
-	  RUN apt-get update && apt-get install -y chromium --no-install-recommends --allow-downgrades fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf
-	  ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/chromium"
+	  apt-get update && apt-get install -y chromium --no-install-recommends --allow-downgrades fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf; \
+	  export PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium"; \
 	fi
 
 # This stage is used to build the service project
