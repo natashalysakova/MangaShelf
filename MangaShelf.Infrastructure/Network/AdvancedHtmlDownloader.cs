@@ -27,6 +27,7 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
 
         if (string.IsNullOrEmpty(executablePath) || !File.Exists(executablePath))
         {
+            Environment.SetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH", null);
             var browserFetcher = new BrowserFetcher();
             await browserFetcher.DownloadAsync();
             executablePath = null;

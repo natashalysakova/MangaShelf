@@ -15,7 +15,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base-arm64
 RUN apt-get update && apt-get install -y chromium --no-install-recommends \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/*
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Find the chromium binary (path varies by distro) and create a symlink at a known location
+RUN CHROMIUM=$(command -v chromium 2>/dev/null || command -v chromium-browser 2>/dev/null) \
+    && ln -sf "$CHROMIUM" /usr/local/bin/chromium-puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/local/bin/chromium-puppeteer
 
 # Select the correct base stage based on target architecture
 ARG TARGETARCH
