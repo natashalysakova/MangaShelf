@@ -93,9 +93,11 @@ public class NashaIdeaParser : BaseParser
 
     private DateTimeOffset? GetDateFromText(string text)
     {
-        if (text.Contains('–'))
+        if (text.Contains('–') || text.Contains('-'))
         {
-            text = text.Substring(text.LastIndexOf('–') + 1).Trim([' ', '.', '.', '!']);
+            var minus = text.Contains('–') ? '–' : '-';
+
+            text = text.Substring(text.LastIndexOf(minus) + 1).Trim([' ', '.', '.', '!']);
         }
 
         string? month = default;

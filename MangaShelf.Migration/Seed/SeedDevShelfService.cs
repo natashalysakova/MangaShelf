@@ -30,23 +30,6 @@ public class SeedDevShelfService : ISeedDataService
         await FixPublicIds();
         await FixMissingUserNames();
         await FixAvgRating();
-
-        await ResetReleaseDate();
-    }
-
-    private async Task ResetReleaseDate()
-    {
-        using var context = await _dbContextFactory.CreateDbContextAsync();
-
-        await context.Volumes.ForEachAsync((v) =>
-        {
-            v.ReleaseDate = null;
-            _logger.LogInformation("Reset release date for volume {VolumeId} - {VolumeTitle}", v.Id, v.Title);
-
-        });
-
-        await context.SaveChangesAsync();
-        _logger.LogInformation("Finished resetting release dates for all volumes.");
     }
 
     private async Task FixAvgRating()

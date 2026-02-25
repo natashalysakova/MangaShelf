@@ -12,7 +12,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 
 # ARM64-specific base stage: installs Chromium from Debian repos
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base-arm64
-RUN apt-get update && apt-get install -y chromium --no-install-recommends \
+RUN apt-get update && apt-get install -y chromium-browser --no-install-recommends \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/*
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
@@ -20,6 +20,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Select the correct base stage based on target architecture
 ARG TARGETARCH
 FROM base-${TARGETARCH} AS base
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 WORKDIR /app
 # This stage is used to build the service project

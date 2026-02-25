@@ -36,10 +36,27 @@ public class SeedProdSystemService : ISeedDataService
                 {
                     Section = item.Section,
                     Key = item.Key,
-                    Value = item.Value
+                    Value = item.Value,
+                    Type = item.type
                 });
                 _logger.LogInformation("Added setting {Section}:{Key} with value {Value}", item.Section, item.Key, item.Value);
             }
+        }
+
+        var validKeys = DefaultSettings.Settings
+            .Select(s => new { s.Section, s.Key })
+            .ToHashSet();
+
+        var allSettings = await context.Settings.ToListAsync();
+
+        var deprecatedSettings = allSettings
+            .Where(x => !validKeys.Contains(new { x.Section, x.Key }))
+            .ToList();
+
+        foreach (var toRemove in deprecatedSettings)
+        {
+            context.Remove(toRemove);
+            _logger.LogWarning("Removed deprecated setting {Section}:{Key} with value {Value}", toRemove.Section, toRemove.Key, toRemove.Value);
         }
 
         await context.SaveChangesAsync();

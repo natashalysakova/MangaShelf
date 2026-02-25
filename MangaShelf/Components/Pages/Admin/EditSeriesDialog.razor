@@ -1,0 +1,94 @@
+@using MangaShelf.BL.Dto
+@using MangaShelf.BL.Interfaces
+@using MangaShelf.DAL.Models
+
+@inject ISeriesService SeriesService
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" />
+            <MudText Typo="Typo.h6">Edit Series</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3" Class="pt-2">
+            <MudTextField @bind-Value="model.Title"
+                          Label="Title"
+                          Required="true"
+                          Variant="Variant.Outlined" />
+
+            <MudTextField @bind-Value="model.OriginalName"
+                          Label="Original Name"
+                          Variant="Variant.Outlined" />
+
+            <MudTextField @bind-Value="authorsText"
+                          Label="Authors"
+                          HelperText="Separate multiple authors with a comma"
+                          Variant="Variant.Outlined" />
+
+            <MudNumericField @bind-Value="model.TotalVolumes"
+                             Label="Total Volumes"
+                             Min="1"
+                             Variant="Variant.Outlined" />
+
+            <MudSelect @bind-Value="model.Status"
+                       Label="Status"
+                       Variant="Variant.Outlined">
+                @foreach (var status in Enum.GetValues<SeriesStatus>())
+                {
+                    <MudSelectItem Value="status">@status</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="Submit"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="isSaving">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public SeriesWithVolumesDto Series { get; set; } = default!;
+
+    private SeriesUpdateDto model = new() { Title = string.Empty };
+    private string authorsText = string.Empty;
+    private bool isSaving;
+
+    protected override void OnParametersSet()
+    {
+        model = new SeriesUpdateDto
+        {
+            Id = Series.Id,
+            Title = Series.Title,
+            OriginalName = Series.OriginalName,
+            Status = Series.Status,
+            TotalVolumes = Series.TotalVolumes,
+            Authors = [..Series.Authors]
+        };
+        authorsText = string.Join(", ", Series.Authors);
+    }
+
+    private async Task Submit()
+    {
+        isSaving = true;
+        model.Authors = authorsText
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        await SeriesService.UpdateSeriesAsync(model);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

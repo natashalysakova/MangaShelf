@@ -23,26 +23,18 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
     }
     public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
-        var executablePath = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH");
-
-        if (string.IsNullOrEmpty(executablePath) || !File.Exists(executablePath))
+        await using var browser = await Puppeteer.ConnectAsync(new ConnectOptions
         {
-            var browserFetcher = new BrowserFetcher();
-            await browserFetcher.DownloadAsync();
-            executablePath = null;
-        }
-
-        await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-        {
-            Headless = true,
-            ExecutablePath = executablePath,
-            Args = new[]
-            {
-                "--disable-gpu",
-                "--disable-dev-shm-usage",
-                "--disable-setuid-sandbox",
-                "--no-sandbox"
-            },
+            BrowserWSEndpoint= "ws://chrome:3000",
+            //Headless = true,
+            //ExecutablePath = executablePath,
+            //Args = new[]
+            //{
+            //    "--disable-gpu",
+            //    "--disable-dev-shm-usage",
+            //    "--disable-setuid-sandbox",
+            //    "--no-sandbox"
+            //},
         });
 
         var maxretry = _options.MaxRetries;

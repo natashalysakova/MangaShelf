@@ -8,7 +8,6 @@ using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Localization.Interfaces;
 using MangaShelf.Common.Localization.Services;
 using MangaShelf.Infrastructure.Network;
-using MangaShelf.Infrastructure.Seed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -43,18 +42,6 @@ public static class ServicesInstallExtention
 
         // Image services
         builder.Services.AddScoped<IImageManager, ImageManager>();
-
-        // Seed services
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddScoped<ISeedDataService, SeedDevUsersService>();
-            builder.Services.AddScoped<ISeedDataService, SeedDevShelfService>();
-            builder.Services.AddScoped<ISeedDataService, SeedDevSystemService>();
-        }
-
-        builder.Services.AddScoped<ISeedDataService, SeedProdUsersService>();
-        builder.Services.AddScoped<ISeedDataService, SeedProdShelfService>();
-        builder.Services.AddScoped<ISeedDataService, SeedProdSystemService>();
 
         // Cache services
         builder.Services.AddMemoryCache();

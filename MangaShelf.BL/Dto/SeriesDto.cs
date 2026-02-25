@@ -26,3 +26,10 @@ public class SeriesSimpleDto
 
     public ICollection<string> Authors { get; set; } = new List<string>();
 }
+
+[ExcludeFromCodeCoverage]
+public class SeriesWithVolumesDto : SeriesSimpleDto
+{
+    public IEnumerable<CardVolumeDto> Volumes { get; set; } = [];
+}
+

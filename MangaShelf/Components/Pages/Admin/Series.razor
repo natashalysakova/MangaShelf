@@ -1,6 +1,217 @@
-﻿@page "/admin/series"
-<h3>Series</h3>
+@page "/admin/series"
+@using MangaShelf.BL.Dto
+@using MangaShelf.BL.Interfaces
+@using MangaShelf.DAL.Models
+@using MangaShelf.Components.Elements.SmallCard
+
+@inject ISeriesService SeriesService
+@inject IDialogService DialogService
+
+<MudText Typo="Typo.h4" Class="mb-4 mt-4">Series</MudText>
+
+@if (isLoading)
+{
+    <MudStack AlignItems="AlignItems.Center" Class="mt-8">
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+    </MudStack>
+}
+else if (seriesList is null || !seriesList.Any())
+{
+    <MudAlert Severity="Severity.Info">No series found.</MudAlert>
+}
+else
+{
+    <div class="series-list">
+    @foreach (var series in seriesList)
+    {
+        var backdropUrl = series.Volumes.FirstOrDefault()?.CoverImageUrlSmall;
+        var statusColor = GetStatusColor(series.Status);
+
+        <MudPaper Class="series-card" Elevation="4" Style="@GetCardStyle(backdropUrl, series.Volumes.Count())">
+            <div class="series-backdrop-overlay">
+
+                    <MudStack Row AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween" Class="mb-3">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.h5" Class="series-title">@series.Title</MudText>
+
+                            @if (!string.IsNullOrEmpty(series.OriginalName))
+                            {
+                                <MudText Typo="Typo.subtitle1" Class="series-subtitle">@series.OriginalName</MudText>
+                            }
+
+                            <MudStack Row Spacing="1" Class="mt-1">
+                                <MudChip T="string" Color="@statusColor" Size="Size.Small" Variant="Variant.Filled">
+                                    @series.Status
+                                </MudChip>
+                                <MudChip T="string" Color="Color.Default" Size="Size.Small" Variant="Variant.Outlined" Style="color:white; border-color:rgba(255,255,255,0.4)">
+                                    @series.Type
+                                </MudChip>
+                                @if (series.TotalVolumes.HasValue)
+                                {
+                                    <MudChip T="string" Color="Color.Default" Size="Size.Small" Variant="Variant.Outlined" Style="color:white; border-color:rgba(255,255,255,0.4)">
+                                        @series.TotalVolumes vol.
+                                    </MudChip>
+                                }
+                            </MudStack>
+
+                            @if (series.Authors.Any())
+                            {
+                                <MudStack Row Spacing="1" AlignItems="AlignItems.Center" Class="mt-1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="series-icon" />
+                                    <MudText Typo="Typo.body2" Class="series-subtitle">
+                                        @string.Join(", ", series.Authors)
+                                    </MudText>
+                                </MudStack>
+                            }
+                        </MudStack>
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Surface"
+                                       Variant="Variant.Filled"
+                                       Size="Size.Small"
+                                       Title="Edit series"
+                                       OnClick="() => OpenEditDialog(series)" />
+                    </MudStack>
+
+                    @if (series.Volumes.Any())
+                    {
+                        <div class="volumes-scroll">
+                            @foreach (var volume in series.Volumes)
+                            {
+                                <div class="volume-card-wrapper">
+                                    <SmallCard Volume="volume" ShowStatus="true" />
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Class="series-subtitle">No volumes yet.</MudText>
+                    }
+
+            </div>
+        </MudPaper>
+    }
+    </div>
+}
+
+<style>
+    .series-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-auto-flow: dense;
+        gap: 1rem;
+    }
+
+    .series-card {
+        overflow: hidden;
+        border-radius: 12px;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+    }
+
+    .series-backdrop-overlay {
+        padding: 20px;
+        height: stretch;
+        background: linear-gradient(135deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 100%);
+        backdrop-filter: blur(6px);
+    }
+
+    .series-title {
+        color: white;
+        font-weight: 700;
+    }
+
+    .series-subtitle {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .series-icon {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .volumes-scroll {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 12px 10px;
+        scrollbar-gutter: stable;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.3) transparent;
+    }
+
+    .volumes-scroll::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .volumes-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.3);
+        border-radius: 4px;
+    }
+
+    .volume-card-wrapper {
+        flex: 0 0 auto;
+        width: 110px;
+    }
+</style>
 
 @code {
+    private IEnumerable<SeriesWithVolumesDto>? seriesList;
+    private bool isLoading = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        isLoading = true;
+        seriesList = await SeriesService.GetAllWithVolumesAsync();
+        isLoading = false;
+    }
+
+    private async Task OpenEditDialog(SeriesWithVolumesDto series)
+    {
+        var parameters = new DialogParameters<EditSeriesDialog>
+        {
+            { d => d.Series, series }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<EditSeriesDialog>(string.Empty, parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await LoadDataAsync();
+        }
+    }
+
+    private static string GetCardStyle(string? url, int volumeCount)
+    {
+        var span = volumeCount switch
+        {
+            <= 3 => 1,
+            <= 8 => 2,
+            _    => 3
+        };
+        var bg = string.IsNullOrEmpty(url) ? string.Empty : $"background-image: url('{url}');";
+        return $"{bg} grid-column: span {span};";
+    }
+
+    private static string GetBackdropStyle(string? url) =>
+        string.IsNullOrEmpty(url) ? string.Empty : $"background-image: url('{url}');";
+
+    private static Color GetStatusColor(SeriesStatus status) => status switch
+    {
+        SeriesStatus.Ongoing   => Color.Success,
+        SeriesStatus.Completed => Color.Info,
+        SeriesStatus.Hiatus    => Color.Warning,
+        SeriesStatus.Cancelled => Color.Error,
+        SeriesStatus.OneShot   => Color.Primary,
+        _                      => Color.Default
+    };
 }
