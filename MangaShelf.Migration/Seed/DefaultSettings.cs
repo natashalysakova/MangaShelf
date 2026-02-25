@@ -17,11 +17,7 @@ public static class DefaultSettings
         .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.RequestTimeout), TimeSpan.FromSeconds(30))
         .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.MaxRetries), 3)
         .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.DelayBetweenRetries), TimeSpan.FromSeconds(5))
-#if DEBUG
-        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.PuppetreeExecPath), "/usr/bin/google-chrome")
-#else
-        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.PuppetreeExecPath), "/usr/bin/chromium")
-#endif
+        .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.BrowserWSEndpoint), "ws://chrome:3000")
         .Add<CacheSettings>(nameof(CacheSettings.Enabled), true)
         .Add<CacheSettings>(nameof(CacheSettings.AbsoluteExpiration), TimeSpan.FromHours(6))
         .Add<CacheSettings>(nameof(CacheSettings.UpdateInterval), TimeSpan.FromMinutes(1))

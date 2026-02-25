@@ -1,5 +1,14 @@
 name: manga-shelf
 services:
+
+  chrome:
+    container_name: chrome
+    image: browserless/chrome
+    ports:
+      - '5300:3000'
+    networks:
+      - manga-network
+ 
   mangashelf.migration:
     container_name: mangashelf.migration
     image: ${DOCKER_REGISTRY}manga-shelf-migration:latest
@@ -50,6 +59,8 @@ services:
       - .env
     restart: always
     depends_on:
+        chrome:
+            condition: service_started
         mangashelf.migration:
             condition: service_completed_successfully
 

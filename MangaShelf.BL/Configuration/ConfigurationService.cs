@@ -47,6 +47,19 @@ public class ConfigurationService(
 
     private TSection GetSection<TSection>() where TSection : class, IConfigurationSection, new()
     {
+        if(cache.TryGetValue(GetCacheKey<TSection>(), out TSection? section))
+        {
+            return section!;
+        }
+        else
+        {
+            var entry = cache.CreateEntry(GetCacheKey<TSection>());
+            entry.AbsoluteExpirationRelativeToNow = CacheDuration;
+            var result = BindSettings<TSection>();
+            entry.SetValue(result);
+            return result;
+        }
+
         return cache.GetOrCreate(GetCacheKey<TSection>(), entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = CacheDuration;

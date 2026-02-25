@@ -39,4 +39,65 @@ public class SeriesService : ISeriesService
         var titles = await seriesService.GetAllTitlesAsync(stoppingToken);
         return titles;
     }
+
+    public async Task<IEnumerable<SeriesWithVolumesDto>> GetAllWithVolumesAsync(CancellationToken token = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var series = await context.Series
+            .Include(s => s.Authors)
+            .Include(s => s.Publisher)
+            .Include(s => s.Volumes)
+            .OrderBy(s => s.Title)
+            .ToListAsync(token);
+
+        return series.Select(s => new SeriesWithVolumesDto
+        {
+            Id = s.Id,
+            PublicId = s.PublicId,
+            Title = s.Title,
+            OriginalName = s.OriginalName,
+            Aliases = s.Aliases,
+            MalId = s.MalId,
+            Type = s.Type,
+            Status = s.Status,
+            TotalVolumes = s.TotalVolumes,
+            IsPublishedOnSite = s.IsPublishedOnSite,
+            PublisherId = s.PublisherId,
+            Publisher = s.Publisher?.ToDto() ?? new PublisherSimpleDto { Name = string.Empty },
+            Authors = s.Authors.Select(a => a.Name).ToList(),
+            Volumes = s.Volumes.OrderBy(v => v.Number).Select(v => v.ToDto()).ToList()
+        });
+    }
+
+    public async Task UpdateSeriesAsync(SeriesUpdateDto dto, CancellationToken token = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var series = await context.Series
+            .Include(s => s.Authors)
+            .FirstOrDefaultAsync(s => s.Id == dto.Id, token);
+
+        if (series is null)
+        {
+            _logger.LogWarning("Series {Id} not found for update", dto.Id);
+            return;
+        }
+
+        series.Title = dto.Title;
+        series.OriginalName = dto.OriginalName;
+        series.Status = dto.Status;
+        series.TotalVolumes = dto.TotalVolumes;
+
+        var serviceFactory = new DomainServiceFactory(context);
+        var authorService = serviceFactory.GetDomainService<IAuthorDomainService>();
+        var resolvedAuthors = await authorService.GetOrCreateByNames(dto.Authors, token);
+
+        series.Authors.Clear();
+        foreach (var author in resolvedAuthors)
+            series.Authors.Add(author);
+
+        await context.SaveChangesAsync(token);
+        _logger.LogInformation("Updated series {Id} ({Title})", series.Id, series.Title);
+    }
 }

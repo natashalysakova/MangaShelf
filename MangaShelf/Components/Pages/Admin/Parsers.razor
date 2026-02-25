@@ -7,22 +7,25 @@
 @implements IDisposable
 
 
-<MudPaper Class="p-4 mb-4 mt-4">
-    <h3>Parsers</h3>
-    <MudStack Row>
-        <MudTextField @bind-Value="url" Label="Paste URL for parsing" Variant="Variant.Filled"></MudTextField>
-        <MudButton OnClick="RunForUrl" Color="Color.Primary" Variant="Variant.Filled">Run</MudButton>
-    </MudStack>
-</MudPaper>
+<MudGrid Justify="Justify.SpaceAround" Class="mb-4">
+    <MudItem xs="12">
+        <MudPaper Class="p-4 mb-4 mt-4">
+            <h3>Parsers</h3>
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Row>
+                <MudTextField @bind-Value="url" Label="Paste URL for parsing" Variant="Variant.Filled"></MudTextField>
+                <MudButton OnClick="RunForUrl" Color="Color.Primary" Variant="Variant.Filled">Run</MudButton>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
 
-@if (statuses != null)
-{
-    <MudGrid Justify="Justify.Center" Class="mb-4">
+    @if (statuses != null)
+    {
         @foreach (ParserStatusDto parser in statuses)
         {
-            <MudItem xs="12" sm="6" md="4" lg="3" xl="2">
-                <MudPaper Elevation="3" Class="p-4">
+            <MudItem Style="width: 250px;  height: 285px;">
+                <MudPaper Class="p-4">
                     @{
+
                         var color = parser.Status switch
                         {
                             ParserStatus.Idle => Color.Default,
@@ -32,50 +35,54 @@
                             _ => Color.Default
                         };
                     }
-                    <MudGrid>
-                        <MudItem xs="7">
-                            <MudStack>
-                                <MudStack Row>
 
-                                    @if (parser.Status == ParserStatus.Parsing)
+                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+
+                        <MudText Typo="Typo.h6">@parser.ParserName</MudText>
+
+                        <MudText Typo="Typo.h6" Color="@color"> @parser.Status </MudText>
+
+
+                        @if (parser.Status == ParserStatus.Parsing)
+                        {
+
+                            <MudProgressCircular Color="@color" Size="Size.Large" Value="@parser.Progress">
+                                <ChildContent>
+                                    @parser.Progress.ToString("N2")
+                                </ChildContent>
+                            </MudProgressCircular>
+                        }
+                        else if (parser.Status == ParserStatus.Idle)
+                        {
+
+                            <MudIconButton Class="@(parser.Status == ParserStatus.Idle ? "visible" : "hidden")" OnClick="(() => RunParser(parser.Id))" Size="Size.Large" Icon="@Icons.Material.Rounded.PlayArrow" Color="Color.Success"></MudIconButton>
+                        }
+                        else
+                        {
+                            <MudProgressCircular Color="@color" Size="Size.Large" Indeterminate="true">
+                                <ChildContent>
+                                    @if (parser.Progress > 0)
                                     {
-                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Book" Color="@color"></MudIcon>
+                                        @parser.Progress.ToString("N2")
                                     }
-                                    else if (parser.Status == ParserStatus.Idle)
-                                    {
-                                        <MudIconButton OnClick="(() => RunParser(parser.Id))" Size="Size.Small" Icon="@Icons.Material.Rounded.PlayArrow" Color="Color.Success"></MudIconButton>
-                                    }
-                                    else if (parser.Status == ParserStatus.Waiting)
-                                    {
-                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Timer" Color="@color"></MudIcon>
-                                    }
-                                    else if (parser.Status == ParserStatus.GatheringVolumes)
-                                    {
-                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Cached" Color="@color"></MudIcon>
-                                    }
-                                    else
-                                    {
-                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Rounded.Help" Color="Color.Default"></MudIcon>
-                                    }
-                                    <MudText>@parser.ParserName</MudText>
-                                </MudStack>
-                                <MudText Typo="Typo.h5" Color="@color"> @parser.Status </MudText>
-                            </MudStack>
-                        </MudItem>
-                        <MudItem xs="5">
-                            @if (parser.Status == ParserStatus.Parsing)
-                            {
-                                <MudProgressCircular Color="@color" Size="Size.Large" Value="@parser.Progress">
-                                    <ChildContent>@parser.Progress.ToString("N2")</ChildContent>
-                                </MudProgressCircular>
-                            }
-                        </MudItem>
-                    </MudGrid>
+                                </ChildContent>
+                            </MudProgressCircular>
+                        }
+
+                        @{
+                            var difference = parser.NextRun - DateTimeOffset.Now;
+                            var text = $"{difference.Hours}h {difference.Minutes}m {difference.Seconds}s";
+                        }
+                        <MudStack Row Spacing="1">
+                            <MudText Typo="Typo.caption">Next Run in</MudText>
+                            <MudText Typo="Typo.caption">@text</MudText>
+                        </MudStack>
+                    </MudStack>
                 </MudPaper>
             </MudItem>
         }
-    </MudGrid>
-}
+    }
+</MudGrid>
 
 <style>
     .cell-Running {
@@ -217,9 +224,9 @@
         }
         catch (Exception)
         {
-            
+
         }
-        
+
     }
     private async Task CancelJob(Guid? id)
     {

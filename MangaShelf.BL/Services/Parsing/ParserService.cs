@@ -279,20 +279,16 @@ public class ParserService : IParseService
             volume.Series.TotalVolumes = volumeInfo.TotalVolumes;
         }
 
+        var wasPreorder = volume.IsPreorder;
         volume.IsPreorder = volumeInfo.IsPreorder;
-        if (volumeInfo.IsPreorder) 
+        
+        if (volumeInfo.IsPreorder && volumeInfo.Release != null)
         {
-            if(volumeInfo.Release != null && volumeInfo.Release > volume.ReleaseDate) // preorder release date changed
-            {
-                volume.ReleaseDate = volumeInfo.Release;
-            }
+            volume.ReleaseDate = volumeInfo.Release;
         }
-        else
+        else if (!volumeInfo.IsPreorder && wasPreorder)
         {
-            if (volume.IsPreorder) // preorder in db but released on site
-            {
-                volume.ReleaseDate = DateTimeOffset.Now;
-            }
+            volume.ReleaseDate = DateTimeOffset.UtcNow;
         }
 
         if (volume.IsPreorder && volume.PreorderStart == null)
