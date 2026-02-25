@@ -129,20 +129,50 @@ public static class ContextInstallExtention
     {
         using (var scope = host.Services.CreateScope())
         {
-            var systemContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
-            var SystemDbContext = systemContextFactory.CreateDbContext();
-            var str = SystemDbContext.Database.GetConnectionString();
-            await SystemDbContext.Database.MigrateAsync();
+            await MakeSureDbCreatedAsync<MangaSystemDbContext>(scope);
+            await MakeSureDbCreatedAsync<MangaDbContext>(scope);
+            await MakeSureDbCreatedAsync<MangaIdentityDbContext>(scope);
 
-            await ResetStuckJobs(SystemDbContext);
+            //var systemContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
+            //var SystemDbContext = systemContextFactory.CreateDbContext();
+            //var str = SystemDbContext.Database.GetConnectionString();
 
-            var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaDbContext>>();
-            var context = await factory.CreateDbContextAsync();
-            await context.Database.MigrateAsync();
+            //if (SystemDbContext.Database.HasPendingModelChanges())
+            //{
+            //    throw new InvalidOperationException("System database model has pending changes. Please apply migrations before starting the application.");
+            //}
 
-            var IdentityDbContext = scope.ServiceProvider.GetRequiredService<MangaIdentityDbContext>();
-            await IdentityDbContext.Database.MigrateAsync();
+            //await SystemDbContext.Database.MigrateAsync();
+
+            //await ResetStuckJobs(SystemDbContext);
+
+            //var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaDbContext>>();
+            //var context = await factory.CreateDbContextAsync();
+            //if (context.Database.HasPendingModelChanges())
+            //{
+            //    throw new InvalidOperationException("System database model has pending changes. Please apply migrations before starting the application.");
+            //}
+
+            //await context.Database.MigrateAsync();
+
+            //var IdentityDbContext = scope.ServiceProvider.GetRequiredService<MangaIdentityDbContext>();
+            //await IdentityDbContext.Database.MigrateAsync();
         }
+    }
+
+    public static async Task MakeSureDbCreatedAsync<T>(IServiceScope scope) where T : DbContext
+    {
+        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<T>>();
+        var context = await factory.CreateDbContextAsync();
+        if (context.Database.HasPendingModelChanges())
+        {
+            throw new InvalidOperationException($"System database model ({typeof(T).Name}) has pending changes. Please apply migrations before starting the application.");
+        }
+
+        await context.Database.MigrateAsync();
+
+        var IdentityDbContext = scope.ServiceProvider.GetRequiredService<T>();
+        await IdentityDbContext.Database.MigrateAsync();
     }
 
     public static async Task SeedDatabase(this IHost host)

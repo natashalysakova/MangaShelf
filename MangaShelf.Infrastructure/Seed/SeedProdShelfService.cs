@@ -56,9 +56,11 @@ public class SeedProdShelfService : ISeedDataService
                     IdentityUserId = id,
                     VisibleUsername = visibleName
                 });
+                _logger.LogInformation($"Adding user with id {id} and visible name {visibleName}");
             }
 
             await context.SaveChangesAsync();
+            _logger.LogInformation("Saved users");
         }
     }
 
@@ -85,7 +87,7 @@ public class SeedProdShelfService : ISeedDataService
                     Name = region.EnglishName,
                     FlagUrl = _imageManager.SaveFlagFromCDN(region.TwoLetterISORegionName.ToLowerInvariant())
                 });
-                _logger.LogInformation(region.Name);
+                _logger.LogInformation($"Adding country {region.EnglishName} with code {region.TwoLetterISORegionName.ToLowerInvariant()}");
             }
         }
         else
@@ -95,14 +97,15 @@ public class SeedProdShelfService : ISeedDataService
                 if (string.IsNullOrEmpty(country.FlagUrl))
                 {
                     country.FlagUrl = IsoCountryCodeToFlagEmoji(country.CountryCode);
+                    _logger.LogInformation($"Updating flag for country {country.Name} with code {country.CountryCode}");
                 }
             }
         }
 
         if (context.ChangeTracker.HasChanges())
         {
-            _logger.LogInformation("Saving countries");
             await context.SaveChangesAsync();
+            _logger.LogInformation("Saved countries");
         }
     }
 
@@ -158,8 +161,10 @@ public class SeedProdShelfService : ISeedDataService
         if (notExisting.Any())
         {
             await context.Publishers.AddRangeAsync(notExisting);
-            _logger.LogInformation("Saving publishers");
+            _logger.LogInformation($"Adding {notExisting.Count} publishers");
+
             await context.SaveChangesAsync();
+            _logger.LogInformation("Saving publishers");
         }
     }
 }

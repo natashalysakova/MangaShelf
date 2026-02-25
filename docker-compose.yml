@@ -1,5 +1,19 @@
 name: manga-shelf
 services:
+  mangashelf.migration:
+    container_name: mangashelf.migration
+    image: ${DOCKER_REGISTRY}manga-shelf-migration:latest
+    networks: 
+      - manga-network
+    environment:
+      DOTNET_ENVIRONMENT: Production
+    env_file:
+      - .env
+    restart: on-failure
+    depends_on:
+        mangashelf.db:
+            condition: service_healthy
+
   mangashelf:
     image: ${DOCKER_REGISTRY}manga-shelf-ui:latest
     container_name: mangashelf
@@ -17,8 +31,9 @@ services:
       - images:/app/wwwroot/images:rw
     restart: always
     depends_on:
-      mangashelf.db:
-        condition: service_healthy
+      mangashelf.migration:
+        condition: service_completed_successfully
+
 
   mangashelf.parser:
     container_name: mangashelf.parser
@@ -35,8 +50,8 @@ services:
       - .env
     restart: always
     depends_on:
-        mangashelf:
-            condition: service_started
+        mangashelf.migration:
+            condition: service_completed_successfully
 
   mangashelf.db:
     container_name: mangashelf.db

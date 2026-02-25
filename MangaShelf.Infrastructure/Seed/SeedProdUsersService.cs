@@ -1,6 +1,7 @@
 using MangaShelf.DAL.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using System.Net.WebSockets;
 using System.Security.Claims;
 
 namespace MangaShelf.Infrastructure.Seed;
@@ -88,6 +89,7 @@ public class SeedProdUsersService : ISeedDataService
         if (!hasUserRole)
         {
             await _userManager.AddToRoleAsync(adminUser, RoleTypes.User);
+            _logger.LogInformation("Added missing {Role} role to existing admin user {UserName}", RoleTypes.User, adminUser.UserName);
         }
     }
 
@@ -104,33 +106,20 @@ public class SeedProdUsersService : ISeedDataService
         await _userManager.AddClaimAsync(user, new Claim(CustomClaimTypes.MustChangePassword, "true"));
         await _userManager.AddToRoleAsync(user, RoleTypes.Admin);
         await _userManager.AddToRoleAsync(user, RoleTypes.User);
+
+        _logger.LogInformation("Seeded admin user with username {UserName}", adminUserName);
     }
 
     private async Task SeedRolesAsync()
     {
-        if (!await _roleManager.RoleExistsAsync(RoleTypes.Admin))
-        {
-            var adminRole = new IdentityRole(RoleTypes.Admin);
-            await _roleManager.CreateAsync(adminRole);
-        }
+        var rolesToCreate = new List<string> { RoleTypes.Admin, RoleTypes.Cataloger, RoleTypes.User, RoleTypes.Service };
 
-        if (!await _roleManager.RoleExistsAsync(RoleTypes.Cataloger))
+        foreach (var role in rolesToCreate)
         {
-            var catalogerRole = new IdentityRole(RoleTypes.Cataloger);
-            await _roleManager.CreateAsync(catalogerRole);
-        }
+            var result = new IdentityRole(role);
+            await _roleManager.CreateAsync(result);
+            _logger.LogInformation("Created {Role} role", role);
 
-        if (!await _roleManager.RoleExistsAsync(RoleTypes.User))
-        {
-            var userRole = new IdentityRole(RoleTypes.User);
-            await _roleManager.CreateAsync(userRole);
-        }
-
-        if (!await _roleManager.RoleExistsAsync(RoleTypes.Service))
-        {
-            var serviceRole = new IdentityRole(RoleTypes.Service);
-            await _roleManager.CreateAsync(serviceRole);
         }
     }
-
 }
