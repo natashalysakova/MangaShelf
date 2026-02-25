@@ -2,10 +2,8 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-WORKDIR /app
 
 ARG TARGETARCH
-
 RUN if [ "$TARGETARCH" != "arm64" ] ; then \
 	  ##Install dependencies for PuppeteerSharp (Chromium)
 	  ## 25.02.2026 works on AMD64, but not on ARM64. .NET 10.0.3
@@ -22,6 +20,7 @@ RUN if [ "$TARGETARCH" != "arm64" ] ; then \
 	  export PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium"; \
 	fi
 
+WORKDIR /app
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release

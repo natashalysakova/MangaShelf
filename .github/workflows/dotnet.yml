@@ -47,6 +47,7 @@ jobs:
         include:
           - directory: ./MangaShelf
           - directory: ./MangaShelf.Parser
+          - directory: ./MangaShelf.Migration
     defaults:
       run:
         working-directory: ${{ matrix.directory }}
