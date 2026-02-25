@@ -23,27 +23,34 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
     }
     public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
+        var executablePath = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH");
+
+        if (string.IsNullOrEmpty(executablePath) || !File.Exists(executablePath))
+        {
+            var browserFetcher = new BrowserFetcher();
+            await browserFetcher.DownloadAsync();
+            executablePath = null;
+        }
+
+        await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+        {
+            Headless = true,
+            ExecutablePath = executablePath,
+            Args = new[]
+            {
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-setuid-sandbox",
+                "--no-sandbox"
+            },
+        });
+
         var maxretry = _options.MaxRetries;
         int retry = 0;
         do
         {
             try
             {
-                var browserFetcher = new BrowserFetcher();
-                await browserFetcher.DownloadAsync();
-
-                await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-                {
-                    Headless = true,
-                    Args = new[]
-                    {
-                        "--disable-gpu",
-                        "--disable-dev-shm-usage",
-                        "--disable-setuid-sandbox",
-                        "--no-sandbox"
-                    },
-                });
-
                 await using var page = await browser.NewPageAsync();
                 await page.SetUserAgentAsync("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36");
                 await page.SetExtraHttpHeadersAsync(new Dictionary<string, string>
