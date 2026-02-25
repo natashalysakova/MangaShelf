@@ -44,6 +44,7 @@ WORKDIR /src
 
 # Copy all csproj files first to leverage Docker layer caching for restore
 COPY ["MangaShelf.Parser/MangaShelf.Parser.csproj", "MangaShelf.Parser/"]
+COPY ["MangaShelf.Migration/MangaShelf.Migration.csproj", "MangaShelf.Migration/"]
 COPY ["MangaShelf.DAL/MangaShelf.DAL.csproj", "MangaShelf.DAL/"]
 COPY ["MangaShelf.Infrastructure/MangaShelf.Infrastructure.csproj", "MangaShelf.Infrastructure/"]
 COPY ["MangaShelf.BL/MangaShelf.BL.csproj", "MangaShelf.BL/"]

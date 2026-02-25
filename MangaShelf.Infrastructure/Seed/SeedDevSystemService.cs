@@ -29,7 +29,8 @@ public class SeedDevSystemService : ISeedDataService
     {
         using var context = await _dbContextFactory.CreateDbContextAsync();
         context.RemoveRange(context.Settings.Where(x => x.Section == "HtmlDownloaders"));
-        await context.SaveChangesAsync();
+        var removed = await context.SaveChangesAsync();
+        _logger.LogInformation("Removed {Count} HtmlDownloaders settings", removed);
     }
 
     private async Task FixTypes()
@@ -47,5 +48,6 @@ public class SeedDevSystemService : ISeedDataService
         }
 
         await context.SaveChangesAsync();
+        _logger.LogInformation("Finished fixing setting types");
     }
 }

@@ -19,15 +19,6 @@ public class Program
 
         var host = builder.Build();
 
-        using (var scope = host.Services.CreateScope())
-        {
-            var _options = scope.ServiceProvider.GetRequiredService<IConfigurationService>().BackgroundWorker;
-            await Task.Delay(_options.StartDelay);
-        }
-
-        await host.MakeSureDbCreatedAsync();
-        await host.SeedDatabase();
-
         host.Run();
     }
 }

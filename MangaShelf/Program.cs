@@ -74,9 +74,6 @@ public class Program
 
         var app = builder.Build();
 
-        await app.MakeSureDbCreatedAsync();
-        await app.SeedDatabase();
-
         app.MapHealthChecks("/health");
 
         // Configure the HTTP request pipeline.
