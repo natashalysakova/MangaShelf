@@ -20,10 +20,6 @@ public class SeedProdUsersService : ISeedDataService
         _userManager = userManager;
         _roleManager = roleManager;
     }
-    public async Task Run()
-    {
-        await Run(CancellationToken.None);
-    }
     public string ActivitySourceName => "Seed prod users";
 
     public int Priority => 1;

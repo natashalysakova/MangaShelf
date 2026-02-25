@@ -1,5 +1,4 @@
 using MangaShelf.Common.Localization.Interfaces;
-using MangaShelf.Localization.Interfaces;
 using MangaShelf.Localization.Services;
 using MangaShelf.Services;
 using System.Reflection;

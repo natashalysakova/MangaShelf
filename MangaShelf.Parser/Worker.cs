@@ -1,5 +1,4 @@
 using MangaShelf.BL.Interfaces;
-using Microsoft.Extensions.Options;
 
 namespace MangaShelf.Parser;
 
@@ -8,15 +7,12 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly IParseJobManager _jobManager;
-    private readonly BackgroundWorkerOptions _options;
 
-    public Worker(ILogger<Worker> logger, IOptions<BackgroundWorkerOptions> options, IServiceProvider serviceProvider, IParseJobManager jobManager)
+    public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider, IParseJobManager jobManager)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
         _jobManager = jobManager;
-        _options = options.Value;
-
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -24,6 +20,7 @@ public class Worker : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var parserFactory = scope.ServiceProvider.GetRequiredService<IParserFactory>();
         var parsers = parserFactory.GetParsers();
+
         _logger.LogInformation("Found {ParserCount} parsers", parsers.Count());
 
         try
@@ -38,6 +35,8 @@ public class Worker : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            var options = scope.ServiceProvider.GetRequiredService<IConfigurationService>().BackgroundWorker;
+
             if (_logger.IsEnabled(LogLevel.Trace))
             {
                 _logger.LogTrace("Worker running at: {time}", DateTimeOffset.Now);
@@ -49,14 +48,14 @@ public class Worker : BackgroundService
                 return;
             }
 
-            if (_options.Enabled)
+            if (options.Enabled)
             {
                 await _jobManager.CreateScheduledJobs();
             }
 
             await _jobManager.RunScheduledJobs();
 
-            await Task.Delay(_options.LoopDelay, stoppingToken);
+            await Task.Delay(options.LoopDelay, stoppingToken);
         }
     }
 }

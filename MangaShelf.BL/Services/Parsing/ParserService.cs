@@ -1,3 +1,5 @@
+using MangaShelf.BL.Configuration;
+using MangaShelf.BL.Extentions;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Parsers;
 using MangaShelf.Common.Interfaces;
@@ -8,7 +10,6 @@ using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace MangaShelf.BL.Services.Parsing;
 
@@ -17,18 +18,18 @@ public class ParserService : IParseService
     private readonly ILogger<ParserService> _logger;
     private readonly IDbContextFactory<MangaDbContext> _dbContextFactory;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ParserServiceOptions _options;
+    private readonly ParserServiceSettings _options;
 
     public ParserService(ILogger<ParserService> logger,
         IDbContextFactory<MangaDbContext> dbContextFactory,
         IServiceProvider serviceProvider,
         IParserFactory parserFactory,
-        IOptions<ParserServiceOptions> options)
+        IConfigurationService configurationService)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _serviceProvider = serviceProvider;
-        _options = options.Value;
+        _options = configurationService.ParserService;
     }
 
     private async Task ParseSite(IPublisherParser parser, Guid jobId, CancellationToken token)
@@ -252,7 +253,8 @@ public class ParserService : IParseService
                 PreorderStart = volumeInfo.PreorderStartDate,
                 OneShot = volumeInfo.SeriesStatus == SeriesStatus.OneShot,
                 AgeRestriction = volumeInfo.AgeRestrictions == null ? 18 : volumeInfo.AgeRestrictions.Value,
-                IsPublishedOnSite = series.IsPublishedOnSite
+                IsPublishedOnSite = series.IsPublishedOnSite,
+                ReleaseDate = volumeInfo.Release,
             };
         }
 
@@ -271,24 +273,26 @@ public class ParserService : IParseService
             volume.Series.Status = volumeInfo.SeriesStatus;
         }
 
-        volume.IsPreorder = volumeInfo.IsPreorder;
 
         if (volumeInfo.TotalVolumes > 0 && volumeInfo.TotalVolumes > volume.Series.TotalVolumes)
         {
             volume.Series.TotalVolumes = volumeInfo.TotalVolumes;
         }
 
-        if (volumeInfo.Release is not null && volumeInfo.Release > DateTime.Now)
+        volume.IsPreorder = volumeInfo.IsPreorder;
+        if (volumeInfo.IsPreorder) 
         {
-            volume.ReleaseDate = volumeInfo.Release;
-        }
-        else if (!volume.IsPreorder && volumeInfo.PreorderStartDate != null)
-        {
-            volume.ReleaseDate = volumeInfo.PreorderStartDate.Value.AddDays(30);
+            if(volumeInfo.Release != null && volumeInfo.Release > volume.ReleaseDate) // preorder release date changed
+            {
+                volume.ReleaseDate = volumeInfo.Release;
+            }
         }
         else
         {
-            volume.ReleaseDate = DateTimeOffset.Now;
+            if (volume.IsPreorder) // preorder in db but released on site
+            {
+                volume.ReleaseDate = DateTimeOffset.Now;
+            }
         }
 
         if (volume.IsPreorder && volume.PreorderStart == null)

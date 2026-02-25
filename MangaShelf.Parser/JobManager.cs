@@ -1,13 +1,6 @@
-using AngleSharp.Dom;
+using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Interfaces;
-using MangaShelf.BL.Services.Parsing;
-using MangaShelf.DAL.System;
-using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 
 namespace MangaShelf.BL.Services;
 
@@ -15,7 +8,7 @@ internal class ParseJobManger : IParseJobManager, IDisposable
 {
     private readonly ILogger<ParseJobManger> _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly JobManagerOptions _options;
+    private readonly JobManagerSettings _options;
 
     private readonly Queue<Guid> queue = new();
     private CancellationTokenSource cancellationTokenSource = new();
@@ -23,12 +16,15 @@ internal class ParseJobManger : IParseJobManager, IDisposable
 
     public ParseJobManger(
         ILogger<ParseJobManger> logger,
-        IServiceProvider serviceProvider,
-        IOptions<JobManagerOptions> options)
+        IServiceProvider serviceProvider)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _options = options.Value;
+
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            _options = scope.ServiceProvider.GetRequiredService<IConfigurationService>().JobManager;
+        }
 
         runQueueHandler();
     }
@@ -81,7 +77,7 @@ internal class ParseJobManger : IParseJobManager, IDisposable
                 }
                 else
                 {
-                    await Task.Delay(1000); // wait for 1 second before checking the queue again
+                    await Task.Delay(5000); // wait for 1 second before checking the queue again
                 }
             }
         }, cancellationTokenSource.Token);

@@ -303,4 +303,7 @@
   <data name="EditOwnership" xml:space="preserve">
     <value>Редагувати запис</value>
   </data>
+  <data name="Readings" xml:space="preserve">
+    <value>Читання</value>
+  </data>
 </root>

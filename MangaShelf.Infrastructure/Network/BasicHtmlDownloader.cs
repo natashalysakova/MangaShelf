@@ -1,5 +1,6 @@
-﻿using MangaShelf.Common.Interfaces;
-using Microsoft.Extensions.Configuration;
+﻿using MangaShelf.BL.Configuration;
+using MangaShelf.BL.Interfaces;
+using MangaShelf.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Infrastructure.Network;
@@ -7,7 +8,7 @@ namespace MangaShelf.Infrastructure.Network;
 public class BasicHtmlDownloader : IHtmlDownloader
 {
     private readonly ILogger<BasicHtmlDownloader> _logger;
-    private readonly IConfiguration _configuration;
+    private readonly HtmlDownloaderSettings _configuration;
     private readonly HttpClient _httpClient;
 
     protected virtual Task PreRequest(string url, CancellationToken token = default)
@@ -30,10 +31,10 @@ public class BasicHtmlDownloader : IHtmlDownloader
         }
     }
 
-    public BasicHtmlDownloader(ILogger<BasicHtmlDownloader> logger, IConfiguration configuration)
+    public BasicHtmlDownloader(ILogger<BasicHtmlDownloader> logger, IConfigurationService configurationService)
     {
         _logger = logger;
-        _configuration = configuration;
+        _configuration = configurationService.HtmlDownloader;
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Clear();
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
@@ -41,7 +42,7 @@ public class BasicHtmlDownloader : IHtmlDownloader
     }
     public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
-        var maxretry = _configuration.GetSection("HtmlDownloaders").GetValue<int>("MaxRetries");
+        var maxretry = _configuration.MaxRetries;
         int retry = 0;
         do
         {

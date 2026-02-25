@@ -99,8 +99,9 @@ public class MolfarParser : BaseParser
 
     protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
-        var node = GetFromTable(document, "Рік видання");
-        return ParseYearIntoLastDayOfYear(node);
+        //var node = GetFromTable(document, "Рік видання");
+        //return ParseYearIntoLastDayOfYear(node);
+        return null;
     }
 
     protected override string GetSeries(IDocument document)

@@ -457,6 +457,15 @@ namespace MangaShelf.Localization.Resources.Components {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Readings.
+        /// </summary>
+        public static string Readings {
+            get {
+                return ResourceManager.GetString("Readings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Register.
         /// </summary>
         public static string Register {

@@ -20,6 +20,10 @@ public class ArtbooksParseTest : BaseParserTestClass<ArtbooksParser>
                 new object[]{
                     release.Url,
                     release
+                },
+                new object[]{
+                    release2.Url,
+                    release2
                 }
             };
         }
@@ -40,13 +44,35 @@ public class ArtbooksParseTest : BaseParserTestClass<ArtbooksParser>
     private static ParsedInfo preorder = new ParsedInfo()
     {
         CanBePublished = true,
+        Series = "Дух в оболонці",
+        Title = "Том 1",
+        CountryCode = "ua",
+        Cover = "https://artbooks.ua/image/cache/catalog/Covers/2026/Manga_ghost_in_the_shell_Vol.1_HQ-1551x1640.png",
+        Authors = "Шіро Масамуне",
+        Isbn = "978-617-523-247-7",
+        IsPreorder = true,
+        Release = DateTime.SpecifyKind(new DateTime(2026, 05, 04), DateTimeKind.Local),
+        PreorderStartDate = null,
+        Publisher = "Artbooks",
+        SeriesStatus = SeriesStatus.Unknown,
+        TotalVolumes = -1,
+        VolumeType = VolumeType.Physical,
+        SeriesType = SeriesType.Manga,
+        AgeRestrictions = 16,
+        Url = "https://artbooks.ua/dukh-v-obolontsi-tom-1",
+        VolumeNumber = 1
+    };
+
+    private static ParsedInfo release2 = new ParsedInfo()
+    {
+        CanBePublished = true,
         Title = "Том 1",
         CountryCode = "ua",
         Cover = "https://artbooks.ua/image/cache/catalog/Covers/2025/%D0%BC%D0%B0%D0%BD%D2%91%D0%B0/Manga_Lie-In-April_Vol.1_HQ-1551x1640.png",
         Authors = "Наоші Аракава",
         Isbn = "978-617-523-324-5",
-        IsPreorder = true,
-        Release = DateTime.SpecifyKind(new DateTime(2025, 10, 1), DateTimeKind.Local),
+        IsPreorder = false,
+        Release = DateTime.SpecifyKind(new DateTime(2025, 12, 31), DateTimeKind.Local),
         PreorderStartDate = null,
         Publisher = "Artbooks",
         Series = "Твоя квітнева брехня",

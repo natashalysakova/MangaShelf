@@ -1,6 +1,4 @@
-using AngleSharp.Dom;
 using MangaShelf.Common.Interfaces;
-using MangaShelf.DAL.System.Models;
 
 namespace MangaShelf.BL.Interfaces;
 
@@ -17,7 +15,7 @@ public interface IParserWriteService : IService
     
     Task<Guid> CreateSingleJob(string parserName, string url, CancellationToken token);
     Task<Guid> CreateParserJob(Guid parserId, CancellationToken token);
-    Task<int> CreateScheduledJobs(int delayBetweenRuns, CancellationToken token = default);
+    Task<int> CreateScheduledJobs(TimeSpan delayBetweenRuns, CancellationToken token = default);
     
     Task CancelJob(Guid parserId, CancellationToken token);
     

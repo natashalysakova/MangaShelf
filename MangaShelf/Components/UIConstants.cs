@@ -1,5 +1,3 @@
-using System;
-
 namespace MangaShelf.Components;
 
 public static class UIConstants

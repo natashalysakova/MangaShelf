@@ -188,18 +188,24 @@ public class VydavnytstvoParser : BaseParser
             return string.Empty;
         }
 
-        var indexOfEndComma = header.TextContent.IndexOf('»');
-        var indexOfPreorder = header.TextContent.ToLower().IndexOf("(передзамовлення)");
-        if (indexOfEndComma >= 0)
+        var title = header.TextContent.Escaped();
+
+        var indexOfEndComma = title.IndexOf('»');
+        var indexOdLastDot = title.LastIndexOf('.');
+
+        var indexToUse = indexOfEndComma > indexOdLastDot ? indexOfEndComma : indexOdLastDot;
+
+        var indexOfPreorder = title.ToLower().IndexOf("(передзамовлення)");
+        if (indexToUse >= 0)
         {
-            if (indexOfPreorder > indexOfEndComma)
+            if (indexOfPreorder > indexToUse)
             {
-                return header.TextContent.Substring(indexOfEndComma + 1, indexOfPreorder - indexOfEndComma - 1).Trim('.', ' ');
+                return title.Substring(indexToUse + 1, indexOfPreorder - indexToUse - 1).Trim('.', ' ');
             }
-            return header.TextContent.Substring(indexOfEndComma + 1).Trim();
+            return title.Substring(indexToUse + 1).Trim();
         }
 
-        return header.TextContent.Trim();
+        return title.Trim();
     }
 
 

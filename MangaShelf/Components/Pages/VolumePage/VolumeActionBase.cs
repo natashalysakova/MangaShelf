@@ -1,14 +1,11 @@
 using MangaShelf.BL.Dto;
 using MangaShelf.BL.Interfaces;
-using MangaShelf.Components.Pages.Admin;
 using MangaShelf.Components.Pages.VolumePage.Elements;
-using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using MangaShelf.Localization.Interfaces;
 using MangaShelf.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 using System.Security.Claims;
 using static MangaShelf.Components.Pages.VolumePage.Elements.AddEditReadingDialog;

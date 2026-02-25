@@ -2,8 +2,6 @@ using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Runtime.CompilerServices;
 
 namespace MangaShelf.Infrastructure.Seed;
 
@@ -31,6 +29,18 @@ public class SeedDevShelfService : ISeedDataService
         await FixMissingUserNames();
         await FixAvgRating();
 
+        await ResetReleaseDate();
+    }
+
+    private async Task ResetReleaseDate()
+    {
+        using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        await context.Volumes.ForEachAsync((v) =>
+        {
+            v.ReleaseDate = null;
+        });
+        await context.SaveChangesAsync();
     }
 
     private async Task FixAvgRating()
@@ -62,11 +72,6 @@ public class SeedDevShelfService : ISeedDataService
         }
 
         await context.SaveChangesAsync();
-    }
-
-    public async Task Run()
-    {
-        await Run(CancellationToken.None);
     }
 
     private async Task FixPublicIds()

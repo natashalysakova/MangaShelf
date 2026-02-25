@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Configuration;
+using MangaShelf.BL.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Infrastructure.Network;
 
 public class MalopusHtmlDownloader : BasicHtmlDownloader
 {
-    public MalopusHtmlDownloader(ILogger<BasicHtmlDownloader> logger, IConfiguration configuration) : base(logger, configuration)
+    public MalopusHtmlDownloader(ILogger<BasicHtmlDownloader> logger, IConfigurationService configuration) : base(logger, configuration)
     {
     }
     

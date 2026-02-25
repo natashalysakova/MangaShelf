@@ -1,10 +1,7 @@
-using AngleSharp.Dom;
-using AngleSharp.Text;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
 
 namespace MangaShelf.BL.Services.Parsing;
 
@@ -245,7 +242,7 @@ public class ParserWriteService : IParserWriteService
         await context.SaveChangesAsync();
     }
 
-    public async Task<int> CreateScheduledJobs(int delayBetweenRuns, CancellationToken token = default)
+    public async Task<int> CreateScheduledJobs(TimeSpan delayBetweenRuns, CancellationToken token = default)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
 
@@ -257,7 +254,7 @@ public class ParserWriteService : IParserWriteService
         {
             var job = CreateJobInternal(parser, ParserRunType.FullSite);
             parser.Jobs.Add(job);
-            parser.NextRun = DateTimeOffset.Now.AddHours(delayBetweenRuns);
+            parser.NextRun = DateTimeOffset.Now + delayBetweenRuns;
         }
 
         await dbContext.SaveChangesAsync(token);

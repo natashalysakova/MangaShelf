@@ -1,4 +1,5 @@
-﻿using MangaShelf.BL.Enums;
+﻿using MangaShelf.BL.Configuration;
+using MangaShelf.BL.Enums;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Parsers;
 using MangaShelf.BL.Services;
@@ -7,9 +8,9 @@ using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Localization.Interfaces;
 using MangaShelf.Common.Localization.Services;
 using MangaShelf.Infrastructure.Network;
+using MangaShelf.Infrastructure.Seed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Identity.Client;
 
 namespace MangaShelf.Infrastructure.Installer;
 
@@ -26,6 +27,7 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
         builder.Services.AddScoped<IParserReadService, ParserReadService>();
+        builder.Services.AddScoped<ISettingReadService, SettingReadService>();
 
         // Parser services
         builder.Services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
@@ -43,11 +45,22 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IImageManager, ImageManager>();
 
         // Seed services
-        builder.RegisterSeedServices();
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddScoped<ISeedDataService, SeedDevUsersService>();
+            builder.Services.AddScoped<ISeedDataService, SeedDevShelfService>();
+            builder.Services.AddScoped<ISeedDataService, SeedDevSystemService>();
+        }
+
+        builder.Services.AddScoped<ISeedDataService, SeedProdUsersService>();
+        builder.Services.AddScoped<ISeedDataService, SeedProdShelfService>();
+        builder.Services.AddScoped<ISeedDataService, SeedProdSystemService>();
 
         // Cache services
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<ICacheService, CacheService>();
+
+        builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
         return builder;
     }

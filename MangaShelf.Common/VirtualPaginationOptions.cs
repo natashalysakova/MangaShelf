@@ -1,6 +1,4 @@
-﻿using MangaShelf.Common.Interfaces;
-
-namespace MangaShelf.Common;
+﻿namespace MangaShelf.Common;
 
 //public record VirtualPaginationOptions : IFilterOptions
 //{

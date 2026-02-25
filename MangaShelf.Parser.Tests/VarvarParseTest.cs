@@ -14,16 +14,16 @@ public class VarvarParseTest : BaseParserTestClass<VarvarParser>
             return new[]
             {
                 new object[]{
-                    release.Url,
-                    release
+                    released.Url,
+                    released
                 },
                 new object[]{
                     preorder.Url,
                     preorder
                 },
                 new object[]{
-                    preorder2.Url,
-                    preorder2
+                    released2.Url,
+                    released2
                 }
             };
         }
@@ -35,18 +35,22 @@ public class VarvarParseTest : BaseParserTestClass<VarvarParser>
     {
         var result = await Parser.Parse(url);
 
-        result.Should().BeEquivalentTo(expectedValue, config => config.Excluding(x => x.Json).Excluding(x=>x.Description));
+        result.Should()
+            .BeEquivalentTo(expectedValue, config => config
+                .Excluding(x => x.Json)
+                .Excluding(x=>x.Description));
+
         result.Description.Should().NotBeNull();
     }
 
-    private static ParsedInfo preorder = new ParsedInfo()
+    private static ParsedInfo released = new ParsedInfo()
     {
         CanBePublished = false,
-        Title = "том 2",
+        Title = "Том 2",
         CountryCode = "ua",
-        Cover = "https://varvarpublishing.com/wp-content/uploads/2025/08/gangsta-02-cover_.webp",
+        Cover = "https://varvarpublishing.com/wp-content/uploads/2025/08/554231_cover-200x200.webp",
         Isbn = "978-617-09-9780-7",
-        IsPreorder = true,
+        IsPreorder = false,
         Authors = "Косуке",
         Publisher = "Varvar Publishing",
         Release = null,
@@ -60,12 +64,12 @@ public class VarvarParseTest : BaseParserTestClass<VarvarParser>
         PreorderStartDate = DateTime.SpecifyKind(new DateTime(2025, 8, 31), DateTimeKind.Local),
         VolumeNumber = 2
     };
-    private static ParsedInfo release = new ParsedInfo()
+    private static ParsedInfo released2 = new ParsedInfo()
     {
         CanBePublished = false,
         Title = "Том 1",
         CountryCode = "ua",
-        Cover = "https://varvarpublishing.com/wp-content/uploads/2025/06/pig-1-cover-a.webp",
+        Cover = "https://varvarpublishing.com/wp-content/uploads/2025/06/549426_cover-200x200.webp",
         Authors = "Кім Карнбі,Чхон Бомшік",
         Isbn = null,
         IsPreorder = false,
@@ -82,25 +86,25 @@ public class VarvarParseTest : BaseParserTestClass<VarvarParser>
         PreorderStartDate = DateTime.SpecifyKind(new DateTime(2025, 6, 30), DateTimeKind.Local),
     };
 
-    private static ParsedInfo preorder2 = new ParsedInfo()
+    private static ParsedInfo preorder = new ParsedInfo()
     {
         CanBePublished = false,
-        VolumeNumber = 2,
-        Title = "Том 2",
+        VolumeNumber = -1,
+        Title = "Бібліоманія",
         CountryCode = "ua",
-        Cover = "https://varvarpublishing.com/wp-content/uploads/2025/08/nebo-2-cov.webp",
-        Authors = "Юн Інван,Кім Сонхі",
-        Isbn = "978-617-09-9787-6",
+        Cover = "https://varvarpublishing.com/wp-content/uploads/2025/12/556003_cover-200x200.webp",
+        Authors = "Орвал,Маччіро",
+        Isbn = "978-617-09-9919-1",
         IsPreorder = true,
         Publisher = "Varvar Publishing",
-        Release = DateTime.SpecifyKind(new DateTime(2025, 11,30), DateTimeKind.Local),
-        PreorderStartDate = DateTime.SpecifyKind(new DateTime(2025, 8, 31), DateTimeKind.Local),
-        Series = "Небо у безодні",
-        SeriesStatus = SeriesStatus.Unknown,
+        Release = DateTime.SpecifyKind(new DateTime(2026, 02,28), DateTimeKind.Local),
+        PreorderStartDate = DateTime.SpecifyKind(new DateTime(2025, 12, 31), DateTimeKind.Local),
+        Series = "Бібліоманія",
+        SeriesStatus = SeriesStatus.OneShot,
         TotalVolumes = -1,
         VolumeType = VolumeType.Physical,
         SeriesType = SeriesType.Unknown,
         AgeRestrictions = null,
-        Url = "https://varvarpublishing.com/product/nebo-u-bezodni-tom-2/"
+        Url = "https://varvarpublishing.com/bibliomaniya/"
     };
 }

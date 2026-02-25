@@ -1,7 +1,7 @@
-﻿using MangaShelf.Common.Interfaces;
-using Microsoft.Extensions.Configuration;
+﻿using MangaShelf.BL.Configuration;
+using MangaShelf.BL.Interfaces;
+using MangaShelf.Common.Interfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using PuppeteerSharp;
 
 namespace MangaShelf.Infrastructure.Network;
@@ -9,17 +9,17 @@ namespace MangaShelf.Infrastructure.Network;
 public class AdvancedHtmlDownloader : IHtmlDownloader
 {
     private readonly ILogger<BasicHtmlDownloader> _logger;
-    private readonly HtmlDownloadOptions _options;
+    private readonly HtmlDownloaderSettings _options;
     private readonly HttpClient _httpClient;
 
-    public AdvancedHtmlDownloader(ILogger<BasicHtmlDownloader> logger, IOptions<HtmlDownloadOptions> options)
+    public AdvancedHtmlDownloader(ILogger<BasicHtmlDownloader> logger, IConfigurationService configurationService)
     {
         _logger = logger;
-        _options = options.Value;
+        _options = configurationService.HtmlDownloader;
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Clear();
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
-        _httpClient.Timeout = TimeSpan.FromMilliseconds(_options.RequestTimeout);
+        _httpClient.Timeout = _options.RequestTimeout;
     }
     public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
@@ -41,7 +41,7 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
                         "--disable-dev-shm-usage",
                         "--disable-setuid-sandbox",
                         "--no-sandbox"
-                    }
+                    },
                 });
 
                 await using var page = await browser.NewPageAsync();
@@ -57,10 +57,10 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
             }
             catch (Exception ex)
             {
-                await Task.Delay(_options.DelayBetweenRetries, token);
                 Console.WriteLine($"Error accessing {url}: {ex.Message}");
                 Console.WriteLine("retry");
                 retry += 1;
+                await Task.Delay(_options.DelayBetweenRetries, token);
             }
         } while (retry < maxretry);
 

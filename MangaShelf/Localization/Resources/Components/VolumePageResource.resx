@@ -303,4 +303,7 @@
   <data name="EditOwnership" xml:space="preserve">
     <value>EditOwnership</value>
   </data>
+  <data name="Readings" xml:space="preserve">
+    <value>Readings</value>
+  </data>
 </root>

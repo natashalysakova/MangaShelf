@@ -126,7 +126,14 @@ public class NashaIdeaParser : BaseParser
 
         if (StartsWithMonth(text))
         {
-            month = text.Substring(0, text.IndexOf(' '));
+            if (text.Contains(' '))
+            {
+                month = text.Substring(0, text.IndexOf(' '));
+            }
+            else
+            {
+                month = text;
+            }
         }
 
         if (month == default)
@@ -278,6 +285,11 @@ public class NashaIdeaParser : BaseParser
                 if (item.TextContent.Contains("Серія незавершена") || item.TextContent.Contains("Серія не завершена"))
                 {
                     return SeriesStatus.Ongoing;
+                }
+                var totalVolumes = GetTotalVolumes(document);
+                if (totalVolumes == 1)
+                {
+                    return SeriesStatus.OneShot;
                 }
 
                 return SeriesStatus.Completed;

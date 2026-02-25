@@ -9,6 +9,8 @@ public class MangaSystemDbContext : DbContext
     public DbSet<Parser> Parsers { get; set; }
     public DbSet<ParserJob> Runs { get; set; }
 
+    public DbSet<Settings> Settings { get; set; }
+
     public MangaSystemDbContext(DbContextOptions<MangaSystemDbContext> options) : base(options)
     {
     }
@@ -43,5 +45,9 @@ public class MangaSystemDbContext : DbContext
 
         modelBuilder.Entity<Parser>()
             .HasIndex(p => p.ParserName).IsUnique();
+
+        modelBuilder.Entity<Settings>()
+            .HasIndex(s => new { s.Section, s.Key })
+            .IsUnique();
     }
 }

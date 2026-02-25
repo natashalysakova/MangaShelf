@@ -18,8 +18,8 @@ public class VydavnytstvoParseTest : BaseParserTestClass<VydavnytstvoParser>
                     release
                 },
                 new object[]{
-                    preorder.Url,
-                    preorder
+                    release2.Url,
+                    release2
                 }
             };
         }
@@ -39,17 +39,17 @@ public class VydavnytstvoParseTest : BaseParserTestClass<VydavnytstvoParser>
 
     }
 
-    private static ParsedInfo preorder = new ParsedInfo()
+    private static ParsedInfo release2 = new ParsedInfo()
     {
         CanBePublished = true,
         Title = "Том 1",
         CountryCode = "ua",
         Cover = "https://i0.wp.com/vydavnytstvo.com/wp-content/uploads/2025/03/kobayashi_v1.jpg?fit=600%2C600&ssl=1",
         Isbn = "978-617-8149-23-9",
-        IsPreorder = true,
+        IsPreorder = false,
         Publisher = "Видавництво",
         Authors = "Кулкьошінджя",
-        Release = DateTime.SpecifyKind(new DateTime(2025, 09, 30), DateTimeKind.Local),
+        Release = null,
         Series = "Драконопокоївка в домі Кобаяші-сан",
         PreorderStartDate = DateTime.SpecifyKind(new DateTime(2025, 03, 31), DateTimeKind.Local),
         SeriesStatus = SeriesStatus.Unknown,

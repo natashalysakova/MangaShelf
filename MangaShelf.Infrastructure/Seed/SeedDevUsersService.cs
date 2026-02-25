@@ -7,10 +7,6 @@ public class SeedDevUsersService : ISeedDataService
     public SeedDevUsersService(ILogger<SeedDevUsersService> logger)
     {
     }
-    public async Task Run()
-    {
-        await Run(CancellationToken.None);
-    }
 
     public string ActivitySourceName => "Seed dev users";
 

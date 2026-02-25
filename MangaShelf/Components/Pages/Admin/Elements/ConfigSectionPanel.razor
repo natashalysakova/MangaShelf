@@ -1,0 +1,59 @@
+﻿@using DbSettings = MangaShelf.DAL.System.Models.Settings
+@using MangaShelf.DAL.System.Models
+
+@inject IConfigurationService ConfigurationService
+
+<MudPaper Class="mb-3 p-3">
+    <MudStack>
+        <MudStack Row>
+            <MudText Typo="Typo.h6">@T</MudText>
+            <MudSpacer></MudSpacer>
+
+            @if (_isUpdating)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Color="Color.Primary"></MudProgressCircular>
+            }
+            else if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudIcon Icon="@Icons.Material.Rounded.Error" Color="Color.Error"></MudIcon>
+            }
+        </MudStack>
+        @foreach (var setting in Items)
+        {
+            <SettingElement Settings="@setting" OnSettingChanged="UpdateInDatabase"></SettingElement>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public string T { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public IEnumerable<DbSettings> Items { get; set; }
+
+    private bool _isUpdating = false;
+    private string? errorMessage;
+
+    Variant variant = Variant.Filled;
+
+    private async Task UpdateInDatabase(DbSettings setting)
+    {
+        try
+        {
+            _isUpdating = true;
+            errorMessage = default;
+            setting = await ConfigurationService.UpdateSectionValueAsync(setting);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+    }
+}

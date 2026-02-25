@@ -85,7 +85,7 @@ public abstract class BaseParser : IPublisherParser
         try
         {
             var classToSearch = GetVolumeUrlBlockClass();
-            var nodes = document.QuerySelectorAll(classToSearch).Where(x=> !x.TextContent.ToLower().StartsWith("комплект"));
+            var nodes = document.QuerySelectorAll(classToSearch).Where(x => !x.TextContent.ToLower().StartsWith("комплект"));
             var attribute = nodes.Select(x => x.Attributes["href"]);
             return attribute.Select(x => x.Value);
         }
@@ -96,18 +96,10 @@ public abstract class BaseParser : IPublisherParser
         }
     }
 
-
-
-    public async Task<ParsedInfo> Parse(string url, CancellationToken token = default)
+    public async Task<ParsedInfo> Parse(string url, string html, CancellationToken token)
     {
         _isRunning = true;
 
-        if (!url.StartsWith(SiteUrl))
-        {
-            url = SiteUrl + url;
-        }
-
-        var html = await _htmlDownloader.GetUrlHtml(url, token);
         var parser = new HtmlParser();
         var document = await parser.ParseDocumentAsync(html, token);
 
@@ -167,7 +159,24 @@ public abstract class BaseParser : IPublisherParser
         {
             _isRunning = false;
         }
+
+    }
+
+    public async Task<ParsedInfo> Parse(string url, CancellationToken token = default)
+    {
+        _isRunning = true;
+
+        if (!url.StartsWith(SiteUrl))
+        {
+            url = SiteUrl + url;
         }
+
+        var html = await _htmlDownloader.GetUrlHtml(url, token);
+
+        return await Parse(url, html, token);
+    }
+
+
     protected static DateTimeOffset? ParseYearIntoLastDayOfYear(string? year)
     {
         if (year != null && int.TryParse(year, out var yearNumber))

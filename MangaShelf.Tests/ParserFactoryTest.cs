@@ -1,5 +1,4 @@
 using MangaShelf.BL.Interfaces;
-using MangaShelf.BL.Parsers;
 using Moq;
 using Xunit;
 
