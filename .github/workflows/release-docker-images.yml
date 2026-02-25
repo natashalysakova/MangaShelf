@@ -52,6 +52,8 @@ jobs:
             image: ${{ needs.compute.outputs.REGISTRY }}/${{ needs.compute.outputs.USER_NAME }}/manga-shelf-ui
           - dockerfile: ./MangaShelf.Parser/Dockerfile
             image: ${{ needs.compute.outputs.REGISTRY }}/${{ needs.compute.outputs.USER_NAME }}/manga-shelf-parser
+          - dockerfile: ./MangaShelf.Migration/Dockerfile
+            image: ${{ needs.compute.outputs.REGISTRY }}/${{ needs.compute.outputs.USER_NAME }}/manga-shelf-migration
 
     permissions:
       contents: read
