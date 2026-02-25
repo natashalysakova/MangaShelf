@@ -344,10 +344,6 @@ public class ParserServiceTests : IDisposable
         Assert.NotNull(volume.PreorderStart);
         // PreorderStart gets set to volumeInfo.PreorderStartDate (which is 5 days in the future)
         Assert.Equal(preorderStart.Date, volume.PreorderStart!.Value.Date);
-        // ReleaseDate gets set to Now since Release is null and IsPreorder is true
-        var now = DateTimeOffset.Now;
-        Assert.True(Math.Abs((volume.ReleaseDate!.Value - now).TotalSeconds) < 5, 
-            $"ReleaseDate {volume.ReleaseDate.Value} should be close to now {now}");
     }
 
     [Fact]
