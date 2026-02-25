@@ -7,20 +7,25 @@
     <AuthorizeView>
         <Authorized>
             <MudStack Row Justify="Justify.Center">
-                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["Like"]">
+                <CardButtonTooltip Text="@Localizer["Like"]">
 
                     <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsLiked"
                                          Size="Size.Large"
                                          @onclick="()=>ToggleLike()"
                                          Icon="@CustomIcons.notFiledHeart" Color="@Color.Default"
                                          ToggledIcon="@CustomIcons.filledHeart" ToggledColor="@Color.Error" />
-                </MudTooltip>
-                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["GoToWebsite"]">
+                </CardButtonTooltip>
+                <CardButtonTooltip Text="@Localizer["GoToWebsite"]">
                     <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
-                </MudTooltip>
+                </CardButtonTooltip>
 
-                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["LibraryMenu"]">
-                    <MudMenu Icon="@CustomIcons.bookshelf" Size="Size.Large"
+                <CardButtonTooltip Text="@Localizer["Wishlist"]">
+                    <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsInWishlist"
+                                         Size="Size.Large"
+                                         @onclick="() => ToggleWishList()"
+                                         Icon="@CustomIcons.wishlist" Color="@Color.Default"
+                                         ToggledIcon="@CustomIcons.wishlist" ToggledColor="@Color.Warning" />
+@*                     <MudMenu Icon="@CustomIcons.bookshelf" Size="Size.Large"
                              Color="Color.Warning"
                              AriaLabel="Open user menu">
 
@@ -28,12 +33,12 @@
                         {
                             <MudMenuItem Icon="@action.Icon" IconColor="@action.Color" Label="@Localizer[action.Lable]" @onclick="@action.Handler" />
                         }
-                    </MudMenu>
-                </MudTooltip>
-                <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["ReadingMenu"]">
+                    </MudMenu> *@
+                </CardButtonTooltip>
+@*                 <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["ReadingMenu"]">
                     <MudIconButton OnClick="()=>ShowAddEditReadingDialog()" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
                 </MudTooltip>
-
+ *@
             </MudStack>
         </Authorized>
     </AuthorizeView>
@@ -49,51 +54,10 @@
     protected override void OnInitialized()
     {
         VolumeState.OnUserStatusChanged += HandleUserStatusChanged;
-        BuildListAvailableActions();
     }
 
     private void HandleUserStatusChanged()
     {
-        BuildListAvailableActions();
         StateHasChanged();
-    }
-
-    private record AvailableAction(string Lable, string Icon, Color Color, Func<Task> Handler);
-    private List<AvailableAction> availableActions;
-
-    private void BuildListAvailableActions()
-    {
-        availableActions = new List<AvailableAction>();
-        if (VolumeState.CurrentUserStatus == null)
-        {
-            return;
-        }
-
-        if (VolumeState.CurrentUserStatus.IsInWishlist)
-        {
-            availableActions.Add(new AvailableAction("RemoveFromWishlist", Icons.Material.Filled.RemoveShoppingCart, Color.Warning, () => ToggleWishList()));
-        }
-        else
-        {
-            availableActions.Add(new AvailableAction("AddToWishlist", CustomIcons.wishlist, Color.Success, () => ToggleWishList()));
-        }
-
-        if (Volume.IsPreorder && VolumeState.CurrentUserStatus.CurrentOwnershipStatus != VolumeStatus.Preorder)
-        {
-            availableActions.Add(new AvailableAction("SetPreorder", CustomIcons.preorder, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder)));
-        }
-        else
-        {
-            if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Own)
-            {
-                availableActions.Add(new AvailableAction("SetGone", Icons.Material.Filled.RemoveCircle, Color.Error, () => OpenSetOwnershipDialog(VolumeStatus.Gone)));
-            }
-            else
-            {
-                availableActions.Add(new AvailableAction("SetOwn", CustomIcons.bookshelf, Color.Success, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
-            }
-        }
-
-        availableActions.Add(new AvailableAction("SetHistoricStatus", CustomIcons.historical, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder, false)));
     }
 }

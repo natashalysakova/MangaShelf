@@ -1,11 +1,4 @@
-﻿using MangaShelf.BL.Enums;
-using MangaShelf.Common.Interfaces;
-using MangaShelf.DAL.Models;
-using MangaShelf.Infrastructure.Network;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
-namespace MangaShelf.Parser.Tests;
+﻿namespace MangaShelf.Parser.Tests;
 
 //[TestClass]
 //[Ignore]

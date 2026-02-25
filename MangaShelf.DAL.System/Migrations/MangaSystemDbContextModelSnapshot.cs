@@ -17,7 +17,7 @@ namespace MangaShelf.DAL.System.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -126,6 +126,38 @@ namespace MangaShelf.DAL.System.Migrations
                     b.HasIndex("ParserStatusId");
 
                     b.ToTable("Runs");
+                });
+
+            modelBuilder.Entity("MangaShelf.DAL.System.Models.Settings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Section")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Section", "Key")
+                        .IsUnique();
+
+                    b.ToTable("Settings");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.ParserError", b =>

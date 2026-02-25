@@ -1,13 +1,13 @@
+using MangaShelf.BL.Configuration;
+using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Parsers;
 using MangaShelf.BL.Services.Parsing;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
-using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -21,7 +21,7 @@ public class ParserServiceTests : IDisposable
     private Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
     private Mock<IImageManager> _imageManagerMock;
     private IDbContextFactory<MangaDbContext> _dbContextFactory;
-    private IOptions<ParserServiceOptions> _options;
+    private Mock<IConfigurationService> _configurationService;
     private ParserService _parserService;
     private string _databaseName;
 
@@ -55,11 +55,14 @@ public class ParserServiceTests : IDisposable
         _serviceProviderMock.Setup(x => x.GetService(typeof(IServiceScopeFactory)))
             .Returns(new TestServiceScopeFactory(_serviceScopeMock.Object));
         
-        _options = Options.Create(new ParserServiceOptions
+        _configurationService = new Mock<IConfigurationService>();
+        _configurationService.Setup(x=>x.ParserService).Returns(new ParserServiceSettings
         {
-            DelayBetweenParse = 100,
+            DelayBetweenParse = TimeSpan.FromSeconds(100),
             IgnoreExistingVolumes = false
         });
+
+
 
         // Setup image manager mock
         _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()))
@@ -75,7 +78,7 @@ public class ParserServiceTests : IDisposable
             _dbContextFactory,
             serviceProvider,
             null!, // IParserFactory not needed for this test
-            _options
+            _configurationService.Object
         );
     }
 

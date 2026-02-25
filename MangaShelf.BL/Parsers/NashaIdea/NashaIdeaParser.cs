@@ -109,13 +109,31 @@ public class NashaIdeaParser : BaseParser
             month = text.Substring("ПЕРША ПОЛОВИНА".Length);
             day = 15;
         }
+        if (text.StartsWith("ПОЧАТОК"))
+        {
+            month = text.Substring("ПОЧАТОК".Length);
+            day = 10;
+        }
+
         if (text.StartsWith("ДРУГА ПОЛОВИНА"))
         {
             month = text.Substring("ДРУГА ПОЛОВИНА".Length);
         }
+        if (text.StartsWith("КІНЕЦЬ"))
+        {
+            month = text.Substring("КІНЕЦЬ".Length);
+        }
+
         if (StartsWithMonth(text))
         {
-            month = text.Substring(0, text.IndexOf(' '));
+            if (text.Contains(' '))
+            {
+                month = text.Substring(0, text.IndexOf(' '));
+            }
+            else
+            {
+                month = text;
+            }
         }
 
         if (month == default)
@@ -268,6 +286,11 @@ public class NashaIdeaParser : BaseParser
                 {
                     return SeriesStatus.Ongoing;
                 }
+                var totalVolumes = GetTotalVolumes(document);
+                if (totalVolumes == 1)
+                {
+                    return SeriesStatus.OneShot;
+                }
 
                 return SeriesStatus.Completed;
             }
@@ -312,11 +335,11 @@ public class NashaIdeaParser : BaseParser
 
     protected override bool GetIsPreorder(IDocument document)
     {
-        var lable = document.QuerySelector(".inventory_status");
+        var lable = document.QuerySelector(".product-status-badges-single");
         if (lable is null)
             return false;
 
-        return lable.TextContent.Contains("Передзамовлення");
+        return lable.TextContent.Contains("Передпродаж");
     }
 
     protected override int? GetAgeRestriction(IDocument document)

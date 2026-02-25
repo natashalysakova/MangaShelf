@@ -6,5 +6,8 @@ public interface ISeedDataService
     int Priority { get; }
 
     Task Run(CancellationToken cancellationToken);
-    Task Run();
+    async Task Run()
+    {
+        await Run(CancellationToken.None);
+    }
 }

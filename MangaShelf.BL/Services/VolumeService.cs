@@ -1,18 +1,13 @@
 ﻿using MangaShelf.BL.Dto;
 using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
-using MangaShelf.Common;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.DomainServices;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
-using static MangaShelf.DAL.Models.Ownership;
-using static MangaShelf.DAL.Models.Reading;
 
 namespace MangaShelf.BL.Services;
 

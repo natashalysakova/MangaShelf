@@ -1,28 +1,42 @@
 @using MangaShelf.DAL.Models
 @using System.Security.Claims
-@inject IVolumePageLocalizationService Localizer
-@inject IVolumeStateService VolumeState
-@inject IVolumeService VolumeService
-@inject IDialogService Dialog
-@inject ILogger<ReaderDataComponent> Logger
 
-@if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Readings.Any())
-{
+@inherits VolumeActionBase
 
-    <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
-        <MudItem xs="12">
-            <MudText Class="mb-3" Typo="Typo.h5">@Localizer["ReaderData"]</MudText>
-            <MudStack AlignItems="AlignItems.Stretch" Spacing="1">
-                @foreach (var reading in VolumeState.CurrentUserStatus.Readings)
+<AuthorizeView>
+    <Authorized>
+        <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
+            <MudItem xs="12">
+                <MudText Class="mb-3" Typo="Typo.h5">@Localizer["Readings"]</MudText>
+
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly" Class="paper-manga-panel">
+                    <CardButtonTooltip Text="@Localizer["PlanToRead"]">
+                        <MudIconButton OnClick="AddPlanToRead" Size="Size.Large" Color="@Color.Surface" Icon="@CustomIcons.planToRead"></MudIconButton>
+                    </CardButtonTooltip>
+                    <CardButtonTooltip Text="@Localizer["AddReading"]">
+                        <MudIconButton OnClick="ShowAddEditReadingDialog" Size="Size.Large" Color="@Color.Surface" Icon="@CustomIcons.reading"></MudIconButton>
+                    </CardButtonTooltip>
+                </MudStack>
+
+                @if (VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.Readings.Any())
                 {
-                    <ReadingHistoryComponent ReadingHistory="@reading" />
+                    <MudStack AlignItems="AlignItems.Stretch" Spacing="1">
+                        @foreach (var reading in VolumeState.CurrentUserStatus.Readings)
+                        {
+                            <ReadingHistoryComponent ReadingHistory="@reading" />
+                        }
+                    </MudStack>
                 }
-            </MudStack>
-        </MudItem>
-    </MudPaper>
-}
+            </MudItem>
+        </MudPaper>
+
+    </Authorized>
+</AuthorizeView>
 
 @code {
+
+    protected override Guid? ResolvedVolumeId => Volume?.Id ?? VolumeId;
+
     [Parameter]
     public VolumeDto? Volume { get; set; }
 }

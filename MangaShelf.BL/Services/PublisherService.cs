@@ -3,7 +3,6 @@ using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 using MangaShelf.BL.Mappers;
-using MangaShelf.BL.Dto;
 using Microsoft.EntityFrameworkCore;
 using MangaShelf.DAL;
 

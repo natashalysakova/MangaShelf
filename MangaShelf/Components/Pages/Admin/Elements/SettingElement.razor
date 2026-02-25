@@ -1,0 +1,117 @@
+@using DbSettings = MangaShelf.DAL.System.Models.Settings
+@using MangaShelf.DAL.System.Models
+
+@switch (Settings.Type)
+{
+    case SettingType.DateTime:
+        <MudDatePicker @bind-Date="Date" Variant="@variant" Label="@Settings.Key"></MudDatePicker>
+        break;
+    case SettingType.TimeSpan:
+        <MudTextField HelperTextOnFocus="true" HelperText="lol" Mask="@(new PatternMask("00:00:00"))" @bind-Value="Str" Variant="@variant" Label="@Settings.Key"></MudTextField>
+        break;
+    case SettingType.Bool:
+        <MudCheckBox @bind-Value="Boolean" Label="@Settings.Key"></MudCheckBox>
+        break;
+    case SettingType.Int:
+        <MudNumericField @bind-Value="Integer" Label="@Settings.Key" Variant="@variant"></MudNumericField>
+        break;
+    case SettingType.Decimal:
+        <MudNumericField @bind-Value="Dec" Label="@Settings.Key" Format="F1" Variant="@variant"></MudNumericField>
+        break;
+    default:
+        <MudTextField @bind-Value="Str" Variant="@variant" Label="@Settings.Key"></MudTextField>
+        break;
+}
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public DbSettings Settings { get; set; }
+
+    [Parameter]
+    public EventCallback<DbSettings> OnSettingChanged { get; set; }
+
+    Variant variant = Variant.Filled;
+
+    private DateTime? _date;
+    private DateTime? Date
+    {
+        get => _date;
+        set { _date = value; _ = OnValueChanged(value?.ToString("o")); }
+    }
+
+    private TimeSpan? _time;
+    private TimeSpan? Time
+    {
+        get => _time;
+        set { _time = value; _ = OnValueChanged(value?.ToString()); }
+    }
+
+    private bool? _boolean;
+    private bool? Boolean
+    {
+        get => _boolean;
+        set { _boolean = value; _ = OnValueChanged(value?.ToString()); }
+    }
+
+    private int? _integer;
+    private int? Integer
+    {
+        get => _integer;
+        set { _integer = value; _ = OnValueChanged(value?.ToString()); }
+    }
+
+    private decimal? _dec;
+    private decimal? Dec
+    {
+        get => _dec;
+        set { _dec = value; _ = OnValueChanged(value?.ToString()); }
+    }
+
+    private string? _str;
+    private string? Str
+    {
+        get => _str;
+        set { _str = value; _ = OnValueChanged(value); }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        switch (Settings.Type)
+        {
+            case SettingType.DateTime:
+                _date = DateTime.Parse(Settings.Value);
+                break;
+            case SettingType.Bool:
+                _boolean = bool.Parse(Settings.Value);
+                break;
+            case SettingType.Int:
+                _integer = int.Parse(Settings.Value);
+                break;
+            case SettingType.Decimal:
+                _dec = decimal.Parse(Settings.Value);
+                break;
+            default:
+                _str = Settings.Value;
+                break;
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task OnValueChanged(string? value)
+    {
+        if (value == null)
+        {
+            return;
+        }
+
+        Settings.Value = value;
+
+        if (OnSettingChanged.HasDelegate)
+        {
+            await OnSettingChanged.InvokeAsync(Settings);
+        }
+    }
+}

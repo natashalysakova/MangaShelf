@@ -58,7 +58,7 @@ public class ArtbooksParser : BaseParser
 
     protected override string? GetAuthors(IDocument document)
     {
-        return GetFromTable(document, "Автор:");
+        return GetFromTable(document, "Автор/ка:");
     }
 
     protected override VolumeType GetVolumeType(IDocument document)
@@ -119,11 +119,13 @@ public class ArtbooksParser : BaseParser
         }
 
         // Not a preorder, or exact date not found, try to get year only
-        var year = GetFromTable(document, "Рік:");
-        if (year is null || string.IsNullOrWhiteSpace(year))
-            return null;
+        //var year = GetFromTable(document, "Рік:");
+        //if (year is null || string.IsNullOrWhiteSpace(year))
+        //    return null;
 
-        return ParseYearIntoLastDayOfYear(year);
+        //return ParseYearIntoLastDayOfYear(year);
+
+        return null;
     }
 
     protected override string GetSeries(IDocument document)

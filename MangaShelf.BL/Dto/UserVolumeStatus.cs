@@ -1,6 +1,5 @@
 using MangaShelf.DAL.Models;
 using System.Diagnostics.CodeAnalysis;
-using static MangaShelf.DAL.Models.Ownership;
 
 namespace MangaShelf.BL.Dto;
 

@@ -6,38 +6,46 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">@Localizer["LogReading"]</MudText>
+        <MudText Typo="Typo.h6">@Localizer[Reading.Id == Guid.Empty ? "AddReading" : "EditReading"]</MudText>
     </TitleContent>
     <DialogContent>
-        <MudSelect @bind-Value="@Reading.Status">
-            @foreach (var status in Enum.GetValues(typeof(ReadingStatus)).Cast<ReadingStatus>())
-            {
-                <MudSelectItem Value="status">@Localizer[status]</MudSelectItem>
+        <MudStack Style="padding: 10px;">
+            <MudSelect T="ReadingStatus" Value="@_selectedStatus" ValueChanged="OnStatusChanged" Label="@Localizer["Status"]">
+                @foreach (var status in Enum.GetValues(typeof(ReadingStatus)).Cast<ReadingStatus>().Where(x => x != ReadingStatus.None))
+                {
+                    <MudSelectItem Value="status">@Localizer[status]</MudSelectItem>
+                }
+            </MudSelect>
+
+            @{
+                bool _startDateDisabled = Reading is { Status: ReadingStatus.None or ReadingStatus.PlanToRead };
+                bool _endDateDisabled = Reading is { Status: ReadingStatus.None or ReadingStatus.PlanToRead or ReadingStatus.Reading };
+                bool _ratingDisabled = Reading is { Status: ReadingStatus.None or ReadingStatus.PlanToRead };
             }
-        </MudSelect>
-        @switch(Reading.Status)
-        {
-            case ReadingStatus.PlanToRead:
-                break;
-            case ReadingStatus.Reading:
-                <MudStack Row>
-                    <MudDatePicker @bind-Date="@selectedStartDate"></MudDatePicker>
+            <MudStack Row>
+                <MudDatePicker @bind-Date="@selectedStartDate" Label="@Localizer["StartDate"]" Disabled="@_startDateDisabled"></MudDatePicker>
+                <MudDatePicker @bind-Date="@selectedEndDate" Label="@Localizer["EndDate"]" Disabled="@_endDateDisabled"></MudDatePicker>
+            </MudStack>
+            <MudStack Row>
+                <MudTextField @bind-Value="@Reading.Review" Label="@Localizer["Review"]" Sizing="InputSizing.Auto" Lines="6" MaxLines="6" Variant="Variant.Outlined" Disabled="@_ratingDisabled"></MudTextField>
+                <MudStack Spacing="1">
+
+                    <MudText Align="Align.Center">
+                        @Localizer["Rating"]
+                    </MudText>
+                    <MudRating @bind-SelectedValue="@_selectedRating" Disabled="@_ratingDisabled"></MudRating>
                 </MudStack>
-                <MudRating @bind-SelectedValue="@_selectedRating"></MudRating>
-                <MudTextField @bind-Value="@Reading.Review"></MudTextField>
-                break;
-            case ReadingStatus.Completed
-            or ReadingStatus.Dropped or ReadingStatus.OnHold:
-                <MudStack Row>
-                    <MudDatePicker @bind-Date="@selectedStartDate"></MudDatePicker>
-                    <MudDatePicker @bind-Date="@selectedEndDate"></MudDatePicker>
-                </MudStack>
-                <MudRating @bind-SelectedValue="@_selectedRating"></MudRating>
-                <MudTextField @bind-Value="@Reading.Review"></MudTextField>
-                break;
-        }
+            </MudStack>
+
+        </MudStack>
     </DialogContent>
     <DialogActions>
+        @if (Reading.Id != Guid.Empty)
+        {
+            <MudButton OnClick="Delete" Color="Color.Error">@Localizer["Delete"]</MudButton>
+            <MudSpacer></MudSpacer>
+        }
+
         <MudButton OnClick="Cancel">@Localizer["Cancel"]</MudButton>
         <MudButton OnClick="Submit" Variant="Variant.Filled" Color="@Color.Primary">@Localizer["Save"]</MudButton>
     </DialogActions>
@@ -47,23 +55,79 @@
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; }
 
-    private DateTime? selectedStartDate = DateTime.Now;
-    private DateTime? selectedEndDate = DateTime.Now;
+    private DateTime? selectedStartDate;
+    private DateTime? selectedEndDate;
 
     private int _selectedRating;
+    private ReadingStatus _selectedStatus;
+
 
     [Parameter]
     public Reading Reading { get; set; }
 
+    protected override void OnParametersSet()
+    {
+        _selectedStatus = Reading.Status;
+        selectedStartDate = Reading.StartedAt.UtcDateTime;
+        selectedEndDate = Reading.FinishedAt?.UtcDateTime;
+        _selectedRating = Reading.Rating ?? 0;
+    }
+
+    private void OnStatusChanged(ReadingStatus status)
+    {
+        _selectedStatus = status;
+        Reading.Status = status;
+
+        if (status is ReadingStatus.None or ReadingStatus.PlanToRead)
+        {
+            selectedStartDate = DateTime.Now;
+            selectedEndDate = null;
+            _selectedRating = 0;
+            Reading.Review = null;
+        }
+        else if (status is ReadingStatus.Reading)
+        {
+            selectedEndDate = null;
+            _selectedRating = 0;
+            Reading.Review = null;
+        }
+    }
+
     private void Submit()
     {
-        Reading.StartedAt = DateTime.SpecifyKind(selectedStartDate.Value, DateTimeKind.Utc);
-        Reading.FinishedAt = DateTime.SpecifyKind(selectedEndDate.Value, DateTimeKind.Utc);
-        Reading.Rating = _selectedRating;
+        var isStartDateDisabled = Reading is { Status: ReadingStatus.None or ReadingStatus.PlanToRead };
+        var isEndDateDisabled = Reading is { Status: ReadingStatus.None or ReadingStatus.PlanToRead or ReadingStatus.Reading };
+        var isRatingDisabled = Reading is { Status: ReadingStatus.None or ReadingStatus.PlanToRead };
 
-        MudDialog.Close(DialogResult.Ok(Reading));
+        Reading.StartedAt = isStartDateDisabled || selectedStartDate == null
+            ? DateTimeOffset.UtcNow
+            : DateTime.SpecifyKind(selectedStartDate.Value, DateTimeKind.Utc);
+        Reading.FinishedAt = isEndDateDisabled || selectedEndDate == null
+            ? null
+            : DateTime.SpecifyKind(selectedEndDate.Value, DateTimeKind.Utc);
+        Reading.Rating = isRatingDisabled ? null : _selectedRating;
+        Reading.Review = isRatingDisabled ? null : Reading.Review;
+
+        MudDialog.Close(DialogResult.Ok(new EditReadingDialogResult()
+        {
+            Reading = Reading
+        }));
     }
 
     private void Cancel() => MudDialog.CancelAll();
 
+    private void Delete()
+    {
+        MudDialog.Close(DialogResult.Ok(new EditReadingDialogResult
+        {
+            Reading = Reading,
+            IsDeleted = true
+        }));
+    }
+
+    public class EditReadingDialogResult
+    {
+        public required Reading Reading { get; set; }
+        public bool IsDeleted { get; set; }
+    }
 }

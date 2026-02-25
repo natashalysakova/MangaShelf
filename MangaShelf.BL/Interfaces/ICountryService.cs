@@ -1,5 +1,4 @@
-﻿using MangaShelf.BL.Dto;
-using MangaShelf.Common.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
 
 namespace MangaShelf.BL.Interfaces;
 

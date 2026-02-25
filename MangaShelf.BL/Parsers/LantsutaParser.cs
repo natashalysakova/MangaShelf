@@ -87,8 +87,9 @@ public class LantsutaParser : BaseParser
         var text = description?.TextContent;
         if (text is null || !text.ContainsAny(lookupPhrases))
         {
-            var year = GetFromTable(document, "Дата виходу");
-            return ParseYearIntoLastDayOfYear(year);
+            //var year = GetFromTable(document, "Дата виходу");
+            //return ParseYearIntoLastDayOfYear(year);
+            return null;
         }
 
         return ParseDescription(text);
@@ -149,8 +150,13 @@ public class LantsutaParser : BaseParser
                 {
                     var month = season.month;
                     var indexAfterSeason = dateString.IndexOf(season.pattern) + season.pattern.Length;
-                    var yearString = dateString.Substring(indexAfterSeason, 5).Trim();
-                    var year = int.Parse(yearString);
+
+                    var nextWhiteSpaceAfterSeason = dateString.IndexOf(' ', indexAfterSeason+1);
+                    var yearLength = nextWhiteSpaceAfterSeason - indexAfterSeason;
+                    var yearString = dateString.Substring(indexAfterSeason, yearLength).Trim();
+                    var yearStartIndex = yearLength - 4 - 1;
+                    var yearFinalString = yearString.Substring(yearStartIndex, 4);
+                    var year = int.Parse(yearFinalString);
                     return new DateTimeOffset(DateTime.SpecifyKind(new DateTime(year, month, DateTime.DaysInMonth(year, month)), DateTimeKind.Local));
                 }
             }

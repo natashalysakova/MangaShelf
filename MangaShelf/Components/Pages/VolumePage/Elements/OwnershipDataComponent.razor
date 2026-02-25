@@ -12,14 +12,24 @@
 {
 
     <MudPaper Outlined="true" Class="p-3 mb-3 paper-manga-panel">
-        <MudStack AlignItems="AlignItems.Stretch" Justify="Justify.Center">
-            <MudText Typo="Typo.h5">@Localizer["OwnershipData"]</MudText>
+        <MudStack AlignItems="AlignItems.Stretch" Justify="Justify.Center" Spacing="1">
             <AuthorizeView>
                 <Authorized>
+                <MudText Typo="Typo.h5">@Localizer["OwnershipData"]</MudText>
+                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly">
+                        @foreach (var action in availableActions)
+                        {
+                            <CardButtonTooltip Text="@Localizer[action.Lable]">
+                                <MudIconButton Icon="@action.Icon" @onclick="@action.Handler" Color="@action.Color" Size="Size.Large">
+                                </MudIconButton>
+                            </CardButtonTooltip>
+                        }
+                    </MudStack>
                     @if (VolumeState != null && VolumeState.CurrentUserStatus != null)
                     {
                         <MudStack Row AlignItems="AlignItems.Center">
                             <MudIcon Icon="@CustomIcons.bookshelf"></MudIcon>
+
                             <MudText>@Localizer[VolumeState.CurrentUserStatus?.CurrentOwnershipStatus]</MudText>
                             <MudSpacer></MudSpacer>
                             @if (VolumeState.CurrentUserStatus?.Ownerships?.Any(x => x.Status != VolumeStatus.None) == true)
@@ -44,8 +54,8 @@
                 </Authorized>
                 <NotAuthorized>
                     <MudText>@Localizer["LoginToSeeData"]</MudText>
-                    <MudButton OnClick="OpenLoginPage">@Localizer["Login"]</MudButton>
-                    <MudButton OnClick="OpenRegisterPage">@Localizer["Register"]</MudButton>
+                    <MudButton Variant="Variant.Filled" OnClick="OpenLoginPage">@Localizer["Login"]</MudButton>
+                    <MudButton Variant="Variant.Filled" OnClick="OpenRegisterPage">@Localizer["Register"]</MudButton>
                 </NotAuthorized>
             </AuthorizeView>
         </MudStack>
@@ -59,6 +69,21 @@
     protected override Guid? ResolvedVolumeId { get => Volume?.Id; }
 
     private bool _showTimeline = false;
+
+    protected override Task OnParametersSetAsync()
+    {
+
+        VolumeState.OnUserStatusChanged += BuildListAvailableActions;
+        BuildListAvailableActions();
+
+        return base.OnParametersSetAsync();
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        VolumeState.OnUserStatusChanged -= BuildListAvailableActions;
+    }
 
 
     private void OpenLoginPage(MouseEventArgs args)
@@ -76,4 +101,36 @@
         string loginUrl = $"/register?returnUrl={Uri.EscapeDataString(currentUrl)}";
         NavigationManager.NavigateTo(loginUrl);
     }
+
+    private record AvailableAction(string Lable, string Icon, Color Color, Func<Task> Handler);
+    private List<AvailableAction> availableActions;
+
+    private void BuildListAvailableActions()
+    {
+        availableActions = new List<AvailableAction>();
+        if (VolumeState.CurrentUserStatus == null)
+        {
+            return;
+        }
+
+
+        if (Volume.IsPreorder && VolumeState.CurrentUserStatus.CurrentOwnershipStatus != VolumeStatus.Preorder)
+        {
+            availableActions.Add(new AvailableAction("SetPreorder", CustomIcons.preorder, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder)));
+        }
+        else
+        {
+            if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Own)
+            {
+                availableActions.Add(new AvailableAction("SetGone", CustomIcons.bookMinus, Color.Error, () => OpenSetOwnershipDialog(VolumeStatus.Gone)));
+            }
+            else
+            {
+                availableActions.Add(new AvailableAction("SetOwn", CustomIcons.bookPlus, Color.Success, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
+            }
+        }
+
+        availableActions.Add(new AvailableAction("SetHistoricStatus", CustomIcons.historical, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder, false)));
+    }
+
 }

@@ -5,7 +5,6 @@ using MangaShelf.Components.Account;
 using MangaShelf.Extentions;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Installer;
-using MangaShelf.Infrastructure.Network;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
@@ -54,14 +53,6 @@ public class Program
 
         builder.AddBusinessServices();
 
-        builder.Services
-            .Configure<CacheOptions>(
-                builder.Configuration
-                .GetSection(CacheOptions.SectionName));
-        builder.Services
-            .Configure<HtmlDownloadOptions>(
-                builder.Configuration
-                .GetSection(HtmlDownloadOptions.SectionName));
 
         builder.Services.AddHostedService<CacheWorker>();
         builder.Services.AddSingleton<CacheSignal>();
@@ -84,6 +75,7 @@ public class Program
         var app = builder.Build();
 
         await app.MakeSureDbCreatedAsync();
+        await app.SeedDatabase();
 
         app.MapHealthChecks("/health");
 

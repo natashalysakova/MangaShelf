@@ -1,5 +1,4 @@
-﻿using MangaShelf.BL.Dto;
-using MangaShelf.DAL.Models;
+﻿using MangaShelf.DAL.Models;
 using Riok.Mapperly.Abstractions;
 
 namespace MangaShelf.BL.Mappers;

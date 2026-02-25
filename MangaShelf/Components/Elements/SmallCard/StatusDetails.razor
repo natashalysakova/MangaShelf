@@ -8,12 +8,12 @@
         if (ShowStatusIcon)
         {
             <CardButtonTooltip Text="@Localizer["Wishlisted"]">
-                <MudIconButton Icon="@CustomIcons.wishlist" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small"></MudIconButton>
+                <MudIconButton Icon="@CustomIcons.wishlist" Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small"></MudIconButton>
             </CardButtonTooltip>
         }
         else
         {
-            <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+            <MudChip T="string" Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">
                 @Localizer["Wishlisted"]
             </MudChip>
         }
@@ -29,12 +29,12 @@
                 _ => CustomIcons.done
             };
             <CardButtonTooltip Text="@Localizer[Status]">
-                <MudIconButton Icon="@icon" Color="Color.Success" Size="Size.Small" Variant="Variant.Filled"></MudIconButton>
+                <MudIconButton Icon="@icon" Color="Color.Dark" Size="Size.Small" Variant="Variant.Filled"></MudIconButton>
             </CardButtonTooltip>
         }
         else
         {
-            <MudChip T="string" Variant="Variant.Filled" Color="Color.Success" Size="Size.Small">
+            <MudChip T="string" Variant="Variant.Filled" Color="Color.Dark" Size="Size.Small">
                 @Localizer[Status]
             </MudChip>
         }

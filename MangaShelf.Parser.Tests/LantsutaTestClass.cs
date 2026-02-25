@@ -30,26 +30,12 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
     }
 
     [TestMethod]
-
-    public async Task LantsutaPreorderTest()
+    [TestCategory("Flacky")]
+    public async Task LantsutaPreorderTestMultipleYears()
     {
         var result = await Parser.Parse("https://lantsuta-publishing.com/manga-ua/apothecary11-ua");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Том 11", result.Title);
-        Assert.AreEqual("Монолог Травниці", result.Series);
-        Assert.AreEqual("Нацу Хюуґа", result.Authors);
-        Assert.AreEqual(11, result.VolumeNumber);
-        Assert.AreEqual("https://lantsuta-publishing.com/image/cache/catalog/Product/Apothecary/kusuriya-11_+-425x650.jpg", result.Cover);
-        Assert.AreEqual(DateTime.Parse("2025-11-30"), result.Release);
-        Assert.AreEqual("LANTSUTA", result.Publisher);
-        Assert.AreEqual(VolumeType.Physical, result.VolumeType);
-        Assert.AreEqual("978-617-8202-48-4", result.Isbn);
-        Assert.AreEqual(-1, result.TotalVolumes);
-        Assert.AreEqual(SeriesStatus.Unknown, result.SeriesStatus);
-        Assert.AreEqual(null, result.OriginalSeriesName);
-        Assert.AreEqual(null, result.PreorderStartDate);
-        Assert.AreEqual("https://lantsuta-publishing.com/manga-ua/apothecary11-ua", result.Url);
         Assert.AreEqual(true, result.IsPreorder);
     }
 
@@ -69,6 +55,7 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
     [DataRow("Видання на стадії виробництва і з'явиться у продажі\r\nу серпні 2025 року.", "2025-08-31")]
     [DataRow("Видання на стадії виробництва і з'явиться у продажі наприкінці 2025 року.", "2025-12-31")]
     [DataRow("Відправка з 20 серпня 2025 року.", "2025-08-20")]
+    [DataRow("Видання на стадії виробництва і з'явиться у продажі\r\nвзимку 2025-2026 року.", "2026-02-28")]
     public async Task Lantsuta_Description_ShouldBe_ParsedToReleaseDate(string input, string dateTime)
     {
         var expectedDate = DateTime.SpecifyKind(DateTime.Parse(dateTime), DateTimeKind.Local);

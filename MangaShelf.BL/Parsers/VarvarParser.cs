@@ -2,6 +2,7 @@
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace MangaShelf.BL.Parsers;
 
@@ -27,13 +28,13 @@ public class VarvarParser : BaseParser
         List<string> authors = new List<string>();
         var lookupWords = new[] { "Автор:", "Сценарист:", "Художник:", "Автор, Художник:" };
 
-        var nodes = document.QuerySelectorAll(".woocommerce-product-details__short-description p");
+        var nodes = document.QuerySelectorAll(".product-meta-custom-double");
         foreach (var word in lookupWords)
         {
-            var node = nodes.FirstOrDefault(x => x.TextContent.StartsWith(word));
+            var node = nodes.FirstOrDefault(x => x.TextContent.Escaped().StartsWith(word));
             if (node != null)
             {
-                var author = node.TextContent.Replace(word, "").Trim();
+                var author = node.TextContent.Escaped().Replace(word, "").Trim();
                 if (!string.IsNullOrEmpty(author) && !authors.Contains(author))
                 {
                     authors.Add(author);
@@ -56,22 +57,28 @@ public class VarvarParser : BaseParser
 
     protected override string GetCover(IDocument document)
     {
-        var node = document.QuerySelector(".woocommerce-product-gallery__image a");
+        var node = document.QuerySelector(".swiper-slide img");
         if (node is null)
             return string.Empty;
 
-        return node.GetAttribute("href")!;
+        return node.GetAttribute("src")!;
     }
 
     protected override string? GetISBN(IDocument document)
     {
-        var nodes = document.QuerySelectorAll(".woocommerce-product-details__short-description p");
+        var nodes = document.QuerySelectorAll(".product-meta-custom-block");
 
         foreach (var node in nodes)
         {
-            if (node.TextContent.Contains("ISBN"))
+            if (node.TextContent.Escaped().Contains("ISBN"))
             {
-                var isbn = node.TextContent.Replace("ISBN", "").Trim(' ', ':');
+                var isbn = node.TextContent.Escaped().Replace("ISBN", "").Trim(' ', ':');
+
+                if (isbn == "При Виборі Обкладинки")
+                {
+                    return IsbnFromVariations(document);
+                }
+
                 if (!string.IsNullOrEmpty(isbn))
                 {
                     return isbn;
@@ -82,10 +89,15 @@ public class VarvarParser : BaseParser
         return null;
     }
 
+    private string? IsbnFromVariations(IDocument document)
+    {
+        return null;
+    }
+
     protected override bool GetIsPreorder(IDocument document)
     {
-        var node = document.QuerySelector(".onsale");
-        if (node != null && node.TextContent.Contains("Передзамовлення", StringComparison.OrdinalIgnoreCase))
+        var node = document.QuerySelector(".custom-preorder-badge");
+        if (node != null && node.TextContent.Contains("ПЕРЕДЗАМОВЛЕННЯ", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -105,7 +117,7 @@ public class VarvarParser : BaseParser
 
     protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
-        var nodes = document.QuerySelectorAll(".woocommerce-product-details__short-description p");
+        var nodes = document.QuerySelectorAll(".product-meta-custom-single");
 
         var seasons = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
         {
@@ -115,11 +127,13 @@ public class VarvarParser : BaseParser
             { "осінь", 11 }
         };
 
+
         foreach (var node in nodes)
         {
-            if (node.TextContent.Contains("Орієнтовна дата виходу:"))
+            var text = node.TextContent.Escaped();
+            if (text.Contains("Орієнтовна Дата Виходу:"))
             {
-                var date = node.TextContent.Replace("Орієнтовна дата виходу:", "").Trim(' ', ':');
+                var date = text.Replace("Орієнтовна Дата Виходу:", "").Trim(' ', ':');
                 if (!string.IsNullOrEmpty(date))
                 {
                     foreach (var season in seasons)
@@ -134,11 +148,36 @@ public class VarvarParser : BaseParser
                             }
                         }
                     }
+
+                    var splittedDate = date.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                    if (splittedDate.Length == 2)
+                    {
+                        var month = GetMonthNumber(splittedDate[0]);
+                        int.TryParse(splittedDate[1], out var year);
+                        if (month != null && year != default)
+                        {
+                            var day = DateTime.DaysInMonth(year, month.Value);
+                            return DateTime.SpecifyKind(new DateTime(year, month.Value, day), DateTimeKind.Local);
+                        }
+                    }
                 }
             }
         }
 
         return null;
+    }
+
+    static int? GetMonthNumber(string monthText)
+    {
+        var culture = new CultureInfo("uk-UA");
+        var months = culture.DateTimeFormat.MonthNames
+            .Concat(culture.DateTimeFormat.MonthGenitiveNames)
+            .Where(m => !string.IsNullOrWhiteSpace(m))
+            .Select((name, index) => new { name, index = (index % 12) + 1 })
+            .ToDictionary(x => x.name, x => x.index, StringComparer.OrdinalIgnoreCase);
+
+        return months.TryGetValue(monthText.Trim(), out var month) ? month : null;
     }
 
     protected override DateTimeOffset? GetSaleStartDate(IDocument document)
@@ -169,7 +208,7 @@ public class VarvarParser : BaseParser
         var title = node.TextContent;
 
         var splitted = title.Split(new[] { "том", "Том" }, StringSplitOptions.RemoveEmptyEntries);
-        if(splitted.Length == 0)
+        if (splitted.Length == 0)
             return title.Trim();
 
         return splitted[0].Trim();
@@ -177,6 +216,14 @@ public class VarvarParser : BaseParser
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
+        var title = GetVolumeTitle(document);
+        var series = GetSeries(document);
+
+        if (title == series)
+        {
+            return SeriesStatus.OneShot;
+        }
+
         return SeriesStatus.Unknown;
     }
 
@@ -188,6 +235,10 @@ public class VarvarParser : BaseParser
             return string.Empty;
         var title = node.TextContent;
         var volumeTitle = title.Replace(series, "").Trim();
+        if (string.IsNullOrEmpty(volumeTitle))
+        {
+            return series;
+        }
         return volumeTitle;
     }
 
@@ -226,5 +277,21 @@ public class VarvarParser : BaseParser
             return null;
 
         return node.TextContent.Trim();
+    }
+}
+
+public static class StringExtentions
+{
+    public static string Escaped(this string input)
+    {
+        if (input is null)
+        {
+            return string.Empty;
+        }
+
+        return input
+            .Replace("\r", string.Empty)
+            .Replace("\n", string.Empty)
+            .Replace("\t", string.Empty).Trim();
     }
 }

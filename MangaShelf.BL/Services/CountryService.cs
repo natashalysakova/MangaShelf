@@ -1,5 +1,4 @@
-﻿using MangaShelf.BL.Dto;
-using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Interfaces;

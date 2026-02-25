@@ -1,5 +1,4 @@
 using MangaShelf.DAL.Identity;
-using MangaShelf.DAL.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;

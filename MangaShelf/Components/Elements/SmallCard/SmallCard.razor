@@ -104,7 +104,12 @@ else
 
         try
         {
-            CurrentUserStatus = await VolumeService.GetVolumeStatusInfo(Volume.Id, await GetUserId());
+            var userId = await GetUserId();
+            if(userId == null)
+            {
+                return;
+            }
+            CurrentUserStatus = await VolumeService.GetVolumeStatusInfo(Volume.Id, userId);
             StateHasChanged();
         }
         catch (Exception ex)
@@ -133,7 +138,7 @@ else
 
     private async Task HandleWishListAsync()
     {
-        await HandleOwnershipChange(VolumeStatus.Wishlist);
+        await ToggleWishList();
     }
 
     private async Task HandlePreorderAsync()

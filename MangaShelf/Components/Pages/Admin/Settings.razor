@@ -1,0 +1,53 @@
+﻿@page "/admin/settings"
+@using MangaShelf.BL.Configuration
+@using MangaShelf.BL.Services
+@using MangaShelf.Components.Pages.Admin.Elements
+@using DbSettings = MangaShelf.DAL.System.Models.Settings
+
+@inject ISettingReadService SettingReadService
+
+<MudText Typo="Typo.h5" Class="mt-3 mb-3">Settings</MudText>
+
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+}
+
+@if (settings != null)
+{
+    <MudGrid>
+
+        @foreach (var sections in settings)
+        {
+            <MudItem>
+                <ConfigSectionPanel T="@sections.Key"
+                                    Items="@settings[sections.Key]">
+                </ConfigSectionPanel>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+
+
+@code {
+    IDictionary<string, IEnumerable<DbSettings>> settings;
+    string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        try
+        {
+            errorMessage = default;
+            settings = await SettingReadService.GetAllGrouped();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+
+    }
+}

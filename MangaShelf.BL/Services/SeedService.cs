@@ -1,8 +1,9 @@
-﻿using MangaShelf.DAL;
+﻿using MangaShelf.BL.Interfaces;
+using MangaShelf.DAL;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MangaShelf.BL.Interfaces;
+namespace MangaShelf.BL.Services;
 
 public class SeedService : ISeedService
 {
