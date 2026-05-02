@@ -19,7 +19,7 @@ public static class ContextInstallExtention
     {
         var connectionString = builder.Configuration.GetConnectionString("AccountsDb") ?? throw new InvalidOperationException("Connection string 'AccountsDb' not found.");
 
-        var accontDbVersion = ServerVersion.AutoDetect(connectionString);
+        var accontDbVersion = ServerVersion.Parse("8.0");
         builder.Services.AddDbContext<MangaIdentityDbContext>(
             options =>
             {
@@ -71,7 +71,7 @@ public static class ContextInstallExtention
     {
         var connectionString = builder.Configuration.GetConnectionString("MangaDb") ?? throw new InvalidOperationException("Connection string 'MangaDb' not found.");
 
-        var accontDbVersion = ServerVersion.AutoDetect(connectionString);
+        var accontDbVersion = ServerVersion.Parse("8.0");
         var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
         {
             if (builder.Environment.IsDevelopment())
@@ -99,7 +99,7 @@ public static class ContextInstallExtention
     {
         var connectionString = builder.Configuration.GetConnectionString("SystemDb") ?? throw new InvalidOperationException("Connection string 'SystemDb' not found.");
 
-        var accontDbVersion = ServerVersion.AutoDetect(connectionString);
+        var accontDbVersion = ServerVersion.Parse("8.0");
         var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
         {
             if (builder.Environment.IsDevelopment())
