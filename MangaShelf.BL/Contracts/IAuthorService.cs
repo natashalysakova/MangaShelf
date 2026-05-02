@@ -1,7 +1,7 @@
 ﻿using MangaShelf.BL.Dto;
 using MangaShelf.Common.Interfaces;
 
-namespace MangaShelf.BL.Interfaces;
+namespace MangaShelf.BL.Contracts;
 
 public interface IAuthorService : IService
 {

@@ -1,6 +1,10 @@
-using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Contracts;
+using MangaShelf.BL.Enums;
 using MangaShelf.BL.Services;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.Infrastructure.Installer;
+using MangaShelf.Infrastructure.Network;
+using MangaShelf.Parser.Services;
 
 namespace MangaShelf.Parser;
 
@@ -14,11 +18,39 @@ public class Program
         builder.RegisterContextAndServices();
         builder.RegisterIdentityContextAndServices();
         builder.AddBusinessServices();
-
+        builder.AddParserServices();
         builder.Services.AddSingleton<IParseJobManager, ParseJobManger>();
 
         var host = builder.Build();
 
         host.Run();
+    }
+}
+
+public static class ParserInstaller
+{
+    public static IHostApplicationBuilder AddParserServices(this IHostApplicationBuilder builder)
+    {
+        // Parser services
+        builder.Services.AddScoped<IParseService, ParserService>();
+
+        var webAppBaseUrl = builder.Configuration["WebApp:BaseUrl"]
+            ?? throw new InvalidOperationException("WebApp:BaseUrl is not configured.");
+
+        var disableCacheInvalidation = builder.Configuration.GetValue<bool>("WebApp:DisableCacheInvalidation");
+
+        if (disableCacheInvalidation)
+        {
+            builder.Services.AddSingleton<ICacheInvalidator, NullCacheInvalidator>();
+        }
+        else
+        {
+            builder.Services.AddHttpClient<ICacheInvalidator, HttpCacheInvalidator>(client =>
+            {
+                client.BaseAddress = new Uri(webAppBaseUrl);
+            });
+        }
+
+        return builder;
     }
 }

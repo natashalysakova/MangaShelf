@@ -1,4 +1,4 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Contracts;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace MangaShelf.BL.Services

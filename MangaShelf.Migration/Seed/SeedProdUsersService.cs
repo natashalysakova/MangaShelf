@@ -1,7 +1,5 @@
 using MangaShelf.DAL.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using System.Net.WebSockets;
 using System.Security.Claims;
 
 namespace MangaShelf.Infrastructure.Seed;

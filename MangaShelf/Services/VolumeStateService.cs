@@ -1,5 +1,5 @@
+using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Dto;
-using MangaShelf.BL.Interfaces;
 
 namespace MangaShelf.Services;
 

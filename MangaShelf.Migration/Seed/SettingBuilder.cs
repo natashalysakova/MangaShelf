@@ -1,6 +1,5 @@
-using MangaShelf.BL.Interfaces;
 using MangaShelf.DAL.System.Models;
-using IConfigurationSection = MangaShelf.BL.Interfaces.IConfigurationSection;
+using IConfigurationSection = MangaShelf.BL.Contracts.IConfigurationSection;
 
 namespace MangaShelf.Infrastructure.Seed;
 

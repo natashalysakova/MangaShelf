@@ -3,7 +3,7 @@ using MangaShelf.BL.Services;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 
-namespace MangaShelf.BL.Interfaces;
+namespace MangaShelf.BL.Contracts;
 
 public interface IVolumeService : IService
 {

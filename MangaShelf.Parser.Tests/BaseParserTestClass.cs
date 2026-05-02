@@ -1,6 +1,6 @@
 ﻿using MangaShelf.BL.Configuration;
+using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Enums;
-using MangaShelf.BL.Interfaces;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.System.Models;
 using MangaShelf.Infrastructure.Network;
@@ -73,12 +73,12 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
         // Fix for CS0535: implement CacheSettings property
         public CacheSettings CacheSettings => new();
 
-        public void InvalidateSection<TSection>() where TSection : class, BL.Interfaces.IConfigurationSection, new()
+        public void InvalidateSection<TSection>() where TSection : class, IConfigurationSection, new()
         {
         }
 
         public Task UpdateSectionValueAsync<TSection>(string key, string value, CancellationToken token = default)
-            where TSection : class, BL.Interfaces.IConfigurationSection, new()
+            where TSection : class, IConfigurationSection, new()
         {
             return Task.CompletedTask;
         }

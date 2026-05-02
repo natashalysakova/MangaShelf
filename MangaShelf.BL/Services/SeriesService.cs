@@ -1,10 +1,10 @@
-﻿using MangaShelf.BL.Interfaces;
-using MangaShelf.DAL.Interfaces;
+﻿using MangaShelf.DAL.Interfaces;
 using Microsoft.Extensions.Logging;
 using MangaShelf.BL.Mappers;
 using MangaShelf.BL.Dto;
 using Microsoft.EntityFrameworkCore;
 using MangaShelf.DAL;
+using MangaShelf.BL.Contracts;
 
 namespace MangaShelf.BL.Services;
 

@@ -6,7 +6,6 @@ using MangaShelf.Extentions;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Installer;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
 
 namespace MangaShelf;
@@ -52,10 +51,7 @@ public class Program
         builder.Services.AddHealthChecks();
 
         builder.AddBusinessServices();
-
-
-        builder.Services.AddHostedService<CacheWorker>();
-        builder.Services.AddSingleton<CacheSignal>();
+        builder.RegisterCacheServices();
 
         builder.Services.AddLocalization();
         builder.AddLocalizationServices();

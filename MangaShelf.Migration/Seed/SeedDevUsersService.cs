@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace MangaShelf.Infrastructure.Seed;
 
 public class SeedDevUsersService : ISeedDataService

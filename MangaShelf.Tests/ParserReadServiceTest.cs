@@ -4,6 +4,7 @@ using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Xunit;
 using Assert = Xunit.Assert;
+using ParserModel = MangaShelf.DAL.System.Models.Parser;
 
 namespace MangaShelf.Tests;
 
@@ -40,7 +41,7 @@ public class ParserReadServiceTest : IDisposable
     {
         // Arrange
         var jobId = Guid.NewGuid();
-        var parser = new Parser { Id = Guid.NewGuid(), ParserName = "TestParser" };
+        var parser = new ParserModel { Id = Guid.NewGuid(), ParserName = "TestParser" };
         var job = new ParserJob 
         { 
             Id = jobId, 
@@ -81,7 +82,7 @@ public class ParserReadServiceTest : IDisposable
     public async Task GetJobs_ReturnsJobsInDescendingOrder()
     {
         // Arrange
-        var parser = new Parser { Id = Guid.NewGuid(), ParserName = "TestParser" };
+        var parser = new ParserModel { Id = Guid.NewGuid(), ParserName = "TestParser" };
         var job1 = new ParserJob 
         { 
             Id = Guid.NewGuid(), 
@@ -147,7 +148,7 @@ public class ParserReadServiceTest : IDisposable
     {
         // Arrange
         var cutoffTime = DateTimeOffset.UtcNow.AddHours(-1);
-        var parser = new Parser { Id = Guid.NewGuid(), ParserName = "TestParser" };
+        var parser = new ParserModel { Id = Guid.NewGuid(), ParserName = "TestParser" };
         var oldJob = new ParserJob 
         { 
             Id = Guid.NewGuid(), 

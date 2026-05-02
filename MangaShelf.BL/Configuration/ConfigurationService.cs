@@ -1,5 +1,5 @@
-﻿using MangaShelf.BL.Exceptions;
-using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Contracts;
+using MangaShelf.BL.Exceptions;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;

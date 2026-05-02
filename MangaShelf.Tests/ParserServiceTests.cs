@@ -1,10 +1,9 @@
 using MangaShelf.BL.Configuration;
-using MangaShelf.BL.Interfaces;
-using MangaShelf.BL.Parsers;
-using MangaShelf.BL.Services.Parsing;
+using MangaShelf.BL.Contracts;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Models;
+using MangaShelf.Parser.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
