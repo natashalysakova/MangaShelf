@@ -17,7 +17,7 @@ public class HttpCacheInvalidator : ICacheInvalidator
     {
         try
         {
-            var response = await _httpClient.PostAsync("/api/cache/rebuildcache", null, cancellationToken);
+            var response = await _httpClient.PostAsync("/api/cache", null, cancellationToken);
             response.EnsureSuccessStatusCode();
             _logger.LogInformation("Cache rebuild triggered successfully.");
         }

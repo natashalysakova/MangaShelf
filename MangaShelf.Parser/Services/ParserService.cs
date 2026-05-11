@@ -120,6 +120,13 @@ public class ParserService : IParseService
             _logger.LogDebug($"{volumesToParse.Count()} volumes left after filtering");
         }
 
+        if(volumesToParse.Count == 0)
+        {
+            _logger.LogDebug("No volumes to parse, finishing job");
+            await statusService.SetToFinishedStatus(jobId, token);
+            return;
+        }
+
         await statusService.SetToParsingStatus(jobId, volumesToParse, token);
 
         var progress = 0.0;
@@ -206,7 +213,6 @@ public class ParserService : IParseService
         if (publisher == null)
         {
             var uri = new Uri(volumeInfo.Url);
-            string baseUrl = $"{uri.Scheme}://{uri.Host}";
             publisher = new Publisher()
             {
                 Name = volumeInfo.Publisher,
