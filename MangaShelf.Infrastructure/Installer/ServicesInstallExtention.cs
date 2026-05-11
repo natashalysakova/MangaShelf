@@ -1,6 +1,6 @@
 ﻿using MangaShelf.BL.Configuration;
+using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Enums;
-using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Parsers;
 using MangaShelf.BL.Services;
 using MangaShelf.BL.Services.Parsing;
@@ -24,33 +24,30 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IAuthorService, AuthorService>();
         builder.Services.AddScoped<IPublisherService, PublisherService>();
         builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
         builder.Services.AddScoped<IParserReadService, ParserReadService>();
+        builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
         builder.Services.AddScoped<ISettingReadService, SettingReadService>();
+        builder.Services.AddScoped<IUserLibraryService, UserLibraryService>();
 
-        // Parser services
+        // Parsing services
         builder.Services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
         builder.Services.AddKeyedScoped<IHtmlDownloader, BasicHtmlDownloader>(HtmlDownloaderKeys.Basic);
         builder.Services.AddKeyedScoped<IHtmlDownloader, AdvancedHtmlDownloader>(HtmlDownloaderKeys.Advanced);
         builder.Services.AddKeyedScoped<IHtmlDownloader, MalopusHtmlDownloader>(HtmlDownloaderKeys.Malopus);
-        builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
         builder.Services.AddScoped<IParserFactory, ParserFactory>();
-        builder.Services.AddScoped<IParseService, ParserService>();
         builder.Services.AddScoped<IJobRequester, JobRequester>();
-
         RegisterInterfaceWithimplementations<IPublisherParser>(builder);
 
         // Image services
         builder.Services.AddScoped<IImageManager, ImageManager>();
 
-        // Cache services
         builder.Services.AddMemoryCache();
-        builder.Services.AddScoped<ICacheService, CacheService>();
-
         builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
         return builder;
     }
+
+   
 
     private static void RegisterInterfaceWithimplementations<T>(IHostApplicationBuilder builder)
     {

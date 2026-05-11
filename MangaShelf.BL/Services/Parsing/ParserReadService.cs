@@ -1,5 +1,5 @@
+using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Dto;
-using MangaShelf.BL.Interfaces;
 using MangaShelf.BL.Mappers;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;

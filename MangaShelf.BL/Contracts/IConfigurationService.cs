@@ -1,7 +1,7 @@
 ﻿using MangaShelf.BL.Configuration;
 using MangaShelf.DAL.System.Models;
 
-namespace MangaShelf.BL.Interfaces;
+namespace MangaShelf.BL.Contracts;
 
 public interface IConfigurationService
 {

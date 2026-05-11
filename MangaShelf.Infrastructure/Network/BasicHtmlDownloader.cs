@@ -1,5 +1,5 @@
 ﻿using MangaShelf.BL.Configuration;
-using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Contracts;
 using MangaShelf.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -51,9 +51,9 @@ public class BasicHtmlDownloader : IHtmlDownloader
                 await PreRequest(url, token);
                 return await GetHtmlFromUrl(url, token);
             }
-            catch (HttpRequestException httpEx)
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                _logger.LogWarning("Retrying {url}\nPrevious run was failed: {error}", url, httpEx.StatusCode);
+                _logger.LogWarning("Not found {url}: {error}", url, httpEx.StatusCode);
                 throw;
             }
             catch (Exception ex)

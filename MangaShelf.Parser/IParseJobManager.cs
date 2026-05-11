@@ -1,5 +1,6 @@
+using MangaShelf.BL.Contracts;
 
-namespace MangaShelf.BL.Interfaces;
+namespace MangaShelf.Parser;
 
 public interface IParseJobManager
 {

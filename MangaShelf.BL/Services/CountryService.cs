@@ -1,4 +1,4 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Mappers;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Interfaces;

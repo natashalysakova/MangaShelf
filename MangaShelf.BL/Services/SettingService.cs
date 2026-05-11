@@ -1,4 +1,5 @@
-﻿using MangaShelf.DAL.System;
+﻿using MangaShelf.BL.Contracts;
+using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
 

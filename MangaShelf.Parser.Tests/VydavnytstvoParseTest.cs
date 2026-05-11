@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Parsers;
 using MangaShelf.DAL.Models;
 

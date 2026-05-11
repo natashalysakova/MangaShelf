@@ -1,8 +1,7 @@
 using MangaShelf.BL.Configuration;
-using MangaShelf.BL.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using MangaShelf.BL.Contracts;
 
-namespace MangaShelf.BL.Services;
+namespace MangaShelf.Parser;
 
 internal class ParseJobManger : IParseJobManager, IDisposable
 {
@@ -47,7 +46,7 @@ internal class ParseJobManger : IParseJobManager, IDisposable
 
                 if (queue.TryDequeue(out var jobId))
                 {
-                    await semaphore.WaitAsync();
+                    await semaphore.WaitAsync(cancellationTokenSource.Token);
 
                     // Start a new task to process the job
                     var jobTask = Task.Run(async () =>
@@ -74,10 +73,12 @@ internal class ParseJobManger : IParseJobManager, IDisposable
                     {
                         runningTasks.Add(jobTask);
                     }
+
+                    await Task.Delay(100, cancellationTokenSource.Token);
                 }
                 else
                 {
-                    await Task.Delay(5000); // wait for 1 second before checking the queue again
+                    await Task.Delay(5000, cancellationTokenSource.Token); // wait before checking the queue again
                 }
             }
         }, cancellationTokenSource.Token);

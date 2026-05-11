@@ -26,10 +26,11 @@
 
 @code {
     [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        var authState = await AuthStateTask;
+        _ = await UserAccessor.GetRequiredUserAsync(authState.User);
     }
 }

@@ -45,7 +45,7 @@
     private bool requirePassword;
 
     [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -53,7 +53,8 @@
     protected override async Task OnInitializedAsync()
     {
         Input ??= new();
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        var authState = await AuthStateTask;
+        user = await UserAccessor.GetRequiredUserAsync(authState.User);
         requirePassword = await UserManager.HasPasswordAsync(user);
     }
 

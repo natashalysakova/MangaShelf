@@ -1,4 +1,4 @@
-using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Infrastructure.Network;

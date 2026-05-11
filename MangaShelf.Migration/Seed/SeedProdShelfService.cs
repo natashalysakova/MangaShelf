@@ -3,8 +3,6 @@ using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Extensions.Logging;
 using System.Globalization;
 
 namespace MangaShelf.Infrastructure.Seed;

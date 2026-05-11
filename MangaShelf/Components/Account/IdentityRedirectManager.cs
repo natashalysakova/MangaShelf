@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MangaShelf.Components.Account;
 
-public sealed class IdentityRedirectManager(NavigationManager navigationManager)
+public sealed class IdentityRedirectManager(NavigationManager navigationManager, IHttpContextAccessor httpContextAccessor)
 {
     public const string StatusCookieName = "Identity.StatusMessage";
 
@@ -26,8 +26,6 @@ public sealed class IdentityRedirectManager(NavigationManager navigationManager)
             uri = navigationManager.ToBaseRelativePath(uri);
         }
 
-        // During static rendering, NavigateTo throws a NavigationException which is handled by the framework as a redirect.
-        // So as long as this is called from a statically rendered Identity component, the InvalidOperationException is never thrown.
         navigationManager.NavigateTo(uri);
         throw new InvalidOperationException($"{nameof(IdentityRedirectManager)} can only be used during static rendering.");
     }
@@ -41,8 +39,9 @@ public sealed class IdentityRedirectManager(NavigationManager navigationManager)
     }
 
     [DoesNotReturn]
-    public void RedirectToWithStatus(string uri, string message, HttpContext context)
+    public void RedirectToWithStatus(string uri, string message)
     {
+        var context = httpContextAccessor.HttpContext!;
         context.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(context));
         RedirectTo(uri);
     }
@@ -53,6 +52,6 @@ public sealed class IdentityRedirectManager(NavigationManager navigationManager)
     public void RedirectToCurrentPage() => RedirectTo(CurrentPath);
 
     [DoesNotReturn]
-    public void RedirectToCurrentPageWithStatus(string message, HttpContext context)
-        => RedirectToWithStatus(CurrentPath, message, context);
+    public void RedirectToCurrentPageWithStatus(string message)
+        => RedirectToWithStatus(CurrentPath, message);
 }

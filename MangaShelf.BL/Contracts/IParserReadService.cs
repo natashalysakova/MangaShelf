@@ -2,7 +2,7 @@ using MangaShelf.BL.Dto;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.System.Models;
 
-namespace MangaShelf.BL.Interfaces;
+namespace MangaShelf.BL.Contracts;
 
 public interface IParserReadService : IService
 {

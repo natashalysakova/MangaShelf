@@ -1,6 +1,4 @@
-﻿using MangaShelf.BL.Parsers;
-
-namespace MangaShelf.BL.Interfaces;
+﻿namespace MangaShelf.BL.Contracts;
 
 public interface IPublisherParser
 {

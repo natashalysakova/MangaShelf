@@ -1,7 +1,6 @@
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Infrastructure.Seed;
 

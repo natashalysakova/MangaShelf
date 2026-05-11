@@ -77,14 +77,15 @@ else
     private IEnumerable<string>? recoveryCodes;
 
     [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        var authState = await AuthStateTask;
+        user = await UserAccessor.GetRequiredUserAsync(authState.User);
 
         await LoadSharedKeyAndQrCodeUriAsync(user);
     }
@@ -115,7 +116,7 @@ else
         }
         else
         {
-            RedirectManager.RedirectToWithStatus("Account/Manage/TwoFactorAuthentication", message, HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Manage/TwoFactorAuthentication", message);
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿using MangaShelf.DAL.System.Models;
 
-namespace MangaShelf.BL.Services;
+namespace MangaShelf.BL.Contracts;
 
 public interface ISettingReadService
 {

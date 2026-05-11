@@ -1,8 +1,59 @@
 ﻿@page "/preorders"
-@rendermode InteractiveServer
+@using MangaShelf.BL.Services
+@using System.Security.Claims
 
+@inject IUserLibraryService UserLibraryService
 <h3>Preordres</h3>
 
-@code {
+@if(UserLibraryDto != null)
+{
+    @foreach(var preorder in UserLibraryDto.Volumes)
+    {
+        <MudCard Class="mb-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6">@preorder.VolumeTitle</MudText>
+                <MudText Typo="Typo.subtitle2">@preorder.SeriesTitle</MudText>
+                <MudText Typo="Typo.body2">Release Date: @preorder.ReleaseDate?.ToString("dd.MM.yyyy")</MudText>
+                <MudText>@preorder.IsPreorderDue</MudText>
+            </MudCardContent>
+        </MudCard>
+    }
+}
 
+@if(errorMessage != null)
+{
+    
+}
+
+@code {
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthStateTask { get; set; }
+
+    private UserLibraryDto UserLibraryDto;
+    private string errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            var userId = await GetUserId();
+            if (userId != null)
+            {
+                UserLibraryDto = await UserLibraryService.GetUserPreorders(userId);
+
+                errorMessage = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while loading preorders. " + ex.Message;
+        }
+    }
+
+    protected async Task<string?> GetUserId()
+    {
+        var authState = await AuthStateTask;
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return userId;
+    }
 }

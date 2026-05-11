@@ -1,4 +1,4 @@
-﻿using MangaShelf.BL.Interfaces;
+﻿using MangaShelf.BL.Contracts;
 
 namespace MangaShelf.BL.Services;
 

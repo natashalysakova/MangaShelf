@@ -51,9 +51,6 @@
     private string? message;
     private ExternalLoginInfo? externalLoginInfo;
 
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
@@ -72,28 +69,21 @@
     {
         if (RemoteError is not null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}");
         }
 
         var info = await SignInManager.GetExternalLoginInfoAsync();
         if (info is null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.");
         }
 
         externalLoginInfo = info;
 
-        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        if (Action == LoginCallbackAction)
         {
-            if (Action == LoginCallbackAction)
-            {
-                await OnLoginCallbackAsync();
-                return;
-            }
-
-            // We should only reach this page via the login callback, so redirect back to
-            // the login page if we get here some other way.
-            RedirectManager.RedirectTo("Account/Login");
+            await OnLoginCallbackAsync();
+            return;
         }
     }
 
@@ -101,7 +91,7 @@
     {
         if (externalLoginInfo is null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.");
         }
 
         // Sign in the user with this external login provider if the user already has a login.
@@ -135,7 +125,7 @@
     {
         if (externalLoginInfo is null)
         {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.", HttpContext);
+            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.");
         }
 
         var emailStore = GetEmailStore();

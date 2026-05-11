@@ -1,6 +1,6 @@
 ﻿using MangaShelf.DAL.Models;
 
-namespace MangaShelf.BL.Parsers;
+namespace MangaShelf.BL.Contracts;
 
 public record ParsedInfo
 {

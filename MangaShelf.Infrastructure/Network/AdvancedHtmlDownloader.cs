@@ -1,5 +1,5 @@
 ﻿using MangaShelf.BL.Configuration;
-using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Contracts;
 using MangaShelf.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 using PuppeteerSharp;

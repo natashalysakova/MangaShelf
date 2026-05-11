@@ -1,10 +1,6 @@
 ﻿using MangaShelf.Common.Interfaces;
 using MangaShelf.Infrastructure.Installer;
 using MangaShelf.Infrastructure.Seed;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Diagnostics;
 
 public class Program
 {

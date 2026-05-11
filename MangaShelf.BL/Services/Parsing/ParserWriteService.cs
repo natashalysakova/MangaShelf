@@ -1,7 +1,8 @@
-using MangaShelf.BL.Interfaces;
+using MangaShelf.BL.Contracts;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
+using ParserModel = MangaShelf.DAL.System.Models.Parser;
 
 namespace MangaShelf.BL.Services.Parsing;
 
@@ -234,7 +235,7 @@ public class ParserWriteService : IParserWriteService
                 continue;
             }
 
-            context.Parsers.Add(new Parser
+            context.Parsers.Add(new ParserModel
             {
                 ParserName = parserName,
                 Status = ParserStatus.Idle,
@@ -296,7 +297,7 @@ public class ParserWriteService : IParserWriteService
         return job.Id;
     }
 
-    private ParserJob CreateJobInternal(Parser parser, ParserRunType parserRunType, string? url = null)
+    private ParserJob CreateJobInternal(ParserModel parser, ParserRunType parserRunType, string? url = null)
     {
         return new ParserJob()
         {

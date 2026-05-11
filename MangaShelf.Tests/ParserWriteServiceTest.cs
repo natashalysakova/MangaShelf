@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MangaShelf.BL.Services.Parsing;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Xunit;
 using Assert = Xunit.Assert;
+using MangaShelf.Parser.Services;
+
+using ParserModel = MangaShelf.DAL.System.Models.Parser;
+using MangaShelf.BL.Services.Parsing;
 
 namespace MangaShelf.Tests
 {
@@ -66,7 +69,7 @@ namespace MangaShelf.Tests
         {
             // Arrange
             using var context = _dbContextFactory.CreateDbContext();
-            var parser = new Parser { ParserName = "test", Status = ParserStatus.Idle };
+            var parser = new ParserModel { ParserName = "test", Status = ParserStatus.Idle };
             var job = new ParserJob { Id = Guid.NewGuid(), Status = RunStatus.Waiting, ParserStatus = parser };
             context.Parsers.Add(parser);
             context.Runs.Add(job);
@@ -89,7 +92,7 @@ namespace MangaShelf.Tests
         {
             // Arrange
             using var context = _dbContextFactory.CreateDbContext();
-            var parser = new Parser { ParserName = "test", Status = ParserStatus.Parsing };
+            var parser = new ParserModel { ParserName = "test", Status = ParserStatus.Parsing };
             var job = new ParserJob { Id = Guid.NewGuid(), Progress = 0, ParserStatus = parser };
             context.Parsers.Add(parser);
             context.Runs.Add(job);
@@ -110,7 +113,7 @@ namespace MangaShelf.Tests
         {
             // Arrange
             using var context = _dbContextFactory.CreateDbContext();
-            var parser = new Parser { ParserName = "test", Status = ParserStatus.Idle };
+            var parser = new ParserModel { ParserName = "test", Status = ParserStatus.Idle };
             context.Parsers.Add(parser);
             await context.SaveChangesAsync();
 
@@ -130,7 +133,7 @@ namespace MangaShelf.Tests
         {
             // Arrange
             using var context = _dbContextFactory.CreateDbContext();
-            var parser = new Parser { ParserName = "test", Status = ParserStatus.Parsing };
+            var parser = new ParserModel { ParserName = "test", Status = ParserStatus.Parsing };
             var job = new ParserJob { Id = Guid.NewGuid(), Status = RunStatus.Running, ParserStatus = parser };
             context.Runs.Add(job);
             await context.SaveChangesAsync();
