@@ -15,7 +15,7 @@ public class MangaSystemDbContextFactory : IDesignTimeDbContextFactory<MangaSyst
 
         var connectionString = configuration.GetConnectionString("SystemDb") ?? throw new InvalidOperationException("Connection string 'SystemDb' not found.");
 
-        var shelfDbVersion = ServerVersion.AutoDetect(connectionString);
+        var shelfDbVersion = ServerVersion.Parse("8.0");
         var options = new DbContextOptionsBuilder<MangaSystemDbContext>()
             .UseMySql(connectionString, shelfDbVersion);
         return new MangaSystemDbContext(options.Options);

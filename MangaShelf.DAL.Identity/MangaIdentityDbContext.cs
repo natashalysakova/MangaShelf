@@ -29,7 +29,7 @@ public class MangaIdentityDbContextFactory : IDesignTimeDbContextFactory<MangaId
 
         var connectionString = configuration.GetConnectionString("AccountsDb") ?? throw new InvalidOperationException("Connection string 'AccountsDb' not found.");
 
-        var shelfDbVersion = ServerVersion.AutoDetect(connectionString);
+        var shelfDbVersion = ServerVersion.Parse("8.0");
         var options = new DbContextOptionsBuilder<MangaIdentityDbContext>()
             .UseMySql(connectionString, shelfDbVersion);
         return new MangaIdentityDbContext(options.Options);
