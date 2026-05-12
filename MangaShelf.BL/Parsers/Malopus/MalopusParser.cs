@@ -213,27 +213,6 @@ public class MalopusParser : BaseParser
             volume = title.Substring(indexOfVolume, nextWhitespace - indexOfVolume);
         }
 
-
-        //var volInd = title.IndexOf("Том ");
-
-        //if (volInd == -1)
-        //{
-        //    volInd = title.IndexOf("Омнібус");
-
-        //    if(volInd == -1)
-        //        return volInd;
-        //}
-
-        //var nextWhiteSpace = title.IndexOf(' ', volInd);
-        //string volume;
-        //if (nextWhiteSpace == -1)
-        //{
-        //    volume = title.Substring(volInd + 1).Trim();
-        //}
-        //else
-        //{
-        //    volume = title.Substring(nextWhiteSpace).Trim();
-        //}
         return int.Parse(volume);
     }
 
@@ -308,19 +287,7 @@ public class MalopusParser : BaseParser
 
     protected override DateTimeOffset? GetSaleStartDate(IDocument document)
     {
-        // var newsDates = document.QuerySelectorAll(".rm-news-item-date");
-        // var dates = new List<DateTimeOffset>();
-        // foreach (var item in newsDates)
-        // {
-        //     if(DateTime.TryParseExact(item.InnerHtml, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out var parsedDate))
-        //     {
-        //         dates.Add(parsedDate);
-        //     }
-        // }
-
-        // var earliest = dates.OrderBy(x => x).FirstOrDefault();
-        // return earliest;
-        return DateTimeOffset.Now;
+        return null;
     }
     protected override bool GetIsPreorder(IDocument document)
     {

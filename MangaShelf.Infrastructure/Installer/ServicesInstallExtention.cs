@@ -3,6 +3,7 @@ using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Enums;
 using MangaShelf.BL.Parsers;
 using MangaShelf.BL.Services;
+using MangaShelf.BL.Services;
 using MangaShelf.BL.Services.Parsing;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Localization.Interfaces;
@@ -25,7 +26,11 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IPublisherService, PublisherService>();
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IParserReadService, ParserReadService>();
-        builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
+        builder.Services.AddScoped<ParserWriteService>();
+        builder.Services.AddScoped<IParserWriteService>(sp => sp.GetRequiredService<ParserWriteService>());
+        builder.Services.AddScoped<IParserJobManager>(sp => sp.GetRequiredService<ParserWriteService>());
+        builder.Services.AddScoped<IParserRunTracker>(sp => sp.GetRequiredService<ParserWriteService>());
+        builder.Services.AddScoped<IVolumeImportService, VolumeImportService>();
         builder.Services.AddScoped<ISettingReadService, SettingReadService>();
         builder.Services.AddScoped<IUserLibraryService, UserLibraryService>();
 

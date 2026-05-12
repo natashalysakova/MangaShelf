@@ -1,30 +1,24 @@
-using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
+using MangaShelf.BL.Services;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Models;
-using MangaShelf.Parser.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
 namespace MangaShelf.Tests;
 
-public class ParserServiceTests : IDisposable
+public class VolumeImportServiceTests : IDisposable
 {
-    private Mock<ILogger<ParserService>> _loggerMock;
-    private Mock<IServiceProvider> _serviceProviderMock;
-    private Mock<IServiceScope> _serviceScopeMock;
-    private Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
+    private Mock<ILogger<VolumeImportService>> _loggerMock;
     private Mock<IImageManager> _imageManagerMock;
     private IDbContextFactory<MangaDbContext> _dbContextFactory;
-    private Mock<IConfigurationService> _configurationService;
-    private ParserService _parserService;
+    private VolumeImportService _volumeImportService;
     private string _databaseName;
 
-    public ParserServiceTests()
+    public VolumeImportServiceTests()
     {
         _databaseName = $"TestDb_{Guid.NewGuid()}";
         
@@ -38,30 +32,8 @@ public class ParserServiceTests : IDisposable
         _dbContextFactory = new TestDbContextFactory(dbContextOptions);
 
         // Setup mocks
-        _loggerMock = new Mock<ILogger<ParserService>>();
+        _loggerMock = new Mock<ILogger<VolumeImportService>>();
         _imageManagerMock = new Mock<IImageManager>();
-        
-        // Create a real service collection for dependency injection
-        var services = new ServiceCollection();
-        services.AddScoped<IImageManager>(sp => _imageManagerMock.Object);
-        
-        var serviceProvider = services.BuildServiceProvider();
-        _serviceProviderMock = new Mock<IServiceProvider>();
-        _serviceScopeMock = new Mock<IServiceScope>();
-        
-        // Setup service scope properly
-        _serviceScopeMock.Setup(x => x.ServiceProvider).Returns(serviceProvider);
-        _serviceProviderMock.Setup(x => x.GetService(typeof(IServiceScopeFactory)))
-            .Returns(new TestServiceScopeFactory(_serviceScopeMock.Object));
-        
-        _configurationService = new Mock<IConfigurationService>();
-        _configurationService.Setup(x=>x.ParserService).Returns(new ParserServiceSettings
-        {
-            DelayBetweenParse = TimeSpan.FromSeconds(100),
-            IgnoreExistingVolumes = false
-        });
-
-
 
         // Setup image manager mock
         _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()))
@@ -72,12 +44,10 @@ public class ParserServiceTests : IDisposable
         // Initialize database with test data
         InitializeTestData().Wait();
 
-        _parserService = new ParserService(
+        _volumeImportService = new VolumeImportService(
             _loggerMock.Object,
             _dbContextFactory,
-            serviceProvider,
-            null!, // IParserFactory not needed for this test
-            _configurationService.Object
+            _imageManagerMock.Object
         );
     }
 
@@ -144,7 +114,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -206,7 +176,7 @@ public class ParserServiceTests : IDisposable
             Description = "Original description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Update with new info
         var updatedParsedInfo = new ParsedInfo
@@ -233,7 +203,7 @@ public class ParserServiceTests : IDisposable
             Description = "Updated description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -280,7 +250,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -329,7 +299,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -374,7 +344,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -416,7 +386,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -457,7 +427,7 @@ public class ParserServiceTests : IDisposable
             Description = "First volume"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(firstParsedInfo);
+        await _volumeImportService.ImportAsync(firstParsedInfo);
 
         // Act - Create second volume with same publisher
         var secondParsedInfo = new ParsedInfo
@@ -484,7 +454,7 @@ public class ParserServiceTests : IDisposable
             Description = "Second volume"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
+        var result = await _volumeImportService.ImportAsync(secondParsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -533,7 +503,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -577,7 +547,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -622,7 +592,7 @@ public class ParserServiceTests : IDisposable
             Description = "First volume"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(firstParsedInfo);
+        await _volumeImportService.ImportAsync(firstParsedInfo);
 
         // Act - Create second volume in same series
         var secondParsedInfo = new ParsedInfo
@@ -649,7 +619,7 @@ public class ParserServiceTests : IDisposable
             Description = "Second volume"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
+        var result = await _volumeImportService.ImportAsync(secondParsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -697,7 +667,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -739,7 +709,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Update with Completed status
         var updatedParsedInfo = new ParsedInfo
@@ -766,7 +736,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -807,7 +777,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Update with 5 total volumes (increased)
         var updatedParsedInfo = new ParsedInfo
@@ -834,7 +804,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -875,7 +845,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Try to update with 3 total volumes (decreased)
         var updatedParsedInfo = new ParsedInfo
@@ -902,7 +872,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -944,7 +914,7 @@ public class ParserServiceTests : IDisposable
         var beforeTest = DateTimeOffset.Now;
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         var afterTest = DateTimeOffset.Now;
 
@@ -990,7 +960,7 @@ public class ParserServiceTests : IDisposable
             Description = "Original description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Update with null description
         var updatedParsedInfo = new ParsedInfo
@@ -1017,7 +987,7 @@ public class ParserServiceTests : IDisposable
             Description = null // Null description should not overwrite
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -1056,7 +1026,7 @@ public class ParserServiceTests : IDisposable
             Description = "Same description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Update with same description and same URL
         var updatedParsedInfo = new ParsedInfo
@@ -1083,7 +1053,7 @@ public class ParserServiceTests : IDisposable
             Description = "Same description" // Same description
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert - Since nothing changed, should still be Updated (EF marks it as unchanged but method returns Updated)
         Assert.Equal(State.Updated, result);
@@ -1118,7 +1088,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1162,7 +1132,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1204,7 +1174,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Update with 0 total volumes (unknown)
         var updatedParsedInfo = new ParsedInfo
@@ -1231,7 +1201,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -1271,7 +1241,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1312,7 +1282,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Verify initial images are set
         using (var context = _dbContextFactory.CreateDbContext())
@@ -1351,7 +1321,7 @@ public class ParserServiceTests : IDisposable
             Description = "Updated description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -1392,7 +1362,7 @@ public class ParserServiceTests : IDisposable
         var beforeTest = DateTimeOffset.Now;
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         var afterTest = DateTimeOffset.Now;
 
@@ -1438,7 +1408,7 @@ public class ParserServiceTests : IDisposable
             Description = "Special edition"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(firstParsedInfo);
+        await _volumeImportService.ImportAsync(firstParsedInfo);
 
         // Act - Create volume with same series and number but different title
         var secondParsedInfo = new ParsedInfo
@@ -1465,7 +1435,7 @@ public class ParserServiceTests : IDisposable
             Description = "Regular edition"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
+        var result = await _volumeImportService.ImportAsync(secondParsedInfo);
 
         // Assert - Should create a new volume since title is different
         Assert.Equal(State.Added, result);
@@ -1507,7 +1477,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1550,7 +1520,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Act - Update with same age restriction
         var updatedParsedInfo = new ParsedInfo
@@ -1577,7 +1547,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -1616,7 +1586,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _volumeImportService.ImportAsync(initialParsedInfo);
 
         // Verify initial state
         using (var context = _dbContextFactory.CreateDbContext())
@@ -1651,7 +1621,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(updatedParsedInfo);
 
         // Assert
         using var context2 = _dbContextFactory.CreateDbContext();
@@ -1689,7 +1659,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(preorderParsedInfo);
+        await _volumeImportService.ImportAsync(preorderParsedInfo);
 
         // Get the original PreorderStart
         DateTimeOffset? originalPreorderStart;
@@ -1726,7 +1696,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(releasedParsedInfo);
+        var result = await _volumeImportService.ImportAsync(releasedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -1769,7 +1739,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1812,7 +1782,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _volumeImportService.ImportAsync(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1893,21 +1863,5 @@ public class TestMangaDbContext : MangaDbContext
         }
 
         return base.SaveChangesAsync(cancellationToken);
-    }
-}
-
-// Helper class for creating service scopes
-public class TestServiceScopeFactory : IServiceScopeFactory
-{
-    private readonly IServiceScope _scope;
-
-    public TestServiceScopeFactory(IServiceScope scope)
-    {
-        _scope = scope;
-    }
-
-    public IServiceScope CreateScope()
-    {
-        return _scope;
     }
 }

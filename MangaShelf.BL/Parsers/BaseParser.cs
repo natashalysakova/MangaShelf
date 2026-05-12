@@ -60,11 +60,11 @@ public abstract class BaseParser : IPublisherParser
 
     public abstract string Pagination { get; }
 
-    public bool IsRunning => _isRunning;
+    public bool IsRunning => _isRunning == 1;
 
     public string ParserName { get => this.GetType().Name; }
 
-    private bool _isRunning = false;
+    private int _isRunning = 0;
 
     public virtual string GetPageUrl(int page)
     {
@@ -98,7 +98,7 @@ public abstract class BaseParser : IPublisherParser
 
     public async Task<ParsedInfo> Parse(string url, string html, CancellationToken token)
     {
-        _isRunning = true;
+        Interlocked.Exchange(ref _isRunning, 1);
 
         var parser = new HtmlParser();
         var document = await parser.ParseDocumentAsync(html, token);
@@ -157,15 +157,13 @@ public abstract class BaseParser : IPublisherParser
         }
         finally
         {
-            _isRunning = false;
+            Interlocked.Exchange(ref _isRunning, 0);
         }
 
     }
 
     public async Task<ParsedInfo> Parse(string url, CancellationToken token = default)
     {
-        _isRunning = true;
-
         if (!url.StartsWith(SiteUrl))
         {
             url = SiteUrl + url;

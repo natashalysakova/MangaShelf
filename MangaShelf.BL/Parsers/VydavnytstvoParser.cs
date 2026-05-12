@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Dom;
+using MangaShelf.BL.Extensions;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;

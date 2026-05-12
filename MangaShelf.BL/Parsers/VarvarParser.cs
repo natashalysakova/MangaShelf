@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Dom;
+using MangaShelf.BL.Extensions;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
@@ -277,21 +278,5 @@ public class VarvarParser : BaseParser
             return null;
 
         return node.TextContent.Trim();
-    }
-}
-
-public static class StringExtentions
-{
-    public static string Escaped(this string input)
-    {
-        if (input is null)
-        {
-            return string.Empty;
-        }
-
-        return input
-            .Replace("\r", string.Empty)
-            .Replace("\n", string.Empty)
-            .Replace("\t", string.Empty).Trim();
     }
 }

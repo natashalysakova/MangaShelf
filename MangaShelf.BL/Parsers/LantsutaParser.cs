@@ -1,5 +1,6 @@
 ﻿
 using AngleSharp.Dom;
+using MangaShelf.BL.Extensions;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
@@ -279,20 +280,5 @@ public class LantsutaParser : BaseParser
     {
         var descriptionNode = document.QuerySelectorAll("#tab-description p");
         return string.Join("\n\n", descriptionNode.Select(n => n.TextContent.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)));
-    }
-}
-
-public static class StringExtensions
-{
-    public static bool ContainsAny(this string source, IEnumerable<string> toCheck)
-    {
-        foreach (var check in toCheck)
-        {
-            if (source.Contains(check))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 }
