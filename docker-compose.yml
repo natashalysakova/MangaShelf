@@ -16,6 +16,9 @@ services:
       - manga-network
     environment:
       DOTNET_ENVIRONMENT: Production
+      ConnectionStrings__MangaDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${MANGA_DATABASE}"
+      ConnectionStrings__AccountsDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${ACCOUNTS_DATABASE}"
+      ConnectionStrings__SystemDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${SYSTEM_DATABASE}"
     env_file:
       - .env
     restart: on-failure
@@ -34,6 +37,9 @@ services:
         ASPNETCORE_ENVIRONMENT: Production
         ASPNETCORE_HTTP_PORTS: 8080
         ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+        ConnectionStrings__MangaDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${MANGA_DATABASE}"
+        ConnectionStrings__AccountsDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${ACCOUNTS_DATABASE}"
+        ConnectionStrings__SystemDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${SYSTEM_DATABASE}"
     env_file:
       - .env
     volumes:
@@ -53,6 +59,9 @@ services:
       DOTNET_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      ConnectionStrings__MangaDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${MANGA_DATABASE}"
+      ConnectionStrings__AccountsDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${ACCOUNTS_DATABASE}"
+      ConnectionStrings__SystemDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${SYSTEM_DATABASE}"
     volumes:
       - images:/app/wwwroot/images:rw
     env_file:
