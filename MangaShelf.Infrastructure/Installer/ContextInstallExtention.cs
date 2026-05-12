@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 
 namespace MangaShelf.Infrastructure.Installer;
@@ -18,6 +19,11 @@ public static class ContextInstallExtention
     public static IHostApplicationBuilder RegisterIdentityContextAndServices(this IHostApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("AccountsDb") ?? throw new InvalidOperationException("Connection string 'AccountsDb' not found.");
+        var logger = LoggerFactory.Create(b =>
+        {
+            b.AddConsole();
+        }).CreateLogger(nameof(RegisterIdentityContextAndServices));
+        logger.LogWarning(connectionString);
 
         var accontDbVersion = ServerVersion.Parse("8.0");
         builder.Services.AddDbContext<MangaIdentityDbContext>(
@@ -28,7 +34,6 @@ public static class ContextInstallExtention
                     mysqlOptions =>
                     {
                         mysqlOptions.EnableRetryOnFailure();
-                        mysqlOptions.CommandTimeout(600);
                     });
 
                 if (builder.Environment.IsDevelopment())
@@ -71,6 +76,11 @@ public static class ContextInstallExtention
     private static IHostApplicationBuilder RegisterShelfContextAndServices(IHostApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("MangaDb") ?? throw new InvalidOperationException("Connection string 'MangaDb' not found.");
+        var logger = LoggerFactory.Create(b =>
+        {
+            b.AddConsole();
+        }).CreateLogger(nameof(RegisterShelfContextAndServices));
+        logger.LogWarning(connectionString);
 
         var accontDbVersion = ServerVersion.Parse("8.0");
         var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
@@ -85,7 +95,6 @@ public static class ContextInstallExtention
             mysqlOptions =>
             {
                 mysqlOptions.EnableRetryOnFailure();
-                mysqlOptions.CommandTimeout(300);
             })
             .AddInterceptors(new AuditInterceptor());
         });
@@ -101,6 +110,12 @@ public static class ContextInstallExtention
     {
         var connectionString = builder.Configuration.GetConnectionString("SystemDb") ?? throw new InvalidOperationException("Connection string 'SystemDb' not found.");
 
+        var logger = LoggerFactory.Create(b =>
+        {
+            b.AddConsole();
+        }).CreateLogger(nameof(RegisterSystemContextAndServices));
+        logger.LogWarning(connectionString);
+
         var accontDbVersion = ServerVersion.Parse("8.0");
         var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
         {
@@ -111,11 +126,10 @@ public static class ContextInstallExtention
 
             options
             .UseMySql(connectionString, accontDbVersion,
-            mysqlOptions =>
-            {
-                mysqlOptions.EnableRetryOnFailure();
-                mysqlOptions.CommandTimeout(300);
-            });
+                mysqlOptions =>
+                {
+                    mysqlOptions.EnableRetryOnFailure();
+                });
         });
 
 
