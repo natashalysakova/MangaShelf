@@ -66,9 +66,9 @@ public abstract class BaseParser : IPublisherParser
 
     private bool _isRunning = false;
 
-    public virtual string GetNextPageUrl()
+    public virtual string GetPageUrl(int page)
     {
-        return $"{SiteUrl}{CatalogUrl}{Pagination}";
+        return $"{SiteUrl}{CatalogUrl}{Pagination.Replace("{0}", page.ToString())}";
     }
 
     protected virtual bool GetCanBePublished()
@@ -86,7 +86,7 @@ public abstract class BaseParser : IPublisherParser
         {
             var classToSearch = GetVolumeUrlBlockClass();
             var nodes = document.QuerySelectorAll(classToSearch).Where(x => !x.TextContent.ToLower().StartsWith("комплект"));
-            var attribute = nodes.Select(x => x.Attributes["href"]);
+            var attribute = nodes.Where(x=> x.Attributes["href"] != null).Select(x => x.Attributes["href"]);
             return attribute.Select(x => x.Value);
         }
         catch

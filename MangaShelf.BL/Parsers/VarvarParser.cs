@@ -14,9 +14,9 @@ public class VarvarParser : BaseParser
 
     public override string SiteUrl => "https://varvarpublishing.com/";
 
-    public override string CatalogUrl => "shop/";
+    public override string CatalogUrl => "shop/?filter_cat=manga";
 
-    public override string Pagination => "?product-page={0}";
+    public override string Pagination => "&product-page={0}";
 
     protected override int? GetAgeRestriction(IDocument document)
     {
@@ -263,7 +263,7 @@ public class VarvarParser : BaseParser
 
     protected override bool GetCanBePublished()
     {
-        return false;
+        return true;
     }
     protected override SeriesType GetSeriesType(IDocument document)
     {

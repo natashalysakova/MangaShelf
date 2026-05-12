@@ -21,9 +21,33 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
                 new object[]{
                     release2.Url,
                     release2
+                },
+                new object[]
+                {
+                    release3.Url,
+                    release3
                 }
             };
         }
+    }
+
+    [TestMethod]
+    public async Task Molfar_PageExist_ShouldHaveVolumes()
+    {
+        var result = await Parser.GetVolumesUrls("https://molfarpublishing.ua/catalog/manga/page/2/", CancellationToken.None);
+
+        Assert.IsNotNull(result);
+        Assert.HasCount(14, result);
+    }
+
+    [TestMethod]
+
+    public async Task Molfar_PageExist_ShouldNotHaveVolumes()
+    {
+        await Assert.ThrowsExactlyAsync<HttpRequestException>(async () =>
+        {
+            await Parser.GetVolumesUrls("https://molfarpublishing.ua/catalog/manga/page/198/", CancellationToken.None);
+        });
     }
 
     [TestMethod]
@@ -52,7 +76,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         VolumeType = VolumeType.Physical,
         SeriesType = SeriesType.Unknown,
         AgeRestrictions = null,
-        Url = "https://molfar-comics.com/product/narechena-chakluna-tom-4/",
+        Url = "https://molfarpublishing.ua/product/narechena-chakluna-tom-4/",
         VolumeNumber = 4
     };
 
@@ -73,7 +97,28 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         VolumeType = VolumeType.Physical,
         SeriesType = SeriesType.Unknown,
         AgeRestrictions = null,
-        Url = "https://molfar-comics.com/product/nich-zhyvykh-niavtsiv-tom-1/",
+        Url = "https://molfarpublishing.ua/product/nich-zhyvykh-niavtsiv-tom-1/",
         VolumeNumber = 1
+    };
+
+    private static ParsedInfo release3 = new ParsedInfo()
+    {
+        CanBePublished = false,
+        Title = "Том 3",
+        CountryCode = "ua",
+        Cover = "https://molfarpublishing.ua/static/d2b106e6a59eb3aa80dd4df9fa36b810/07686/cats03.webp",
+        Authors = "Hawkman,Mecha-Roots",
+        Isbn = "978-617-8485-67-2",
+        IsPreorder = true,
+        Publisher = "Molfar Comics",
+        Release = DateTime.SpecifyKind(new DateTime(2026, 7, 31), DateTimeKind.Local),
+        Series = "Ніч Живих Нявців",
+        SeriesStatus = SeriesStatus.Unknown,
+        TotalVolumes = -1,
+        VolumeType = VolumeType.Physical,
+        SeriesType = SeriesType.Unknown,
+        AgeRestrictions = null,
+        Url = "https://molfarpublishing.ua/product/nich-zhyvykh-niavtsiv-tom-3/",
+        VolumeNumber = 3
     };
 }

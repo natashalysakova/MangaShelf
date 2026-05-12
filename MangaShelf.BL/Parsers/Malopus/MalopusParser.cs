@@ -1,5 +1,6 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
+using AngleSharp.Io;
 using MangaShelf.BL.Enums;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers.Malopus;
+
 public class MalopusParser : BaseParser
 {
     public override string SiteUrl => "https://malopus.com.ua";
@@ -47,17 +49,26 @@ public class MalopusParser : BaseParser
     {
         var html = document.ToHtml();
 
-        int index = html.IndexOf("Орієнтовна дата надходження:");
+        string approxDateString = "Орієнтовна дата надходження:";
+
+        int index = html.IndexOf(approxDateString);
         if (index == -1)
             return null;
 
+        int nextWhitespace = html.IndexOf(' ', index + approxDateString.Length + 1);
+        int length = nextWhitespace - (index + approxDateString.Length);
+        if(length != 10)
+        {
+            nextWhitespace = html.IndexOf(' ', nextWhitespace + 1);
+            length = nextWhitespace - (index + approxDateString.Length);
+        }
 
-        var date = html.Substring(index + "Орієнтовна дата надходження:".Length + 1, 10);
+        var date = html.Substring(index + approxDateString.Length + 1, length).Trim();
 
         if (date == "0000-00-00")
             return null;
 
-   
+
         if (DateTimeOffset.TryParseExact(date, "dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture,
             System.Globalization.DateTimeStyles.AssumeLocal, out DateTimeOffset parsedExactDate))
         {
@@ -69,8 +80,44 @@ public class MalopusParser : BaseParser
             return parsedDate;
         }
 
+        if (LookupList.Any(x => date.Contains(x.season)))
+        {
+            return GetDateFromText(date);
+        }
+
         return null;
     }
+
+    private DateTimeOffset? GetDateFromText(string date)
+    {
+        int day;
+        int month;
+        int year;
+
+        var splitted = date.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if(splitted.Length == 2)
+        {
+            month = LookupList.Single(x => x.season == splitted[0]).month;
+            year = int.Parse(splitted[1]);
+            day = DateTime.DaysInMonth(year, month);
+
+            if(year == DateTime.Now.Year && month == 2 && month < DateTime.Now.Month)
+            {
+                month = 12; // fallback for winter. If year is current and month in past then it's till december current year
+            }
+            return new DateTimeOffset(year, month, day, 0, 0, 0, TimeZoneInfo.Local.GetUtcOffset(new DateTime(year, month, day)));
+        }
+
+        return null;
+    }
+
+    private (string season, int month)[] LookupList = [
+        ("осінь", 11),
+        ("літо", 8),
+        ("зима", 2),
+        ("весна", 5)];
+
 
     protected override string GetSeries(IDocument document)
     {
@@ -125,9 +172,9 @@ public class MalopusParser : BaseParser
             }
         }
 
-        if(index != -1)
+        if (index != -1)
         {
-             title = title.Substring(index + 1).Trim();
+            title = title.Substring(index + 1).Trim();
         }
 
         title = ReplaceVolumeType(title);
@@ -307,12 +354,12 @@ public class MalopusParser : BaseParser
         // Get the description container
         var descriptionDiv = document.QuerySelector(".product-description .text");
 
-        if(descriptionDiv == null)
+        if (descriptionDiv == null)
             return null;
 
         var paragraphs = descriptionDiv.QuerySelectorAll("p");
-        
-        var description = string.Join("\n", 
+
+        var description = string.Join("\n",
             paragraphs
                 .Select(p => p.TextContent.Trim())
                 .Where(text => !string.IsNullOrWhiteSpace(text))

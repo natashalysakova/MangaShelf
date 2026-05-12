@@ -55,9 +55,8 @@ public class ParserService : IParseService
 
             try
             {
-                pageUrl = parser.GetNextPageUrl();
                 currentPage += 1;
-                pageUrl = pageUrl.Replace("{0}", currentPage.ToString());
+                pageUrl = parser.GetPageUrl(currentPage);
 
                 _logger.LogDebug("accessing " + pageUrl);
                 volumes = await parser.GetVolumesUrls(pageUrl, token);

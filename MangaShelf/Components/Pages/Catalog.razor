@@ -162,7 +162,7 @@
         }
     }
 
-    private OrderBy _orderBy = OrderBy.Popularity;
+    private OrderBy _orderBy = OrderBy.ReleaseDate;
     private OrderBy OrderBy
     {
         get => _orderBy;
@@ -241,7 +241,7 @@
             await ProtectedLocalStorage.SetAsync(nameof(SelectedPage), SelectedPage);
             await ProtectedLocalStorage.SetAsync(nameof(PageSize), PageSize);
 
-                await ProtectedLocalStorage.SetAsync(nameof(Search), Search);
+            await ProtectedLocalStorage.SetAsync(nameof(Search), Search);
 
             await ProtectedLocalStorage.SetAsync(nameof(SelectedReleaseFilter), SelectedReleaseFilter);
             await ProtectedLocalStorage.SetAsync(nameof(OrderBy), OrderBy);
@@ -301,7 +301,7 @@
 
         return default!;
     }
-    
+
 
     private void ToggleFilters()
     {
@@ -312,6 +312,9 @@
     {
         Search = string.Empty;
         SelectedPage = 1;
+        OrderBy = OrderBy.ReleaseDate;
+        OrderIsAsc = false;
+        SelectedReleaseFilter = [ReleaseFilter.Released, ReleaseFilter.Preorder];
         _ = ReloadVolumes();
     }
 
