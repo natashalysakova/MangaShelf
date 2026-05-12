@@ -67,7 +67,8 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
         {
             RequestTimeout = TimeSpan.FromSeconds(30),
             MaxRetries = 1,
-            DelayBetweenRetries = TimeSpan.FromMilliseconds(100)
+            DelayBetweenRetries = TimeSpan.FromMilliseconds(100),
+            BrowserWSEndpoint = "ws://localhost:5300/"
         };
 
         // Fix for CS0535: implement CacheSettings property

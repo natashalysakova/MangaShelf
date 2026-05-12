@@ -23,9 +23,11 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
     }
     public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
+        var browserUrl = _options.BrowserWSEndpoint;
+
         await using var browser = await Puppeteer.ConnectAsync(new ConnectOptions
         {
-            BrowserWSEndpoint= "ws://chrome:3000",
+            BrowserWSEndpoint= _options.BrowserWSEndpoint,
             //Headless = true,
             //ExecutablePath = executablePath,
             //Args = new[]

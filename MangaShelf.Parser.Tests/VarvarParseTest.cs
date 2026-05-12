@@ -46,7 +46,7 @@ public class VarvarParseTest : BaseParserTestClass<VarvarParser>
 
     private static ParsedInfo released = new ParsedInfo()
     {
-        CanBePublished = false,
+        CanBePublished = true,
         Title = "Том 2",
         CountryCode = "ua",
         Cover = "https://varvarpublishing.com/wp-content/uploads/2025/08/554231_cover-200x200.webp",
@@ -67,7 +67,7 @@ public class VarvarParseTest : BaseParserTestClass<VarvarParser>
     };
     private static ParsedInfo released2 = new ParsedInfo()
     {
-        CanBePublished = false,
+        CanBePublished = true,
         Title = "Том 1",
         CountryCode = "ua",
         Cover = "https://varvarpublishing.com/wp-content/uploads/2025/06/549426_cover-200x200.webp",
