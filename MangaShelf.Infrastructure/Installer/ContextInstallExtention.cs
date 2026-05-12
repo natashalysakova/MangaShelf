@@ -28,6 +28,7 @@ public static class ContextInstallExtention
                     mysqlOptions =>
                     {
                         mysqlOptions.EnableRetryOnFailure();
+                        mysqlOptions.CommandTimeout(600);
                     });
 
                 if (builder.Environment.IsDevelopment())
@@ -84,6 +85,7 @@ public static class ContextInstallExtention
             mysqlOptions =>
             {
                 mysqlOptions.EnableRetryOnFailure();
+                mysqlOptions.CommandTimeout(300);
             })
             .AddInterceptors(new AuditInterceptor());
         });
@@ -112,6 +114,7 @@ public static class ContextInstallExtention
             mysqlOptions =>
             {
                 mysqlOptions.EnableRetryOnFailure();
+                mysqlOptions.CommandTimeout(300);
             });
         });
 
