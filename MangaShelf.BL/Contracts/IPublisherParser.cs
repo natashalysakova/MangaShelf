@@ -3,7 +3,7 @@
 public interface IPublisherParser
 {
     Task<ParsedInfo> Parse(string url, CancellationToken token = default);
-    string GetNextPageUrl();
+    string GetPageUrl(int page);
     Task<IEnumerable<string>> GetVolumesUrls(string url, CancellationToken token = default);
     bool CanParse(string url);
 

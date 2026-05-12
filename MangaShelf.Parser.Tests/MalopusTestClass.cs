@@ -31,13 +31,13 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
     [TestMethod]
     public async Task MalopusPreorderTest()
     {
-        var result = await Parser.Parse("https://malopus.com.ua/manga/smoking-behind-the-supermarket-vol-3/");
+        var result = await Parser.Parse("https://malopus.com.ua/manga/smoking-behind-the-supermarket-vol-4/");
 
         Assert.IsNotNull(result);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(DateTime.Today, result.PreorderStartDate.Value.Date);
         Assert.AreEqual(true, result.IsPreorder);
-        Assert.AreEqual(DateTime.Parse("2026-03-31"), result.Release);
+        Assert.AreEqual(DateTime.Parse("2026-11-30"), result.Release);
     }
 
     [TestMethod]

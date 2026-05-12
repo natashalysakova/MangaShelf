@@ -19,12 +19,7 @@ public static class ContextInstallExtention
     public static IHostApplicationBuilder RegisterIdentityContextAndServices(this IHostApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("AccountsDb") ?? throw new InvalidOperationException("Connection string 'AccountsDb' not found.");
-        var logger = LoggerFactory.Create(b =>
-        {
-            b.AddConsole();
-        }).CreateLogger(nameof(RegisterIdentityContextAndServices));
-        logger.LogWarning(connectionString);
-
+        
         var accontDbVersion = ServerVersion.Parse("8.0");
         builder.Services.AddDbContext<MangaIdentityDbContext>(
             options =>
@@ -76,11 +71,6 @@ public static class ContextInstallExtention
     private static IHostApplicationBuilder RegisterShelfContextAndServices(IHostApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("MangaDb") ?? throw new InvalidOperationException("Connection string 'MangaDb' not found.");
-        var logger = LoggerFactory.Create(b =>
-        {
-            b.AddConsole();
-        }).CreateLogger(nameof(RegisterShelfContextAndServices));
-        logger.LogWarning(connectionString);
 
         var accontDbVersion = ServerVersion.Parse("8.0");
         var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
@@ -109,12 +99,6 @@ public static class ContextInstallExtention
     private static IHostApplicationBuilder RegisterSystemContextAndServices(this IHostApplicationBuilder builder)
     {
         var connectionString = builder.Configuration.GetConnectionString("SystemDb") ?? throw new InvalidOperationException("Connection string 'SystemDb' not found.");
-
-        var logger = LoggerFactory.Create(b =>
-        {
-            b.AddConsole();
-        }).CreateLogger(nameof(RegisterSystemContextAndServices));
-        logger.LogWarning(connectionString);
 
         var accontDbVersion = ServerVersion.Parse("8.0");
         var sqlConfiguration = new Action<DbContextOptionsBuilder>(options =>
