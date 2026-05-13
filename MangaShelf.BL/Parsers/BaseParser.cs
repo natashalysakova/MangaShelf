@@ -164,14 +164,22 @@ public abstract class BaseParser : IPublisherParser
 
     public async Task<ParsedInfo> Parse(string url, CancellationToken token = default)
     {
-        if (!url.StartsWith(SiteUrl))
+        Interlocked.Exchange(ref _isRunning, 1);
+        try
         {
-            url = SiteUrl + url;
+            if (!url.StartsWith(SiteUrl))
+            {
+                url = SiteUrl + url;
+            }
+
+            var html = await _htmlDownloader.GetUrlHtml(url, token);
+
+            return await Parse(url, html, token);
         }
-
-        var html = await _htmlDownloader.GetUrlHtml(url, token);
-
-        return await Parse(url, html, token);
+        finally
+        {
+            Interlocked.Exchange(ref _isRunning, 0);
+        }
     }
 
 

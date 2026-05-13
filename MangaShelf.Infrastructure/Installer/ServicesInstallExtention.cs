@@ -3,7 +3,6 @@ using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Enums;
 using MangaShelf.BL.Parsers;
 using MangaShelf.BL.Services;
-using MangaShelf.BL.Services;
 using MangaShelf.BL.Services.Parsing;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Localization.Interfaces;
