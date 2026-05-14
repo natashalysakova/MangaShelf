@@ -62,7 +62,7 @@ public class SeedService(
         }
     }
 
-    private static async Task MakeSureDbCreatedAsync<T>(IServiceScope scope) where T : DbContext
+    private async Task MakeSureDbCreatedAsync<T>(IServiceScope scope) where T : DbContext
     {
         var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<T>>();
         using var context = await factory.CreateDbContextAsync();
@@ -71,6 +71,7 @@ public class SeedService(
             throw new InvalidOperationException($"System database model ({typeof(T).Name}) has pending changes. Please apply migrations before starting the application.");
         }
 
+        logger.LogInformation("Applying migrations for {DbContextName}", typeof(T).Name);
         await context.Database.MigrateAsync();
     }
 

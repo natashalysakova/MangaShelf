@@ -35,8 +35,11 @@ public class MangaDbContext : DbContext
                 modelBuilder.Entity(entityType.ClrType)
                     .Property(nameof(IEntity.Id))
                     .ValueGeneratedOnAdd();
+            }
 
-                // Apply a global query filter to exclude soft-deleted entities
+            // Apply a global query filter to exclude soft-deleted entities
+            if (typeof(IDeletableEntity).IsAssignableFrom(entityType.ClrType))
+            {
                 modelBuilder.Entity(entityType.ClrType)
                     .HasQueryFilter(ConvertToDeleteFilter(entityType.ClrType));
             }
@@ -51,8 +54,13 @@ public class MangaDbContext : DbContext
         modelBuilder.Entity<Reading>().ToTable("Reading");
         modelBuilder.Entity<Ownership>().ToTable("Ownership");
 
-        //modelBuilder.Entity<Volume>()
-        //    .HasIndex(v=> new { v.SeriesId, v.Number, v.Title }).IsUnique();
+        modelBuilder.Entity<Volume>()
+            .HasOne(v => v.Series)
+            .WithMany(s => s.Volumes)
+            .HasForeignKey(v => v.SeriesId);
+
+        modelBuilder.Entity<Volume>()
+            .HasIndex(v => new { v.SeriesId, v.Number, v.Title }).IsUnique();
 
         modelBuilder.Entity<Likes>()
             .HasIndex(l => new { l.UserId, l.VolumeId }).IsUnique();
@@ -62,8 +70,6 @@ public class MangaDbContext : DbContext
 
         modelBuilder.Entity<Author>()
             .HasIndex(a => a.Name);
-
-
     }
 
     private static LambdaExpression ConvertToDeleteFilter(Type type)
