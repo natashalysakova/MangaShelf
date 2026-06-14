@@ -22,7 +22,7 @@ public interface IVolumeService : IService
     Task<IEnumerable<CardVolumeDto>> GetNewestReleases(int count = 6, CancellationToken token = default);
 
     Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(Guid seriesId, CancellationToken token = default);
-
+    Task<CardVolumeDto> GetVolumeCardById(Guid volumeId, CancellationToken token = default);
     Task<VolumeDto?> GetFullVolumeByPublicIdAsync(string volumePublicId, CancellationToken token = default);
     Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string userIdentityId, CancellationToken token = default);
     Task<VolumeStatsDto> GetVolumeStats(Guid volumeId, CancellationToken token = default);

@@ -28,6 +28,14 @@ public class UserLibraryService : IUserLibraryService
 
     public async Task<UserLibraryDto> GetUserLibrary(string userId, IFilterOptions? paginationOptions = null, CancellationToken cancellationToken = default)
     {
+        var dbContext = _dbContextFactory.CreateDbContext();
+
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId, cancellationToken);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
         throw new NotImplementedException();
     }
 
@@ -36,13 +44,24 @@ public class UserLibraryService : IUserLibraryService
         var dbContext = _dbContextFactory.CreateDbContext();
 
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId, cancellationToken);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
 
-        var query = dbContext.Ownerships
-            .Include(u => u.Volume)
-            .ThenInclude(v => v.Series)
-            .Where(o => o.UserId == user.Id && o.Status == VolumeStatus.Preorder);
+        var userOwerships = await dbContext.Ownerships.Where(x => x.UserId == user.Id).ToListAsync(cancellationToken);
+         
+        var latestPreorderIds = userOwerships
+            .GroupBy(o => o.VolumeId)
+            .Select(v => v.OrderByDescending(x => x.Date).First())
+            .Where(o => o.Status == VolumeStatus.Preorder)
+            .Select(x => x.Id);
 
-        var result = await query.ApplyPagination(paginationOptions).ToListAsync(cancellationToken);
+        var result = await dbContext.Ownerships
+            .Include(x=>x.Volume)
+                .ThenInclude(v => v.Series)
+            .Where(x=> latestPreorderIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
 
         return new UserLibraryDto()
         {
@@ -54,8 +73,9 @@ public class UserLibraryService : IUserLibraryService
                 SeriesTitle = o.Volume!.Series!.Title,
                 VolumeStatus = o.Status,
                 ReleaseDate = o.Volume.ReleaseDate,
+                DaysTillRelease = o.Volume.ReleaseDate.HasValue ? (o.Volume.ReleaseDate.Value - DateTimeOffset.UtcNow).Days : 0,
                 CoverUrl = o.Volume.CoverImageUrlSmall
-            })
+            }).OrderBy(x => x.ReleaseDate)
         };
     }
 }
@@ -75,6 +95,7 @@ public class UserLibraryItem
 
     public VolumeStatus VolumeStatus { get; set; }
     public DateTimeOffset? ReleaseDate { get; set; }
+    public int DaysTillRelease { get; set; }
     public bool IsPreorderDue { get => VolumeStatus == VolumeStatus.Preorder && ReleaseDate < DateTimeOffset.UtcNow; }
 
     public string? CoverUrl { get; set; } = null;

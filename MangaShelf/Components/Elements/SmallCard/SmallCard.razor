@@ -97,6 +97,11 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if(Volume == null && VolumeId != null)
+        {
+            Volume = await VolumeService.GetVolumeCardById(VolumeId.Value);
+        }
+
         if (Volume == null || (ShowButtons == false && ShowStatus == false))
         {
             return;

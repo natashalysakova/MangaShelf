@@ -94,9 +94,9 @@ public class MalopusParser : BaseParser
         int month;
         int year;
 
-        var splitted = date.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var splitted = date.Replace("&nbsp;", " ").Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        if(splitted.Length == 2)
+      if (splitted.Length == 2 || splitted.Length == 3)
         {
             month = LookupList.Single(x => x.season == splitted[0]).month;
             year = int.Parse(splitted[1]);
@@ -106,11 +106,11 @@ public class MalopusParser : BaseParser
             {
                 month = 12; // fallback for winter. If year is current and month in past then it's till december current year
             }
-            return new DateTimeOffset(year, month, day, 0, 0, 0, TimeZoneInfo.Local.GetUtcOffset(new DateTime(year, month, day)));
+            return new DateTimeOffset(year, month, day, 0, 0, 0, DateTimeOffset.Now.Offset);
         }
 
         return null;
-    }
+    }       
 
     private (string season, int month)[] LookupList = [
         ("осінь", 11),

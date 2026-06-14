@@ -1,26 +1,46 @@
 ﻿@page "/preorders"
 @using MangaShelf.BL.Services
 @using System.Security.Claims
+@using MangaShelf.Components.Elements.SmallCard
 
 @inject IUserLibraryService UserLibraryService
+@inject IAdminLocalizationService Localizer
 <h3>Preordres</h3>
 
-@if(UserLibraryDto != null)
+@if (UserLibraryDto != null)
 {
-    @foreach(var preorder in UserLibraryDto.Volumes)
-    {
-        <MudCard Class="mb-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h6">@preorder.VolumeTitle</MudText>
-                <MudText Typo="Typo.subtitle2">@preorder.SeriesTitle</MudText>
-                <MudText Typo="Typo.body2">Release Date: @preorder.ReleaseDate?.ToString("dd.MM.yyyy")</MudText>
-                <MudText>@preorder.IsPreorderDue</MudText>
-            </MudCardContent>
-        </MudCard>
-    }
+    <MudGrid>
+
+        @foreach (var preorder in UserLibraryDto.Volumes)
+        {
+            <MudItem xs="4">
+                @{
+                    var cardClass = "paper-manga-panel " + (preorder.IsPreorderDue ? "expired-preorder" : "normal-preorder");
+                } 
+                <MudCard Class="@cardClass">
+                    <MudCardContent>
+                        <MudStack Row>
+                            <MudPaper Style="width: 120px;height: 170px; background-color: transparent;" Class="p-2">
+                                <SmallCard  ShowButtons="true" VolumeId="@preorder.VolumeId" />
+                            </MudPaper>
+                            <MudStack Spacing="1">
+                                <MudText Typo="Typo.h6">@preorder.VolumeTitle</MudText>
+                                <MudText Typo="Typo.subtitle2">@preorder.SeriesTitle</MudText>
+                                <MudText Typo="Typo.body2">Release Date: @preorder.ReleaseDate?.ToString("dd.MM.yyyy")</MudText>
+                                <MudText Typo="Typo.body2">@preorder.IsPreorderDue</MudText>
+                            </MudStack>
+                            <MudStack>
+                                <MudText>@preorder.DaysTillRelease</MudText>
+                            </MudStack>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
 }
 
-@if(errorMessage != null)
+@if (errorMessage != null)
 {
     
 }

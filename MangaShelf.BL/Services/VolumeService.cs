@@ -98,20 +98,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             result = result.IgnoreQueryFilters().Where(x => x.IsDeleted);
         }
 
-        if (sortDefinitions.Any())
-        {
-            var firstSort = sortDefinitions.First();
-
-            if (firstSort.Descending)
-            {
-                result = result.OrderByDescending(firstSort.SortFunction).AsQueryable();
-            }
-            else
-            {
-                result = result.OrderBy(firstSort.SortFunction).AsQueryable();
-            }
-        }
-        else
+        if (!sortDefinitions.Any())
         {
             result = result
                 .OrderBy(x => x.Series.Title)
@@ -119,6 +106,20 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         }
 
         var resultList = await result.ToListAsync();
+
+        if (sortDefinitions.Any())
+        {
+            var firstSort = sortDefinitions.First();
+
+            if (firstSort.Descending)
+            {
+                resultList = resultList.OrderByDescending(firstSort.SortFunction).ToList();
+            }
+            else
+            {
+                resultList = resultList.OrderBy(firstSort.SortFunction).ToList();
+            }
+        }
 
         if (filterFunctions != null && filterFunctions.Any())
         {
@@ -480,6 +481,13 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
     {
         var context = dbContextFactory.CreateDbContext();
         return context.Ownerships.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, token);
+    }
+
+    public async Task<CardVolumeDto> GetVolumeCardById(Guid volumeId, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        var volume = await context.Volumes.FirstAsync(x => x.Id == volumeId);
+        return volume.ToDto();
     }
 }
 

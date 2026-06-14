@@ -74,7 +74,7 @@ public class VolumeInfoParser(
                 OneShot = volumeInfo.SeriesStatus == SeriesStatus.OneShot,
                 AgeRestriction = volumeInfo.AgeRestrictions == null ? 18 : volumeInfo.AgeRestrictions.Value,
                 IsPublishedOnSite = series.IsPublishedOnSite,
-                ReleaseDate = volumeInfo.Release,
+                ReleaseDate = volumeInfo.Release ?? DateTimeOffset.Now,
             };
         }
 

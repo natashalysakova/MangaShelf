@@ -234,3 +234,12 @@ h1:focus {
 .manga-card:hover .catalog-button-panel {
     visibility: visible;
 }
+
+.mud-paper .expired-preorder {
+    outline: 5px solid red;
+    outline-offset: -5px; /* or -5px if you want it drawn inside */
+}
+
+.mud-paper .normal-preorder {
+    
+}

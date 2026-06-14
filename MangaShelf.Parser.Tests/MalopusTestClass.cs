@@ -28,6 +28,15 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual(18, result.AgeRestrictions);
     }
 
+    
+[TestMethod]
+    public async Task MalopusTest_BeastarsOmnibus2()
+    {
+        var result = await Parser.Parse("https://malopus.com.ua/manga/beastars-omnibus-2/");
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(DateTimeOffset.Parse("2026-11-30 00:00:00 +03:00"), result.Release);
+    }
     [TestMethod]
     public async Task MalopusPreorderTest()
     {

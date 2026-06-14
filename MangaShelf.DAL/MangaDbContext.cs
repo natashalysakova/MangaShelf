@@ -1,12 +1,21 @@
 ﻿using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Linq.Expressions;
 
 namespace MangaShelf.DAL;
 
 public class MangaDbContext : DbContext
 {
+    private static readonly ValueConverter<DateTimeOffset, DateTime> DateTimeOffsetUtcConverter = new(
+        value => value.UtcDateTime,
+        value => new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc), TimeSpan.Zero));
+
+    private static readonly ValueConverter<DateTimeOffset?, DateTime?> NullableDateTimeOffsetUtcConverter = new(
+        value => value.HasValue ? value.Value.UtcDateTime : null,
+        value => value.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(value.Value, DateTimeKind.Utc), TimeSpan.Zero) : null);
+
     // Domain tables
     public DbSet<Country> Countries { get; set; }
     public DbSet<Publisher> Publishers { get; set; }
@@ -43,6 +52,22 @@ public class MangaDbContext : DbContext
                 modelBuilder.Entity(entityType.ClrType)
                     .HasQueryFilter(ConvertToDeleteFilter(entityType.ClrType));
             }
+
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTimeOffset))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(property.Name)
+                        .HasConversion(DateTimeOffsetUtcConverter);
+                }
+                else if (property.ClrType == typeof(DateTimeOffset?))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(property.Name)
+                        .HasConversion(NullableDateTimeOffsetUtcConverter);
+                }
+            }
         }
 
         modelBuilder.Entity<Series>()
@@ -53,6 +78,8 @@ public class MangaDbContext : DbContext
 
         modelBuilder.Entity<Reading>().ToTable("Reading");
         modelBuilder.Entity<Ownership>().ToTable("Ownership");
+
+
 
         modelBuilder.Entity<Volume>()
             .HasOne(v => v.Series)
