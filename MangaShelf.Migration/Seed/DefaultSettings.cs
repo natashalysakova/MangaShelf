@@ -5,12 +5,12 @@ namespace MangaShelf.Infrastructure.Seed;
 public static class DefaultSettings
 {
     public static IEnumerable<SeedSetting> Settings = new SettingBuilder()
-        .Add<BackgroundWorkerSettings>(nameof(BackgroundWorkerSettings.Enabled), true)
         .Add<BackgroundWorkerSettings>(nameof(BackgroundWorkerSettings.StartDelay), TimeSpan.FromMinutes(1))
         .Add<BackgroundWorkerSettings>(nameof(BackgroundWorkerSettings.LoopDelay), TimeSpan.FromSeconds(5))
         .Add<JobManagerSettings>(nameof(JobManagerSettings.DelayBetweenRuns), TimeSpan.FromHours(12))
         .Add<JobManagerSettings>(nameof(JobManagerSettings.MaxParallelParsers), 3)
         .Add<JobManagerSettings>(nameof(JobManagerSettings.ResetNextRun), false)
+        .Add<JobManagerSettings>(nameof(JobManagerSettings.ScheduledJobsEnabled), true)
         .Add<ParserServiceSettings>(nameof(ParserServiceSettings.DelayBetweenParse), TimeSpan.FromSeconds(5))
         .Add<ParserServiceSettings>(nameof(ParserServiceSettings.IgnoreExistingVolumes), true)
         .Add<HtmlDownloaderSettings>(nameof(HtmlDownloaderSettings.RequestTimeout), TimeSpan.FromSeconds(30))
