@@ -23,13 +23,13 @@ COPY ["MangaShelf.Common/MangaShelf.Common.csproj", "MangaShelf.Common/"]
 COPY ["MangaShelf.Admin/MangaShelf.Admin.csproj", "MangaShelf.Admin/"]
 
 # Restore dependencies - this layer will be cached unless csproj files change
-RUN dotnet restore "MangaShelf/MangaShelf.csproj"
+RUN dotnet restore "MangaShelf.Admin/MangaShelf.Admin.csproj"
 
 # Copy the rest of the source code
 COPY . .
 
-WORKDIR "/src/MangaShelf"
-RUN dotnet build "./MangaShelf.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/MangaShelf.Admin"
+RUN dotnet build "./MangaShelf.Admin.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
@@ -40,4 +40,4 @@ RUN dotnet publish "./MangaShelf.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MangaShelf.dll"]
+ENTRYPOINT ["dotnet", "MangaShelf.Admin.dll"]

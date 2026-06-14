@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MangaShelf.Localization.Resources {
+namespace MangaShelf.Admin.Localization.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace MangaShelf.Localization.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MangaShelf.Localization.Resources.AdminInterfaceResource", typeof(AdminInterfaceResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MangaShelf.Admin.Localization.Resources.AdminInterfaceResource", typeof(AdminInterfaceResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

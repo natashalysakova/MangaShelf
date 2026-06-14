@@ -7,4 +7,49 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="9.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MangaShelf.BL\MangaShelf.BL.csproj" />
+    <ProjectReference Include="..\MangaShelf.Common\MangaShelf.Common.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL.Identity\MangaShelf.DAL.Identity.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL.System\MangaShelf.DAL.System.csproj" />
+    <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Localization\Resources\AdminInterfaceResource.Designer.cs">
+      <DependentUpon>AdminInterfaceResource.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Localization\Resources\AdminInterfaceResource.en.Designer.cs">
+      <DependentUpon>AdminInterfaceResource.en.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Localization\Resources\AdminInterfaceResource.uk.Designer.cs">
+      <DependentUpon>AdminInterfaceResource.uk.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\Resources\AdminInterfaceResource.en.resx">
+      <LastGenOutput>AdminInterfaceResource.en.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\Resources\AdminInterfaceResource.resx">
+      <LastGenOutput>AdminInterfaceResource.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\Resources\AdminInterfaceResource.uk.resx">
+      <LastGenOutput>AdminInterfaceResource.uk.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

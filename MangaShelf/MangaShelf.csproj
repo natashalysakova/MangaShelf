@@ -28,25 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Localization\Resources\AdminInterfaceResource.en.Designer.cs">
-      <DependentUpon>AdminInterfaceResource.en.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Localization\Resources\AdminInterfaceResource.uk.Designer.cs">
-      <DependentUpon>AdminInterfaceResource.uk.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Update="Localization\Resources\Components\VolumePageResource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>VolumePageResource.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Localization\Resources\AdminInterfaceResource.Designer.cs">
-      <DependentUpon>AdminInterfaceResource.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
     </Compile>
     <Compile Update="Localization\Resources\Elements\SmallCardResource.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -61,21 +46,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Localization\Resources\AdminInterfaceResource.en.resx">
-      <LastGenOutput>AdminInterfaceResource.en.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Localization\Resources\AdminInterfaceResource.uk.resx">
-      <LastGenOutput>AdminInterfaceResource.uk.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
     <EmbeddedResource Update="Localization\Resources\Components\VolumePageResource.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>VolumePageResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Localization\Resources\AdminInterfaceResource.resx">
-      <LastGenOutput>AdminInterfaceResource.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Localization\Resources\Elements\SmallCardResource.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

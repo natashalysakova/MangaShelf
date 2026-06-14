@@ -1,11 +1,24 @@
-﻿@using System.Net.Http
+﻿@* @attribute [Authorize(Roles = "Admin")] *@
+
+@using System.Net.Http
 @using System.Net.Http.Json
+@using System.Security.Claims
+@using System.Threading.Tasks
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.JSInterop
 @using MangaShelf.Admin
 @using MangaShelf.Admin.Components
 @using MangaShelf.Admin.Components.Layout
+@using MangaShelf.Admin.Localization.Interfaces
+@using MangaShelf.BL.Contracts
+@using MangaShelf.BL.Dto
+@using MangaShelf.DAL.Models
+
+@using MudBlazor
