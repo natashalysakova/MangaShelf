@@ -8,8 +8,10 @@ using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Localization.Interfaces;
 using MangaShelf.Common.Localization.Services;
 using MangaShelf.Infrastructure.Network;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Reflection;
 
 namespace MangaShelf.Infrastructure.Installer;
 
@@ -70,5 +72,49 @@ public static class ServicesInstallExtention
     public static void AddLocalizationServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddSingleton<ICountryLocalizationService, CountryLocalizationService>();
+    }
+
+    public static void UseRequestLocalization(this WebApplication app)
+    {
+        string[] supportedCultures = LocalizationService.SupportedCultures.Select(x => x.Name).ToArray();
+        var localizationOptions = new RequestLocalizationOptions()
+            .SetDefaultCulture(supportedCultures[0])
+            .AddSupportedCultures(supportedCultures)
+            .AddSupportedUICultures(supportedCultures);
+        localizationOptions.ApplyCurrentCultureToResponseHeaders = true;
+        app.UseRequestLocalization(localizationOptions);
+    }
+
+    public static IServiceCollection AddLocalizationServicesFromAssembly(
+        this IServiceCollection services,
+        Assembly assembly)
+    {
+        var localizationServiceType = typeof(ILocalizationService<>);
+
+        var serviceTypes = assembly.GetTypes()
+            .Where(type =>
+                type is { IsClass: true, IsAbstract: false } &&
+                type.GetInterfaces().Any(i =>
+                    i.IsGenericType &&
+                    i.GetGenericTypeDefinition() == localizationServiceType))
+            .ToList();
+
+        foreach (var implementationType in serviceTypes)
+        {
+            // Find the most specific interface (non-generic preferred)
+            var interfaceType = implementationType.GetInterfaces()
+                .Where(i => i != typeof(IAutoRegisterLocalizationService) &&
+                           (i.IsGenericType && i.GetGenericTypeDefinition() == localizationServiceType ||
+                            i.GetInterfaces().Any(ii => ii.IsGenericType && ii.GetGenericTypeDefinition() == localizationServiceType)))
+                .OrderBy(i => i.IsGenericType ? 1 : 0) // Prefer non-generic interfaces
+                .FirstOrDefault();
+
+            if (interfaceType != null)
+            {
+                services.AddSingleton(interfaceType, implementationType);
+            }
+        }
+
+        return services;
     }
 }

@@ -41,8 +41,6 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddMudServices();
 
-        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
         builder.RegisterContextAndServices();
         builder.RegisterIdentityContextAndServices();
         builder.Services.AddScoped<IdentityUserAccessor>();
@@ -90,14 +88,8 @@ public class Program
 
         app.UseStaticFiles();
         app.MapStaticAssets();
-        
-        string[] supportedCultures = LocalizationService.SupportedCultures.Select(x => x.Name).ToArray();
-        var localizationOptions = new RequestLocalizationOptions()
-            .SetDefaultCulture(supportedCultures[0])
-            .AddSupportedCultures(supportedCultures)
-            .AddSupportedUICultures(supportedCultures);
-        localizationOptions.ApplyCurrentCultureToResponseHeaders = true;
-        app.UseRequestLocalization(localizationOptions);
+
+        app.UseRequestLocalization();
 
         app.UseStatusCodePagesWithRedirects("/404");
 

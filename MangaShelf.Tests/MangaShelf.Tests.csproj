@@ -27,6 +27,8 @@
     <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
     <ProjectReference Include="..\MangaShelf.Common\MangaShelf.Common.csproj" />
     <ProjectReference Include="..\MangaShelf.Parser\MangaShelf.Parser.csproj" />
+    <ProjectReference Include="..\MangaShelf.Infrastructure\MangaShelf.Infrastructure.csproj" />
+    <ProjectReference Include="..\MangaShelf\MangaShelf.csproj" />
   </ItemGroup>
 
 </Project>
