@@ -16,7 +16,6 @@ public class SeedService(
         {
             await MakeSureDbCreatedAsync();
             await SeedDatabase();
-            await ResetStuckJobs(serviceProvider);
         }
         catch (Exception ex)
         {
@@ -86,43 +85,5 @@ public class SeedService(
         await context.Database.MigrateAsync();
     }
 
-    private  async Task ResetStuckJobs(IServiceProvider serviceProvider)
-    {
-        using var scope = serviceProvider.CreateScope();
-        using var context = scope.ServiceProvider.GetRequiredService<MangaSystemDbContext>();
-
-        try
-        {
-            var parserStatuses = context.Parsers
-                .Include(p => p.Jobs)
-                    .ThenInclude(r => r.Errors);
-
-            var notFinishedProperly = parserStatuses
-                .SelectMany(x => x.Jobs)
-                .Where(r => r.Status == RunStatus.Waiting || r.Status == RunStatus.Running);
-
-            foreach (var job in notFinishedProperly)
-            {
-                job.Status = RunStatus.Error;
-                job.Finished = DateTimeOffset.Now;
-                job.Progress = -1;
-                job.Errors.Add(new ParserError()
-                {
-                    ErrorMessage = "Was automatically cancelled after restart",
-                    RunTime = job.Finished.Value
-                });
-            }
-
-            foreach (var parser in parserStatuses)
-            {
-                parser.Status = ParserStatus.Idle;
-            }
-
-            await context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            // do nothing, we don't want to block the app from starting
-        }
-    }
+    
 }

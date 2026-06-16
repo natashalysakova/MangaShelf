@@ -150,4 +150,34 @@
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>
+  <data name="Recent Volume Updates" xml:space="preserve">
+    <value>Recent Volume Updates</value>
+  </data>
+  <data name="VolumeReleasedMessage" xml:space="preserve">
+    <value>{title} was released on {date}.</value>
+  </data>
+  <data name="PreorderStartedMessage" xml:space="preserve">
+    <value>Preorders started for {title} on {date}.</value>
+  </data>
+  <data name="ReleaseDateChangedMessage" xml:space="preserve">
+    <value>Release date for {title} changed from {old} to {new}.</value>
+  </data>
+  <data name="VolumeUpdatedMessage" xml:space="preserve">
+    <value>{title} was updated on {date}.</value>
+  </data>
+  <data name="Unknown Value" xml:space="preserve">
+    <value>unknown</value>
+  </data>
+  <data name="Start Date" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="End Date" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Range</value>
+  </data>
+  <data name="No updates found for the selected date range." xml:space="preserve">
+    <value>No updates found for the selected date range.</value>
+  </data>
 </root>

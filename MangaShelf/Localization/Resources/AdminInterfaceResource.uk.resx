@@ -150,4 +150,34 @@
   <data name="Edit" xml:space="preserve">
     <value>Редагувати</value>
   </data>
+  <data name="Recent Volume Updates" xml:space="preserve">
+    <value>Останні оновлення томів</value>
+  </data>
+  <data name="VolumeReleasedMessage" xml:space="preserve">
+    <value>{title} надійшов у продаж.</value>
+  </data>
+  <data name="PreorderStartedMessage" xml:space="preserve">
+    <value>Розпочалося передзамовлення {title}.</value>
+  </data>
+  <data name="ReleaseDateChangedMessage" xml:space="preserve">
+    <value>Дата виходу {title} змінена з {old} на {new}.</value>
+  </data>
+  <data name="VolumeUpdatedMessage" xml:space="preserve">
+    <value>{title} було оновлено {date}.</value>
+  </data>
+  <data name="Unknown Value" xml:space="preserve">
+    <value>невідомо</value>
+  </data>
+  <data name="Start Date" xml:space="preserve">
+    <value>Початкова дата</value>
+  </data>
+  <data name="End Date" xml:space="preserve">
+    <value>Кінцева дата</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Період</value>
+  </data>
+  <data name="No updates found for the selected date range." xml:space="preserve">
+    <value>За вибраний період оновлень не знайдено.</value>
+  </data>
 </root>

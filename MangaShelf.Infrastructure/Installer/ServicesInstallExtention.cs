@@ -27,6 +27,7 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IParserReadService, ParserReadService>();
         builder.Services.AddScoped<ISettingReadService, SettingReadService>();
         builder.Services.AddScoped<IUserLibraryService, UserLibraryService>();
+        builder.Services.AddScoped<IVolumeHistoryService, VolumeHistoryService>();
 
         // Parsing services
         builder.Services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();

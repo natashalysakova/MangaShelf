@@ -35,6 +35,7 @@ public class Volume : BaseEntity
     public virtual ICollection<Ownership> Owners { get; set; } = new List<Ownership>();
     public virtual ICollection<Reading> Readers { get; set; } = new List<Reading>();
     public virtual ICollection<Likes> Likes { get; set; } = new List<Likes>();
+    public virtual ICollection<VolumeHistory> History { get; set; } = new List<VolumeHistory>();
 }
 
 

@@ -86,6 +86,7 @@ public static class ContextInstallExtention
             {
                 mysqlOptions.EnableRetryOnFailure();
             })
+            .AddInterceptors(new WriteVolumeHistoryInterceptor())
             .AddInterceptors(new AuditInterceptor());
         });
 

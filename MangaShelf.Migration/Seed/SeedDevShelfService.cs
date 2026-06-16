@@ -71,7 +71,7 @@ public class SeedDevShelfService : ISeedDataService
         var context = _dbContextFactory.CreateDbContext();
 
         var seriesList = await context.Series
-            .Where(s => string.IsNullOrEmpty(s.PublicId))
+            .Where(s => string.IsNullOrEmpty(s.PublicId) || s.PublicId == Guid.Empty.ToString())
             .ToListAsync();
 
         foreach (var series in seriesList)
@@ -81,7 +81,7 @@ public class SeedDevShelfService : ISeedDataService
         }
 
         var volumeList = await context.Volumes
-            .Where(v => string.IsNullOrEmpty(v.PublicId))
+            .Where(v => string.IsNullOrEmpty(v.PublicId) || v.PublicId == Guid.Empty.ToString())
             .ToListAsync();
 
         foreach (var volume in volumeList)

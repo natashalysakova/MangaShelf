@@ -175,7 +175,6 @@ internal class ParseJobRunner : IParseJobRunner, IDisposable
 
         var jobManagerService = scope.ServiceProvider.GetRequiredService<IParseJobManagerService>();
         await jobManagerService.InitializeParsers(parsers.Select(x => x.ParserName), token);
-
     }
 }
 

@@ -21,6 +21,7 @@ public class MangaDbContext : DbContext
     public DbSet<Publisher> Publishers { get; set; }
     public DbSet<Series> Series { get; set; }
     public DbSet<Volume> Volumes { get; set; }
+    public DbSet<VolumeHistory> VolumeHistory { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Ownership> Ownerships { get; set; }
     public DbSet<Reading> Readings { get; set; }
@@ -85,6 +86,14 @@ public class MangaDbContext : DbContext
             .HasOne(v => v.Series)
             .WithMany(s => s.Volumes)
             .HasForeignKey(v => v.SeriesId);
+
+        modelBuilder.Entity<VolumeHistory>()
+            .HasOne(vh => vh.Volume)
+            .WithMany(v => v.History)
+            .HasForeignKey(vh => vh.VolumeId);
+
+        modelBuilder.Entity<VolumeHistory>()
+            .HasIndex(vh => new { vh.VolumeId, vh.Timestamp });
 
         modelBuilder.Entity<Volume>()
             .HasIndex(v => new { v.SeriesId, v.Number, v.Title }).IsUnique();

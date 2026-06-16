@@ -99,5 +99,6 @@ public class UserLibraryItem
     public bool IsPreorderDue { get => VolumeStatus == VolumeStatus.Preorder && ReleaseDate < DateTimeOffset.UtcNow; }
 
     public string? CoverUrl { get; set; } = null;
+    
 }
 

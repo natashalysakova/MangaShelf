@@ -27,6 +27,7 @@ public class ConfigurationServiceTests : IDisposable
         _options = new DbContextOptionsBuilder<MangaSystemDbContext>()
             .UseInMemoryDatabase(databaseName: databaseName)
             .EnableSensitiveDataLogging()
+            .AddInterceptors(new WriteVolumeHistoryInterceptor())
             .AddInterceptors(new AuditInterceptor())
             .Options;
 

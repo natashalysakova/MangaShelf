@@ -110,7 +110,46 @@ public class ParseJobManagerService : IParseJobManagerService
                 NextRun = DateTimeOffset.Now
             });
         }
+
+        await ResetStuckJobs(context);
         await context.SaveChangesAsync(token);
+    }
+
+    private  async Task ResetStuckJobs(MangaSystemDbContext context)
+    {
+        try
+        {
+            var parserStatuses = context.Parsers
+                .Include(p => p.Jobs)
+                    .ThenInclude(r => r.Errors);
+
+            var notFinishedProperly = parserStatuses
+                .SelectMany(x => x.Jobs)
+                .Where(r => r.Status == RunStatus.Waiting || r.Status == RunStatus.Running);
+
+            foreach (var job in notFinishedProperly)
+            {
+                job.Status = RunStatus.Error;
+                job.Finished = DateTimeOffset.Now;
+                job.Progress = -1;
+                job.Errors.Add(new ParserError()
+                {
+                    ErrorMessage = "Was automatically cancelled after restart",
+                    RunTime = job.Finished.Value
+                });
+            }
+
+            foreach (var parser in parserStatuses)
+            {
+                parser.Status = ParserStatus.Idle;
+            }
+
+            await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            // do nothing, we don't want to block the app from starting
+        }
     }
 
     public async Task<IEnumerable<Guid>> PrepareWaitingJobs(CancellationToken token)
