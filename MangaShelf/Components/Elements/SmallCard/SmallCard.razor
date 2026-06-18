@@ -83,6 +83,9 @@ else
     [Parameter]
     public bool ShowStatusIcon { get; set; }
 
+    [Parameter]
+    public EventCallback<VolumeStatus> OnStatusChange { get; set; }
+
     [Inject]
     NavigationManager NavigationManager { get; set; }
 
@@ -136,8 +139,13 @@ else
         var newStatus = await OpenSetOwnershipDialog(status);
         if (newStatus != null)
         {
+            if (OnStatusChange.HasDelegate && newStatus.CurrentOwnershipStatus != CurrentUserStatus?.CurrentOwnershipStatus)
+            {
+                await OnStatusChange.InvokeAsync(newStatus.CurrentOwnershipStatus);
+            }
+
             CurrentUserStatus = newStatus;
-            StateHasChanged();
+            StateHasChanged();      
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using ImageMagick;
+using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Common.Interfaces;
 
@@ -16,6 +17,13 @@ public class ImageManager : IImageManager
 {
     private const string serverRoot = "wwwroot";
     const string imageDir = "images";
+
+    private readonly ILogger<ImageManager> _logger;
+
+    public ImageManager(ILogger<ImageManager> logger)
+    {
+        _logger = logger;
+    }
 
     public string? CropImage(string imageUrl)
     {
@@ -279,7 +287,7 @@ public class ImageManager : IImageManager
                         Directory.CreateDirectory(localDirectory);
 
                     File.WriteAllBytes(localPath, imageBytes);
-
+                    _logger.LogInformation($"Downloaded image from {url} to {localPath}");
                 }
             }
 

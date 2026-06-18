@@ -60,22 +60,18 @@ public class UserLibraryService : IUserLibraryService
         var result = await dbContext.Ownerships
             .Include(x=>x.Volume)
                 .ThenInclude(v => v.Series)
+            .Include(x => x.Volume)
+                .ThenInclude(v => v.History)
             .Where(x=> latestPreorderIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
+
+        var histories = result.SelectMany(o => o.Volume!.History).ToList();
 
         return new UserLibraryDto()
         {
             UserId = userId,
-            Volumes = result.Select(o => new UserLibraryItem()
-            {
-                VolumeId = o.VolumeId,
-                VolumeTitle = o.Volume!.Title,
-                SeriesTitle = o.Volume!.Series!.Title,
-                VolumeStatus = o.Status,
-                ReleaseDate = o.Volume.ReleaseDate,
-                DaysTillRelease = o.Volume.ReleaseDate.HasValue ? (o.Volume.ReleaseDate.Value - DateTimeOffset.UtcNow).Days : 0,
-                CoverUrl = o.Volume.CoverImageUrlSmall
-            }).OrderBy(x => x.ReleaseDate)
+            Volumes = result.Select(o => o.ToUserLibraryItemDto()).OrderBy(x => x.ReleaseDate),
+            Updates = histories.Select(h => h.ToDto()).OrderByDescending(x => x.Date)
         };
     }
 }
@@ -85,6 +81,7 @@ public class UserLibraryDto
     public string UserId { get; set; }
 
     public IEnumerable<UserLibraryItem> Volumes { get; set; }
+    public IEnumerable<VolumeHistoryDto> Updates { get; set; }
 }
 
 public class UserLibraryItem

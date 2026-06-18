@@ -1,0 +1,36 @@
+@using MangaShelf.BL.Services
+
+@inject IAdminLocalizationService Localizer
+
+@if(GroupedByDate)
+{
+    @foreach (var history in VolumeHistory
+        .GroupBy(h => h.Date.Date)
+        .OrderByDescending(g => g.Key))
+    {
+        <MudText Typo="Typo.h6" Color="Color.Tertiary">@history.Key.ToString("d")</MudText>
+        <MudDivider/>
+        @foreach (var record in history)
+        {
+            <VolumeHistoryRecord VolumeHistory="record" GroupedByDate="GroupedByDate" />
+        }
+    }
+}
+else
+{
+    @foreach (var history in VolumeHistory
+        .OrderByDescending(h => h.Date))
+    {
+        <VolumeHistoryRecord VolumeHistory="history" GroupedByDate="GroupedByDate" />
+    }
+}
+
+@code {
+
+    [Parameter]
+    [EditorRequired]
+    public required IEnumerable<VolumeHistoryDto> VolumeHistory { get; set; }
+
+    [Parameter]
+    public bool GroupedByDate { get; set; } = false;
+}

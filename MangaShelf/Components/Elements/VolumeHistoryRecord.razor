@@ -1,0 +1,83 @@
+@using System.Net
+@using MangaShelf.BL.Services
+@using MangaShelf.DAL.Models
+@inject IAdminLocalizationService Localizer
+
+<style>
+    .volume-title-link {
+        font-weight: 700;
+        color: var(--mud-palette-secondary);
+        text-decoration: none;
+    }
+
+    .volume-title-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+
+    <div class="d-flex gap-1">
+        @if(!GroupedByDate)
+        {
+            <div style="min-width: 80px;">
+                <MudText Typo="Typo.caption" Color="Color.Primary">
+                    @VolumeHistory.Date.ToLocalTime().ToString("g")
+                </MudText>
+            </div>
+        }
+        <div class="flex-grow-1">
+            <MudText Typo="Typo.body1">
+                @((MarkupString)BuildHistoryMessage())
+            </MudText>
+        </div>
+    </div>
+
+@code {
+
+    [Parameter]
+    [EditorRequired]
+    public required VolumeHistoryDto VolumeHistory { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public required bool GroupedByDate { get; set; }
+
+    private MarkupString BuildHistoryMessage()
+    {
+        var template = VolumeHistory.EventType switch
+        {
+            HistoryEventType.Released => Localizer["VolumeReleasedMessage"].Value,
+            HistoryEventType.PreorderStarted => Localizer["PreorderStartedMessage"].Value,
+            HistoryEventType.ReleaseDateChanged => Localizer["ReleaseDateChangedMessage"].Value,
+            _ => Localizer["VolumeUpdatedMessage"].Value
+        };
+
+        var message = template
+            .Replace("{title}", $"<a class=\"volume-title-link\" href=\"/volume/{WebUtility.HtmlEncode(VolumeHistory.VolumePublicId)}\">{WebUtility.HtmlEncode(VolumeHistory.FullVolumeName)}</a>")
+            .Replace("{date}", WebUtility.HtmlEncode(VolumeHistory.Date.ToLocalTime().ToString("d")))
+            .Replace("{old}", WebUtility.HtmlEncode(FormatValue(VolumeHistory.OldValue, Localizer["Unknown Value"].Value)))
+            .Replace("{new}", WebUtility.HtmlEncode(FormatValue(VolumeHistory.NewValue, Localizer["Unknown Value"].Value)));
+
+        return new MarkupString(message);
+    }
+
+    private static string FormatValue(string? value, string unknownValue)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return unknownValue;
+        }
+
+        if (DateTime.TryParse(value, out var dateTime))
+        {
+            return dateTime.ToString("d");
+        }
+
+        if (DateTimeOffset.TryParse(value, out var dateTimeOffset))
+        {
+            return dateTimeOffset.ToLocalTime().ToString("d");
+        }
+
+        return value;
+    }
+}

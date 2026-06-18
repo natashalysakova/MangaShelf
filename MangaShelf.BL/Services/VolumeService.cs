@@ -486,7 +486,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
     public async Task<CardVolumeDto> GetVolumeCardById(Guid volumeId, CancellationToken token = default)
     {
         var context = dbContextFactory.CreateDbContext();
-        var volume = await context.Volumes.FirstAsync(x => x.Id == volumeId);
+        var volume = await context.Volumes.Include(x => x.Series).FirstAsync(x => x.Id == volumeId);
         return volume.ToDto();
     }
 }

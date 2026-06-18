@@ -15,4 +15,5 @@ public static partial class VolumeMapper
     private static string? MapDateTimeOffsetToString(DateTimeOffset? source) => source?.ToString("dd.MM.yyyy");
 
     public static partial VolumeDto ToFullDto(this Volume volume);
+
 }

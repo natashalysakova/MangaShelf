@@ -44,7 +44,7 @@
                         </MudStack>
                         @if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Preorder)
                         {
-                            <MudButton EndIcon="@CustomIcons.delivered" Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Success">@Localizer["ConfirmDelivery"]</MudButton>
+                            <MudButton EndIcon="@CustomIcons.delivered" Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Secondary">@Localizer["ConfirmDelivery"]</MudButton>
                         }
                         @if (_showTimeline)
                         {

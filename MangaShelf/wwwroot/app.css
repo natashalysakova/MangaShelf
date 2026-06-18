@@ -176,13 +176,13 @@ h1:focus {
 
 .preorder-badge {
     top: 0;
-    color: var(--mud-palette-tertiary-text) !important;
-    background-color: var(--mud-palette-tertiary) !important;
+    color: var(--mud-palette-secondary-text) !important;
+    background-color: var(--mud-palette-secondary) !important;
 }
 .preorder-date-badge {
     top: 22px;
-    color: var(--mud-palette-info-text) !important;
-    background-color: var(--mud-palette-info) !important;
+    color: var(--mud-palette-tertiary-text) !important;
+    background-color: var(--mud-palette-tertiary) !important;
 }
 
 .paper-manga-panel {
@@ -235,11 +235,17 @@ h1:focus {
     visibility: visible;
 }
 
-.mud-paper .expired-preorder {
-    outline: 5px solid red;
-    outline-offset: -5px; /* or -5px if you want it drawn inside */
+.expired-preorder {
+    /*outline: 5px solid red !important;
+    outline-offset: -5px;  or -5px if you want it drawn inside */
+    background-color: rgba(255, 0, 0, 0.3) !important;
 }
 
-.mud-paper .normal-preorder {
+.normal-preorder {
     
+}
+
+.mud-secondary-hover:hover.preorder-arrived-btn {
+    background-color: var(--mud-palette-secondary) !important;
+    color: var(--mud-palette-secondary-text) !important;
 }

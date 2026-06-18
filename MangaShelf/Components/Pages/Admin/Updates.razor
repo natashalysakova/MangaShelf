@@ -1,23 +1,11 @@
 @page "/admin/updates"
-@using System.Net
 @using MangaShelf.BL.Services
-@using MangaShelf.DAL.Models
 @inject IVolumeHistoryService VolumeHistoryService
 @inject ILogger<Updates> Logger
 @inject IAdminLocalizationService Localizer
 
 <h3>@Localizer["Recent Volume Updates"]</h3>
-<style>
-    .volume-title-link {
-        font-weight: 700;
-        color: var(--mud-palette-primary);
-        text-decoration: none;
-    }
 
-    .volume-title-link:hover {
-        text-decoration: underline;
-    }
-</style>
 <MudPaper Class="pa-4 mt-4">
     <MudDateRangePicker DateRange="@_dateRange" Margin="Margin.Dense" Clearable="false" 
                         PlaceholderStart="@Localizer["Start Date"]" 
@@ -31,19 +19,7 @@
         <MudStack Spacing="2">
             @foreach (var history in VolumeHistories.OrderByDescending(x => x.Date))
             {
-                <MudDivider Class="my-3"/>
-                <div class="d-flex gap-3">
-                    <div style="min-width: 80px;">
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            @history.Date.ToLocalTime().ToString("d")
-                        </MudText>
-                    </div>
-                    <div class="flex-grow-1">
-                        <MudText Typo="Typo.body1">
-                            @((MarkupString)BuildHistoryMessage(history))
-                        </MudText>
-                    </div>
-                </div>
+                <VolumeHistoryRecord VolumeHistory="history" />
             }
         </MudStack>
     </MudPaper>
@@ -84,42 +60,5 @@ else
         }
     }
 
-    private MarkupString BuildHistoryMessage(VolumeHistoryDto history)
-    {
-        var template = history.EventType switch
-        {
-            HistoryEventType.Released => Localizer["VolumeReleasedMessage"].Value,
-            HistoryEventType.PreorderStarted => Localizer["PreorderStartedMessage"].Value,
-            HistoryEventType.ReleaseDateChanged => Localizer["ReleaseDateChangedMessage"].Value,
-            _ => Localizer["VolumeUpdatedMessage"].Value
-        };
-
-        var message = template
-            .Replace("{title}", $"<a class=\"volume-title-link\" href=\"/volume/{WebUtility.HtmlEncode(history.VolumePublicId)}\">{WebUtility.HtmlEncode(history.FullVolumeName)}</a>")
-            .Replace("{date}", WebUtility.HtmlEncode(history.Date.ToLocalTime().ToString("d")))
-            .Replace("{old}", WebUtility.HtmlEncode(FormatValue(history.OldValue, Localizer["Unknown Value"].Value)))
-            .Replace("{new}", WebUtility.HtmlEncode(FormatValue(history.NewValue, Localizer["Unknown Value"].Value)));
-
-        return new MarkupString(message);
-    }
-
-    private static string FormatValue(string? value, string unknownValue)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return unknownValue;
-        }
-
-        if (DateTime.TryParse(value, out var dateTime))
-        {
-            return dateTime.ToString("d");
-        }
-
-        if (DateTimeOffset.TryParse(value, out var dateTimeOffset))
-        {
-            return dateTimeOffset.ToLocalTime().ToString("d");
-        }
-
-        return value;
-    }
+    
 }
