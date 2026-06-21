@@ -29,6 +29,39 @@ public class SeedDevShelfService : ISeedDataService
         await FixPublicIds();
         await FixMissingUserNames();
         await FixAvgRating();
+        await FixNullableFields();
+    }
+
+    private async Task FixNullableFields()
+    {
+        using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var series = context.Series
+            .Where(v => v.TotalVolumes < 1)
+            .ToList();
+
+        foreach (var item in series)
+        {
+            item.TotalVolumes = null; // Set to null to indicate unknown total volumes
+            _logger.LogInformation("Updated TotalVolumes for series {SeriesId} - {SeriesTitle} to {TotalVolumes}", item.Id, item.Title, item.TotalVolumes);
+        }
+
+        await context.SaveChangesAsync();
+        _logger.LogInformation("Finished updating nullable fields for all series.");
+
+
+        var volumes = context.Volumes
+            .Where(v => v.Number < 0)
+            .ToList();
+        
+        foreach (var item in volumes)
+        {
+            item.Number = null; // Set to null to indicate not numbered or unknown number
+            _logger.LogInformation("Updated Number for volume {VolumeId} - {VolumeTitle} to {Number}", item.Id, item.Title, item.Number);
+        }
+
+        await context.SaveChangesAsync();
+        _logger.LogInformation("Finished updating nullable fields for all volumes.");
     }
 
     private async Task FixAvgRating()

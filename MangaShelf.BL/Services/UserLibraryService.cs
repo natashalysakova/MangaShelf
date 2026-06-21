@@ -64,8 +64,15 @@ public class UserLibraryService : IUserLibraryService
                 .ThenInclude(v => v.History)
             .Where(x=> latestPreorderIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
-
-        var histories = result.SelectMany(o => o.Volume!.History).ToList();
+        
+        var everPreordered = await dbContext.Ownerships
+            .Include(x => x.Volume)
+                .ThenInclude(v => v.Series)
+            .Include(x => x.Volume)
+                .ThenInclude(v => v.History)
+            .Where(x => x.UserId == user.Id && x.Status == VolumeStatus.Preorder)
+            .ToListAsync(cancellationToken);
+        var histories = everPreordered.SelectMany(x => x.Volume.History).ToList();
 
         return new UserLibraryDto()
         {

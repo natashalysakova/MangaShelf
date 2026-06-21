@@ -204,12 +204,12 @@ h1:focus {
 }
 
 .reading-history:hover {
-    border-color: rgba(206, 250, 254, 1);
+    border-color: var(--mud-palette-tertiary) !important;
     background-color: rgba(206, 250, 254, 0.07);
 }
 
 .has-review:hover {
-    border-color: rgb(31, 255, 185);
+    border-color: var(--mud-palette-tertiary) !important;
 }
 
 

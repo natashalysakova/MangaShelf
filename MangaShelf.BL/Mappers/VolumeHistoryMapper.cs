@@ -20,7 +20,7 @@ public static partial class VolumeHistoryMapper
 
     static string GetFullVolumeName(VolumeHistory volume)
     {
-        if (volume.Volume!.OneShot)
+        if (volume.Volume!.Series!.Status == SeriesStatus.OneShot)
         {
             return volume.Volume.Series!.Title;
         }

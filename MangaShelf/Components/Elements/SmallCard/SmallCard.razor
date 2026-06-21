@@ -136,7 +136,7 @@ else
 
     protected async Task HandleOwnershipChange(VolumeStatus status)
     {
-        var newStatus = await OpenSetOwnershipDialog(status);
+        var newStatus = await OpenSetOwnershipDialog(status, Volume.Type);
         if (newStatus != null)
         {
             if (OnStatusChange.HasDelegate && newStatus.CurrentOwnershipStatus != CurrentUserStatus?.CurrentOwnershipStatus)

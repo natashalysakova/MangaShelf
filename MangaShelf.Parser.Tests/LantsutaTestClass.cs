@@ -22,9 +22,9 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
         Assert.AreEqual("LANTSUTA", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
         Assert.AreEqual("978-617-8202-19-4", result.Isbn);
-        Assert.AreEqual(-1, result.TotalVolumes);
+        Assert.AreEqual(null, result.TotalVolumes);
         Assert.AreEqual(SeriesStatus.Unknown, result.SeriesStatus);
-        Assert.AreEqual(null, result.OriginalSeriesName);
+        Assert.AreEqual(null, result.OriginalSeriesTitle);
         Assert.AreEqual(false, result.IsPreorder);
         Assert.AreEqual(12, result.AgeRestrictions);
     }

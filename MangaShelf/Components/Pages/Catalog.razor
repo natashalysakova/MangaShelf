@@ -47,9 +47,9 @@
                 ToggledIcon="@Icons.Material.Filled.Sort" ToggledColor="@Color.Success" />
 
             <MudChipSet @bind-SelectedValues="SelectedReleaseFilter" SelectionMode="SelectionMode.MultiSelection"
-                Variant="Variant.Text" Color="Color.Info">
-                <MudChip Value="ReleaseFilter.Preorder" Text="@Localizer[ReleaseFilter.Preorder.ToString()]" />
-                <MudChip Value="ReleaseFilter.Released" Text="@Localizer[ReleaseFilter.Released.ToString()]" />
+                Variant="Variant.Text">
+                <MudChip Color="Color.Secondary" Value="ReleaseFilter.Preorder" Text="@Localizer[ReleaseFilter.Preorder.ToString()]" />
+                <MudChip Color="Color.Tertiary" Value="ReleaseFilter.Released" Text="@Localizer[ReleaseFilter.Released.ToString()]" />
             </MudChipSet>
 
         </MudStack>

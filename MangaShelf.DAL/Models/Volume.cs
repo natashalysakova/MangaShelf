@@ -4,10 +4,10 @@ public class Volume : BaseEntity
 {
     public string PublicId { get; set; } = Guid.NewGuid().ToString();
     public required string Title { get; set; }
-    public int Number { get; set; }
+    public int? Number { get; set; }
     public string? ISBN { get; set; }
 
-    public bool OneShot { get; set; }
+    //public bool OneShot { get; set; }
     public bool SingleIssue { get; set; }
     public int AgeRestriction { get; set; }
 
@@ -41,7 +41,8 @@ public class Volume : BaseEntity
 
 [Flags]
 public enum VolumeType
-{
+{   
+    NotSpecified = 0,
     Physical = 1,
     Digital = 2,
 }

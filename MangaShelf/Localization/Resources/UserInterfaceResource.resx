@@ -149,4 +149,12 @@
     <value>{count} days</value>
     <comment/>
   </data>
+  <data name="DaysTillRelease" xml:space="preserve">
+    <value>Days till release</value>
+    <comment/>
+  </data>
+  <data name="PreorderIsDue" xml:space="preserve">
+    <value>Late</value>
+    <comment/>
+  </data>
 </root>

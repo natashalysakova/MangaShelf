@@ -12,7 +12,8 @@ public interface IVolumeService : IService
     Task<Volume?> GetFullVolumeByIdAsync(Guid volumeId, CancellationToken token = default);
     
     Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions, bool showDeleted = false, CancellationToken token = default);
-
+    Task<VolumeEditDto> GetFullVolumeForEdit(Guid volumeId, CancellationToken token = default);
+    Task<VolumeEditDto> Update(VolumeEditDto volume, CancellationToken token = default);
     Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse, CancellationToken token = default);
     Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken);
     

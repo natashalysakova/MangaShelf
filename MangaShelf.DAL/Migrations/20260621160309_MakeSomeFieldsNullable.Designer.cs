@@ -4,6 +4,7 @@ using MangaShelf.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MangaShelf.DAL.Migrations
 {
     [DbContext(typeof(MangaDbContext))]
-    partial class MangaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260621160309_MakeSomeFieldsNullable")]
+    partial class MakeSomeFieldsNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -352,7 +355,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<int>("MalId")
                         .HasColumnType("int");
 
-                    b.Property<string>("OriginalTitle")
+                    b.Property<string>("OriginalName")
                         .HasColumnType("longtext");
 
                     b.Property<string>("PublicId")

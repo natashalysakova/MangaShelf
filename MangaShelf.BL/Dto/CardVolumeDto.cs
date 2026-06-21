@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.BL.Dto;
 
@@ -15,4 +16,5 @@ public class CardVolumeDto
     public bool IsPreorder { get; set; }
     public string? ReleaseDate { get; set; }
     public double AvgRating { get; set; }
+    public VolumeType Type { get; set; }
 }

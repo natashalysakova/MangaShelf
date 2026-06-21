@@ -13,9 +13,9 @@ public record ParsedInfo
     public required string Publisher { get; init; }
     public required VolumeType VolumeType { get; init; }
     public required string Isbn { get; init; }
-    public required int TotalVolumes { get; init; }
+    public int? TotalVolumes { get; init; }
     public required SeriesStatus SeriesStatus { get; init; }
-    public string? OriginalSeriesName { get; init; }
+    public string? OriginalSeriesTitle { get; init; }
     public required string Url { get; init; }
     public DateTimeOffset? PreorderStartDate { get; init; }
     public required string CountryCode { get; init; }

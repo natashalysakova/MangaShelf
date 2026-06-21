@@ -257,4 +257,12 @@
     <value>{count} днів</value>
     <comment/>
   </data>
+  <data name="DaysTillRelease" xml:space="preserve">
+    <value>Днів до релізу</value>
+    <comment/>
+  </data>
+  <data name="PreorderIsDue" xml:space="preserve">
+    <value>Запізнюється</value>
+    <comment/>
+  </data>
 </root>

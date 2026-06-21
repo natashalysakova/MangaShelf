@@ -45,7 +45,7 @@ public class VolumeInfoParser(
         {
             series = new Series()
             {
-                OriginalName = volumeInfo.OriginalSeriesName,
+                OriginalTitle = volumeInfo.OriginalSeriesTitle,
                 Status = volumeInfo.SeriesStatus,
                 TotalVolumes = volumeInfo.TotalVolumes,
                 Title = volumeInfo.Series,
@@ -71,10 +71,10 @@ public class VolumeInfoParser(
                 Series = series,
                 ISBN = volumeInfo.Isbn,
                 Number = volumeInfo.VolumeNumber,
-                OneShot = volumeInfo.SeriesStatus == SeriesStatus.OneShot,
                 AgeRestriction = volumeInfo.AgeRestrictions == null ? 18 : volumeInfo.AgeRestrictions.Value,
                 IsPublishedOnSite = series.IsPublishedOnSite,
                 ReleaseDate = volumeInfo.Release,
+                Type = volumeInfo.VolumeType,
             };
         }
 
@@ -94,7 +94,7 @@ public class VolumeInfoParser(
         }
 
 
-        if (volumeInfo.TotalVolumes > 0 && volumeInfo.TotalVolumes > volume.Series.TotalVolumes)
+        if (volumeInfo.TotalVolumes != null && (volume.Series.TotalVolumes == null || volumeInfo.TotalVolumes > volume.Series.TotalVolumes))
         {
             volume.Series.TotalVolumes = volumeInfo.TotalVolumes;
         }

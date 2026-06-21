@@ -10,7 +10,7 @@ public class SeriesSimpleDto
     public string PublicId { get; set; }
 
     public required string Title { get; set; }
-    public string? OriginalName { get; set; }
+    public string? OriginalTitle { get; set; }
     public ICollection<string> Aliases { get; set; } = new List<string>();
     public int MalId { get; set; }
 

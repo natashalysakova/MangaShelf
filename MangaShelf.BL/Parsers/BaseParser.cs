@@ -130,7 +130,7 @@ public abstract class BaseParser : IPublisherParser
                 Isbn = GetISBN(document),
                 TotalVolumes = GetTotalVolumes(document),
                 SeriesStatus = GetSeriesStatus(document),
-                OriginalSeriesName = GetOriginalSeriesName(document),
+                OriginalSeriesTitle = GetOriginalSeriesName(document),
                 Url = url,
                 PreorderStartDate = EnsureLocalOffset(GetSaleStartDate(document)),
                 CountryCode = GetCountryCode(document),

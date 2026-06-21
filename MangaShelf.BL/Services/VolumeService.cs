@@ -407,15 +407,16 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
         reading.UserId = user.Id;
 
+        DetachExisting(reading, context);
+
+        context.Readings.Update(reading);
+
         var avgRating = volume.Readers.Where(x => x.Rating != null && x.Rating.Value != 0);
         if (avgRating.Any())
         {
             volume.AvgRating = avgRating.Average(x => x.Rating!.Value);
         }
 
-        DetachExisting(reading, context);
-
-        context.Readings.Update(reading);
         await context.SaveChangesAsync(token);
 
         return (await GetVolumeStatusInfo(volume.Id, user.IdentityUserId), await GetVolumeStats(volume.Id));
@@ -488,6 +489,90 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         var context = dbContextFactory.CreateDbContext();
         var volume = await context.Volumes.Include(x => x.Series).FirstAsync(x => x.Id == volumeId);
         return volume.ToDto();
+    }
+
+    public Task<VolumeEditDto> GetFullVolumeForEdit(Guid volumeId, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        var volume = context.Volumes
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Authors)
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Publisher)
+            .FirstOrDefault(v => v.Id == volumeId);
+
+        if (volume == null)
+        {
+            throw new Exception("Volume not found");
+        }
+
+        return Task.FromResult(volume.ToEditDto());
+    }
+
+    public async Task<VolumeEditDto> Update(VolumeEditDto volumeDto, CancellationToken token = default)
+    {
+        if (volumeDto == null)
+        {
+            throw new ArgumentNullException(nameof(volumeDto));
+        }
+
+        using var context = dbContextFactory.CreateDbContext();
+
+        var volume = context.Volumes
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Authors)
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Publisher)
+            .FirstOrDefault(v => v.Id == volumeDto.Id);
+        if (volume == null)
+        {
+            throw new Exception("Volume not found");
+        }
+
+        volume.ReleaseDate = volumeDto.ReleaseDate;
+        volume.PreorderStart = volumeDto.PreorderStart;
+        volume.Title = volumeDto.Title;
+        volume.Number = volumeDto.Number;
+        volume.ISBN = volumeDto.ISBN;
+        volume.AgeRestriction = volumeDto.AgeRestriction;
+        volume.Description = volumeDto.Description;
+
+        volume.Series!.Title = volumeDto.SeriesTitle;
+        volume.Series.OriginalTitle = volumeDto.SeriesOriginalTitle;
+        volume.Series.TotalVolumes = volumeDto.SeriesTotalVolumes;
+        volume.Series.Status = volumeDto.SeriesStatus;
+
+        volume.Type = volumeDto.Type;
+
+        UpdateAuthors(volumeDto, volume);
+
+        await context.SaveChangesAsync(token);
+
+        return volume.ToEditDto();
+    }
+
+    private static void UpdateAuthors(VolumeEditDto volumeDto, Volume volume)
+    {
+        var existingAuthors = volume.Series.Authors.ToList();
+        var updatedAuthors = volumeDto.SeriesAuthors.Select(a => new Author { Name = a.Name }).ToList();
+
+        // Remove authors that are no longer associated
+        foreach (var existingAuthor in existingAuthors)
+        {
+            if (!updatedAuthors.Any(a => a.Name == existingAuthor.Name))
+            {
+                volume.Series.Authors.Remove(existingAuthor);
+            }
+        }
+
+        // Add new authors that are not already associated
+        foreach (var updatedAuthor in updatedAuthors)
+        {
+            if (!existingAuthors.Any(a => a.Name == updatedAuthor.Name))
+            {
+                volume.Series.Authors.Add(updatedAuthor);
+            }
+        }
     }
 }
 

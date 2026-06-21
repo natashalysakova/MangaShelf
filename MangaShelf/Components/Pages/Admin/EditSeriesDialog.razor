@@ -18,7 +18,7 @@
                           Required="true"
                           Variant="Variant.Outlined" />
 
-            <MudTextField @bind-Value="model.OriginalName"
+            <MudTextField @bind-Value="model.OriginalTitle"
                           Label="Original Name"
                           Variant="Variant.Outlined" />
 
@@ -71,7 +71,7 @@
         {
             Id = Series.Id,
             Title = Series.Title,
-            OriginalName = Series.OriginalName,
+            OriginalTitle = Series.OriginalTitle,
             Status = Series.Status,
             TotalVolumes = Series.TotalVolumes,
             Authors = [..Series.Authors]

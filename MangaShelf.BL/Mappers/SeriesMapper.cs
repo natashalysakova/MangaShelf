@@ -8,5 +8,5 @@ namespace MangaShelf.BL.Mappers;
 [UseStaticMapper(typeof(PublisherMapper))]
 public static partial class SeriesMapper
 {
-    public static partial SeriesSimpleDto ToDto(this Series country);
+    public static partial SeriesSimpleDto ToDto(this Series series);
 }

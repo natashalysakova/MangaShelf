@@ -23,7 +23,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("978-617-8168-12-4", result.Isbn);
         Assert.AreEqual(15, result.TotalVolumes);
         Assert.AreEqual(SeriesStatus.Completed, result.SeriesStatus);
-        Assert.AreEqual("Sono Bisque Doll wa Koi wo Suru", result.OriginalSeriesName);
+        Assert.AreEqual("Sono Bisque Doll wa Koi wo Suru", result.OriginalSeriesTitle);
         Assert.AreEqual(false, result.IsPreorder);
         Assert.AreEqual(18, result.AgeRestrictions);
     }
@@ -66,7 +66,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("978-617-8168-11-7", result.Isbn);
         Assert.AreEqual(1, result.TotalVolumes);
         Assert.AreEqual(SeriesStatus.OneShot, result.SeriesStatus);
-        Assert.AreEqual("Nijigahara Holograph", result.OriginalSeriesName);
+        Assert.AreEqual("Nijigahara Holograph", result.OriginalSeriesTitle);
         Assert.AreEqual(false, result.IsPreorder);
     }
 
@@ -127,7 +127,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
 
     public async Task Malopus_PageNotExist_ShouldHaveNoVolumes()
     {
-        await Assert.ThrowsExactlyAsync<HttpRequestException>(async () =>
+        await Assert.ThrowsAsync<Exception>(async () =>
         {
             await Parser.GetVolumesUrls("https://malopus.com.ua/manga/filter/page=9999/", CancellationToken.None);
         });

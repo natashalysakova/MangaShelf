@@ -54,7 +54,7 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         {
             Rating = 0,
             StartedAt = DateTime.UtcNow,
-            Status = ReadingStatus.PlanToRead,
+            Status = ReadingStatus.Reading,
             VolumeId = ResolvedVolumeId!.Value,
         };
 
@@ -113,14 +113,14 @@ public abstract class VolumeActionBase : ComponentBase, IDisposable
         }
     }
 
-    protected async Task<UserVolumeStatusDto?> OpenSetOwnershipDialog(VolumeStatus status, bool disableStatus = true)
+    protected async Task<UserVolumeStatusDto?> OpenSetOwnershipDialog(VolumeStatus status, VolumeType type, bool disableStatus = true)
     {
         var ownership = new Ownership()
         {
             VolumeId = ResolvedVolumeId!.Value,
             Status = status,
             Date = DateTime.UtcNow,
-            Type = VolumeType.Physical
+            Type = type
         };
         return await OpenSetOwnershipDialog(ownership, disableStatus);
     }
