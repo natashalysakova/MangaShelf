@@ -150,7 +150,7 @@ public class VolumeService(
             .OrderBy(v => v.Title)
             .ToListAsync(stoppingToken);
 
-        return titles.Select(v => v.GetFullVolumeName());
+        return titles.Select(v => v.Title).Distinct().ToList();
     }
 
     public async Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string? userId, CancellationToken token = default)
@@ -582,6 +582,7 @@ public class VolumeService(
     {
         using var context = dbContextFactory.CreateDbContext();
         var user = await context.Users
+            .Include(x => x.Likes)
             .FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
 
         if (user == null)
@@ -589,12 +590,14 @@ public class VolumeService(
             throw new Exception("User not found");
         }
 
-        var query = (await context.Ownerships
+        var ownerships = await context.Ownerships
             .Where(o => o.UserId == user.Id)
             .Include(o => o.Volume)
                 .ThenInclude(v => v!.Series)
             .OrderByDescending(o => o.Date)
-            .ToListAsync(token))
+            .ToListAsync(token);
+
+        var query = ownerships
             .GroupBy(o => o.VolumeId)
             .Select(g => g.First())
             .ToList();
@@ -605,6 +608,83 @@ public class VolumeService(
             .Where(r => r.UserId == user.Id && volumeIds.Contains(r.VolumeId))
             .ToListAsync(token);
 
-        return query.Select(o => o.ToUserVolumeCard(readings));
+        var likedVolumeIds = user.Likes
+            .Where(x => x.Status == LikeStatus.Liked)
+            .Select(x => x.VolumeId)
+            .ToHashSet();
+
+        return query
+            .Where(o => MatchesShelfFilter(o, readings, likedVolumeIds, filterOptions))
+            .Select(o => o.ToUserVolumeCard(readings));
+    }
+
+    private static bool MatchesShelfFilter(
+        Ownership ownership,
+        IEnumerable<Reading> readings,
+        ISet<Guid> likedVolumeIds,
+        IUserShelfFilterOptions filterOptions)
+    {
+        if (filterOptions.CurrentOwnershipStatuses?.Any() == true && !filterOptions.CurrentOwnershipStatuses.Contains(ownership.Status))
+        {
+            return false;
+        }
+
+        var volumeReadings = readings
+            .Where(r => r.VolumeId == ownership.VolumeId)
+            .ToList();
+
+        var currentReadingStatus = volumeReadings
+            .OrderByDescending(r => r.StartedAt)
+            .FirstOrDefault()?.Status ?? ReadingStatus.None;
+
+        if (filterOptions.CurrentReadingStatuses?.Any() == true && !filterOptions.CurrentReadingStatuses.Contains(currentReadingStatus))
+        {
+            return false;
+        }
+
+        if (filterOptions.IsLiked.HasValue && filterOptions.IsLiked.Value != likedVolumeIds.Contains(ownership.VolumeId))
+        {
+            return false;
+        }
+
+        if (filterOptions.MinRating.HasValue || filterOptions.MaxRating.HasValue)
+        {
+            var ratings = volumeReadings
+                .Where(r => r.Rating.HasValue)
+                .Select(r => r.Rating!.Value)
+                .ToList();
+
+            if (!ratings.Any())
+            {
+                return false;
+            }
+
+            var averageRating = ratings.Average();
+
+            if (filterOptions.MinRating.HasValue && averageRating < filterOptions.MinRating.Value)
+            {
+                return false;
+            }
+
+            if (filterOptions.MaxRating.HasValue && averageRating > filterOptions.MaxRating.Value)
+            {
+                return false;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(filterOptions.SearchTerm))
+        {
+            var searchTerm = filterOptions.SearchTerm.Trim();
+            var fullTitle = ownership.Volume?.GetFullVolumeName() ?? string.Empty;
+            var number = ownership.Volume?.Number?.ToString() ?? string.Empty;
+
+            if (!fullTitle.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) &&
+                !number.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -56,13 +56,24 @@ public static class PaginationExtention
             }
         }
 
-        if (!string.IsNullOrEmpty(paginationOptions?.Search))
+        if (!string.IsNullOrWhiteSpace(paginationOptions?.Search))
         {
-            query = query.Where(x =>
-                EF.Functions.Like(x.Title, $"%{paginationOptions.Search}%") ||
-                EF.Functions.Like(x.Series!.Title, $"%{paginationOptions.Search}%") ||
-                EF.Functions.Like(x.Series!.Publisher!.Name, $"%{paginationOptions.Search}%") ||
-                x.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
+            var searchTerms = paginationOptions.Search
+                .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var searchTerm in searchTerms)
+            {
+                var likePattern = $"%{searchTerm}%";
+                var isVolumeNumber = int.TryParse(searchTerm, out var parsedNumber);
+
+                // Chain WHERE clauses so every token must match at least one searchable field.
+                query = query.Where(x =>
+                    EF.Functions.Like(x.Title!, likePattern) ||
+                    EF.Functions.Like(x.Series!.Title, likePattern) ||
+                    EF.Functions.Like(x.Series!.Publisher!.Name, likePattern) ||
+                    x.Series.Authors.Any(a => EF.Functions.Like(a.Name, likePattern)) ||
+                    (isVolumeNumber && x.Number == parsedNumber));
+            }
         }
 
         Func<IQueryable<Volume>, Expression<Func<Volume, object>>, IOrderedQueryable<Volume>> orderBy =

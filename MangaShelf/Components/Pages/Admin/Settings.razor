@@ -1,18 +1,42 @@
 ﻿@page "/admin/settings"
 @using MangaShelf.BL.Configuration
 @using MangaShelf.BL.Services
+@using MangaShelf.Cache
 @using MangaShelf.Components.Pages.Admin.Elements
 @using DbSettings = MangaShelf.DAL.System.Models.Settings
 
 @inject ISettingReadService SettingReadService
+@inject ICacheProvider CacheProvider
 
 <MudText Typo="Typo.h5" Class="mt-3 mb-3">Settings</MudText>
+
+<MudStack Row="true" Spacing="2" Class="mb-3">
+    <MudButton OnClick="RebuildCache"
+               Color="Color.Primary"
+               Variant="Variant.Filled"
+               Disabled="@isRebuildInProgress"
+               StartIcon="@Icons.Material.Filled.Refresh">
+        Rebuild Cache
+    </MudButton>
+
+    @if (isRebuildInProgress)
+    {
+        <MudProgressCircular Indeterminate="true" Size="Size.Small" />
+    }
+</MudStack>
+
+@if (!string.IsNullOrEmpty(cacheMessage))
+{
+    <MudAlert Severity="@cacheMessageSeverity" Dense="true" Class="mb-3">@cacheMessage</MudAlert>
+}
 
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
     <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
 }
+
+
 
 @if (settings != null)
 {
@@ -32,8 +56,11 @@
 
 
 @code {
-    IDictionary<string, IEnumerable<DbSettings>> settings;
+    IDictionary<string, IEnumerable<DbSettings>>? settings;
     string? errorMessage;
+    string? cacheMessage;
+    Severity cacheMessageSeverity = Severity.Info;
+    bool isRebuildInProgress;
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,5 +76,28 @@
             errorMessage = ex.Message;
         }
 
+    }
+
+    private async Task RebuildCache()
+    {
+        try
+        {
+            isRebuildInProgress = true;
+            cacheMessage = default;
+
+            await CacheProvider.RebuildCache(CancellationToken.None);
+
+            cacheMessage = "Cache was rebuilt successfully.";
+            cacheMessageSeverity = Severity.Success;
+        }
+        catch (Exception ex)
+        {
+            cacheMessage = ex.Message;
+            cacheMessageSeverity = Severity.Error;
+        }
+        finally
+        {
+            isRebuildInProgress = false;
+        }
     }
 }

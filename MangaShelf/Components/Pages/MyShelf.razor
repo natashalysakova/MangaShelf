@@ -6,13 +6,23 @@
 @inherits UserContextComponent
 
 @inject IVolumeService VolumeService
-@inject IUiLocalizationService Localizer
 
 @attribute [Authorize]
 
-@if(volumes != null){
+<UserShelfFilterComponent FilterOptions="filterOptions" FilterOptionsChanged="ReloadVolumesAsync" />
 
-
+@if (isLoading)
+{
+    <MudStack AlignItems="AlignItems.Center" Class="mt-8">
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+    </MudStack>
+}
+else if (volumes is null || !volumes.Any())
+{
+    <MudAlert Severity="Severity.Info">No volumes found.</MudAlert>
+}
+else
+{
     <MudGrid>
         @foreach (var volume in volumes)
         {
@@ -23,22 +33,44 @@
     </MudGrid>
 }
 
-
-
-
 @code {
     IEnumerable<UserVolumeCard>? volumes;
+    readonly UserShelfFilterOptions filterOptions = new();
+    bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadVolumesAsync();
+    }
+
+    private async Task ReloadVolumesAsync(UserShelfFilterOptions updatedFilterOptions)
+    {
+        filterOptions.SearchTerm = updatedFilterOptions.SearchTerm;
+        filterOptions.CurrentOwnershipStatuses = updatedFilterOptions.CurrentOwnershipStatuses;
+        filterOptions.CurrentReadingStatuses = updatedFilterOptions.CurrentReadingStatuses;
+        filterOptions.IsLiked = updatedFilterOptions.IsLiked;
+        filterOptions.MinRating = updatedFilterOptions.MinRating;
+        filterOptions.MaxRating = updatedFilterOptions.MaxRating;
+
+        await LoadVolumesAsync();
+    }
+
+    private async Task LoadVolumesAsync()
+    {
         try
         {
+            isLoading = true;
             var userId = await GetUserId();
-            volumes = await VolumeService.GetUserVolumes(userId, new UserShelfFilterOptions());
+            volumes = await VolumeService.GetUserVolumes(userId, filterOptions);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading user volumes: {ex.Message}");
+            volumes = [];
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 }

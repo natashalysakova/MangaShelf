@@ -15,4 +15,5 @@ public class UserVolumeCard
 
     public VolumeStatus CurrentOwnershipStatus { get; set; }
     public ReadingStatus CurrentReadingStatus { get; set; }
+    public bool IsLiked { get; set; }
 }

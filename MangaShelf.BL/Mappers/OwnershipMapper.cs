@@ -28,6 +28,7 @@ public static partial class OwnershipMapper
         public static UserVolumeCard ToUserVolumeCard(this Ownership volume, IEnumerable<Reading> readings)
     {
         var reading = readings.OrderByDescending(r => r.StartedAt).FirstOrDefault(r => r.VolumeId == volume.VolumeId);
+        var isLiked = volume.Volume.Likes.Any(l => l.UserId == volume.UserId);
         return new UserVolumeCard()
         {
             PublicId = volume.Volume.PublicId,
@@ -36,7 +37,8 @@ public static partial class OwnershipMapper
             SeriesTitle = volume.Volume.Series.Title,
             CoverImageUrlSmall = volume.Volume.CoverImageUrlSmall,
             CurrentReadingStatus = reading?.Status ?? ReadingStatus.None,
-            UserRating = readings.Where(r => r.Rating.HasValue).Average(r => r.Rating)
+            UserRating = readings.Where(r => r.Rating.HasValue && r.VolumeId == volume.VolumeId).Average(r => r.Rating),
+            IsLiked = isLiked
         };
     }
 }
