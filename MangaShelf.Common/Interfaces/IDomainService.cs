@@ -16,12 +16,3 @@ public interface IDomainService<T>
     //Task<T?> Get(Guid id, CancellationToken token = default);
     //Task<IEnumerable<T>> GetAll(bool tracking = false, CancellationToken token = default);
 }
-
-public enum State
-{
-    None,
-    Added,
-    Updated,
-    Deleted,
-    Unchanged,
-}

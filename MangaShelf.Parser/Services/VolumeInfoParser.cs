@@ -73,7 +73,7 @@ public class VolumeInfoParser(
                 Number = volumeInfo.VolumeNumber,
                 AgeRestriction = volumeInfo.AgeRestrictions == null ? 18 : volumeInfo.AgeRestrictions.Value,
                 IsPublishedOnSite = series.IsPublishedOnSite,
-                ReleaseDate = volumeInfo.Release,
+                ReleaseDate = MapReleaseDate(volumeInfo.Release),
                 Type = volumeInfo.VolumeType,
             };
         }
@@ -104,7 +104,7 @@ public class VolumeInfoParser(
 
         if (volumeInfo.IsPreorder && volumeInfo.Release != null)
         {
-            volume.ReleaseDate = volumeInfo.Release;
+            volume.ReleaseDate = MapReleaseDate(volumeInfo.Release);
         }
         else if (!volumeInfo.IsPreorder && wasPreorder)
         {
@@ -132,8 +132,18 @@ public class VolumeInfoParser(
         }
 
         var result = await volumeDomainService.AddOrUpdate(volume, true, token);
-        logger.LogInformation($"{result.Entity.Series.Title} {volume.Title} {volume.Number} was {result.State}");
+        logger.LogInformation($"{volume.GetFullVolumeName()} {volume.Number} was {result.State}");
 
         return result.State;
+    }
+
+    private DateTimeOffset MapReleaseDate(DateTimeOffset? release)
+    {
+        if (release.HasValue)
+        {
+            return new DateTimeOffset(release.Value.DateTime, DateTimeOffset.Now.Offset);
+        }
+
+        return DateTimeOffset.Now;
     }
 }

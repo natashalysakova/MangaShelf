@@ -258,7 +258,7 @@
     <comment/>
   </data>
   <data name="DaysTillRelease" xml:space="preserve">
-    <value>Днів до релізу</value>
+    <value>До релізу</value>
     <comment/>
   </data>
   <data name="PreorderIsDue" xml:space="preserve">

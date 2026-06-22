@@ -520,9 +520,8 @@ public class VolumeInfoParserTests : IDisposable
             .FirstOrDefaultAsync(v => v.Title == "Future Volume");
 
         Assert.NotNull(volume);
-        Assert.NotNull(volume.ReleaseDate);
         // Future dates should not be used, current date should be set instead
-        Assert.True(volume.ReleaseDate!.Value.Date >= DateTime.Now.Date);
+        Assert.True(volume.ReleaseDate.Date >= DateTimeOffset.Now.Date);
     }
 
     [Fact]

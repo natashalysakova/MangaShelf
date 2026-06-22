@@ -55,7 +55,8 @@ public class WriteVolumeHistoryInterceptorTests : IDisposable
             Number = 2,
             SeriesId = Guid.NewGuid(),
             IsPreorder = true,
-            CreatedBy = "tests"
+            CreatedBy = "tests",
+            ReleaseDate = new DateTimeOffset(2026, 1, 10, 0, 0, 0, TimeSpan.Zero)
         });
 
         await context.SaveChangesAsync(cancellationToken);
@@ -140,7 +141,8 @@ public class WriteVolumeHistoryInterceptorTests : IDisposable
             Number = 4,
             SeriesId = Guid.NewGuid(),
             IsPreorder = false,
-            CreatedBy = "tests"
+            CreatedBy = "tests",
+            ReleaseDate = new DateTimeOffset(2026, 1, 10, 0, 0, 0, TimeSpan.Zero)
         };
 
         context.Volumes.Add(volume);

@@ -39,11 +39,7 @@
                         var url = $"/volume/{@context.Item.PublicId}";
                     }
                     <MudLink Href="@url" Color="Color.Default">
-                        <MudText>@context.Item.Series.Title</MudText>
-                        @if (context.Item.Series.Title != context.Item.Title)
-                        {
-                            <MudText>@context.Item.Title</MudText>
-                        }
+                        <MudText>@context.Item.GetFullVolumeName()</MudText>
                         <MudText>@string.Join(',', context.Item.Series.Authors.Select(x => x.Name))</MudText>
                     </MudLink>
                 </CellTemplate>
@@ -183,7 +179,7 @@
         {
             volume.IsPublishedOnSite = await volumeService.ChangePublishedStatus(volume.Id);
             await Task.Delay(2000);
-            Snackbar.Add($"Volume {volume.Series.Title} {volume.Title} publish was {(volume.IsPublishedOnSite ? "published" : "unpublished")}", Severity.Info);
+            Snackbar.Add($"Volume {volume.GetFullVolumeName()} publish was {(volume.IsPublishedOnSite ? "published" : "unpublished")}", Severity.Info);
         }
         catch (Exception ex)
         {
@@ -202,11 +198,11 @@
             volume.IsDeleted = await volumeService.DeleteVolume(volume.Id);
             if (volume.IsDeleted)
             {
-                Snackbar.Add($"Volume {volume.Series.Title} {volume.Title} was deleted", Severity.Info);
+                Snackbar.Add($"Volume {volume.GetFullVolumeName()} was deleted", Severity.Info);
             }
             else
             {
-                Snackbar.Add($"Volume {volume.Series.Title} {volume.Title} was restored", Severity.Info);
+                Snackbar.Add($"Volume {volume.GetFullVolumeName()} was restored", Severity.Info);
 
             }
 

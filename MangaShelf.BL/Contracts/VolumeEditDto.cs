@@ -12,10 +12,10 @@ public class VolumeEditDto
     [ReadOnly(true)]
     public required string PublicId { get; set; }
 
-    [Required]
-    public required string Title { get; set; }
+    [RequiredWhenNotAOneShot]
+    public string? Title { get; set; }
 
-    [Required]
+    [RequiredWhenNotAOneShot]
     [Range(0, int.MaxValue, ErrorMessage = "Number must be positive")]
     public int? Number { get; set; }
 
@@ -38,6 +38,8 @@ public class VolumeEditDto
 
     public bool IsPreorder { get; set; }
     public DateTime? PreorderStart { get; set; }
+
+    [Required]
     public DateTime? ReleaseDate { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Type must be selected")]
@@ -53,4 +55,28 @@ public class VolumeEditDto
     [Range(1, int.MaxValue, ErrorMessage = "Total volumes must be positive")]
     public int? SeriesTotalVolumes { get; set; }
     public List<AuthorDto> SeriesAuthors { get; set; } = new();
+}
+
+public class RequiredWhenNotAOneShotAttribute : ValidationAttribute
+{
+    public RequiredWhenNotAOneShotAttribute()
+    {
+        ErrorMessage = "{0} is required when the volume is not a one-shot.";
+    }
+
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        var volumeEditDto = (VolumeEditDto)validationContext.ObjectInstance;
+        var requiresValue = volumeEditDto.SeriesStatus != SeriesStatus.OneShot;
+        var isMissing = value == null || (value is string text && string.IsNullOrWhiteSpace(text));
+
+        if (requiresValue && isMissing)
+        {
+            var memberName = validationContext.MemberName ?? string.Empty;
+            var error = string.Format(ErrorMessageString, validationContext.DisplayName);
+            return new ValidationResult(error, new[] { memberName });
+        }
+
+        return ValidationResult.Success;
+    }
 }

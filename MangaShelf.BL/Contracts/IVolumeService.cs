@@ -27,6 +27,7 @@ public interface IVolumeService : IService
     Task<VolumeDto?> GetFullVolumeByPublicIdAsync(string volumePublicId, CancellationToken token = default);
     Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string userIdentityId, CancellationToken token = default);
     Task<VolumeStatsDto> GetVolumeStats(Guid volumeId, CancellationToken token = default);
+    Task<IEnumerable<UserVolumeCard>> GetUserVolumes(string userIdentityId, IUserShelfFilterOptions filterOptions, CancellationToken token = default);
 
     Task<(UserVolumeStatusDto, VolumeStatsDto)> ToggleWishlist(Guid volumeId, string userIdentityId, CancellationToken token = default);
     Task<(UserVolumeStatusDto, VolumeStatsDto)> ToggleLike(Guid volumeId, string userIdentityId, CancellationToken token = default);

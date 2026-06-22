@@ -11,19 +11,3 @@ public interface IFilterOptions
 
     ReleaseFilter ReleaseFilter { get; init; }
 }
-
-public enum ReleaseFilter
-{
-    None,
-    Released,
-    Preorder
-}
-
-public enum OrderBy
-{
-    SeriesTitle,
-    Popularity,
-    Rating,
-    ReleaseDate,
-    PreorderDate
-}

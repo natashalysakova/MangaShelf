@@ -11,7 +11,10 @@ using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Services;
 
-public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<MangaDbContext> dbContextFactory, IImageManager imageManager) : IVolumeService
+public class VolumeService(
+    ILogger<VolumeService> logger, 
+    IDbContextFactory<MangaDbContext> dbContextFactory, 
+    IImageManager imageManager) : IVolumeService
 {
     public async Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IFilterOptions? paginationOptions = default, CancellationToken token = default)
     {
@@ -142,12 +145,12 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
     {
         using var context = dbContextFactory.CreateDbContext();
 
-        var titles = context.Volumes
+        var titles = await context.Volumes
             .AsNoTracking()
             .OrderBy(v => v.Title)
-            .Select(v => v.Title);
+            .ToListAsync(stoppingToken);
 
-        return await titles.ToListAsync(stoppingToken);
+        return titles.Select(v => v.GetFullVolumeName());
     }
 
     public async Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string? userId, CancellationToken token = default)
@@ -529,7 +532,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             throw new Exception("Volume not found");
         }
 
-        volume.ReleaseDate = volumeDto.ReleaseDate;
+        volume.ReleaseDate = new DateTimeOffset(volumeDto.ReleaseDate!.Value, DateTimeOffset.Now.Offset);
         volume.PreorderStart = volumeDto.PreorderStart;
         volume.Title = volumeDto.Title;
         volume.Number = volumeDto.Number;
@@ -574,10 +577,34 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             }
         }
     }
-}
 
-public class SortDefinitions<T>
-{
-    public Func<T, object> SortFunction { get; set; }
-    public bool Descending { get; set; }
+    public async Task<IEnumerable<UserVolumeCard>> GetUserVolumes(string userIdentityId, IUserShelfFilterOptions filterOptions, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        var query = (await context.Ownerships
+            .Where(o => o.UserId == user.Id)
+            .Include(o => o.Volume)
+                .ThenInclude(v => v!.Series)
+            .OrderByDescending(o => o.Date)
+            .ToListAsync(token))
+            .GroupBy(o => o.VolumeId)
+            .Select(g => g.First())
+            .ToList();
+
+        var volumeIds = query.Select(o => o.VolumeId).ToList();
+
+        var readings = await context.Readings
+            .Where(r => r.UserId == user.Id && volumeIds.Contains(r.VolumeId))
+            .ToListAsync(token);
+
+        return query.Select(o => o.ToUserVolumeCard(readings));
+    }
 }

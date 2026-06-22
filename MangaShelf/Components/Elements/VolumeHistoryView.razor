@@ -2,6 +2,11 @@
 
 @inject IAdminLocalizationService Localizer
 
+@if (VolumeHistory == null || !VolumeHistory.Any())
+{
+    <MudText Color="Color.Secondary">@Localizer["NoNews"]</MudText>
+}
+
 @if(GroupedByDate)
 {
     @foreach (var history in VolumeHistory

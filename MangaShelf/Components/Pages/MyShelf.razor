@@ -1,17 +1,44 @@
 ﻿@page "/my-shelf"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
+@using MangaShelf.BL.Services
+
+@inherits UserContextComponent
+
+@inject IVolumeService VolumeService
+@inject IUiLocalizationService Localizer
 
 @attribute [Authorize]
 
+@if(volumes != null){
 
-<h3>MyShelf</h3>
 
-<h1>You are authenticated</h1>
+    <MudGrid>
+        @foreach (var volume in volumes)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <UserVolumeCardComponent VolumeCard="volume" />
+            </MudItem>
+        }
+    </MudGrid>
+}
 
-<AuthorizeView>
-    Hello @context.User.Identity?.Name!
-</AuthorizeView>
+
+
+
 @code {
+    IEnumerable<UserVolumeCard>? volumes;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var userId = await GetUserId();
+            volumes = await VolumeService.GetUserVolumes(userId, new UserShelfFilterOptions());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user volumes: {ex.Message}");
+        }
+    }
 }

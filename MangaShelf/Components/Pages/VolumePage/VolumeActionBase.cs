@@ -1,5 +1,6 @@
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Dto;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.Components.Pages.VolumePage.Elements;
 using MangaShelf.DAL.Models;
 using MangaShelf.Localization.Interfaces;

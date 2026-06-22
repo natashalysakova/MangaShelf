@@ -14,7 +14,7 @@ public class CardVolumeDto
     public int Number { get; set; }
     public required string PurchaseUrl { get; set; }
     public bool IsPreorder { get; set; }
-    public string? ReleaseDate { get; set; }
+    public required string ReleaseDate { get; set; }
     public double AvgRating { get; set; }
     public VolumeType Type { get; set; }
 }

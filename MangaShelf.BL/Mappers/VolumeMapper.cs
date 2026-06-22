@@ -11,14 +11,24 @@ namespace MangaShelf.BL.Mappers;
 public static partial class VolumeMapper
 {
     [MapProperty(nameof(Volume.Series.Title), nameof(CardVolumeDto.SeriesName))]
+    [MapProperty(nameof(Volume.ReleaseDate), nameof(CardVolumeDto.ReleaseDate), Use = nameof(MapDateTimeOffsetToString))]
     public static partial CardVolumeDto ToDto(this Volume volume);
 
 
-    private static string? MapDateTimeOffsetToString(DateTimeOffset? source) => source?.ToString("dd.MM.yyyy");
-    private static DateTime? MapDateTimeOffsetToLocalDateTime(DateTimeOffset? source) => source?.LocalDateTime ?? null;
+    private static string? MapDateTimeOffsetToString(DateTimeOffset source) => source.ToLocalTime().ToString("dd.MM.yyyy");
+    private static DateTime? MapNullableDateTimeOffsetToLocalDateTime(DateTimeOffset? source) => source?.LocalDateTime ?? null;
+    private static DateTime? MapDateTimeOffsetToLocalDateTime(DateTimeOffset source) => source.LocalDateTime;
+
+
+    [MapPropertyFromSource(nameof(VolumeDto.FullTitle), Use = nameof(MapFullTitle))]
     public static partial VolumeDto ToFullDto(this Volume volume);
 
-    [MapProperty(nameof(VolumeEditDto.PreorderStart), nameof(Volume.PreorderStart), Use = nameof(MapDateTimeOffsetToLocalDateTime))]
+    private static string MapFullTitle(Volume volume)
+    {
+        return volume.GetFullVolumeName();
+    }
+
+    [MapProperty(nameof(VolumeEditDto.PreorderStart), nameof(Volume.PreorderStart), Use = nameof(MapNullableDateTimeOffsetToLocalDateTime))]
     [MapProperty(nameof(VolumeEditDto.ReleaseDate), nameof(Volume.ReleaseDate), Use = nameof(MapDateTimeOffsetToLocalDateTime))]
     public static partial VolumeEditDto ToEditDto(this Volume volume);
 }

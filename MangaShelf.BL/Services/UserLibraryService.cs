@@ -94,8 +94,7 @@ public class UserLibraryDto
 public class UserLibraryItem
 {
     public Guid VolumeId { get; set; }
-    public string VolumeTitle { get; set; }
-    public string SeriesTitle { get; set; }
+    public string Title { get; set; }
 
     public VolumeStatus VolumeStatus { get; set; }
     public DateTimeOffset? ReleaseDate { get; set; }

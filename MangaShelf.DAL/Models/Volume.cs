@@ -3,7 +3,7 @@
 public class Volume : BaseEntity
 {
     public string PublicId { get; set; } = Guid.NewGuid().ToString();
-    public required string Title { get; set; }
+    public string? Title { get; set; }
     public int? Number { get; set; }
     public string? ISBN { get; set; }
 
@@ -21,7 +21,7 @@ public class Volume : BaseEntity
 
     public bool IsPreorder { get; set; }
     public DateTimeOffset? PreorderStart { get; set; }
-    public DateTimeOffset? ReleaseDate { get; set; }
+    public required DateTimeOffset ReleaseDate { get; set; }
 
     public double AvgRating { get; set; }
 
@@ -36,7 +36,18 @@ public class Volume : BaseEntity
     public virtual ICollection<Reading> Readers { get; set; } = new List<Reading>();
     public virtual ICollection<Likes> Likes { get; set; } = new List<Likes>();
     public virtual ICollection<VolumeHistory> History { get; set; } = new List<VolumeHistory>();
+
+    public string GetFullVolumeName()
+    {
+        if (Series!.Status == SeriesStatus.OneShot)
+        {
+            return Series.Title;
+        }
+        return $"{Series.Title} - {Title}";
+    }
 }
+
+
 
 
 [Flags]

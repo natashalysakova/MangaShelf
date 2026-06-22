@@ -12,16 +12,19 @@ public class SeedProdShelfService : ISeedDataService
     private readonly ILogger<SeedProdShelfService> _logger;
     private readonly IImageManager _imageManager;
     private readonly MangaIdentityDbContext _identityContext;
+    private readonly IEnumerable<IDataCorrection> _dataCorrections;
     private readonly IDbContextFactory<MangaDbContext> _factory;
 
     public SeedProdShelfService(ILogger<SeedProdShelfService> logger,
         IImageManager imageManager, IDbContextFactory<MangaDbContext> dbContextFactory,
-        MangaIdentityDbContext identityContext
+        MangaIdentityDbContext identityContext,
+        IEnumerable<IDataCorrection> dataCorrections
         )
     {
         _logger = logger;
         _imageManager = imageManager;
         _identityContext = identityContext;
+        _dataCorrections = dataCorrections;
         _factory = dbContextFactory;
     }
 
@@ -34,6 +37,22 @@ public class SeedProdShelfService : ISeedDataService
         await SeedPublishers();
 
         await SeedUsers();
+
+
+        await ApplyDataCorrections();
+    }
+
+    private async Task ApplyDataCorrections()
+    {
+        using var context = await _factory.CreateDbContextAsync();
+
+        foreach (var correction in _dataCorrections)
+        {
+            _logger.LogInformation($"Applying data correction: {correction.GetType().Name}");
+            await correction.ApplyCorrection(context);
+        }
+
+        await context.SaveChangesAsync();
     }
 
     private async Task SeedUsers()

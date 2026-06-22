@@ -1,0 +1,12 @@
+
+<MudStack>
+
+<MudText Typo="Typo.h6" Class="mb-1">@VolumeCard.SeriesTitle</MudText>
+<MudText Typo="Typo.subtitle2" Class="mb-1">@VolumeCard.Number</MudText>
+<MudRating MaxValue="5" Value="@VolumeCard.UserRating" ReadOnly="true" Size="Size.Small" Class="mb-1" />
+</MudStack>
+
+@code{
+    [Parameter]
+    public UserVolumeCard VolumeCard { get; set; } = default!;
+}

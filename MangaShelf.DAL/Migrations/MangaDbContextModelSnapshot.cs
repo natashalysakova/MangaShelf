@@ -484,7 +484,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<string>("PurchaseUrl")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime?>("ReleaseDate")
+                    b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("SeriesId")
@@ -494,7 +494,6 @@ namespace MangaShelf.DAL.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.Property<int>("Type")

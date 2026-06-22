@@ -4,6 +4,8 @@
 @using MangaShelf.Components.Elements.SmallCard
 @using MangaShelf.DAL.Models
 
+@inherits UserContextComponent
+
 @inject IUserLibraryService UserLibraryService
 @inject IUiLocalizationService Localizer
 <h3>@Localizer["Preorders"]</h3>
@@ -12,43 +14,49 @@
 {
     <MudGrid>
         <MudItem sm="12" md="6">
-            <MudGrid>
-                @foreach (var preorder in UserLibraryDto.Volumes)
+            <MudPaper Class="paper-manga-panel p-4" Elevation="0">
+                @if (!UserLibraryDto.Volumes.Any())
                 {
-                    var cardClass = "paper-manga-panel " + (preorder.IsPreorderDue ? "expired-preorder" : "normal-preorder");
-                    <MudItem xs="6" sm="4">
-
-                        <MudCard Class="@cardClass">
-                            <MudCardContent>
-                                <MudStack Spacing="1" AlignItems="AlignItems.Center">
-                                    <MudPaper Style="width: 120px;height: 170px; background-color: transparent;" Class="p-2">
-                                        <SmallCard ShowButtons="true" VolumeId="@preorder.VolumeId" OnStatusChange="@ReloadUserLibrary" />
-                                    </MudPaper>
-                                    @if (preorder.IsPreorderDue)
-                                    {
-                                        <MudText Color="Color.Error">@Localizer["PreorderIsDue"]</MudText>
-                                        <MudText Color="Color.Error">@preorder.ReleaseDate?.ToString("d")</MudText>
-                                    }
-                                    else if (preorder.DaysTillRelease == 0)
-                                    {
-                                        <MudText>@Localizer["Release"]</MudText>
-                                        <MudText Color="Color.Success">@Localizer["Today"]</MudText>
-                                    }
-                                    else
-                                    {
-                                        <MudText>@Localizer["DaysTillRelease"]</MudText>
-                                        <MudText>@FormatDays(preorder.DaysTillRelease)</MudText>
-                                    }
-                                </MudStack>
-                            </MudCardContent>
-                        </MudCard>
+                    <MudItem sm="12">
+                        <MudAlert Severity="Severity.Normal">@Localizer["NoPreorders"]</MudAlert>
                     </MudItem>
                 }
-            </MudGrid>
+                <MudGrid>
+                    @foreach (var preorder in UserLibraryDto.Volumes)
+                    {
+                        var cardClass = "m-1 p-3 " + (preorder.IsPreorderDue ? "expired-preorder" :
+               "normal-preorder");
+                        <MudItem xs="6" sm="4" >
+                            <MudStack Spacing="1" AlignItems="AlignItems.Center" class="@cardClass">
+                                <div style="width: 120px;height: 170px;">
+                                    <SmallCard ShowButtons="true" VolumeId="@preorder.VolumeId"
+                                               OnStatusChange="@ReloadUserLibrary" />
+
+                                </div>
+                                @if (preorder.IsPreorderDue)
+                                {
+                                    <MudText Color="Color.Error">@Localizer["PreorderIsDue"]</MudText>
+                                    <MudText Color="Color.Error">@preorder.ReleaseDate?.ToString("d")</MudText>
+                                }
+                                else if (preorder.DaysTillRelease == 0)
+                                {
+                                    <MudText>@Localizer["Release"]</MudText>
+                                    <MudText Color="Color.Success">@Localizer["Today"]</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>@Localizer["DaysTillRelease"]</MudText>
+                                    <MudText>@FormatDays(preorder.DaysTillRelease)</MudText>
+                                }
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudPaper>
         </MudItem>
         <MudItem sm="12" md="6">
-            <MudPaper Class="paper-manga-panel p-4">
-                    <VolumeHistoryView VolumeHistory="UserLibraryDto.Updates" GroupedByDate="true" />
+            <MudPaper Class="paper-manga-panel p-4" Elevation="0">
+                <VolumeHistoryView VolumeHistory="UserLibraryDto.Updates" GroupedByDate="true" />
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -93,13 +101,6 @@
         {
             errorMessage = "An error occurred while loading preorders. " + ex.Message;
         }
-    }
-
-    protected async Task<string?> GetUserId()
-    {
-        var authState = await AuthStateTask;
-        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return userId;
     }
 
     private string FormatDays(int days)

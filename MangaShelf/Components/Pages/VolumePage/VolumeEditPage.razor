@@ -44,14 +44,14 @@
                                       For="@(() => Volume!.SeriesTitle)" />
                     </MudStack>
                     <MudStack Row="true" Spacing="2">
-                        <MudSelect T="SeriesStatus" @bind-Value="Volume.SeriesStatus" Label="@Localizer["SeriesStatus"]"
+                        <MudSelect T="SeriesStatus" Value="Volume.SeriesStatus" ValueChanged="OnSeriesStatusChanged" Label="@Localizer["SeriesStatus"]"
                                    Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.SeriesStatus)">
                             @foreach (var seriesStatus in Enum.GetValues<SeriesStatus>())
                             {
                                 <MudSelectItem Value="@seriesStatus">@seriesStatus</MudSelectItem>
                             }
                         </MudSelect>
-                        <MudNumericField T="int?" @bind-Value="Volume.SeriesTotalVolumes"
+                        <MudNumericField T="int?" @bind-Value="Volume.SeriesTotalVolumes" Disabled="Volume.SeriesStatus == SeriesStatus.OneShot"
                                          Label="@Localizer["SeriesTotalVolumes"]" Variant="Variant.Outlined" FullWidth="true"
                                          Immediate="true" For="@(() => Volume.SeriesTotalVolumes)" />
                     </MudStack>
@@ -454,6 +454,32 @@
         }
 
         Volume.SeriesAuthors.RemoveAt(index);
+        UpdateChangeFlags();
+        StateHasChanged();
+    }
+
+    private void OnSeriesStatusChanged(SeriesStatus status)
+    {
+        if (Volume == null)
+        {
+            return;
+        }
+
+        Volume.SeriesStatus = status;
+
+        if(status == SeriesStatus.OneShot)
+        {
+            Volume.Number = null;
+            Volume.SeriesTotalVolumes = 1;
+        }
+
+        if (_editContext != null)
+        {
+            _editContext.NotifyFieldChanged(new FieldIdentifier(Volume, nameof(VolumeEditDto.SeriesStatus)));
+            _editContext.NotifyFieldChanged(new FieldIdentifier(Volume, nameof(VolumeEditDto.Number)));
+            _editContext.NotifyFieldChanged(new FieldIdentifier(Volume, nameof(VolumeEditDto.Title)));
+        }
+
         UpdateChangeFlags();
         StateHasChanged();
     }
