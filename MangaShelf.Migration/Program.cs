@@ -13,6 +13,7 @@ public class Program
         builder.RegisterContextAndServices();
 
         builder.Services.AddScoped<IImageManager, ImageManager>();
+        RegisterDataCorrections(builder);
 
         InstallSeedServices(builder);
 
@@ -35,5 +36,18 @@ public class Program
         builder.Services.AddScoped<ISeedDataService, SeedProdShelfService>();
         builder.Services.AddScoped<ISeedDataService, SeedProdSystemService>();
 
+    }
+
+    private static void RegisterDataCorrections(HostApplicationBuilder builder)
+    {
+        var correctionTypes = typeof(Program).Assembly
+            .GetTypes()
+            .Where(type => typeof(IDataCorrection).IsAssignableFrom(type)
+                           && type is { IsClass: true, IsAbstract: false });
+
+        foreach (var correctionType in correctionTypes)
+        {
+            builder.Services.AddScoped(typeof(IDataCorrection), correctionType);
+        }
     }
 }

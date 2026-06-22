@@ -28,6 +28,14 @@ public class UserLibraryService : IUserLibraryService
 
     public async Task<UserLibraryDto> GetUserLibrary(string userId, IFilterOptions? paginationOptions = null, CancellationToken cancellationToken = default)
     {
+        var dbContext = _dbContextFactory.CreateDbContext();
+
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId, cancellationToken);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
         throw new NotImplementedException();
     }
 
@@ -36,26 +44,41 @@ public class UserLibraryService : IUserLibraryService
         var dbContext = _dbContextFactory.CreateDbContext();
 
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userId, cancellationToken);
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
 
-        var query = dbContext.Ownerships
-            .Include(u => u.Volume)
-            .ThenInclude(v => v.Series)
-            .Where(o => o.UserId == user.Id && o.Status == VolumeStatus.Preorder);
+        var userOwerships = await dbContext.Ownerships.Where(x => x.UserId == user.Id).ToListAsync(cancellationToken);
+         
+        var latestPreorderIds = userOwerships
+            .GroupBy(o => o.VolumeId)
+            .Select(v => v.OrderByDescending(x => x.Date).First())
+            .Where(o => o.Status == VolumeStatus.Preorder)
+            .Select(x => x.Id);
 
-        var result = await query.ApplyPagination(paginationOptions).ToListAsync(cancellationToken);
+        var result = await dbContext.Ownerships
+            .Include(x=>x.Volume)
+                .ThenInclude(v => v.Series)
+            .Include(x => x.Volume)
+                .ThenInclude(v => v.History)
+            .Where(x=> latestPreorderIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+        
+        var everPreordered = await dbContext.Ownerships
+            .Include(x => x.Volume)
+                .ThenInclude(v => v.Series)
+            .Include(x => x.Volume)
+                .ThenInclude(v => v.History)
+            .Where(x => x.UserId == user.Id && x.Status == VolumeStatus.Preorder)
+            .ToListAsync(cancellationToken);
+        var histories = everPreordered.SelectMany(x => x.Volume.History).ToList();
 
         return new UserLibraryDto()
         {
             UserId = userId,
-            Volumes = result.Select(o => new UserLibraryItem()
-            {
-                VolumeId = o.VolumeId,
-                VolumeTitle = o.Volume!.Title,
-                SeriesTitle = o.Volume!.Series!.Title,
-                VolumeStatus = o.Status,
-                ReleaseDate = o.Volume.ReleaseDate,
-                CoverUrl = o.Volume.CoverImageUrlSmall
-            })
+            Volumes = result.Select(o => o.ToUserLibraryItemDto()).OrderBy(x => x.ReleaseDate),
+            Updates = histories.Select(h => h.ToDto()).OrderByDescending(x => x.Date)
         };
     }
 }
@@ -65,18 +88,20 @@ public class UserLibraryDto
     public string UserId { get; set; }
 
     public IEnumerable<UserLibraryItem> Volumes { get; set; }
+    public IEnumerable<VolumeHistoryDto> Updates { get; set; }
 }
 
 public class UserLibraryItem
 {
     public Guid VolumeId { get; set; }
-    public string VolumeTitle { get; set; }
-    public string SeriesTitle { get; set; }
+    public string Title { get; set; }
 
     public VolumeStatus VolumeStatus { get; set; }
     public DateTimeOffset? ReleaseDate { get; set; }
+    public int DaysTillRelease { get; set; }
     public bool IsPreorderDue { get => VolumeStatus == VolumeStatus.Preorder && ReleaseDate < DateTimeOffset.UtcNow; }
 
     public string? CoverUrl { get; set; } = null;
+    
 }
 

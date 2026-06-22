@@ -1,0 +1,184 @@
+@using MangaShelf.BL.Services
+
+@inject ICacheService CacheService
+
+<MudPaper Class="pa-4 mb-4" Elevation="2">
+    <MudStack Spacing="3">
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h6">Shelf filters</MudText>
+            <MudSpacer />
+        </MudStack>
+
+        <MudStack Row>
+            <MudAutocomplete T="string" Label="Search" @bind-Value="_searchTerm" SearchFunc="@SearchAutocomplete"
+                             Variant="Variant.Outlined" Clearable="true" ResetValueOnEmptyText="true"
+                             SelectValueOnTab="true" CoerceValue="true"
+                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+
+            <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="ClearFiltersAsync">Reset</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFiltersAsync">Apply</MudButton>
+
+        </MudStack>
+
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">Ownership status</MudText>
+                <MudChipSet @bind-SelectedValues="SelectedOwnershipStatuses"
+                            SelectionMode="SelectionMode.MultiSelection" CheckMark="true" Variant="Variant.Outlined">
+                    @foreach (var status in _ownershipStatuses)
+                    {
+                        <MudChip T="VolumeStatus" Value="@status" Text="@status.ToString()"
+                                 SelectedColor="Color.Tertiary" />
+                    }
+                </MudChipSet>
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">Reading status</MudText>
+                <MudChipSet @bind-SelectedValues="SelectedReadingStatuses" SelectionMode="SelectionMode.MultiSelection"
+                            CheckMark="true" Variant="Variant.Outlined">
+                    @foreach (var status in _readingStatuses)
+                    {
+                        <MudChip T="ReadingStatus" Value="@status" Text="@status.ToString()"
+                                 SelectedColor="Color.Tertiary" />
+                    }
+                </MudChipSet>
+            </MudItem>
+
+            <MudItem xs="12" md="4">
+                <MudSelect T="string" @bind-Value="_likedSelection" Label="Liked" Variant="Variant.Outlined"
+                           FullWidth="true">
+                    <MudSelectItem T="string" Value="@(string.Empty)">Any</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("true")">Liked</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("false")">Not liked</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudNumericField T="int?" @bind-Value="_minRating" Label="Min rating" Variant="Variant.Outlined" Min="0"
+                                 Max="5" />
+            </MudItem>
+
+            <MudItem xs="6" md="4">
+                <MudNumericField T="int?" @bind-Value="_maxRating" Label="Max rating" Variant="Variant.Outlined" Min="0"
+                                 Max="5" />
+            </MudItem>
+        </MudGrid>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public UserShelfFilterOptions FilterOptions { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<UserShelfFilterOptions> FilterOptionsChanged { get; set; }
+
+    private readonly VolumeStatus[] _ownershipStatuses = Enum.GetValues<VolumeStatus>().Except(new[] { VolumeStatus.None
+}).ToArray();
+    private readonly ReadingStatus[] _readingStatuses = Enum.GetValues<ReadingStatus>();
+
+    private string? _searchTerm;
+    private IReadOnlyCollection<VolumeStatus> _selectedOwnershipStatuses = Array.Empty<VolumeStatus>();
+    private IReadOnlyCollection<ReadingStatus> _selectedReadingStatuses = Array.Empty<ReadingStatus>();
+    private string? _likedSelection;
+    private int? _minRating;
+    private int? _maxRating;
+    private IEnumerable<string>? _autocomplete;
+
+    private IReadOnlyCollection<VolumeStatus> SelectedOwnershipStatuses
+    {
+        get => _selectedOwnershipStatuses;
+        set => _selectedOwnershipStatuses = value;
+    }
+
+    private IReadOnlyCollection<ReadingStatus> SelectedReadingStatuses
+    {
+        get => _selectedReadingStatuses;
+        set => _selectedReadingStatuses = value;
+    }
+
+    protected override void OnParametersSet()
+    {
+        _searchTerm = FilterOptions.SearchTerm;
+        _selectedOwnershipStatuses = FilterOptions.CurrentOwnershipStatuses?.ToArray() ?? Array.Empty<VolumeStatus>();
+        _selectedReadingStatuses = FilterOptions.CurrentReadingStatuses?.ToArray() ?? Array.Empty<ReadingStatus>();
+        _likedSelection = ToSelection(FilterOptions.IsLiked);
+        _minRating = FilterOptions.MinRating;
+        _maxRating = FilterOptions.MaxRating;
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        if (_minRating.HasValue && _maxRating.HasValue && _minRating > _maxRating)
+        {
+            (_minRating, _maxRating) = (_maxRating, _minRating);
+        }
+
+        FilterOptions.SearchTerm = string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm.Trim();
+        FilterOptions.CurrentOwnershipStatuses = _selectedOwnershipStatuses.ToArray();
+        FilterOptions.CurrentReadingStatuses = _selectedReadingStatuses.ToArray();
+        FilterOptions.IsLiked = ParseSelection(_likedSelection);
+        FilterOptions.MinRating = _minRating;
+        FilterOptions.MaxRating = _maxRating;
+
+        if (FilterOptionsChanged.HasDelegate)
+        {
+            await FilterOptionsChanged.InvokeAsync(FilterOptions);
+        }
+    }
+
+    private async Task ClearFiltersAsync()
+    {
+        _searchTerm = null;
+        _selectedOwnershipStatuses = Array.Empty<VolumeStatus>();
+        _selectedReadingStatuses = Array.Empty<ReadingStatus>();
+        _likedSelection = string.Empty;
+        _minRating = null;
+        _maxRating = null;
+
+        await ApplyFiltersAsync();
+    }
+
+    private static string ToSelection(bool? value) => value.HasValue ? value.Value.ToString().ToLowerInvariant() :
+string.Empty;
+
+    private static bool? ParseSelection(string? selection) => selection switch
+    {
+        "true" => true,
+        "false" => false,
+        _ => null,
+    };
+
+    private Task<IEnumerable<string>> SearchAutocomplete(string value, CancellationToken token)
+    {
+        _autocomplete ??= CacheService.GetSearchAutoComplete();
+
+        if (string.IsNullOrEmpty(value))
+        {
+            return Task.FromResult(Enumerable.Empty<string>());
+        }
+
+        var matches = _autocomplete
+            .Where(item => item.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+            .OrderByDescending(item => CalculateMatchScore(item, value))
+            .ToList();
+
+        return Task.FromResult<IEnumerable<string>>(matches);
+    }
+
+    private static double CalculateMatchScore(string item, string searchValue)
+    {
+        var normalizedItem = item.ToLowerInvariant();
+        var normalizedSearch = searchValue.ToLowerInvariant();
+
+        if (normalizedItem.Equals(normalizedSearch))
+            return 1.0;
+
+        if (normalizedItem.StartsWith(normalizedSearch))
+            return 0.9 - (0.001 * (normalizedItem.Length - normalizedSearch.Length));
+
+        var position = normalizedItem.IndexOf(normalizedSearch);
+
+        return 0.5 - (0.01 * position) - (0.001 * (normalizedItem.Length - normalizedSearch.Length));
+    }
+}

@@ -12,19 +12,16 @@ using Xunit;
 
 namespace MangaShelf.Tests;
 
-public class ParserServiceTests : IDisposable
+public class VolumeInfoParserTests : IDisposable
 {
-    private Mock<ILogger<ParserService>> _loggerMock;
-    private Mock<IServiceProvider> _serviceProviderMock;
-    private Mock<IServiceScope> _serviceScopeMock;
-    private Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
+    private Mock<ILogger<VolumeInfoParser>> _loggerMock;
     private Mock<IImageManager> _imageManagerMock;
     private IDbContextFactory<MangaDbContext> _dbContextFactory;
-    private Mock<IConfigurationService> _configurationService;
-    private ParserService _parserService;
+
+    private VolumeInfoParser _parserService;
     private string _databaseName;
 
-    public ParserServiceTests()
+    public VolumeInfoParserTests()
     {
         _databaseName = $"TestDb_{Guid.NewGuid()}";
         
@@ -38,31 +35,9 @@ public class ParserServiceTests : IDisposable
         _dbContextFactory = new TestDbContextFactory(dbContextOptions);
 
         // Setup mocks
-        _loggerMock = new Mock<ILogger<ParserService>>();
+        _loggerMock = new Mock<ILogger<VolumeInfoParser>>();
         _imageManagerMock = new Mock<IImageManager>();
-        
-        // Create a real service collection for dependency injection
-        var services = new ServiceCollection();
-        services.AddScoped<IImageManager>(sp => _imageManagerMock.Object);
-        
-        var serviceProvider = services.BuildServiceProvider();
-        _serviceProviderMock = new Mock<IServiceProvider>();
-        _serviceScopeMock = new Mock<IServiceScope>();
-        
-        // Setup service scope properly
-        _serviceScopeMock.Setup(x => x.ServiceProvider).Returns(serviceProvider);
-        _serviceProviderMock.Setup(x => x.GetService(typeof(IServiceScopeFactory)))
-            .Returns(new TestServiceScopeFactory(_serviceScopeMock.Object));
-        
-        _configurationService = new Mock<IConfigurationService>();
-        _configurationService.Setup(x=>x.ParserService).Returns(new ParserServiceSettings
-        {
-            DelayBetweenParse = TimeSpan.FromSeconds(100),
-            IgnoreExistingVolumes = false
-        });
-
-
-
+                
         // Setup image manager mock
         _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()))
             .Returns("images/cover.jpg");
@@ -72,13 +47,10 @@ public class ParserServiceTests : IDisposable
         // Initialize database with test data
         InitializeTestData().Wait();
 
-        _parserService = new ParserService(
-            _loggerMock.Object,
+        _parserService = new VolumeInfoParser(
             _dbContextFactory,
-            serviceProvider,
-            null!, // IParserFactory not needed for this test
-            _configurationService.Object
-        );
+            _loggerMock.Object,
+            _imageManagerMock.Object);
     }
 
     public void Dispose()
@@ -116,7 +88,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_NewVolume_CreatesVolume()
+    public async Task Parse_NewVolume_CreatesVolume()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -132,7 +104,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "テストシリーズ",
+            OriginalSeriesTitle = "テストシリーズ",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -144,7 +116,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -168,7 +140,7 @@ public class ParserServiceTests : IDisposable
 
         Assert.NotNull(volume.Series);
         Assert.Equal("Test Series", volume.Series.Title);
-        Assert.Equal("テストシリーズ", volume.Series.OriginalName);
+        Assert.Equal("テストシリーズ", volume.Series.OriginalTitle);
         Assert.Equal(SeriesStatus.Ongoing, volume.Series.Status);
         Assert.Equal(5, volume.Series.TotalVolumes);
         Assert.Equal(SeriesType.Manga, volume.Series.Type);
@@ -179,7 +151,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_ExistingVolume_UpdatesVolume()
+    public async Task Parse_ExistingVolume_UpdatesVolume()
     {
         // Arrange - Create initial volume
         var initialParsedInfo = new ParsedInfo
@@ -195,7 +167,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 3,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "既存シリーズ",
+            OriginalSeriesTitle = "既存シリーズ",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -206,7 +178,7 @@ public class ParserServiceTests : IDisposable
             Description = "Original description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Update with new info
         var updatedParsedInfo = new ParsedInfo
@@ -222,7 +194,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Completed,
-            OriginalSeriesName = "既存シリーズ",
+            OriginalSeriesTitle = "既存シリーズ",
             Url = "https://example.com/volume1-new",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -233,7 +205,7 @@ public class ParserServiceTests : IDisposable
             Description = "Updated description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -252,7 +224,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_MultipleAuthors_CreatesAllAuthors()
+    public async Task Parse_MultipleAuthors_CreatesAllAuthors()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -268,7 +240,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Completed,
-            OriginalSeriesName = "Original Name",
+            OriginalSeriesTitle = "Original Name",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -280,7 +252,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -300,10 +272,9 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_PreorderVolume_SetsPreorderFields()
+    public async Task Parse_PreorderVolume_SetsPreorderFields()
     {
         // Arrange
-        var preorderStart = DateTimeOffset.Now.AddDays(5);
         var parsedInfo = new ParsedInfo
         {
             Title = "Preorder Volume",
@@ -317,9 +288,9 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/preorder",
-            PreorderStartDate = preorderStart,
+            PreorderStartDate = DateTimeOffset.Now.AddDays(5), // Parser-provided date should be ignored
             CountryCode = "uk",
             IsPreorder = true,
             AgeRestrictions = 12,
@@ -328,8 +299,12 @@ public class ParserServiceTests : IDisposable
             Description = "Preorder description"
         };
 
+        var beforeTest = DateTimeOffset.Now;
+
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
+
+        var afterTest = DateTimeOffset.Now;
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -341,12 +316,13 @@ public class ParserServiceTests : IDisposable
         Assert.NotNull(volume);
         Assert.True(volume.IsPreorder);
         Assert.NotNull(volume.PreorderStart);
-        // PreorderStart gets set to volumeInfo.PreorderStartDate (which is 5 days in the future)
-        Assert.Equal(preorderStart.Date, volume.PreorderStart!.Value.Date);
+        // PreorderStart should be set to the date the volume was added to DB, not the parser-provided date
+        Assert.True(volume.PreorderStart >= beforeTest && volume.PreorderStart <= afterTest,
+            "PreorderStart should be set to approximately now (date added to DB)");
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_OneShot_SetsOneShotFlag()
+    public async Task Parse_OneShot_SetsOneShotFlag()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -362,7 +338,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.OneShot,
-            OriginalSeriesName = "ワンショット",
+            OriginalSeriesTitle = "ワンショット",
             Url = "https://example.com/oneshot",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -374,21 +350,22 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
+            .Include(v => v.Series)
             .FirstOrDefaultAsync(v => v.Title == "One Shot");
 
         Assert.NotNull(volume);
-        Assert.True(volume.OneShot);
+        Assert.True(volume.Series.Status == SeriesStatus.OneShot);
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_NoAgeRestrictions_DefaultsTo18()
+    public async Task Parse_NoAgeRestrictions_DefaultsTo18()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -404,7 +381,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/adult",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -416,7 +393,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -430,7 +407,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_ExistingPublisher_UsesExistingPublisher()
+    public async Task Parse_ExistingPublisher_UsesExistingPublisher()
     {
         // Arrange - Create first volume with publisher
         var firstParsedInfo = new ParsedInfo
@@ -446,7 +423,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -457,7 +434,7 @@ public class ParserServiceTests : IDisposable
             Description = "First volume"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(firstParsedInfo);
+        await _parserService.Parse(firstParsedInfo);
 
         // Act - Create second volume with same publisher
         var secondParsedInfo = new ParsedInfo
@@ -473,7 +450,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-0987654321",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original 2",
+            OriginalSeriesTitle = "Original 2",
             Url = "https://example.com/volume2",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -484,7 +461,7 @@ public class ParserServiceTests : IDisposable
             Description = "Second volume"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
+        var result = await _parserService.Parse(secondParsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -504,7 +481,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_FutureReleaseDate_UsesProvidedDate()
+    public async Task Parse_FutureReleaseDate_UsesProvidedDate()
     {
         // Arrange
         var futureRelease = DateTimeOffset.Now.AddDays(30);
@@ -521,7 +498,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/future",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -533,7 +510,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -543,13 +520,12 @@ public class ParserServiceTests : IDisposable
             .FirstOrDefaultAsync(v => v.Title == "Future Volume");
 
         Assert.NotNull(volume);
-        Assert.NotNull(volume.ReleaseDate);
         // Future dates should not be used, current date should be set instead
-        Assert.True(volume.ReleaseDate!.Value.Date >= DateTime.Now.Date);
+        Assert.True(volume.ReleaseDate.Date >= DateTimeOffset.Now.Date);
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_InvalidCountryCode_UsesDefaultUkraine()
+    public async Task Parse_InvalidCountryCode_UsesDefaultUkraine()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -565,7 +541,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "invalid",
@@ -577,7 +553,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -595,7 +571,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_ExistingSeries_AddNewVolumeToSeries()
+    public async Task Parse_ExistingSeries_AddNewVolumeToSeries()
     {
         // Arrange - Create first volume in series
         var firstParsedInfo = new ParsedInfo
@@ -611,7 +587,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567891",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "共有シリーズ",
+            OriginalSeriesTitle = "共有シリーズ",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -622,7 +598,7 @@ public class ParserServiceTests : IDisposable
             Description = "First volume"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(firstParsedInfo);
+        await _parserService.Parse(firstParsedInfo);
 
         // Act - Create second volume in same series
         var secondParsedInfo = new ParsedInfo
@@ -638,7 +614,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567892",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "共有シリーズ",
+            OriginalSeriesTitle = "共有シリーズ",
             Url = "https://example.com/volume2",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -649,7 +625,7 @@ public class ParserServiceTests : IDisposable
             Description = "Second volume"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
+        var result = await _parserService.Parse(secondParsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -669,7 +645,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_NullAuthors_CreatesSeriesWithoutAuthors()
+    public async Task Parse_NullAuthors_CreatesSeriesWithoutAuthors()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -685,7 +661,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Completed,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/noauthor",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -697,7 +673,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -712,7 +688,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_SeriesStatusChange_UpdatesSeriesStatus()
+    public async Task Parse_SeriesStatusChange_UpdatesSeriesStatus()
     {
         // Arrange - Create initial volume with Ongoing status
         var initialParsedInfo = new ParsedInfo
@@ -728,7 +704,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 3,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -739,7 +715,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Update with Completed status
         var updatedParsedInfo = new ParsedInfo
@@ -755,7 +731,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 3,
             SeriesStatus = SeriesStatus.Completed, // Changed status
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -766,7 +742,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -780,7 +756,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_TotalVolumesIncrease_UpdatesTotalVolumes()
+    public async Task Parse_TotalVolumesIncrease_UpdatesTotalVolumes()
     {
         // Arrange - Create initial volume with 3 total volumes
         var initialParsedInfo = new ParsedInfo
@@ -796,7 +772,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 3,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -807,7 +783,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Update with 5 total volumes (increased)
         var updatedParsedInfo = new ParsedInfo
@@ -823,7 +799,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 5, // Increased
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -834,7 +810,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -848,7 +824,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_TotalVolumesDecrease_DoesNotUpdateTotalVolumes()
+    public async Task Parse_TotalVolumesDecrease_DoesNotUpdateTotalVolumes()
     {
         // Arrange - Create initial volume with 5 total volumes
         var initialParsedInfo = new ParsedInfo
@@ -864,7 +840,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -875,7 +851,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Try to update with 3 total volumes (decreased)
         var updatedParsedInfo = new ParsedInfo
@@ -891,7 +867,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 3, // Decreased - should not be applied
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -902,7 +878,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -914,7 +890,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_PreorderWithNullPreorderStart_SetsPreorderStartToNow()
+    public async Task Parse_PreorderWithNullPreorderStart_SetsPreorderStartToNow()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -930,7 +906,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/newpreorder",
             PreorderStartDate = null, // No preorder start date provided
             CountryCode = "uk",
@@ -944,7 +920,7 @@ public class ParserServiceTests : IDisposable
         var beforeTest = DateTimeOffset.Now;
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         var afterTest = DateTimeOffset.Now;
 
@@ -963,7 +939,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_NullDescription_DoesNotUpdateDescription()
+    public async Task Parse_NullDescription_DoesNotUpdateDescription()
     {
         // Arrange - Create initial volume with description
         var initialParsedInfo = new ParsedInfo
@@ -979,7 +955,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -990,7 +966,7 @@ public class ParserServiceTests : IDisposable
             Description = "Original description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Update with null description
         var updatedParsedInfo = new ParsedInfo
@@ -1006,7 +982,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1-new",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1017,7 +993,7 @@ public class ParserServiceTests : IDisposable
             Description = null // Null description should not overwrite
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -1029,7 +1005,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_SameDescription_DoesNotTriggerUpdate()
+    public async Task Parse_SameDescription_DoesNotTriggerUpdate()
     {
         // Arrange - Create initial volume with description
         var initialParsedInfo = new ParsedInfo
@@ -1045,7 +1021,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1056,7 +1032,7 @@ public class ParserServiceTests : IDisposable
             Description = "Same description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Update with same description and same URL
         var updatedParsedInfo = new ParsedInfo
@@ -1072,7 +1048,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1", // Same URL
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1083,14 +1059,14 @@ public class ParserServiceTests : IDisposable
             Description = "Same description" // Same description
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert - Since nothing changed, should still be Updated (EF marks it as unchanged but method returns Updated)
         Assert.Equal(State.Updated, result);
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_CanBePublishedFalse_SetsIsPublishedOnSiteFalse()
+    public async Task Parse_CanBePublishedFalse_SetsIsPublishedOnSiteFalse()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -1106,7 +1082,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/unpublished",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1118,7 +1094,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1134,7 +1110,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_NewlineInAuthors_SplitsCorrectly()
+    public async Task Parse_NewlineInAuthors_SplitsCorrectly()
     {
         // Arrange
         var parsedInfo = new ParsedInfo
@@ -1150,7 +1126,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Completed,
-            OriginalSeriesName = "Original Name",
+            OriginalSeriesTitle = "Original Name",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1162,7 +1138,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1177,7 +1153,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_ZeroTotalVolumes_DoesNotUpdateTotalVolumes()
+    public async Task Parse_ZeroTotalVolumes_DoesNotUpdateTotalVolumes()
     {
         // Arrange - Create initial volume with total volumes
         var initialParsedInfo = new ParsedInfo
@@ -1193,7 +1169,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1204,7 +1180,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Update with 0 total volumes (unknown)
         var updatedParsedInfo = new ParsedInfo
@@ -1220,7 +1196,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 0, // Zero - should not update
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1231,7 +1207,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -1243,7 +1219,7 @@ public class ParserServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateOrUpdateFromParsedInfoAsync_DifferentSeriesType_SetsCorrectType()
+    public async Task Parse_DifferentSeriesType_SetsCorrectType()
     {
         // Arrange - Test with Manhwa type
         var parsedInfo = new ParsedInfo
@@ -1259,7 +1235,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 10,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Korean Original",
+            OriginalSeriesTitle = "Korean Original",
             Url = "https://example.com/manhwa",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1271,7 +1247,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1301,7 +1277,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1312,7 +1288,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Verify initial images are set
         using (var context = _dbContextFactory.CreateDbContext())
@@ -1340,7 +1316,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1-updated",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1351,7 +1327,7 @@ public class ParserServiceTests : IDisposable
             Description = "Updated description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -1378,7 +1354,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/pastrelease",
             PreorderStartDate = null, // No preorder start date
             CountryCode = "uk",
@@ -1392,7 +1368,7 @@ public class ParserServiceTests : IDisposable
         var beforeTest = DateTimeOffset.Now;
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         var afterTest = DateTimeOffset.Now;
 
@@ -1427,7 +1403,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567891",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/special",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1438,15 +1414,15 @@ public class ParserServiceTests : IDisposable
             Description = "Special edition"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(firstParsedInfo);
+        await _parserService.Parse(firstParsedInfo);
 
         // Act - Create volume with same series and number but different title
         var secondParsedInfo = new ParsedInfo
         {
             Title = "Regular Edition", // Different title
             Authors = "Test Author",
-            VolumeNumber = 1, // Same number
-            Series = "Multi Title Series", // Same series
+            VolumeNumber = 1,
+            Series = "Multi Title Series",
             Cover = "https://example.com/cover2.jpg",
             Release = DateTimeOffset.Now.AddDays(-10),
             Publisher = "Test Publisher",
@@ -1454,7 +1430,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567892",
             TotalVolumes = 5,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/regular",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1465,7 +1441,7 @@ public class ParserServiceTests : IDisposable
             Description = "Regular edition"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(secondParsedInfo);
+        var result = await _parserService.Parse(secondParsedInfo);
 
         // Assert - Should create a new volume since title is different
         Assert.Equal(State.Added, result);
@@ -1495,7 +1471,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Completed,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/emptyauthor",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1507,7 +1483,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1539,7 +1515,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1550,7 +1526,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Act - Update with same age restriction
         var updatedParsedInfo = new ParsedInfo
@@ -1566,7 +1542,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1577,7 +1553,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
@@ -1605,7 +1581,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 0, // Initially unknown
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1616,7 +1592,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo);
 
         // Verify initial state
         using (var context = _dbContextFactory.CreateDbContext())
@@ -1640,7 +1616,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 10, // Now known
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1651,7 +1627,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo);
 
         // Assert
         using var context2 = _dbContextFactory.CreateDbContext();
@@ -1678,18 +1654,18 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/waspreorder",
             PreorderStartDate = DateTimeOffset.Now.AddDays(-30),
             CountryCode = "uk",
-            IsPreorder = true, // Was a preorder
+            IsPreorder = true,
             AgeRestrictions = 16,
             CanBePublished = true,
             SeriesType = SeriesType.Manga,
             Description = "Test description"
         };
 
-        await _parserService.CreateOrUpdateFromParsedInfoAsync(preorderParsedInfo);
+        await _parserService.Parse(preorderParsedInfo);
 
         // Get the original PreorderStart
         DateTimeOffset? originalPreorderStart;
@@ -1715,7 +1691,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://example.com/waspreorder",
             PreorderStartDate = DateTimeOffset.Now.AddDays(-30),
             CountryCode = "uk",
@@ -1726,7 +1702,7 @@ public class ParserServiceTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(releasedParsedInfo);
+        var result = await _parserService.Parse(releasedParsedInfo);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -1757,7 +1733,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "Original",
+            OriginalSeriesTitle = "Original",
             Url = "https://newpublisher.com/shop/volume1",
             PreorderStartDate = null,
             CountryCode = "uk",
@@ -1769,7 +1745,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1800,7 +1776,7 @@ public class ParserServiceTests : IDisposable
             Isbn = "978-1234567890",
             TotalVolumes = 1,
             SeriesStatus = SeriesStatus.Ongoing,
-            OriginalSeriesName = "日本シリーズ",
+            OriginalSeriesTitle = "日本シリーズ",
             Url = "https://example.com/japan",
             PreorderStartDate = null,
             CountryCode = "jp", // Valid country code that exists in test data
@@ -1812,7 +1788,7 @@ public class ParserServiceTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.CreateOrUpdateFromParsedInfoAsync(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1828,86 +1804,5 @@ public class ParserServiceTests : IDisposable
         Assert.NotNull(series.Publisher.Country);
         Assert.Equal("jp", series.Publisher.Country.CountryCode);
         Assert.Equal("Japan", series.Publisher.Country.Name);
-    }
-}
-
-// Helper class for creating DbContextFactory
-public class TestDbContextFactory : IDbContextFactory<MangaDbContext>
-{
-    private readonly DbContextOptions<MangaDbContext> _options;
-
-    public TestDbContextFactory(DbContextOptions<MangaDbContext> options)
-    {
-        _options = options;
-    }
-
-    public MangaDbContext CreateDbContext()
-    {
-        return new TestMangaDbContext(_options);
-    }
-}
-
-// Test-specific DbContext that ignores audit requirements
-public class TestMangaDbContext : MangaDbContext
-{
-    public TestMangaDbContext(DbContextOptions<MangaDbContext> options) : base(options)
-    {
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        
-        // Make audit fields optional for testing
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            var createdByProperty = entityType.FindProperty("CreatedBy");
-            if (createdByProperty != null)
-            {
-                createdByProperty.IsNullable = true;
-            }
-        }
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        // Set audit fields automatically for testing
-        var entries = ChangeTracker.Entries()
-            .Where(e => e.Entity is BaseEntity &&
-                        (e.State == EntityState.Added || e.State == EntityState.Modified));
-
-        foreach (var entry in entries)
-        {
-            var entity = (BaseEntity)entry.Entity;
-            
-            if (entry.State == EntityState.Added)
-            {
-                entity.CreatedAt = DateTimeOffset.Now;
-                entity.CreatedBy = entity.CreatedBy ?? "TestSystem";
-            }
-            else if (entry.State == EntityState.Modified)
-            {
-                entity.UpdatedAt = DateTimeOffset.Now;
-                entity.UpdatedBy = "TestSystem";
-            }
-        }
-
-        return base.SaveChangesAsync(cancellationToken);
-    }
-}
-
-// Helper class for creating service scopes
-public class TestServiceScopeFactory : IServiceScopeFactory
-{
-    private readonly IServiceScope _scope;
-
-    public TestServiceScopeFactory(IServiceScope scope)
-    {
-        _scope = scope;
-    }
-
-    public IServiceScope CreateScope()
-    {
-        return _scope;
     }
 }

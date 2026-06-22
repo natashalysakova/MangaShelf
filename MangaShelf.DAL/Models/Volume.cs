@@ -3,11 +3,11 @@
 public class Volume : BaseEntity
 {
     public string PublicId { get; set; } = Guid.NewGuid().ToString();
-    public required string Title { get; set; }
-    public int Number { get; set; }
+    public string? Title { get; set; }
+    public int? Number { get; set; }
     public string? ISBN { get; set; }
 
-    public bool OneShot { get; set; }
+    //public bool OneShot { get; set; }
     public bool SingleIssue { get; set; }
     public int AgeRestriction { get; set; }
 
@@ -21,7 +21,7 @@ public class Volume : BaseEntity
 
     public bool IsPreorder { get; set; }
     public DateTimeOffset? PreorderStart { get; set; }
-    public DateTimeOffset? ReleaseDate { get; set; }
+    public required DateTimeOffset ReleaseDate { get; set; }
 
     public double AvgRating { get; set; }
 
@@ -35,12 +35,32 @@ public class Volume : BaseEntity
     public virtual ICollection<Ownership> Owners { get; set; } = new List<Ownership>();
     public virtual ICollection<Reading> Readers { get; set; } = new List<Reading>();
     public virtual ICollection<Likes> Likes { get; set; } = new List<Likes>();
+    public virtual ICollection<VolumeHistory> History { get; set; } = new List<VolumeHistory>();
+
+    public string GetFullVolumeName()
+    {
+        if (Series!.Status == SeriesStatus.OneShot)
+        {
+            return Series.Title;
+        }
+        
+        var titlePart = string.IsNullOrWhiteSpace(Title)
+             ? (Number.HasValue ? $"Vol. {Number.Value}" : string.Empty)
+             : Title;
+             
+         return string.IsNullOrWhiteSpace(titlePart)
+             ? Series.Title
+             : $"{Series.Title} - {titlePart}";
+    }
 }
+
+
 
 
 [Flags]
 public enum VolumeType
-{
+{   
+    NotSpecified = 0,
     Physical = 1,
     Digital = 2,
 }

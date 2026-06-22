@@ -1,38 +1,91 @@
 ﻿@page "/preorders"
 @using MangaShelf.BL.Services
 @using System.Security.Claims
+@using MangaShelf.Components.Elements.SmallCard
+@using MangaShelf.DAL.Models
+
+@inherits UserContextComponent
 
 @inject IUserLibraryService UserLibraryService
-<h3>Preordres</h3>
+@inject IUiLocalizationService Localizer
+<h3>@Localizer["Preorders"]</h3>
 
-@if(UserLibraryDto != null)
+@if (UserLibraryDto != null)
 {
-    @foreach(var preorder in UserLibraryDto.Volumes)
-    {
-        <MudCard Class="mb-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h6">@preorder.VolumeTitle</MudText>
-                <MudText Typo="Typo.subtitle2">@preorder.SeriesTitle</MudText>
-                <MudText Typo="Typo.body2">Release Date: @preorder.ReleaseDate?.ToString("dd.MM.yyyy")</MudText>
-                <MudText>@preorder.IsPreorderDue</MudText>
-            </MudCardContent>
-        </MudCard>
-    }
+    <MudGrid>
+        <MudItem sm="12" md="6">
+            <MudPaper Class="paper-manga-panel p-4" Elevation="0">
+                @if (!UserLibraryDto.Volumes.Any())
+                {
+                    <MudItem sm="12">
+                        <MudAlert Severity="Severity.Normal">@Localizer["NoPreorders"]</MudAlert>
+                    </MudItem>
+                }
+                <MudGrid>
+                    @foreach (var preorder in UserLibraryDto.Volumes)
+                    {
+                        var cardClass = "m-1 p-3 " + (preorder.IsPreorderDue ? "expired-preorder" :
+               "normal-preorder");
+                        <MudItem xs="6" sm="4" >
+                            <MudStack Spacing="1" AlignItems="AlignItems.Center" class="@cardClass">
+                                <div style="width: 120px;height: 170px;">
+                                    <SmallCard ShowButtons="true" VolumeId="@preorder.VolumeId"
+                                               OnStatusChange="@ReloadUserLibrary" />
+
+                                </div>
+                                @if (preorder.IsPreorderDue)
+                                {
+                                    <MudText Color="Color.Error">@Localizer["PreorderIsDue"]</MudText>
+                                    <MudText Color="Color.Error">@preorder.ReleaseDate?.ToString("d")</MudText>
+                                }
+                                else if (preorder.DaysTillRelease == 0)
+                                {
+                                    <MudText>@Localizer["Release"]</MudText>
+                                    <MudText Color="Color.Success">@Localizer["Today"]</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>@Localizer["DaysTillRelease"]</MudText>
+                                    <MudText>@FormatDays(preorder.DaysTillRelease)</MudText>
+                                }
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudPaper>
+        </MudItem>
+        <MudItem sm="12" md="6">
+            <MudPaper Class="paper-manga-panel p-4" Elevation="0">
+                <VolumeHistoryView VolumeHistory="UserLibraryDto.Updates" GroupedByDate="true" />
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 }
 
-@if(errorMessage != null)
+
+@if (errorMessage != null)
 {
-    
+    <MudText Color="Color.Error">@errorMessage</MudText>
 }
 
 @code {
     [CascadingParameter]
     public required Task<AuthenticationState> AuthStateTask { get; set; }
 
-    private UserLibraryDto UserLibraryDto;
-    private string errorMessage;
+    private UserLibraryDto? UserLibraryDto;
+    private string? errorMessage;
 
     protected override async Task OnParametersSetAsync()
+    {
+        await LoadUserLibrary();
+    }
+
+    private async Task ReloadUserLibrary(VolumeStatus status)
+    {
+        await LoadUserLibrary();
+    }
+
+    private async Task LoadUserLibrary()
     {
         try
         {
@@ -50,10 +103,20 @@
         }
     }
 
-    protected async Task<string?> GetUserId()
+    private string FormatDays(int days)
     {
-        var authState = await AuthStateTask;
-        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return userId;
+        var lastDigit = days % 10;
+        if (lastDigit == 1 && days != 11)
+        {
+            return Localizer["OneDay"].Value.Replace("{count}", days.ToString());
+        }
+        else if (lastDigit >= 2 && lastDigit <= 4 && (days < 10 || days > 20))
+        {
+            return Localizer["FewDays"].Value.Replace("{count}", days.ToString());
+        }
+        else
+        {
+            return Localizer["Days"].Value.Replace("{count}", days.ToString());
+        }
     }
 }

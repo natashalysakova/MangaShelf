@@ -96,6 +96,18 @@ public abstract class BaseParser : IPublisherParser
         }
     }
 
+    private static DateTimeOffset? EnsureLocalOffset(DateTimeOffset? value)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        var dateTime = value.Value.DateTime;
+        var offset = TimeZoneInfo.Local.GetUtcOffset(dateTime);
+        return new DateTimeOffset(dateTime, offset);
+    }
+
     public async Task<ParsedInfo> Parse(string url, string html, CancellationToken token)
     {
         _isRunning = true;
@@ -112,15 +124,15 @@ public abstract class BaseParser : IPublisherParser
                 VolumeNumber = GetVolumeNumber(document),
                 Series = GetSeries(document),
                 Cover = GetCover(document),
-                Release = GetReleaseDate(document),
+                Release = EnsureLocalOffset(GetReleaseDate(document)),
                 Publisher = GetPublisher(document),
                 VolumeType = GetVolumeType(document),
                 Isbn = GetISBN(document),
                 TotalVolumes = GetTotalVolumes(document),
                 SeriesStatus = GetSeriesStatus(document),
-                OriginalSeriesName = GetOriginalSeriesName(document),
+                OriginalSeriesTitle = GetOriginalSeriesName(document),
                 Url = url,
-                PreorderStartDate = GetSaleStartDate(document),
+                PreorderStartDate = EnsureLocalOffset(GetSaleStartDate(document)),
                 CountryCode = GetCountryCode(document),
                 IsPreorder = GetIsPreorder(document),
                 AgeRestrictions = GetAgeRestriction(document),

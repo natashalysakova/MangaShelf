@@ -13,22 +13,13 @@
     <MudGrid Spacing="6">
 
         <MudItem xs="12">
-            <MudText Typo="Typo.h4">@Volume.Series.Title @Volume.Title</MudText>
-            <MudText Typo="Typo.caption">@Volume.Series.OriginalName</MudText>
+            <MudText Typo="Typo.h4">@Volume.FullTitle</MudText>
+            <MudText Typo="Typo.caption">@Volume.Series.OriginalTitle</MudText>
             <MudText Typo="Typo.h4"></MudText>
         </MudItem>
         <MudItem xs="12">
             <AdminVolumePanel Volume="@Volume" />
         </MudItem>
-        @if (Volume.IsPreorder)
-        {
-            <MudItem xs="12">
-                <MudAlert Severity="Severity.Warning" Elevation="0">
-                    @Localizer["ThisIsPreorderVolume"]
-                    @Volume.ReleaseDate?.ToString("dd.MM.yyyy")
-                </MudAlert>
-            </MudItem>
-        }
         <MudItem xs="12">
             <MudStack Row Breakpoint="Breakpoint.SmAndDown">
                 <MudItem xs="12" md="9">

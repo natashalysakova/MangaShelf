@@ -12,7 +12,8 @@ public interface IVolumeService : IService
     Task<Volume?> GetFullVolumeByIdAsync(Guid volumeId, CancellationToken token = default);
     
     Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions, bool showDeleted = false, CancellationToken token = default);
-
+    Task<VolumeEditDto> GetFullVolumeForEdit(Guid volumeId, CancellationToken token = default);
+    Task<VolumeEditDto> Update(VolumeEditDto volume, CancellationToken token = default);
     Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse, CancellationToken token = default);
     Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken);
     
@@ -22,10 +23,11 @@ public interface IVolumeService : IService
     Task<IEnumerable<CardVolumeDto>> GetNewestReleases(int count = 6, CancellationToken token = default);
 
     Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(Guid seriesId, CancellationToken token = default);
-
+    Task<CardVolumeDto> GetVolumeCardById(Guid volumeId, CancellationToken token = default);
     Task<VolumeDto?> GetFullVolumeByPublicIdAsync(string volumePublicId, CancellationToken token = default);
     Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string userIdentityId, CancellationToken token = default);
     Task<VolumeStatsDto> GetVolumeStats(Guid volumeId, CancellationToken token = default);
+    Task<IEnumerable<UserVolumeCard>> GetUserVolumes(string userIdentityId, IUserShelfFilterOptions filterOptions, CancellationToken token = default);
 
     Task<(UserVolumeStatusDto, VolumeStatsDto)> ToggleWishlist(Guid volumeId, string userIdentityId, CancellationToken token = default);
     Task<(UserVolumeStatusDto, VolumeStatsDto)> ToggleLike(Guid volumeId, string userIdentityId, CancellationToken token = default);

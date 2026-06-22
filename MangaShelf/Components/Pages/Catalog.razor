@@ -11,6 +11,8 @@
 @inject IUiLocalizationService Localizer
 @inject ProtectedLocalStorage ProtectedLocalStorage
 
+@inherits UserContextComponent
+
 <MudPaper Class="p-4 mb-4" Elevation="3" Style="background-color: transparent">
     <MudStack Row>
 
@@ -47,9 +49,9 @@
                 ToggledIcon="@Icons.Material.Filled.Sort" ToggledColor="@Color.Success" />
 
             <MudChipSet @bind-SelectedValues="SelectedReleaseFilter" SelectionMode="SelectionMode.MultiSelection"
-                Variant="Variant.Text" Color="Color.Info">
-                <MudChip Value="ReleaseFilter.Preorder" Text="@Localizer[ReleaseFilter.Preorder.ToString()]" />
-                <MudChip Value="ReleaseFilter.Released" Text="@Localizer[ReleaseFilter.Released.ToString()]" />
+                Variant="Variant.Text">
+                <MudChip Color="Color.Secondary" Value="ReleaseFilter.Preorder" Text="@Localizer[ReleaseFilter.Preorder.ToString()]" />
+                <MudChip Color="Color.Tertiary" Value="ReleaseFilter.Released" Text="@Localizer[ReleaseFilter.Released.ToString()]" />
             </MudChipSet>
 
         </MudStack>
@@ -357,16 +359,5 @@
 
         // Score decreases as position increases and as length difference increases
         return 0.5 - (0.01 * position) - (0.001 * (normalizedItem.Length - normalizedSearch.Length));
-    }
-
-    [CascadingParameter]
-    public required Task<AuthenticationState> AuthStateTask { get; set; }
-
-    private async Task<string?> GetUserId()
-    {
-        var authState = await AuthStateTask;
-        var user = authState.User;
-        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return userId;
-    }   
+    }  
 }

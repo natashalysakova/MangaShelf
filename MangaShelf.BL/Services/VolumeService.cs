@@ -11,7 +11,10 @@ using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Services;
 
-public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<MangaDbContext> dbContextFactory, IImageManager imageManager) : IVolumeService
+public class VolumeService(
+    ILogger<VolumeService> logger, 
+    IDbContextFactory<MangaDbContext> dbContextFactory, 
+    IImageManager imageManager) : IVolumeService
 {
     public async Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IFilterOptions? paginationOptions = default, CancellationToken token = default)
     {
@@ -98,20 +101,7 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
             result = result.IgnoreQueryFilters().Where(x => x.IsDeleted);
         }
 
-        if (sortDefinitions.Any())
-        {
-            var firstSort = sortDefinitions.First();
-
-            if (firstSort.Descending)
-            {
-                result = result.OrderByDescending(firstSort.SortFunction).AsQueryable();
-            }
-            else
-            {
-                result = result.OrderBy(firstSort.SortFunction).AsQueryable();
-            }
-        }
-        else
+        if (!sortDefinitions.Any())
         {
             result = result
                 .OrderBy(x => x.Series.Title)
@@ -119,6 +109,20 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         }
 
         var resultList = await result.ToListAsync();
+
+        if (sortDefinitions.Any())
+        {
+            var firstSort = sortDefinitions.First();
+
+            if (firstSort.Descending)
+            {
+                resultList = resultList.OrderByDescending(firstSort.SortFunction).ToList();
+            }
+            else
+            {
+                resultList = resultList.OrderBy(firstSort.SortFunction).ToList();
+            }
+        }
 
         if (filterFunctions != null && filterFunctions.Any())
         {
@@ -141,12 +145,12 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
     {
         using var context = dbContextFactory.CreateDbContext();
 
-        var titles = context.Volumes
+        var titles = await context.Volumes
             .AsNoTracking()
             .OrderBy(v => v.Title)
-            .Select(v => v.Title);
+            .ToListAsync(stoppingToken);
 
-        return await titles.ToListAsync(stoppingToken);
+        return titles.Select(v => v.Title).Distinct().ToList();
     }
 
     public async Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string? userId, CancellationToken token = default)
@@ -406,15 +410,16 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
         reading.UserId = user.Id;
 
+        DetachExisting(reading, context);
+
+        context.Readings.Update(reading);
+
         var avgRating = volume.Readers.Where(x => x.Rating != null && x.Rating.Value != 0);
         if (avgRating.Any())
         {
             volume.AvgRating = avgRating.Average(x => x.Rating!.Value);
         }
 
-        DetachExisting(reading, context);
-
-        context.Readings.Update(reading);
         await context.SaveChangesAsync(token);
 
         return (await GetVolumeStatusInfo(volume.Id, user.IdentityUserId), await GetVolumeStats(volume.Id));
@@ -481,10 +486,205 @@ public class VolumeService(ILogger<VolumeService> logger, IDbContextFactory<Mang
         var context = dbContextFactory.CreateDbContext();
         return context.Ownerships.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, token);
     }
-}
 
-public class SortDefinitions<T>
-{
-    public Func<T, object> SortFunction { get; set; }
-    public bool Descending { get; set; }
+    public async Task<CardVolumeDto> GetVolumeCardById(Guid volumeId, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        var volume = await context.Volumes.Include(x => x.Series).FirstAsync(x => x.Id == volumeId);
+        return volume.ToDto();
+    }
+
+    public Task<VolumeEditDto> GetFullVolumeForEdit(Guid volumeId, CancellationToken token = default)
+    {
+        var context = dbContextFactory.CreateDbContext();
+        var volume = context.Volumes
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Authors)
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Publisher)
+            .FirstOrDefault(v => v.Id == volumeId);
+
+        if (volume == null)
+        {
+            throw new Exception("Volume not found");
+        }
+
+        return Task.FromResult(volume.ToEditDto());
+    }
+
+    public async Task<VolumeEditDto> Update(VolumeEditDto volumeDto, CancellationToken token = default)
+    {
+        if (volumeDto == null)
+        {
+            throw new ArgumentNullException(nameof(volumeDto));
+        }
+
+        using var context = dbContextFactory.CreateDbContext();
+
+        var volume = context.Volumes
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Authors)
+            .Include(v => v.Series)
+                .ThenInclude(s => s!.Publisher)
+            .FirstOrDefault(v => v.Id == volumeDto.Id);
+        if (volume == null)
+        {
+            throw new Exception("Volume not found");
+        }
+
+        volume.ReleaseDate = new DateTimeOffset(volumeDto.ReleaseDate!.Value, DateTimeOffset.Now.Offset);
+        volume.PreorderStart = volumeDto.PreorderStart;
+        volume.Title = volumeDto.Title;
+        volume.Number = volumeDto.Number;
+        volume.ISBN = volumeDto.ISBN;
+        volume.AgeRestriction = volumeDto.AgeRestriction;
+        volume.Description = volumeDto.Description;
+
+        volume.Series!.Title = volumeDto.SeriesTitle;
+        volume.Series.OriginalTitle = volumeDto.SeriesOriginalTitle;
+        volume.Series.TotalVolumes = volumeDto.SeriesTotalVolumes;
+        volume.Series.Status = volumeDto.SeriesStatus;
+
+        volume.Type = volumeDto.Type;
+
+        UpdateAuthors(volumeDto, volume);
+
+        await context.SaveChangesAsync(token);
+
+        return volume.ToEditDto();
+    }
+
+    private static void UpdateAuthors(VolumeEditDto volumeDto, Volume volume)
+    {
+        var existingAuthors = volume.Series.Authors.ToList();
+        var updatedAuthors = volumeDto.SeriesAuthors.Select(a => new Author { Name = a.Name }).ToList();
+
+        // Remove authors that are no longer associated
+        foreach (var existingAuthor in existingAuthors)
+        {
+            if (!updatedAuthors.Any(a => a.Name == existingAuthor.Name))
+            {
+                volume.Series.Authors.Remove(existingAuthor);
+            }
+        }
+
+        // Add new authors that are not already associated
+        foreach (var updatedAuthor in updatedAuthors)
+        {
+            if (!existingAuthors.Any(a => a.Name == updatedAuthor.Name))
+            {
+                volume.Series.Authors.Add(updatedAuthor);
+            }
+        }
+    }
+
+    public async Task<IEnumerable<UserVolumeCard>> GetUserVolumes(string userIdentityId, IUserShelfFilterOptions filterOptions, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var user = await context.Users
+            .Include(x => x.Likes)
+            .FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
+
+        if (user == null)
+        {
+            throw new Exception("User not found");
+        }
+
+        var ownerships = await context.Ownerships
+            .Where(o => o.UserId == user.Id)
+            .Include(o => o.Volume)
+                .ThenInclude(v => v!.Series)
+            .OrderByDescending(o => o.Date)
+            .ToListAsync(token);
+
+        var query = ownerships
+            .GroupBy(o => o.VolumeId)
+            .Select(g => g.First())
+            .ToList();
+
+        var volumeIds = query.Select(o => o.VolumeId).ToList();
+
+        var readings = await context.Readings
+            .Where(r => r.UserId == user.Id && volumeIds.Contains(r.VolumeId))
+            .ToListAsync(token);
+
+        var likedVolumeIds = user.Likes
+            .Where(x => x.Status == LikeStatus.Liked)
+            .Select(x => x.VolumeId)
+            .ToHashSet();
+
+        return query
+            .Where(o => MatchesShelfFilter(o, readings, likedVolumeIds, filterOptions))
+            .Select(o => o.ToUserVolumeCard(readings));
+    }
+
+    private static bool MatchesShelfFilter(
+        Ownership ownership,
+        IEnumerable<Reading> readings,
+        ISet<Guid> likedVolumeIds,
+        IUserShelfFilterOptions filterOptions)
+    {
+        if (filterOptions.CurrentOwnershipStatuses?.Any() == true && !filterOptions.CurrentOwnershipStatuses.Contains(ownership.Status))
+        {
+            return false;
+        }
+
+        var volumeReadings = readings
+            .Where(r => r.VolumeId == ownership.VolumeId)
+            .ToList();
+
+        var currentReadingStatus = volumeReadings
+            .OrderByDescending(r => r.StartedAt)
+            .FirstOrDefault()?.Status ?? ReadingStatus.None;
+
+        if (filterOptions.CurrentReadingStatuses?.Any() == true && !filterOptions.CurrentReadingStatuses.Contains(currentReadingStatus))
+        {
+            return false;
+        }
+
+        if (filterOptions.IsLiked.HasValue && filterOptions.IsLiked.Value != likedVolumeIds.Contains(ownership.VolumeId))
+        {
+            return false;
+        }
+
+        if (filterOptions.MinRating.HasValue || filterOptions.MaxRating.HasValue)
+        {
+            var ratings = volumeReadings
+                .Where(r => r.Rating.HasValue)
+                .Select(r => r.Rating!.Value)
+                .ToList();
+
+            if (!ratings.Any())
+            {
+                return false;
+            }
+
+            var averageRating = ratings.Average();
+
+            if (filterOptions.MinRating.HasValue && averageRating < filterOptions.MinRating.Value)
+            {
+                return false;
+            }
+
+            if (filterOptions.MaxRating.HasValue && averageRating > filterOptions.MaxRating.Value)
+            {
+                return false;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(filterOptions.SearchTerm))
+        {
+            var searchTerm = filterOptions.SearchTerm.Trim();
+            var fullTitle = ownership.Volume?.GetFullVolumeName() ?? string.Empty;
+            var number = ownership.Volume?.Number?.ToString() ?? string.Empty;
+
+            if (!fullTitle.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) &&
+                !number.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

@@ -1,0 +1,65 @@
+@page "/admin/updates"
+@using MangaShelf.BL.Services
+@inject IVolumeHistoryService VolumeHistoryService
+@inject ILogger<Updates> Logger
+@inject IAdminLocalizationService Localizer
+
+<h3>@Localizer["Recent Volume Updates"]</h3>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudDateRangePicker DateRange="@_dateRange" Margin="Margin.Dense" Clearable="false" 
+                        PlaceholderStart="@Localizer["Start Date"]" 
+                        PlaceholderEnd="@Localizer["End Date"]" Label="@Localizer["Range"]"
+                        DateRangeChanged="OnDateRangeChanged"/>
+</MudPaper>
+
+@if(VolumeHistories.Any())
+{
+    <MudPaper Class="pa-4 mt-4 mb-4">
+        <MudStack Spacing="2">
+            @foreach (var history in VolumeHistories.OrderByDescending(x => x.Date))
+            {
+                <VolumeHistoryRecord VolumeHistory="history" GroupedByDate="false" />
+            }
+        </MudStack>
+    </MudPaper>
+}
+else
+{
+    <p>@Localizer["No updates found for the selected date range."]</p>
+}
+
+@code{
+
+    IEnumerable<VolumeHistoryDto> VolumeHistories { get; set; } = Array.Empty<VolumeHistoryDto>();
+
+    DateRange _dateRange = new DateRange(DateTime.Now.AddDays(-7), DateTime.Now);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVolumeHistoriesAsync();
+    }
+
+    private async Task OnDateRangeChanged(DateRange range)
+    {
+        _dateRange = range;
+        await LoadVolumeHistoriesAsync();
+    }
+
+    private async Task LoadVolumeHistoriesAsync()
+    {
+        try
+        {
+            var start = _dateRange.Start ?? DateTime.Now.AddDays(-7);
+            var end = _dateRange.End ?? DateTime.Now;
+
+            VolumeHistories = await VolumeHistoryService.GetVolumeHistoryAsync(start, end, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load volume history for the selected date range");
+        }
+    }
+
+    
+}

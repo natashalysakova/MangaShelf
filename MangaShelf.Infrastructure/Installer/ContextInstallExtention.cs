@@ -39,7 +39,7 @@ public static class ContextInstallExtention
 
         builder.Services.AddIdentityCore<MangaIdentityUser>(options =>
          {
-             options.SignIn.RequireConfirmedAccount = true;
+             options.SignIn.RequireConfirmedAccount = false;
          })
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<MangaIdentityDbContext>()
@@ -86,6 +86,7 @@ public static class ContextInstallExtention
             {
                 mysqlOptions.EnableRetryOnFailure();
             })
+            .AddInterceptors(new WriteVolumeHistoryInterceptor())
             .AddInterceptors(new AuditInterceptor());
         });
 

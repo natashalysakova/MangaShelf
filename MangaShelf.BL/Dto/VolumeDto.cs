@@ -9,12 +9,10 @@ public class VolumeDto
     public Guid Id { get; set; }
     public required string PublicId { get; set; }
 
-    public required string Title { get; set; }
+    public required string FullTitle { get; set; }
     public int Number { get; set; }
     public string? ISBN { get; set; }
 
-    public bool OneShot { get; set; }
-    public bool SingleIssue { get; set; }
     public int AgeRestriction { get; set; }
 
     public string? CoverImageUrl { get; set; }

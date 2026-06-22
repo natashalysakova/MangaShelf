@@ -1,26 +1,28 @@
 name: manga-shelf
-services:
 
+x-db-env: &db-env
+  ConnectionStrings__MangaDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${MANGA_DATABASE}"
+  ConnectionStrings__AccountsDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${ACCOUNTS_DATABASE}"
+  ConnectionStrings__SystemDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${SYSTEM_DATABASE}"
+
+services:
   chrome:
-    container_name: chrome
     image: browserless/chrome
-    ports:
-      - '5300:3000'
     networks:
       - manga-network
  
   mangashelf.migration:
-    container_name: mangashelf.migration
     image: ${DOCKER_REGISTRY}manga-shelf-migration:latest
     networks: 
       - manga-network
-    environment:
-      DOTNET_ENVIRONMENT: Production
-      ConnectionStrings__MangaDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${MANGA_DATABASE}"
-      ConnectionStrings__AccountsDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${ACCOUNTS_DATABASE}"
-      ConnectionStrings__SystemDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${SYSTEM_DATABASE}"
     env_file:
       - .env
+    environment:
+      DOTNET_ENVIRONMENT: ${DOTNET_ENVIRONMENT:-Production}
+      MANGASHELF_WEBROOT_PATH: /app/wwwroot
+      <<: *db-env
+    volumes:
+      - images:/app/wwwroot/images:rw
     restart: on-failure
     depends_on:
         mangashelf.db:
@@ -28,20 +30,16 @@ services:
 
   mangashelf:
     image: ${DOCKER_REGISTRY}manga-shelf-ui:latest
-    container_name: mangashelf
-    ports:
-      - 5299:8080
     networks: 
       - manga-network
-    environment:
-        ASPNETCORE_ENVIRONMENT: Production
-        ASPNETCORE_HTTP_PORTS: 8080
-        ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
-        ConnectionStrings__MangaDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${MANGA_DATABASE}"
-        ConnectionStrings__AccountsDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${ACCOUNTS_DATABASE}"
-        ConnectionStrings__SystemDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${SYSTEM_DATABASE}"
     env_file:
       - .env
+    environment:
+        ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+        ASPNETCORE_HTTP_PORTS: 8080
+        ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+        MANGASHELF_WEBROOT_PATH: /app/wwwroot
+        <<: *db-env
     volumes:
       - images:/app/wwwroot/images:rw
     restart: always
@@ -51,21 +49,19 @@ services:
 
 
   mangashelf.parser:
-    container_name: mangashelf.parser
     image: ${DOCKER_REGISTRY}manga-shelf-parser:latest
     networks: 
       - manga-network
-    environment:
-      DOTNET_ENVIRONMENT: Production
-      ASPNETCORE_HTTP_PORTS: 8080
-      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
-      ConnectionStrings__MangaDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${MANGA_DATABASE}"
-      ConnectionStrings__AccountsDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${ACCOUNTS_DATABASE}"
-      ConnectionStrings__SystemDb: "server=${MANGA_HOST};user id=${MANGA_USER};password=${MANGA_PASSWORD};database=${SYSTEM_DATABASE}"
-    volumes:
-      - images:/app/wwwroot/images:rw
     env_file:
       - .env
+    environment:
+      DOTNET_ENVIRONMENT: ${DOTNET_ENVIRONMENT:-Production}
+      ASPNETCORE_HTTP_PORTS: 8080
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      MANGASHELF_WEBROOT_PATH: /app/wwwroot
+      <<: *db-env
+    volumes:
+      - images:/app/wwwroot/images:rw
     restart: always
     depends_on:
         chrome:
@@ -74,10 +70,7 @@ services:
             condition: service_completed_successfully
 
   mangashelf.db:
-    container_name: mangashelf.db
     image: mysql:8.0
-    ports:
-      - 3303:3306
     networks:
       - manga-network
     volumes:
@@ -103,7 +96,5 @@ volumes:
   dbdata:
     driver: local
   images:
-    driver: local
-  accdata:
     driver: local
 

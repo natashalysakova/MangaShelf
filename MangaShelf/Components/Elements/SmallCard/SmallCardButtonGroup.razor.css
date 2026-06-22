@@ -1,0 +1,5 @@
+.preorder-arrived-btn:hover,
+.preorder-arrived-btn:focus-visible {
+    background-color: var(--mud-palette-secondary) !important;
+    color: var(--mud-palette-secondary-text) !important;
+}

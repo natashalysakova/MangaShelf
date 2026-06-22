@@ -1,17 +1,27 @@
 ﻿using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Linq.Expressions;
 
 namespace MangaShelf.DAL;
 
 public class MangaDbContext : DbContext
 {
+    private static readonly ValueConverter<DateTimeOffset, DateTime> DateTimeOffsetUtcConverter = new(
+        value => value.UtcDateTime,
+        value => new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc), TimeSpan.Zero));
+
+    private static readonly ValueConverter<DateTimeOffset?, DateTime?> NullableDateTimeOffsetUtcConverter = new(
+        value => value.HasValue ? value.Value.UtcDateTime : null,
+        value => value.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(value.Value, DateTimeKind.Utc), TimeSpan.Zero) : null);
+
     // Domain tables
     public DbSet<Country> Countries { get; set; }
     public DbSet<Publisher> Publishers { get; set; }
     public DbSet<Series> Series { get; set; }
     public DbSet<Volume> Volumes { get; set; }
+    public DbSet<VolumeHistory> VolumeHistory { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Ownership> Ownerships { get; set; }
     public DbSet<Reading> Readings { get; set; }
@@ -35,10 +45,29 @@ public class MangaDbContext : DbContext
                 modelBuilder.Entity(entityType.ClrType)
                     .Property(nameof(IEntity.Id))
                     .ValueGeneratedOnAdd();
+            }
 
-                // Apply a global query filter to exclude soft-deleted entities
+            // Apply a global query filter to exclude soft-deleted entities
+            if (typeof(IDeletableEntity).IsAssignableFrom(entityType.ClrType))
+            {
                 modelBuilder.Entity(entityType.ClrType)
                     .HasQueryFilter(ConvertToDeleteFilter(entityType.ClrType));
+            }
+
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTimeOffset))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(property.Name)
+                        .HasConversion(DateTimeOffsetUtcConverter);
+                }
+                else if (property.ClrType == typeof(DateTimeOffset?))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property(property.Name)
+                        .HasConversion(NullableDateTimeOffsetUtcConverter);
+                }
             }
         }
 
@@ -51,8 +80,23 @@ public class MangaDbContext : DbContext
         modelBuilder.Entity<Reading>().ToTable("Reading");
         modelBuilder.Entity<Ownership>().ToTable("Ownership");
 
-        //modelBuilder.Entity<Volume>()
-        //    .HasIndex(v=> new { v.SeriesId, v.Number, v.Title }).IsUnique();
+
+
+        modelBuilder.Entity<Volume>()
+            .HasOne(v => v.Series)
+            .WithMany(s => s.Volumes)
+            .HasForeignKey(v => v.SeriesId);
+
+        modelBuilder.Entity<VolumeHistory>()
+            .HasOne(vh => vh.Volume)
+            .WithMany(v => v.History)
+            .HasForeignKey(vh => vh.VolumeId);
+
+        modelBuilder.Entity<VolumeHistory>()
+            .HasIndex(vh => new { vh.VolumeId, vh.Timestamp });
+
+        modelBuilder.Entity<Volume>()
+            .HasIndex(v => new { v.SeriesId, v.Number, v.Title }).IsUnique();
 
         modelBuilder.Entity<Likes>()
             .HasIndex(l => new { l.UserId, l.VolumeId }).IsUnique();
@@ -62,8 +106,6 @@ public class MangaDbContext : DbContext
 
         modelBuilder.Entity<Author>()
             .HasIndex(a => a.Name);
-
-
     }
 
     private static LambdaExpression ConvertToDeleteFilter(Type type)

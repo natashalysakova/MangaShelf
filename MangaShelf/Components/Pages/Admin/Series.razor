@@ -34,9 +34,9 @@ else
                         <MudStack Spacing="1">
                             <MudText Typo="Typo.h5" Class="series-title">@series.Title</MudText>
 
-                            @if (!string.IsNullOrEmpty(series.OriginalName))
+                            @if (!string.IsNullOrEmpty(series.OriginalTitle))
                             {
-                                <MudText Typo="Typo.subtitle1" Class="series-subtitle">@series.OriginalName</MudText>
+                                <MudText Typo="Typo.subtitle1" Class="series-subtitle">@series.OriginalTitle</MudText>
                             }
 
                             <MudStack Row Spacing="1" Class="mt-1">

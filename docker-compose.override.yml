@@ -1,29 +1,34 @@
 services:
+  chrome:
+    ports:
+      - "5300:3000"
+
+  mangashelf.db:
+    ports:
+      - "3303:3306"
+
   mangashelf:
     build:
       context: .
       dockerfile: MangaShelf/Dockerfile
+    ports:
+      - "5299:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    #   - ASPNETCORE_HTTPS_PORTS=8081
-    # ports:
-    #   - 5499:8081
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      ASPNETCORE_ENVIRONMENT: Development
+      MANGASHELF_WEBROOT_PATH: /app/wwwroot
 
   mangashelf.parser:
     build:
-        context: .
-        dockerfile: MangaShelf.Parser/Dockerfile
+      context: .
+      dockerfile: MangaShelf.Parser/Dockerfile
     environment:
-        DOTNET_ENVIRONMENT: Development
+      DOTNET_ENVIRONMENT: Development
+      MANGASHELF_WEBROOT_PATH: /app/wwwroot
 
   mangashelf.migration:
     build:
-        context: .
-        dockerfile: MangaShelf.Migration/Dockerfile
+      context: .
+      dockerfile: MangaShelf.Migration/Dockerfile
     environment:
-        DOTNET_ENVIRONMENT: Development
+      DOTNET_ENVIRONMENT: Development
+      MANGASHELF_WEBROOT_PATH: /app/wwwroot

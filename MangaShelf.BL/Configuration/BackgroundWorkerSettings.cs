@@ -4,7 +4,6 @@ namespace MangaShelf.BL.Configuration;
 
 public class BackgroundWorkerSettings : IConfigurationSection
 {
-    public bool Enabled { get; set; }
     public TimeSpan StartDelay { get; set; }
     public TimeSpan LoopDelay { get; set; }
 }

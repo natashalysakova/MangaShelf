@@ -11,11 +11,13 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
     private readonly ILogger<BasicHtmlDownloader> _logger;
     private readonly HtmlDownloaderSettings _options;
     private readonly HttpClient _httpClient;
+    private readonly string _browserWSEndpoint;
 
     public AdvancedHtmlDownloader(ILogger<BasicHtmlDownloader> logger, IConfigurationService configurationService)
     {
         _logger = logger;
         _options = configurationService.HtmlDownloader;
+        _browserWSEndpoint = ResolveBrowserWSEndpoint(_options.BrowserWSEndpoint);
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.Clear();
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
@@ -23,11 +25,9 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
     }
     public async Task<string> GetUrlHtml(string url, CancellationToken token = default)
     {
-        var browserUrl = _options.BrowserWSEndpoint;
-
         await using var browser = await Puppeteer.ConnectAsync(new ConnectOptions
         {
-            BrowserWSEndpoint= _options.BrowserWSEndpoint,
+            BrowserWSEndpoint= _browserWSEndpoint,
             //Headless = true,
             //ExecutablePath = executablePath,
             //Args = new[]
@@ -66,5 +66,38 @@ public class AdvancedHtmlDownloader : IHtmlDownloader
         } while (retry < maxretry);
 
         throw new Exception("Cannot access website");
+    }
+
+    private string ResolveBrowserWSEndpoint(string endpoint)
+    {
+        if (string.IsNullOrWhiteSpace(endpoint))
+        {
+            return endpoint;
+        }
+
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+        {
+            return endpoint;
+        }
+
+        var isRunningInContainer = string.Equals(
+            Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+
+        if (isRunningInContainer || !string.Equals(uri.Host, "chrome", StringComparison.OrdinalIgnoreCase))
+        {
+            return endpoint;
+        }
+
+        var uriBuilder = new UriBuilder(uri)
+        {
+            Host = "localhost",
+            Port = 5300
+        };
+
+        var resolvedEndpoint = uriBuilder.Uri.ToString();
+        _logger.LogInformation("Browser websocket endpoint adjusted from {OriginalEndpoint} to {ResolvedEndpoint}", endpoint, resolvedEndpoint);
+        return resolvedEndpoint;
     }
 }

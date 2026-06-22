@@ -45,7 +45,6 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
     {
         public BackgroundWorkerSettings BackgroundWorker => new()
         {
-            Enabled = false,
             StartDelay = TimeSpan.Zero,
             LoopDelay = TimeSpan.Zero
         };
@@ -54,7 +53,8 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
         {
             DelayBetweenRuns = TimeSpan.Zero,
             MaxParallelParsers = 1,
-            ResetNextRun = false
+            ResetNextRun = false,
+            ScheduledJobsEnabled = false
         };
 
         public ParserServiceSettings ParserService => new()

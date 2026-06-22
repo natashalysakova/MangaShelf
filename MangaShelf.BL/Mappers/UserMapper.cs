@@ -1,4 +1,5 @@
 ﻿using MangaShelf.BL.Dto;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Riok.Mapperly.Abstractions;
 
@@ -18,11 +19,11 @@ public static partial class UserMapper
     private static VolumeStatus GetCurrentOwnershipStatus(User user)
     {
         var currentOwnership = user.OwnedVolumes
-            .Where(x=>x.Status != VolumeStatus.Wishlist)
+            .Where(x => x.Status != VolumeStatus.Wishlist)
             .OrderByDescending(o => o.Date)
             .FirstOrDefault();
 
-        if(currentOwnership == null)
+        if (currentOwnership == null)
         {
             return VolumeStatus.None;
         }
@@ -46,6 +47,6 @@ public static partial class UserMapper
     }
     private static bool IsLiked(User user)
     {
-        return user.Likes.Any(x=>x.Status == LikeStatus.Liked);
+        return user.Likes.Any(x => x.Status == LikeStatus.Liked);
     }
 }

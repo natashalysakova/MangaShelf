@@ -17,30 +17,20 @@
             @if (!string.IsNullOrEmpty(OriginalCover))
             {
                 <div class="image-crop-container mb-3" style="position: relative; width: 100%; display: inline-block;">
-                    <img id="cropImage"
-                         src="@OriginalCover"
-                         alt="Volume Cover"
+                    <img id="cropImage" src="@OriginalCover" alt="Volume Cover"
                          style="max-width: 100%; height: auto; display: block;" />
 
                     @if (_showCropPreview && _imageWidth > 0 && _imageHeight > 0)
                     {
-                        <CropPreview Top="@_cropTop"
-                                     Left="@_cropLeft"
-                                     Right="@_cropRight"
-                                     Bottom="@_cropBottom"
-                                     ImageHeight="@_imageHeight"
-                                     ImageWidth="@_imageWidth" />
+                        <CropPreview Top="@_cropTop" Left="@_cropLeft" Right="@_cropRight" Bottom="@_cropBottom"
+                                     ImageHeight="@_imageHeight" ImageWidth="@_imageWidth" />
                     }
                 </div>
 
                 <MudStack Spacing="2">
-                    <MudButton OnClick="AutoCropImage"
-                               Disabled="_processing"
-                               Color="Color.Primary"
-                               Variant="Variant.Filled"
-                               StartIcon="@Icons.Material.Filled.Crop"
-                               FullWidth="true">
-                        @if (_processing)
+                    <MudButton OnClick="AutoCropImage" Disabled="Processing" Color="Color.Primary" Variant="Variant.Filled"
+                               StartIcon="@Icons.Material.Filled.Crop" FullWidth="true">
+                        @if (Processing)
                         {
                             <MudProgressCircular Size="Size.Small" Indeterminate="true" />
                             <span class="ml-2">@Localizer["Processing"]...</span>
@@ -51,12 +41,10 @@
                         }
                     </MudButton>
 
-                    <MudButton OnClick="ToggleManualCrop"
-                               Disabled="_processing"
+                    <MudButton OnClick="ToggleManualCrop" Disabled="Processing"
                                Color="@(_showManualCrop ? Color.Secondary : Color.Default)"
                                Variant="@(_showManualCrop ? Variant.Filled : Variant.Outlined)"
-                               StartIcon="@Icons.Material.Filled.Tune"
-                               FullWidth="true">
+                               StartIcon="@Icons.Material.Filled.Tune" FullWidth="true">
                         @Localizer["ManualCrop"]
                     </MudButton>
                 </MudStack>
@@ -79,41 +67,29 @@
                 <MudGrid Spacing="2">
                     <MudItem xs="12">
                         <MudSlider Value="_cropLeft"
-                                   ValueChanged="@((int value) => { _cropLeft = value; StateHasChanged(); })"
-                                   Min="0"
-                                   Max="@(_imageWidth - 1)"
-                                   Step="1"
-                                   Color="Color.Primary">
+                                   ValueChanged="@((int value) => { _cropLeft = value; StateHasChanged(); })" Min="0"
+                                   Max="@(_imageWidth - 1)" Step="1" Color="Color.Primary">
                             Left: @_cropLeft px
                         </MudSlider>
                     </MudItem>
                     <MudItem xs="12">
                         <MudSlider Value="_cropTop"
-                                   ValueChanged="@((int value) => { _cropTop = value; StateHasChanged(); })"
-                                   Min="0"
-                                   Max="@(_imageHeight - 1)"
-                                   Step="1"
-                                   Color="Color.Primary">
+                                   ValueChanged="@((int value) => { _cropTop = value; StateHasChanged(); })" Min="0"
+                                   Max="@(_imageHeight - 1)" Step="1" Color="Color.Primary">
                             Top: @_cropTop px
                         </MudSlider>
                     </MudItem>
                     <MudItem xs="12">
                         <MudSlider Value="_cropRight"
                                    ValueChanged="@((int value) => { _cropRight = value; StateHasChanged(); })"
-                                   Min="@(_cropLeft + 1)"
-                                   Max="@(_imageWidth - 1)"
-                                   Step="1"
-                                   Color="Color.Primary">
+                                   Min="@(_cropLeft + 1)" Max="@(_imageWidth - 1)" Step="1" Color="Color.Primary">
                             Right: @_cropRight px
                         </MudSlider>
                     </MudItem>
                     <MudItem xs="12">
                         <MudSlider Value="_cropBottom"
                                    ValueChanged="@((int value) => { _cropBottom = value; StateHasChanged(); })"
-                                   Min="@(_cropTop + 1)"
-                                   Max="@(_imageHeight - 1)"
-                                   Step="1"
-                                   Color="Color.Primary">
+                                   Min="@(_cropTop + 1)" Max="@(_imageHeight - 1)" Step="1" Color="Color.Primary">
                             Bottom: @_cropBottom px
                         </MudSlider>
                     </MudItem>
@@ -125,39 +101,21 @@
 
                 <MudGrid Spacing="2">
                     <MudItem xs="6">
-                        <MudNumericField @bind-Value="_cropLeft"
-                                         Label="@Localizer["Left"]"
-                                         Min="0"
-                                         Max="@(_imageWidth - 1)"
-                                         Variant="Variant.Outlined"
-                                         Adornment="Adornment.End"
+                        <MudNumericField @bind-Value="_cropLeft" Label="@Localizer["Left"]" Min="0" Max="@(_imageWidth - 1)"
+                                         Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="px" />
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudNumericField @bind-Value="_cropTop" Label="@Localizer["Top"]" Min="0" Max="@(_imageHeight - 1)"
+                                         Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="px" />
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudNumericField @bind-Value="_cropRight" Label="@Localizer["Right"]" Min="@(_cropLeft + 1)"
+                                         Max="@(_imageWidth - 1)" Variant="Variant.Outlined" Adornment="Adornment.End"
                                          AdornmentText="px" />
                     </MudItem>
                     <MudItem xs="6">
-                        <MudNumericField @bind-Value="_cropTop"
-                                         Label="@Localizer["Top"]"
-                                         Min="0"
-                                         Max="@(_imageHeight - 1)"
-                                         Variant="Variant.Outlined"
-                                         Adornment="Adornment.End"
-                                         AdornmentText="px" />
-                    </MudItem>
-                    <MudItem xs="6">
-                        <MudNumericField @bind-Value="_cropRight"
-                                         Label="@Localizer["Right"]"
-                                         Min="@(_cropLeft + 1)"
-                                         Max="@(_imageWidth - 1)"
-                                         Variant="Variant.Outlined"
-                                         Adornment="Adornment.End"
-                                         AdornmentText="px" />
-                    </MudItem>
-                    <MudItem xs="6">
-                        <MudNumericField @bind-Value="_cropBottom"
-                                         Label="@Localizer["Bottom"]"
-                                         Min="@(_cropTop + 1)"
-                                         Max="@(_imageHeight - 1)"
-                                         Variant="Variant.Outlined"
-                                         Adornment="Adornment.End"
+                        <MudNumericField @bind-Value="_cropBottom" Label="@Localizer["Bottom"]" Min="@(_cropTop + 1)"
+                                         Max="@(_imageHeight - 1)" Variant="Variant.Outlined" Adornment="Adornment.End"
                                          AdornmentText="px" />
                     </MudItem>
                 </MudGrid>
@@ -166,28 +124,16 @@
                     @Localizer["CropSize"]: @(_cropRight - _cropLeft) × @(_cropBottom - _cropTop) px
                 </MudAlert>
 
-                <MudSwitch @bind-Value="_showCropPreview"
-                           Color="Color.Primary"
-                           Label="@Localizer["ShowPreviewOverlay"]"
+                <MudSwitch @bind-Value="_showCropPreview" Color="Color.Primary" Label="@Localizer["ShowPreviewOverlay"]"
                            Class="mt-3" />
 
-                <MudButton OnClick="ApplyManualCrop"
-                           Color="Color.Primary"
-                           Variant="Variant.Filled"
-                           StartIcon="@Icons.Material.Filled.ContentCut"
-                           Disabled="_processing"
-                           FullWidth="true"
-                           Class="mt-3">
+                <MudButton OnClick="ApplyManualCrop" Color="Color.Primary" Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.ContentCut" Disabled="Processing" FullWidth="true" Class="mt-3">
                     @Localizer["ApplyCrop"]
                 </MudButton>
 
-                <MudButton OnClick="ResetCropBoundaries"
-                           Color="Color.Default"
-                           Variant="Variant.Outlined"
-                           StartIcon="@Icons.Material.Filled.Refresh"
-                           Disabled="_processing"
-                           FullWidth="true"
-                           Class="mt-2">
+                <MudButton OnClick="ResetCropBoundaries" Color="Color.Default" Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.Refresh" Disabled="Processing" FullWidth="true" Class="mt-2">
                     @Localizer["ResetBoundaries"]
                 </MudButton>
             </MudPaper>
@@ -199,7 +145,8 @@
                 <MudText Typo="Typo.h6" Class="mb-3">@Localizer["CurrentCroppedVersion"]</MudText>
 
                 <div class="image-crop-preview mb-3">
-                    <MudImage Src="@CroppedCover" Alt="Cropped Preview" Class="rounded-lg" Style="max-width: 100%; height: auto;" />
+                    <MudImage Src="@CroppedCover" Alt="Cropped Preview" Class="rounded-lg"
+                              Style="max-width: 100%; height: auto;" />
                 </div>
             </MudPaper>
         }
@@ -213,12 +160,12 @@
 @code {
 
     [Parameter]
-    public string OriginalCover { get; set; }
+    public required string OriginalCover { get; set; }
     [Parameter]
-    public string CroppedCover { get; set; }
+    public string? CroppedCover { get; set; }
 
-    private bool _loading = true;
-    private bool _processing = false;
+    [Parameter]
+    public bool Processing { get; set; }
 
     // Crop properties
     private bool _showManualCrop = false;
@@ -278,7 +225,7 @@
     {
         try
         {
-            _processing = true;
+            Processing = true;
             StateHasChanged();
 
             // Validate boundaries
@@ -290,8 +237,12 @@
 
             await Task.Run(() =>
             {
-                CroppedCover = ImageManager.CropImage(OriginalCover, _cropLeft, _cropTop, _cropRight, _cropBottom);
-                CroppedCover += $"?v={DateTime.Now.Ticks}";
+                var cropResult = ImageManager.CropImage(OriginalCover, _cropLeft, _cropTop, _cropRight, _cropBottom);
+                if (cropResult != null)
+                {
+                    CroppedCover = cropResult;
+                    CroppedCover += $"?v={DateTime.Now.Ticks}";
+                }
             });
 
 
@@ -307,7 +258,7 @@
         }
         finally
         {
-            _processing = false;
+            Processing = false;
             StateHasChanged();
         }
     }
@@ -316,7 +267,7 @@
     {
         try
         {
-            _processing = true;
+            Processing = true;
             StateHasChanged();
 
             await Task.Run(() =>
@@ -336,7 +287,7 @@
         }
         finally
         {
-            _processing = false;
+            Processing = false;
             StateHasChanged();
         }
     }

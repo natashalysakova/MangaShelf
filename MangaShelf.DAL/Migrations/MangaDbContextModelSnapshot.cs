@@ -59,14 +59,14 @@ namespace MangaShelf.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
@@ -76,7 +76,7 @@ namespace MangaShelf.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -99,14 +99,14 @@ namespace MangaShelf.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("FlagUrl")
@@ -120,7 +120,7 @@ namespace MangaShelf.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -139,14 +139,14 @@ namespace MangaShelf.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
@@ -155,7 +155,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -183,17 +183,17 @@ namespace MangaShelf.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("Date")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
@@ -205,7 +205,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -235,14 +235,14 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<Guid>("CountryId")
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
@@ -252,7 +252,7 @@ namespace MangaShelf.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -274,17 +274,17 @@ namespace MangaShelf.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("FinishedAt")
+                    b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
@@ -296,13 +296,13 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<string>("Review")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("StartedAt")
+                    b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -333,14 +333,14 @@ namespace MangaShelf.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDeleted")
@@ -352,7 +352,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<int>("MalId")
                         .HasColumnType("int");
 
-                    b.Property<string>("OriginalName")
+                    b.Property<string>("OriginalTitle")
                         .HasColumnType("longtext");
 
                     b.Property<string>("PublicId")
@@ -375,7 +375,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -394,14 +394,14 @@ namespace MangaShelf.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("IdentityUserId")
@@ -411,7 +411,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -443,14 +443,14 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<string>("CoverImageUrlSmall")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
@@ -468,16 +468,13 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<bool>("IsPublishedOnSite")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("Number")
+                    b.Property<int?>("Number")
                         .HasColumnType("int");
-
-                    b.Property<bool>("OneShot")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("OriginalCoverUrl")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("PreorderStart")
+                    b.Property<DateTime?>("PreorderStart")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("PublicId")
@@ -487,7 +484,7 @@ namespace MangaShelf.DAL.Migrations
                     b.Property<string>("PurchaseUrl")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("ReleaseDate")
+                    b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("SeriesId")
@@ -497,13 +494,12 @@ namespace MangaShelf.DAL.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
@@ -511,9 +507,57 @@ namespace MangaShelf.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SeriesId");
+                    b.HasIndex("SeriesId", "Number", "Title")
+                        .IsUnique();
 
                     b.ToTable("Volumes");
+                });
+
+            modelBuilder.Entity("MangaShelf.DAL.Models.VolumeHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("VolumeId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VolumeId", "Timestamp");
+
+                    b.ToTable("VolumeHistory");
                 });
 
             modelBuilder.Entity("AuthorSeries", b =>
@@ -636,6 +680,17 @@ namespace MangaShelf.DAL.Migrations
                     b.Navigation("Series");
                 });
 
+            modelBuilder.Entity("MangaShelf.DAL.Models.VolumeHistory", b =>
+                {
+                    b.HasOne("MangaShelf.DAL.Models.Volume", "Volume")
+                        .WithMany("History")
+                        .HasForeignKey("VolumeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Volume");
+                });
+
             modelBuilder.Entity("MangaShelf.DAL.Models.Country", b =>
                 {
                     b.Navigation("Publishers");
@@ -662,6 +717,8 @@ namespace MangaShelf.DAL.Migrations
 
             modelBuilder.Entity("MangaShelf.DAL.Models.Volume", b =>
                 {
+                    b.Navigation("History");
+
                     b.Navigation("Likes");
 
                     b.Navigation("Owners");

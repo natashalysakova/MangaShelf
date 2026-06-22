@@ -56,7 +56,7 @@ public class SeriesService : ISeriesService
             Id = s.Id,
             PublicId = s.PublicId,
             Title = s.Title,
-            OriginalName = s.OriginalName,
+            OriginalTitle = s.OriginalTitle,
             Aliases = s.Aliases,
             MalId = s.MalId,
             Type = s.Type,
@@ -85,7 +85,7 @@ public class SeriesService : ISeriesService
         }
 
         series.Title = dto.Title;
-        series.OriginalName = dto.OriginalName;
+        series.OriginalTitle = dto.OriginalTitle;
         series.Status = dto.Status;
         series.TotalVolumes = dto.TotalVolumes;
 

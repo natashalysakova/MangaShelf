@@ -25,9 +25,9 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IPublisherService, PublisherService>();
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IParserReadService, ParserReadService>();
-        builder.Services.AddScoped<IParserWriteService, ParserWriteService>();
         builder.Services.AddScoped<ISettingReadService, SettingReadService>();
         builder.Services.AddScoped<IUserLibraryService, UserLibraryService>();
+        builder.Services.AddScoped<IVolumeHistoryService, VolumeHistoryService>();
 
         // Parsing services
         builder.Services.AddScoped<IHtmlDownloader, BasicHtmlDownloader>();
@@ -36,6 +36,7 @@ public static class ServicesInstallExtention
         builder.Services.AddKeyedScoped<IHtmlDownloader, MalopusHtmlDownloader>(HtmlDownloaderKeys.Malopus);
         builder.Services.AddScoped<IParserFactory, ParserFactory>();
         builder.Services.AddScoped<IJobRequester, JobRequester>();
+        builder.Services.AddScoped<IParseJobManagerService, ParseJobManagerService>();
         RegisterInterfaceWithimplementations<IPublisherParser>(builder);
 
         // Image services

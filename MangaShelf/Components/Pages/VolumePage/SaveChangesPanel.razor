@@ -1,0 +1,27 @@
+@inject IUiLocalizationService Localizer
+@inject NavigationManager Navigation
+
+<MudStack Row="true" Justify="Justify.SpaceBetween" Class="mb-4">
+    <MudButton OnClick="NavigateBack" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.ArrowBack">
+        @Localizer["BackToList"]
+    </MudButton>
+
+    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Save" Disabled="!HasChanges">
+        @Localizer["SaveChanges"]
+    </MudButton>
+</MudStack>
+
+@code {
+    [Parameter]
+    public bool HasChanges { get; set; } = true;
+    
+    [Parameter]
+    [EditorRequired]
+    public required string VolumePublicId { get; set; }
+
+    private void NavigateBack(MouseEventArgs args)
+    {
+        Navigation.NavigateTo("/volume/" + VolumePublicId);
+    }
+}

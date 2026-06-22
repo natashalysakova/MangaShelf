@@ -1,0 +1,23 @@
+@using System.Security.Claims
+
+@code 
+{
+    [CascadingParameter] 
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+        
+    protected async Task<string> GetUserId()
+    {
+        var authState = await AuthState;
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return userId ?? string.Empty;
+    }
+
+    protected async Task<bool> IsUserAuthenticated()
+    {
+        if (AuthState == null)
+            return false;
+
+        var authState = await AuthState;
+        return authState.User?.Identity?.IsAuthenticated ?? false;
+    }
+}

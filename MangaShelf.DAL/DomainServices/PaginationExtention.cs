@@ -56,13 +56,24 @@ public static class PaginationExtention
             }
         }
 
-        if (!string.IsNullOrEmpty(paginationOptions?.Search))
+        if (!string.IsNullOrWhiteSpace(paginationOptions?.Search))
         {
-            query = query.Where(x =>
-                EF.Functions.Like(x.Title, $"%{paginationOptions.Search}%") ||
-                EF.Functions.Like(x.Series!.Title, $"%{paginationOptions.Search}%") ||
-                EF.Functions.Like(x.Series!.Publisher!.Name, $"%{paginationOptions.Search}%") ||
-                x.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
+            var searchTerms = paginationOptions.Search
+                .Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var searchTerm in searchTerms)
+            {
+                var likePattern = $"%{searchTerm}%";
+                var isVolumeNumber = int.TryParse(searchTerm, out var parsedNumber);
+
+                // Chain WHERE clauses so every token must match at least one searchable field.
+                query = query.Where(x =>
+                    EF.Functions.Like(x.Title!, likePattern) ||
+                    EF.Functions.Like(x.Series!.Title, likePattern) ||
+                    EF.Functions.Like(x.Series!.Publisher!.Name, likePattern) ||
+                    x.Series.Authors.Any(a => EF.Functions.Like(a.Name, likePattern)) ||
+                    (isVolumeNumber && x.Number == parsedNumber));
+            }
         }
 
         Func<IQueryable<Volume>, Expression<Func<Volume, object>>, IOrderedQueryable<Volume>> orderBy =
@@ -92,42 +103,13 @@ public static class PaginationExtention
         return query;
     }
 
-    public static IQueryable<Ownership> Filter(this IQueryable<Ownership> query, IFilterOptions? paginationOptions)
+    public static IQueryable<Ownership> Filter(this IQueryable<Ownership> query, IUserShelfFilterOptions? filterOptions)
     {
-        if (paginationOptions is null)
+        if (filterOptions is null)
         {
             return query;
         }
-        //if (!string.IsNullOrEmpty(paginationOptions?.Search))
-        //{
-        //    query = query.Where(x =>
-        //        EF.Functions.Like(x.Volume.Title, $"%{paginationOptions.Search}%") ||
-        //        EF.Functions.Like(x.Volume.Series!.Title, $"%{paginationOptions.Search}%") ||
-        //        EF.Functions.Like(x.Volume.Series!.Publisher!.Name, $"%{paginationOptions.Search}%") ||
-        //        x.Volume.Series.Authors.Any(a => EF.Functions.Like(a.Name, $"%{paginationOptions.Search}%")));
-        //}
-        //Func<IQueryable<Ownership>, Expression<Func<Ownership, object>>, IOrderedQueryable<Ownership>> orderBy =
-        //    paginationOptions.OrderIsAsc
-        //        ? Queryable.OrderBy
-        //        : Queryable.OrderByDescending;
-        //switch (paginationOptions.OrderBy)
-        //{
-        //    case OrderBy.SeriesTitle:
-        //        query = orderBy(query, x => x.Volume.Series.Title).ThenBy(x => x.Volume.Number);
-        //        break;
-        //    case OrderBy.ReleaseDate:
-        //        query = orderBy(query, x => x.Volume.ReleaseDate);
-        //        break;
-        //    case OrderBy.Popularity:
-        //        query = orderBy(query, x => x.Volume.Likes.Count);
-        //        break;
-        //    case OrderBy.Rating:
-        //        query = orderBy(query, x => x.Volume.AvgRating);
-        //        break;
-        //    case OrderBy.PreorderDate:
-        //        query = orderBy(query, x => x.Volume.PreorderStart);
-        //        break;
-        //}
+
         return query;
     }
 }

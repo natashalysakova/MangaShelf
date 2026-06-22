@@ -9,12 +9,14 @@
             <MudItem xs="12">
                 <MudText Class="mb-3" Typo="Typo.h5">@Localizer["Readings"]</MudText>
 
-                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly" Class="paper-manga-panel">
-                    <CardButtonTooltip Text="@Localizer["PlanToRead"]">
-                        <MudIconButton OnClick="AddPlanToRead" Size="Size.Large" Color="@Color.Surface" Icon="@CustomIcons.planToRead"></MudIconButton>
-                    </CardButtonTooltip>
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly">
                     <CardButtonTooltip Text="@Localizer["AddReading"]">
-                        <MudIconButton OnClick="ShowAddEditReadingDialog" Size="Size.Large" Color="@Color.Surface" Icon="@CustomIcons.reading"></MudIconButton>
+                        <MudIconButton OnClick="ShowAddEditReadingDialog" Size="Size.Large" Color="@Color.Tertiary"
+                                       Icon="@CustomIcons.reading"></MudIconButton>
+                    </CardButtonTooltip>
+                    <CardButtonTooltip Text="@Localizer["PlanToRead"]">
+                        <MudIconButton OnClick="AddPlanToRead" Size="Size.Large" Color="@Color.Secondary"
+                                       Icon="@CustomIcons.planToRead"></MudIconButton>
                     </CardButtonTooltip>
                 </MudStack>
 

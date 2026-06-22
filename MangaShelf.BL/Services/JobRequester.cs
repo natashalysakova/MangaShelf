@@ -28,7 +28,7 @@ public class JobRequester : IJobRequester
             throw new InvalidOperationException($"Url {url} does not supported");
         }
 
-        var parserService = scope.ServiceProvider.GetRequiredService<IParserWriteService>();
+        var parserService = scope.ServiceProvider.GetRequiredService<IParseJobManagerService>();
         var jobId = await parserService.CreateSingleJob(parser.ParserName, url, token);
 
         return jobId;
@@ -45,7 +45,7 @@ public class JobRequester : IJobRequester
         using var scope = _serviceProvider.CreateScope();
         var factory = scope.ServiceProvider.GetRequiredService<IParserFactory>();
 
-        var parserService = scope.ServiceProvider.GetRequiredService<IParserWriteService>();
+        var parserService = scope.ServiceProvider.GetRequiredService<IParseJobManagerService>();
         var jobId = await parserService.CreateParserJob(parserId, token);
 
         return jobId;
@@ -54,7 +54,7 @@ public class JobRequester : IJobRequester
     public async Task CancelJob(Guid jobId, CancellationToken token = default)
     {
         var scope = _serviceProvider.CreateScope();
-        var parserService = scope.ServiceProvider.GetRequiredService<IParserWriteService>();
+        var parserService = scope.ServiceProvider.GetRequiredService<IParseJobManagerService>();
         await parserService.CancelJob(jobId, token);
     }
 }

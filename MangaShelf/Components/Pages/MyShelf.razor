@@ -1,17 +1,76 @@
 ﻿@page "/my-shelf"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
+@using MangaShelf.BL.Services
+
+@inherits UserContextComponent
+
+@inject IVolumeService VolumeService
 
 @attribute [Authorize]
 
+<UserShelfFilterComponent FilterOptions="filterOptions" FilterOptionsChanged="ReloadVolumesAsync" />
 
-<h3>MyShelf</h3>
+@if (isLoading)
+{
+    <MudStack AlignItems="AlignItems.Center" Class="mt-8">
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+    </MudStack>
+}
+else if (volumes is null || !volumes.Any())
+{
+    <MudAlert Severity="Severity.Info">No volumes found.</MudAlert>
+}
+else
+{
+    <MudGrid>
+        @foreach (var volume in volumes)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <UserVolumeCardComponent VolumeCard="volume" />
+            </MudItem>
+        }
+    </MudGrid>
+}
 
-<h1>You are authenticated</h1>
-
-<AuthorizeView>
-    Hello @context.User.Identity?.Name!
-</AuthorizeView>
 @code {
+    IEnumerable<UserVolumeCard>? volumes;
+    readonly UserShelfFilterOptions filterOptions = new();
+    bool isLoading = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVolumesAsync();
+    }
+
+    private async Task ReloadVolumesAsync(UserShelfFilterOptions updatedFilterOptions)
+    {
+        filterOptions.SearchTerm = updatedFilterOptions.SearchTerm;
+        filterOptions.CurrentOwnershipStatuses = updatedFilterOptions.CurrentOwnershipStatuses;
+        filterOptions.CurrentReadingStatuses = updatedFilterOptions.CurrentReadingStatuses;
+        filterOptions.IsLiked = updatedFilterOptions.IsLiked;
+        filterOptions.MinRating = updatedFilterOptions.MinRating;
+        filterOptions.MaxRating = updatedFilterOptions.MaxRating;
+
+        await LoadVolumesAsync();
+    }
+
+    private async Task LoadVolumesAsync()
+    {
+        try
+        {
+            isLoading = true;
+            var userId = await GetUserId();
+            volumes = await VolumeService.GetUserVolumes(userId, filterOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user volumes: {ex.Message}");
+            volumes = [];
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }

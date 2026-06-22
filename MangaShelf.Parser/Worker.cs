@@ -6,26 +6,22 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IParseJobManager _jobManager;
+    private readonly IParseJobRunner _parseJobRunner;
 
-    public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider, IParseJobManager jobManager)
+    public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider, IParseJobRunner parseJobRunner)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
-        _jobManager = jobManager;
+        _parseJobRunner = parseJobRunner;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var parserFactory = scope.ServiceProvider.GetRequiredService<IParserFactory>();
-        var parsers = parserFactory.GetParsers();
-
-        _logger.LogInformation("Found {ParserCount} parsers", parsers.Count());
 
         try
         {
-            await _jobManager.InitializeParser(parsers);
+            await _parseJobRunner.InitializeParsers(stoppingToken);
         }
         catch (Exception ex)
         {
@@ -48,12 +44,7 @@ public class Worker : BackgroundService
                 return;
             }
 
-            if (options.Enabled)
-            {
-                await _jobManager.CreateScheduledJobs();
-            }
-
-            await _jobManager.RunScheduledJobs();
+            await _parseJobRunner.RunJobs(stoppingToken);
 
             await Task.Delay(options.LoopDelay, stoppingToken);
         }

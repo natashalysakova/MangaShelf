@@ -83,6 +83,9 @@ else
     [Parameter]
     public bool ShowStatusIcon { get; set; }
 
+    [Parameter]
+    public EventCallback<VolumeStatus> OnStatusChange { get; set; }
+
     [Inject]
     NavigationManager NavigationManager { get; set; }
 
@@ -97,6 +100,11 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if(Volume == null && VolumeId != null)
+        {
+            Volume = await VolumeService.GetVolumeCardById(VolumeId.Value);
+        }
+
         if (Volume == null || (ShowButtons == false && ShowStatus == false))
         {
             return;
@@ -128,11 +136,16 @@ else
 
     protected async Task HandleOwnershipChange(VolumeStatus status)
     {
-        var newStatus = await OpenSetOwnershipDialog(status);
+        var newStatus = await OpenSetOwnershipDialog(status, Volume.Type);
         if (newStatus != null)
         {
+            if (OnStatusChange.HasDelegate && newStatus.CurrentOwnershipStatus != CurrentUserStatus?.CurrentOwnershipStatus)
+            {
+                await OnStatusChange.InvokeAsync(newStatus.CurrentOwnershipStatus);
+            }
+
             CurrentUserStatus = newStatus;
-            StateHasChanged();
+            StateHasChanged();      
         }
     }
 

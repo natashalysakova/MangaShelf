@@ -25,7 +25,7 @@
                             </CardButtonTooltip>
                         }
                     </MudStack>
-                    @if (VolumeState != null && VolumeState.CurrentUserStatus != null)
+                    @if (VolumeState != null && VolumeState.CurrentUserStatus != null && VolumeState.CurrentUserStatus.CurrentOwnershipStatus != VolumeStatus.None)
                     {
                         <MudStack Row AlignItems="AlignItems.Center">
                             <MudIcon Icon="@CustomIcons.bookshelf"></MudIcon>
@@ -44,7 +44,7 @@
                         </MudStack>
                         @if (VolumeState.CurrentUserStatus.CurrentOwnershipStatus == VolumeStatus.Preorder)
                         {
-                            <MudButton EndIcon="@CustomIcons.delivered" Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Success">@Localizer["ConfirmDelivery"]</MudButton>
+                            <MudButton EndIcon="@CustomIcons.delivered" Variant="Variant.Filled" OnClick="@(() => OpenSetOwnershipDialog(VolumeStatus.Own))" Color="@Color.Secondary">@Localizer["ConfirmDelivery"]</MudButton>
                         }
                         @if (_showTimeline)
                         {
@@ -126,11 +126,15 @@
             }
             else
             {
-                availableActions.Add(new AvailableAction("SetOwn", CustomIcons.bookPlus, Color.Success, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
+                availableActions.Add(new AvailableAction("SetOwn", CustomIcons.bookPlus, Color.Tertiary, () => OpenSetOwnershipDialog(VolumeStatus.Own)));
             }
         }
 
-        availableActions.Add(new AvailableAction("SetHistoricStatus", CustomIcons.historical, Color.Info, () => OpenSetOwnershipDialog(VolumeStatus.Preorder, false)));
+        availableActions.Add(new AvailableAction("SetHistoricStatus", CustomIcons.historical, Color.Secondary, () => OpenSetOwnershipDialog(VolumeStatus.Preorder, false)));
     }
 
+    async Task OpenSetOwnershipDialog(VolumeStatus status, bool disableStatus = true)
+    {
+        await OpenSetOwnershipDialog(status, Volume?.Type ?? VolumeType.NotSpecified, disableStatus);
+    }
 }

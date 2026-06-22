@@ -1,4 +1,6 @@
-﻿namespace MangaShelf.DAL.Models;
+﻿using MangaShelf.Common.Interfaces;
+
+namespace MangaShelf.DAL.Models;
 
 public class Ownership : BaseEntity
 {
@@ -11,12 +13,4 @@ public class Ownership : BaseEntity
     public DateTimeOffset Date { get; set; }
 
 
-}
-public enum VolumeStatus
-{
-    Wishlist = 0,
-    Preorder = 1,
-    Own = 2,
-    Gone = 3,
-    None = 4,
 }

@@ -1,0 +1,68 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C#: Migration (Development)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/MangaShelf.Migration/bin/Debug/net10.0/MangaShelf.Migration.dll",
+            "cwd": "${workspaceFolder}/MangaShelf.Migration",
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development",
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+    {
+            "name": "C#: Parser (Development)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/MangaShelf.Parser/bin/Debug/net10.0/MangaShelf.Parser.dll",
+            "cwd": "${workspaceFolder}/MangaShelf.Parser",
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development",
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "C#: MangaShelf (HTTP Development)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/MangaShelf/bin/Debug/net10.0/MangaShelf.dll",
+            "cwd": "${workspaceFolder}/MangaShelf",
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development",
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5090"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "C#: Run All (Migration + Parser + MangaShelf)",
+            "configurations": [
+                "C#: Migration (Development)",
+                "C#: Parser (Development)",
+                "C#: MangaShelf (HTTP Development)"
+            ],
+            "stopAll": true
+        },
+        {
+            "name": "C#: Run Frontend",
+            "configurations": [
+                "C#: MangaShelf (HTTP Development)",
+                "C#: Parser (Development)"
+            ],
+            "stopAll": true,
+        }
+    ]
+}

@@ -27,6 +27,7 @@ public class ConfigurationServiceTests : IDisposable
         _options = new DbContextOptionsBuilder<MangaSystemDbContext>()
             .UseInMemoryDatabase(databaseName: databaseName)
             .EnableSensitiveDataLogging()
+            .AddInterceptors(new WriteVolumeHistoryInterceptor())
             .AddInterceptors(new AuditInterceptor())
             .Options;
 
@@ -44,7 +45,6 @@ public class ConfigurationServiceTests : IDisposable
 
         var settings = _service.BackgroundWorker;
 
-        Assert.True(settings.Enabled);
         Assert.Equal(TimeSpan.FromSeconds(5), settings.StartDelay);
         Assert.Equal(TimeSpan.FromMinutes(1), settings.LoopDelay);
     }
@@ -57,27 +57,6 @@ public class ConfigurationServiceTests : IDisposable
         Assert.Throws<ConfigurationMissingException>(() => _service.BackgroundWorker);
     }
 
-    [Fact]
-    public async Task UpdateSectionValueAsync_UpdatesValueAndInvalidatesCache()
-    {
-        await SeedBackgroundWorkerSettingsAsync(enabled: true, startDelay: TimeSpan.FromSeconds(5), loopDelay: TimeSpan.FromMinutes(1));
-
-        var cachedSettings = _service.BackgroundWorker;
-        Assert.True(cachedSettings.Enabled);
-
-        using var context = CreateContext();
-        var setting = await context.Settings.SingleAsync(x => x.Section == "BackgroundWorker" && x.Key == "Enabled");
-        setting.Value = "false";
-        await _service.UpdateSectionValueAsync(setting);
-
-        var updatedSettings = _service.BackgroundWorker;
-
-        Assert.False(updatedSettings.Enabled);
-
-        using var context2 = CreateContext();
-        var setting2 = await context2.Settings.SingleAsync(x => x.Section == "BackgroundWorker" && x.Key == "Enabled");
-        Assert.Equal("false", setting2.Value);
-    }
 
     public void Dispose()
     {

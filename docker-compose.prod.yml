@@ -1,0 +1,20 @@
+services:
+  mangashelf.migration:
+    image: ${DOCKER_REGISTRY}manga-shelf-migration:${IMAGE_TAG}
+    restart: "no"
+
+  mangashelf:
+    image: ${DOCKER_REGISTRY}manga-shelf-ui:${IMAGE_TAG}
+    ports:
+      - "5299:8080"
+    restart: always
+
+  mangashelf.parser:
+    image: ${DOCKER_REGISTRY}manga-shelf-parser:${IMAGE_TAG}
+    restart: always
+
+  mangashelf.db:
+    restart: always
+
+  chrome:
+    restart: always

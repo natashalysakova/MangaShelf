@@ -1,0 +1,176 @@
+<MudPaper Elevation="8" Class="user-volume-card d-flex flex-column h-100 overflow-hidden">
+    <div class="cover-frame position-relative">
+        @if (!string.IsNullOrWhiteSpace(VolumeCard.CoverImageUrlSmall))
+        {
+            <MudImage Src="@VolumeCard.CoverImageUrlSmall" Alt="@GetCoverAltText()" Class="cover-image" Fluid="true" />
+        }
+        else
+        {
+            <MudStack Class="cover-placeholder" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="1">
+                <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" />
+                <MudText Typo="Typo.caption">No cover available</MudText>
+            </MudStack>
+        }
+        @if (VolumeCard.IsLiked)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.Favorite" Class="liked-heart-badge" />
+        }
+        @if (VolumeCard.UserRating.HasValue)
+        {
+            <MudChip T="string" Class="rating-badge" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small">
+                <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Class="mr-1" />
+                @GetRatingValueText()
+            </MudChip>
+        }
+    </div>
+
+    <MudStack Class="pa-4" Spacing="1">
+        <MudLink Href="@($"/volume/{VolumeCard.PublicId}")" Class="text-decoration-none">
+            <MudText Typo="Typo.h6" Class="title-text">@VolumeCard.SeriesTitle</MudText>
+        </MudLink>
+
+        @if(VolumeCard.Number.HasValue){
+            <MudChip T="string" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small" Class="w-fit-content">
+                <MudIcon Icon="@Icons.Material.Filled.Tag" Size="Size.Small" Class="mr-1" />
+                Vol. @(VolumeCard.Number.Value)
+            </MudChip>
+        }
+
+        <MudDivider Class="my-1" />
+
+        <div class="status-chips">
+            <MudChip T="string" Variant="Variant.Outlined" Color="@GetOwnershipColor()" Class="status-chip">
+                <MudIcon Icon="@GetOwnershipIcon()" Size="Size.Small" Class="mr-1" />
+                @GetOwnershipText()
+            </MudChip>
+            <MudChip T="string" Variant="Variant.Outlined" Color="@GetReadingColor()" Class="status-chip">
+                <MudIcon Icon="@GetReadingIcon()" Size="Size.Small" Class="mr-1" />
+                @GetReadingText()
+            </MudChip>
+        </div>
+    </MudStack>
+</MudPaper>
+
+<style>
+    .user-volume-card {
+        border-radius: 16px;
+        background: linear-gradient(160deg, var(--mud-palette-surface) 0%, color-mix(in srgb, var(--mud-palette-surface) 88%, var(--mud-palette-primary) 12%) 100%);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .user-volume-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 24px -18px rgba(0, 0, 0, 0.65);
+    }
+
+    .cover-frame {
+        height: 240px;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--mud-palette-dark) 72%, black 28%) 0%, color-mix(in srgb, var(--mud-palette-primary) 34%, var(--mud-palette-dark) 66%) 100%);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .liked-heart-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        color: var(--mud-palette-error);
+        font-size: 2rem;
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+    }
+
+    .rating-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        font-weight: 600;
+        background-color: color-mix(in srgb, var(--mud-palette-warning) 88%, black 12%);
+        color: var(--mud-palette-warning-text);
+        box-shadow: 0 6px 14px -10px rgba(0, 0, 0, 0.9);
+    }
+
+    .cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        color: color-mix(in srgb, var(--mud-palette-text-primary) 65%, white 35%);
+    }
+
+    .title-text {
+        line-height: 1.3;
+        min-height: 2.6em;
+        color: var(--mud-palette-text-primary);
+    }
+
+    .status-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .status-chip {
+        width: fit-content;
+    }
+
+    @@media (max-width: 600px) {
+        .cover-frame {
+            height: 200px;
+        }
+    }
+</style>
+
+@code {
+    [Parameter]
+    public UserVolumeCard VolumeCard { get; set; } = default!;
+
+    private string GetRatingValueText() => $"{Math.Clamp(VolumeCard.UserRating!.Value, 0, 5):0.0}";
+
+    private string GetCoverAltText() => $"{VolumeCard.SeriesTitle} volume cover";
+
+    private string GetOwnershipText() => $"Ownership: {VolumeCard.CurrentOwnershipStatus}";
+
+    private string GetReadingText() => $"Reading: {VolumeCard.CurrentReadingStatus}";
+
+    private Color GetOwnershipColor() => VolumeCard.CurrentOwnershipStatus switch
+    {
+        VolumeStatus.Own => Color.Success,
+        VolumeStatus.Wishlist => Color.Info,
+        VolumeStatus.Preorder => Color.Warning,
+        VolumeStatus.Gone => Color.Error,
+        _ => Color.Default
+    };
+
+    private string GetOwnershipIcon() => VolumeCard.CurrentOwnershipStatus switch
+    {
+        VolumeStatus.Own => Icons.Material.Filled.LibraryBooks,
+        VolumeStatus.Wishlist => Icons.Material.Filled.Bookmarks,
+        VolumeStatus.Preorder => Icons.Material.Filled.LocalShipping,
+        VolumeStatus.Gone => Icons.Material.Filled.RemoveShoppingCart,
+        _ => Icons.Material.Filled.HelpOutline
+    };
+
+    private Color GetReadingColor() => VolumeCard.CurrentReadingStatus switch
+    {
+        ReadingStatus.Completed => Color.Success,
+        ReadingStatus.Reading => Color.Primary,
+        ReadingStatus.PlanToRead => Color.Info,
+        ReadingStatus.OnHold => Color.Warning,
+        ReadingStatus.Dropped => Color.Error,
+        _ => Color.Default
+    };
+
+    private string GetReadingIcon() => VolumeCard.CurrentReadingStatus switch
+    {
+        ReadingStatus.Completed => Icons.Material.Filled.TaskAlt,
+        ReadingStatus.Reading => Icons.Material.Filled.AutoStories,
+        ReadingStatus.PlanToRead => Icons.Material.Filled.Schedule,
+        ReadingStatus.OnHold => Icons.Material.Filled.PauseCircle,
+        ReadingStatus.Dropped => Icons.Material.Filled.Cancel,
+        _ => Icons.Material.Filled.DoNotDisturbAlt
+    };
+}
