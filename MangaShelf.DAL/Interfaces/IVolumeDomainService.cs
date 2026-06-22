@@ -1,11 +1,12 @@
 ﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.Common.Models;
 using MangaShelf.DAL.Models;
 
 namespace MangaShelf.DAL.Interfaces;
 
 public interface IVolumeDomainService : IDomainService<Volume>, IShelfDomainService
 {
-    Volume? FindBySeriesNameTitleAndNumber(string series, int volumeNumber, string volumeTitle);
+    Volume? FindVolumeFromParsedInfo(VolumeInfoRequest volumeInfo);
     IQueryable<Volume> GetAllFullPaginated(IFilterOptions? paginationOptions = default);
     IQueryable<Volume> GetAllWithSeries(IFilterOptions? paginationOptions = default);
 
@@ -16,3 +17,5 @@ public interface IVolumeDomainService : IDomainService<Volume>, IShelfDomainServ
 
     IQueryable<Volume>GetAllFull();
 }
+
+

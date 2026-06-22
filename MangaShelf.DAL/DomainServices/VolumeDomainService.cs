@@ -1,4 +1,5 @@
 ﻿using MangaShelf.Common.Interfaces;
+using MangaShelf.Common.Models;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,16 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
 
     }
 
-    public Volume? FindBySeriesNameTitleAndNumber(string series, int volumeNumber, string volumeTitle)
+    public Volume? FindVolumeFromParsedInfo(VolumeInfoRequest volumeInfo)
     {
-        return _context.Volumes
-            .Where(x => x.Number == volumeNumber && x.Title == volumeTitle)
+        var query = _context.Volumes
             .Include(x => x.Series)
-            .Where(x => x.Series!.Title == series)
+            .Where(x =>
+                (x.PurchaseUrl != null && x.PurchaseUrl == volumeInfo.Url) ||
+                (x.ISBN != null && x.ISBN == volumeInfo.ISBN) ||
+                (x.Series!.Title == volumeInfo.Series && x.Number == volumeInfo.VolumeNumber && x.Title == volumeInfo.Title));
+
+        return query
             .IgnoreQueryFilters()
             .SingleOrDefault();
     }

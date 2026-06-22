@@ -15,8 +15,10 @@
 @code {
     [Parameter]
     public bool HasChanges { get; set; } = true;
+    
     [Parameter]
-    public string? VolumePublicId { get; set; }
+    [EditorRequired]
+    public required string VolumePublicId { get; set; }
 
     private void NavigateBack(MouseEventArgs args)
     {

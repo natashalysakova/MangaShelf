@@ -1,4 +1,5 @@
-﻿using MangaShelf.DAL.Models;
+﻿using MangaShelf.Common.Models;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.BL.Contracts;
 
@@ -25,4 +26,16 @@ public record ParsedInfo
     public string Json { get; set; } = string.Empty;
     public required SeriesType SeriesType { get; init; }
     public string? Description { get; init; }
+
+    public VolumeInfoRequest ToVolumeInfoRequest()
+    {
+        return new VolumeInfoRequest
+        {
+            Series = Series,
+            VolumeNumber = VolumeNumber,
+            Title = Title,
+            Url = Url,
+            ISBN = Isbn
+        };
+    }
 }

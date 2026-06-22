@@ -62,7 +62,7 @@ public class VolumeInfoParser(
             }
         }
 
-        var volume = volumeDomainService.FindBySeriesNameTitleAndNumber(volumeInfo.Series, volumeInfo.VolumeNumber, volumeInfo.Title);
+        var volume = volumeDomainService.FindVolumeFromParsedInfo(volumeInfo.ToVolumeInfoRequest());
         if (volume == null)
         {
             volume = new Volume()

@@ -19,7 +19,7 @@
         <MudStack Spacing="2">
             @foreach (var history in VolumeHistories.OrderByDescending(x => x.Date))
             {
-                <VolumeHistoryRecord VolumeHistory="history" />
+                <VolumeHistoryRecord VolumeHistory="history" GroupedByDate="false" />
             }
         </MudStack>
     </MudPaper>
@@ -40,8 +40,9 @@ else
         await LoadVolumeHistoriesAsync();
     }
 
-    private async Task OnDateRangeChanged()
+    private async Task OnDateRangeChanged(DateRange range)
     {
+        _dateRange = range;
         await LoadVolumeHistoriesAsync();
     }
 

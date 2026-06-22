@@ -43,7 +43,14 @@ public class Volume : BaseEntity
         {
             return Series.Title;
         }
-        return $"{Series.Title} - {Title}";
+        
+        var titlePart = string.IsNullOrWhiteSpace(Title)
+             ? (Number.HasValue ? $"Vol. {Number.Value}" : string.Empty)
+             : Title;
+             
+         return string.IsNullOrWhiteSpace(titlePart)
+             ? Series.Title
+             : $"{Series.Title} - {titlePart}";
     }
 }
 

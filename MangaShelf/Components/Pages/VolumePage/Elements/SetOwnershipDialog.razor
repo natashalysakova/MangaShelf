@@ -17,7 +17,7 @@
         </MudSelect>
         <MudDatePicker @bind-Date="@selectedDate" Required="true" RequiredError="@Localizer["DateRequired"]"></MudDatePicker>
         <MudRadioGroup @bind-Value="@Ownership.Type">
-            @foreach (var type in GetVisibleVolumeypes())
+            @foreach (var type in GetVisibleVolumeTypes())
             {
                 <MudRadio Value="@type" Color="Color.Primary" UncheckedColor="Color.Default">@Localizer[type]</MudRadio>
             }
@@ -75,7 +75,7 @@
         public bool IsDeleted { get; set; }
     }
 
-    private IEnumerable<VolumeType> GetVisibleVolumeypes()
+    private IEnumerable<VolumeType> GetVisibleVolumeTypes()
     {
         return Enum
             .GetValues(typeof(VolumeType))
