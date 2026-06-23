@@ -12,6 +12,15 @@
             <FallbackImage ImageUrl="@Volume.CoverImageUrlSmall" Class="@sideImageClass" Alt="@Volume.SeriesName" />
 
         </div>
+        @if(Volume.AvgRating != 0 && ShowRating)
+        {
+            <div class="rating-badge">
+                <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Class="" />
+                @GetRatingValueText()
+            </div>
+
+
+        }
         @if (Volume.IsPreorder && ShowBadges)
         {
             <div class="preorder-badge">
@@ -81,6 +90,10 @@ else
     public bool ShowStatus { get; set; }
 
     [Parameter]
+    public bool ShowRating { get; set; } = false;
+
+
+    [Parameter]
     public bool ShowStatusIcon { get; set; }
 
     [Parameter]
@@ -97,6 +110,9 @@ else
     protected override Guid? ResolvedVolumeId => Volume?.Id;
 
     private string sideImageClass = "card-image";
+
+    private string GetRatingValueText() => $"{Math.Clamp(Volume.AvgRating, 0, 5):0.0}";
+
 
     protected override async Task OnParametersSetAsync()
     {

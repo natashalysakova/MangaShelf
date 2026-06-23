@@ -10,10 +10,27 @@
 @inject IUiLocalizationService Localizer
 <h3>@Localizer["Preorders"]</h3>
 
+<style>
+    .expired-preorder {
+        /*outline: 5px solid red !important;
+        outline-offset: -5px;  or -5px if you want it drawn inside */
+        background-color: rgba(255, 0, 0, 0.3) !important;
+    }
+
+    .normal-preorder {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .preorder-image{
+        width: 100%;
+        height: auto;
+    }
+</style>
+
 @if (UserLibraryDto != null)
 {
     <MudGrid>
-        <MudItem sm="12" md="6">
+        <MudItem sm="12" md="8">
             <MudPaper Class="paper-manga-panel p-4" Elevation="0">
                 @if (!UserLibraryDto.Volumes.Any())
                 {
@@ -24,37 +41,49 @@
                 <MudGrid>
                     @foreach (var preorder in UserLibraryDto.Volumes)
                     {
-                        var cardClass = "m-1 p-3 " + (preorder.IsPreorderDue ? "expired-preorder" :
+                        var cardClass = "" + (preorder.IsPreorderDue ? "expired-preorder" :
                "normal-preorder");
-                        <MudItem xs="6" sm="4" >
+                        <MudItem xs="6" sm="3" md="2" >
                             <MudStack Spacing="1" AlignItems="AlignItems.Center" class="@cardClass">
-                                <div style="width: 120px;height: 170px;">
+                                <div class="preorder-image">
                                     <SmallCard ShowButtons="true" VolumeId="@preorder.VolumeId"
                                                OnStatusChange="@ReloadUserLibrary" />
 
                                 </div>
+                                @{
+                                    string text;
+                                    @if (preorder.IsPreorderDue)
+                                    {
+                                        text = @Localizer["PreorderIsDue"];
+                                    }
+                                    else
+                                    {
+                                        text = @Localizer["Release"];
+                                    }
+                                }
+
+                                <MudTooltip Text="@text" Arrow="true" Color="Color.Dark">
+
                                 @if (preorder.IsPreorderDue)
                                 {
-                                    <MudText Color="Color.Error">@Localizer["PreorderIsDue"]</MudText>
                                     <MudText Color="Color.Error">@preorder.ReleaseDate?.ToString("d")</MudText>
                                 }
                                 else if (preorder.DaysTillRelease == 0)
                                 {
-                                    <MudText>@Localizer["Release"]</MudText>
                                     <MudText Color="Color.Success">@Localizer["Today"]</MudText>
                                 }
                                 else
                                 {
-                                    <MudText>@Localizer["DaysTillRelease"]</MudText>
-                                    <MudText>@FormatDays(preorder.DaysTillRelease)</MudText>
+                                    <MudText>@preorder.ReleaseDate?.ToString("d")</MudText>
                                 }
+                                </MudTooltip>
                             </MudStack>
                         </MudItem>
                     }
                 </MudGrid>
             </MudPaper>
         </MudItem>
-        <MudItem sm="12" md="6">
+        <MudItem sm="12" md="4">
             <MudPaper Class="paper-manga-panel p-4" Elevation="0">
                 <VolumeHistoryView VolumeHistory="UserLibraryDto.Updates" GroupedByDate="true" />
             </MudPaper>

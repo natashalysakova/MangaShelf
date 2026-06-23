@@ -169,7 +169,7 @@ h1:focus {
     right: 0;
     margin-right: 0 !important;
     border-bottom-left-radius: 10px;
-    border-top-left-radius: 10px;
+    border-top-left-radius: 0px;
     padding: 0px 4px 0px 8px;
     height: 22px;
 }
@@ -183,6 +183,20 @@ h1:focus {
     top: 22px;
     color: var(--mud-palette-tertiary-text) !important;
     background-color: var(--mud-palette-tertiary) !important;
+}
+
+.rating-badge {
+    position: absolute;
+    margin-right: 0 !important;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 0px;
+    left: 0;
+    right: auto;
+    color: var(--mud-palette-primary-text) !important;
+    background-color: var(--mud-palette-primary) !important;
+    padding: 0px 4px 0px 2px;
+    height: 22px;
+    align-content: center;
 }
 
 .paper-manga-panel {
@@ -235,15 +249,7 @@ h1:focus {
     visibility: visible;
 }
 
-.expired-preorder {
-    /*outline: 5px solid red !important;
-    outline-offset: -5px;  or -5px if you want it drawn inside */
-    background-color: rgba(255, 0, 0, 0.3) !important;
-}
 
-.normal-preorder {
-    
-}
 
 .mud-secondary-hover:hover.preorder-arrived-btn {
     background-color: var(--mud-palette-secondary) !important;

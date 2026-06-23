@@ -29,10 +29,11 @@
         <MudScrollToTop>
             <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
         </MudScrollToTop>
-        <MudAppBar Elevation="0" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
-            <MudGrid Justify="Justify.Center">
+        <MudAppBar Elevation="0" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;" >
+            <MudStack Row AlignItems="AlignItems.Center">
                 <MudText Style="font-size:small">COPYRIGHT</MudText>
-            </MudGrid>
+                <CultureSelector />
+            </MudStack>
         </MudAppBar>
     </MudMainContent>
 </MudLayout>
