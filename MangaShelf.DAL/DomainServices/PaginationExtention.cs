@@ -70,6 +70,7 @@ public static class PaginationExtention
                 query = query.Where(x =>
                     EF.Functions.Like(x.Title!, likePattern) ||
                     EF.Functions.Like(x.Series!.Title, likePattern) ||
+                    EF.Functions.Like(x.Series!.OriginalTitle, likePattern) ||
                     EF.Functions.Like(x.Series!.Publisher!.Name, likePattern) ||
                     x.Series.Authors.Any(a => EF.Functions.Like(a.Name, likePattern)) ||
                     (isVolumeNumber && x.Number == parsedNumber));
