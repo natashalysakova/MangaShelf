@@ -16,7 +16,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("Ця порцелянова лялечка закохалася", result.Series);
         Assert.AreEqual("Шін’ічі Фукуда", result.Authors);
         Assert.AreEqual(5, result.VolumeNumber);
-        Assert.AreEqual("https://malopus.com.ua/content/images/30/600x600l80mc0/manga-cya-porcelyanova-lyalechka-zakohalasya-tom-5-63577913695375.png", result.Cover);
+        Assert.AreEqual("https://malopus.com.ua/content/images/30/600x600l80mc0/manga-cya-porcelyanova-lyalechka-zakohalasya-tom-5-63577913695375.webp", result.Cover);
         Assert.AreEqual(null, result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
@@ -35,7 +35,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         var result = await Parser.Parse("https://malopus.com.ua/manga/beastars-omnibus-2/");
 
         Assert.IsNotNull(result);
-        Assert.AreEqual(DateTimeOffset.Parse("2026-11-30 00:00:00 +03:00"), result.Release);
+        Assert.AreEqual(DateTimeOffset.Parse("2026-11-30 00:00:00 +02:00"), result.Release);
     }
     [TestMethod]
     public async Task MalopusPreorderTest()
@@ -59,7 +59,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("Голограф Веселкового поля", result.Series);
         Assert.AreEqual("Ініо Асано", result.Authors);
         Assert.AreEqual(-1, result.VolumeNumber);
-        Assert.AreEqual("https://malopus.com.ua/content/images/24/600x600l80mc0/nijigahara-holograph-55453872054888.png", result.Cover);
+        Assert.AreEqual("https://malopus.com.ua/content/images/24/600x600l80mc0/nijigahara-holograph-55453872054888.webp", result.Cover);
         Assert.AreEqual(null, result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);

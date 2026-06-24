@@ -102,7 +102,7 @@ public class MolfarParser : BaseParser
 
     protected override string? GetOriginalSeriesName(IDocument document)
     {
-        return null;
+        return GetFromTable(document, "Оригінальна назва");
     }
 
     protected override DateTimeOffset? GetSaleStartDate(IDocument document)

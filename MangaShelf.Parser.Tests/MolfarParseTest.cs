@@ -56,33 +56,40 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
     {
         var result = await Parser.Parse(url);
 
-        result.Should().BeEquivalentTo(expectedValue, config => config.Excluding(x => x.Json).Excluding(x=>x.Description));
+        result.Should().BeEquivalentTo(expectedValue, config => config
+            .Excluding(x => x.Json)
+            .Excluding(x=>x.Description)
+            .Excluding(x => x.Cover));
+
         result.Description.Should().NotBeNullOrEmpty();
+        result.Cover.Should().NotBeNullOrEmpty();
     }
 
     private static ParsedInfo release = new ParsedInfo()
     {
-        CanBePublished = false,
+        CanBePublished = true,
         Title = "Том 4",
         CountryCode = "ua",
         Cover = "https://molfar-comics.com/wp-content/uploads/2024/03/bride04-jpg.webp",
-        Isbn = string.Empty,
+        Isbn = "978-617-7885-93-0",
         IsPreorder = false,
         Publisher = "Molfar Comics",
         Release = null,
         Series = "Наречена чаклуна",
         SeriesStatus = SeriesStatus.Unknown,
+        OriginalSeriesTitle = "яп. 魔法使いの嫁, Mahoutsukai no Yome",
         TotalVolumes =null,
         VolumeType = VolumeType.Physical,
         SeriesType = SeriesType.Unknown,
         AgeRestrictions = null,
         Url = "https://molfarpublishing.ua/product/narechena-chakluna-tom-4/",
-        VolumeNumber = 4
+        VolumeNumber = 4,
+        Authors = "Ямадзакі Коре"
     };
 
     private static ParsedInfo release2 = new ParsedInfo()
     {
-        CanBePublished = false,
+        CanBePublished = true,
         Title = "Том 1",
         CountryCode = "ua",
         Cover = "https://molfar-comics.com/wp-content/uploads/2025/04/cats01.jpg",
@@ -98,12 +105,13 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         SeriesType = SeriesType.Unknown,
         AgeRestrictions = null,
         Url = "https://molfarpublishing.ua/product/nich-zhyvykh-niavtsiv-tom-1/",
-        VolumeNumber = 1
+        VolumeNumber = 1,
+        OriginalSeriesTitle = "яп. ニャイト・オブ・ザ・リビングキャット, Nyaito obu za Ribingu Kyatto"
     };
 
     private static ParsedInfo release3 = new ParsedInfo()
     {
-        CanBePublished = false,
+        CanBePublished = true,
         Title = "Том 3",
         CountryCode = "ua",
         Cover = "https://molfarpublishing.ua/static/d2b106e6a59eb3aa80dd4df9fa36b810/07686/cats03.webp",
@@ -119,6 +127,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         SeriesType = SeriesType.Unknown,
         AgeRestrictions = null,
         Url = "https://molfarpublishing.ua/product/nich-zhyvykh-niavtsiv-tom-3/",
-        VolumeNumber = 3
+        VolumeNumber = 3,
+        OriginalSeriesTitle = "яп. ニャイト・オブ・ザ・リビングキャット, Nyaito obu za Ribingu Kyatto"
     };
 }

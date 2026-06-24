@@ -1,6 +1,8 @@
 ﻿using AngleSharp.Dom;
+using MangaShelf.BL.Enums;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 
@@ -8,7 +10,7 @@ namespace MangaShelf.BL.Parsers;
 
 public class VarvarParser : BaseParser
 {
-    public VarvarParser(ILogger<BaseParser> logger, IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    public VarvarParser(ILogger<BaseParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Advanced)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
     }
 
