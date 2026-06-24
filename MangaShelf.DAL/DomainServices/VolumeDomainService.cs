@@ -3,6 +3,7 @@ using MangaShelf.Common.Models;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace MangaShelf.DAL.DomainServices;
 
@@ -17,14 +18,40 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
     {
         var query = _context.Volumes
             .Include(x => x.Series)
-            .Where(x =>
-                (x.PurchaseUrl != null && x.PurchaseUrl == volumeInfo.Url) ||
-                (x.ISBN != null && x.ISBN == volumeInfo.ISBN) ||
-                (x.Series!.Title == volumeInfo.Series && x.Number == volumeInfo.VolumeNumber && x.Title == volumeInfo.Title));
+            .IgnoreQueryFilters();
 
-        return query
-            .IgnoreQueryFilters()
-            .SingleOrDefault();
+        if (!string.IsNullOrWhiteSpace(volumeInfo.Url))
+        {
+            var volumeByUrl = FindSingleMatchOrDefault(query, x => x.PurchaseUrl == volumeInfo.Url);
+            if (volumeByUrl != null)
+            {
+                return volumeByUrl;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(volumeInfo.ISBN))
+        {
+            var volumeByIsbn = FindSingleMatchOrDefault(query, x => x.ISBN == volumeInfo.ISBN);
+            if (volumeByIsbn != null)
+            {
+                return volumeByIsbn;
+            }
+        }
+
+        return FindSingleMatchOrDefault(query, x =>
+            x.Series!.Title == volumeInfo.Series &&
+            x.Number == volumeInfo.VolumeNumber &&
+            x.Title == volumeInfo.Title);
+    }
+
+    private static Volume? FindSingleMatchOrDefault(IQueryable<Volume> query, Expression<Func<Volume, bool>> predicate)
+    {
+        var matches = query
+            .Where(predicate)
+            .Take(2)
+            .ToList();
+
+        return matches.Count == 1 ? matches[0] : null;
     }
 
     public IQueryable<Volume> GetAllFullPaginated(IFilterOptions? paginationOptions = default)

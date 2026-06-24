@@ -87,9 +87,8 @@ public class LantsutaParser : BaseParser
         var text = description?.TextContent;
         if (text is null || !text.ContainsAny(lookupPhrases))
         {
-            //var year = GetFromTable(document, "Дата виходу");
-            //return ParseYearIntoLastDayOfYear(year);
-            return null;
+            var year = GetFromTable(document, "Дата виходу");
+            return ParseYearIntoLastDayOfYear(year);
         }
 
         return ParseDescription(text);

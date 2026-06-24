@@ -106,7 +106,10 @@ public class MalopusParser : BaseParser
             {
                 month = 12; // fallback for winter. If year is current and month in past then it's till december current year
             }
-            return new DateTimeOffset(year, month, day, 0, 0, 0, DateTimeOffset.Now.Offset);
+            var localTz = TimeZoneInfo.Local;
+            var dateTime = new DateTime(year, month, day);
+
+            return new DateTimeOffset(dateTime, localTz.GetUtcOffset(dateTime));
         }
 
         return null;
@@ -247,11 +250,11 @@ public class MalopusParser : BaseParser
         return GetFromTable(document, "ISBN") ?? string.Empty;
     }
 
-    protected override int GetTotalVolumes(IDocument document)
+    protected override int? GetTotalVolumes(IDocument document)
     {
         var text = GetFromTable(document, "Кількість томів");
         if (text is null)
-            return -1;
+            return null;
 
         if (text.Contains('/'))
         {

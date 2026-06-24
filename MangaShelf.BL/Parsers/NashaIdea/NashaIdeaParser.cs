@@ -210,11 +210,11 @@ public class NashaIdeaParser : BaseParser
         return string.Empty;
     }
 
-    protected override int GetTotalVolumes(IDocument document)
+    protected override int? GetTotalVolumes(IDocument document)
     {
         var node = document.QuerySelector(".book-product-table-data-status");
         if (node is null)
-            return -1;
+            return null;
 
         if (node.TextContent.Contains("Серія завершена"))
         {
@@ -242,7 +242,7 @@ public class NashaIdeaParser : BaseParser
             return GetFromStatus(text, "Серія з ");
         }
 
-        return -1;
+        return null;
     }
 
     private static int GetFromStatus(string text, string pattern)

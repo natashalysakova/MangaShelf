@@ -47,9 +47,9 @@ public abstract class BaseParser : IPublisherParser
         return "ua";
     }
 
-    protected virtual int GetTotalVolumes(IDocument document)
+    protected virtual int? GetTotalVolumes(IDocument document)
     {
-        return -1;
+        return null;
     }
 
 
@@ -86,6 +86,10 @@ public abstract class BaseParser : IPublisherParser
         {
             var classToSearch = GetVolumeUrlBlockClass();
             var nodes = document.QuerySelectorAll(classToSearch).Where(x => !x.TextContent.ToLower().StartsWith("комплект"));
+            if (!nodes.Any())
+            {
+                throw new Exception("Page does not contain any volumes. Probably last page reached.");
+            }
             var attribute = nodes.Where(x=> x.Attributes["href"] != null).Select(x => x.Attributes["href"]);
             return attribute.Select(x => x.Value);
         }

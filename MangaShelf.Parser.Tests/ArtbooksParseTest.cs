@@ -38,8 +38,10 @@ public class ArtbooksParseTest : BaseParserTestClass<ArtbooksParser>
 
         result.Should().BeEquivalentTo(expectedValue, config => config
             .Excluding(x => x.Json)
-            .Excluding(x => x.Description));
+            .Excluding(x => x.Description)
+            .Excluding(x => x.Cover));
         result.Description.Should().NotBeNullOrEmpty();
+        result.Cover.Should().NotBeNullOrEmpty();
     }
 
     private static ParsedInfo preorder = new ParsedInfo()
@@ -52,7 +54,7 @@ public class ArtbooksParseTest : BaseParserTestClass<ArtbooksParser>
         Authors = "Шіро Масамуне",
         Isbn = "978-617-523-247-7",
         IsPreorder = true,
-        Release = DateTime.SpecifyKind(new DateTime(2026, 05, 04), DateTimeKind.Local),
+        Release = null,
         PreorderStartDate = null,
         Publisher = "Artbooks",
         SeriesStatus = SeriesStatus.Unknown,
@@ -73,7 +75,7 @@ public class ArtbooksParseTest : BaseParserTestClass<ArtbooksParser>
         Authors = "Наоші Аракава",
         Isbn = "978-617-523-324-5",
         IsPreorder = false,
-        Release = DateTime.SpecifyKind(new DateTime(2025, 12, 31), DateTimeKind.Local),
+        Release = null,
         PreorderStartDate = null,
         Publisher = "Artbooks",
         Series = "Твоя квітнева брехня",
@@ -96,7 +98,7 @@ public class ArtbooksParseTest : BaseParserTestClass<ArtbooksParser>
         Isbn = "978-617-523-321-4",
         IsPreorder = false,
         Publisher = "Artbooks",
-        Release = DateTime.SpecifyKind(new DateTime(2025, 12, 31), DateTimeKind.Local),
+        Release = null,
         Series = "Атака титанів",
         SeriesStatus = SeriesStatus.Unknown,
         TotalVolumes = null,

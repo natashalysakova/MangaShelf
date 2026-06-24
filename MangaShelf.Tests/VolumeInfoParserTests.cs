@@ -116,7 +116,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -125,7 +125,7 @@ public class VolumeInfoParserTests : IDisposable
         var volume = await context.Volumes
             .Include(v => v.Series)
             .ThenInclude(s => s!.Authors)
-            .FirstOrDefaultAsync(v => v.Title == "Volume 1");
+            .FirstOrDefaultAsync(v => v.Title == "Volume 1", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.Equal("Volume 1", volume.Title);
@@ -146,7 +146,7 @@ public class VolumeInfoParserTests : IDisposable
         Assert.Equal(SeriesType.Manga, volume.Series.Type);
         Assert.True(volume.Series.IsPublishedOnSite);
 
-        Assert.Equal(1, volume.Series.Authors.Count);
+        Assert.Single(volume.Series.Authors);
         Assert.Equal("Test Author", volume.Series.Authors.First().Name);
     }
 
@@ -178,7 +178,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Original description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Update with new info
         var updatedParsedInfo = new ParsedInfo
@@ -205,7 +205,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Updated description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -213,7 +213,7 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .Include(v => v.Series)
-            .FirstOrDefaultAsync(v => v.Title == "Volume 1");
+            .FirstOrDefaultAsync(v => v.Title == "Volume 1", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.Equal("Updated description", volume.Description);
@@ -252,7 +252,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -260,15 +260,15 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
-            .FirstOrDefaultAsync(s => s.Title == "Multi-Author Series");
+            .FirstOrDefaultAsync(s => s.Title == "Multi-Author Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         // Authors are split but not trimmed, so they have leading spaces
         Assert.Equal(3, series.Authors.Count);
         var authorNames = series.Authors.Select(a => a.Name.Trim()).ToList();
-        Assert.True(authorNames.Contains("Author One"));
-        Assert.True(authorNames.Contains("Author Two"));
-        Assert.True(authorNames.Contains("Author Three"));
+        Assert.Contains("Author One", authorNames);
+        Assert.Contains("Author Two", authorNames);
+        Assert.Contains("Author Three", authorNames);
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public class VolumeInfoParserTests : IDisposable
         var beforeTest = DateTimeOffset.Now;
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         var afterTest = DateTimeOffset.Now;
 
@@ -311,7 +311,7 @@ public class VolumeInfoParserTests : IDisposable
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "Preorder Volume");
+            .FirstOrDefaultAsync(v => v.Title == "Preorder Volume", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.True(volume.IsPreorder);
@@ -350,7 +350,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -358,10 +358,10 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .Include(v => v.Series)
-            .FirstOrDefaultAsync(v => v.Title == "One Shot");
+            .FirstOrDefaultAsync(v => v.Title == "One Shot", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
-        Assert.True(volume.Series.Status == SeriesStatus.OneShot);
+        Assert.Equal(SeriesStatus.OneShot, volume.Series!.Status);
     }
 
     [Fact]
@@ -393,14 +393,14 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "Adult Volume");
+            .FirstOrDefaultAsync(v => v.Title == "Adult Volume", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.Equal(18, volume.AgeRestriction);
@@ -434,7 +434,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "First volume"
         };
 
-        await _parserService.Parse(firstParsedInfo);
+        await _parserService.Parse(firstParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Create second volume with same publisher
         var secondParsedInfo = new ParsedInfo
@@ -461,7 +461,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Second volume"
         };
 
-        var result = await _parserService.Parse(secondParsedInfo);
+        var result = await _parserService.Parse(secondParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -469,13 +469,13 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var publishers = await context.Publishers
             .Where(p => p.Name == "Shared Publisher")
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(1, publishers.Count);
+        Assert.Single(publishers);
 
         var seriesCount = await context.Series
             .Where(s => s.Publisher!.Name == "Shared Publisher")
-            .CountAsync();
+            .CountAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(2, seriesCount);
     }
@@ -510,14 +510,14 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "Future Volume");
+            .FirstOrDefaultAsync(v => v.Title == "Future Volume", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         // Future dates should not be used, current date should be set instead
@@ -553,7 +553,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -562,7 +562,7 @@ public class VolumeInfoParserTests : IDisposable
         var series = await context.Series
             .Include(s => s.Publisher)
             .ThenInclude(p => p!.Country)
-            .FirstOrDefaultAsync(s => s.Title == "Test Series");
+            .FirstOrDefaultAsync(s => s.Title == "Test Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.NotNull(series.Publisher);
@@ -598,7 +598,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "First volume"
         };
 
-        await _parserService.Parse(firstParsedInfo);
+        await _parserService.Parse(firstParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Create second volume in same series
         var secondParsedInfo = new ParsedInfo
@@ -625,7 +625,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Second volume"
         };
 
-        var result = await _parserService.Parse(secondParsedInfo);
+        var result = await _parserService.Parse(secondParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -633,13 +633,13 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var seriesCount = await context.Series
             .Where(s => s.Title == "Shared Series")
-            .CountAsync();
+            .CountAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(1, seriesCount);
 
         var volumes = await context.Volumes
             .Where(v => v.Series!.Title == "Shared Series")
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(2, volumes.Count);
     }
@@ -673,7 +673,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -681,10 +681,10 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
-            .FirstOrDefaultAsync(s => s.Title == "No Author Series");
+            .FirstOrDefaultAsync(s => s.Title == "No Author Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
-        Assert.Equal(0, series.Authors.Count);
+        Assert.Empty(series.Authors);
     }
 
     [Fact]
@@ -715,7 +715,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Update with Completed status
         var updatedParsedInfo = new ParsedInfo
@@ -742,14 +742,14 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Updated, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
-            .FirstOrDefaultAsync(s => s.Title == "Status Change Series");
+            .FirstOrDefaultAsync(s => s.Title == "Status Change Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.Equal(SeriesStatus.Completed, series.Status);
@@ -783,7 +783,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Update with 5 total volumes (increased)
         var updatedParsedInfo = new ParsedInfo
@@ -810,14 +810,14 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Updated, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
-            .FirstOrDefaultAsync(s => s.Title == "Volume Count Series");
+            .FirstOrDefaultAsync(s => s.Title == "Volume Count Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.Equal(5, series.TotalVolumes);
@@ -851,7 +851,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Try to update with 3 total volumes (decreased)
         var updatedParsedInfo = new ParsedInfo
@@ -878,12 +878,12 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
-            .FirstOrDefaultAsync(s => s.Title == "No Decrease Series");
+            .FirstOrDefaultAsync(s => s.Title == "No Decrease Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.Equal(5, series.TotalVolumes);
@@ -920,7 +920,7 @@ public class VolumeInfoParserTests : IDisposable
         var beforeTest = DateTimeOffset.Now;
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         var afterTest = DateTimeOffset.Now;
 
@@ -929,7 +929,7 @@ public class VolumeInfoParserTests : IDisposable
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "New Preorder");
+            .FirstOrDefaultAsync(v => v.Title == "New Preorder", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.True(volume.IsPreorder);
@@ -966,7 +966,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Original description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Update with null description
         var updatedParsedInfo = new ParsedInfo
@@ -993,12 +993,12 @@ public class VolumeInfoParserTests : IDisposable
             Description = null // Null description should not overwrite
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "Volume 1" && v.Series!.Title == "Description Series");
+            .FirstOrDefaultAsync(v => v.Title == "Volume 1" && v.Series!.Title == "Description Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.Equal("Original description", volume.Description);
@@ -1032,7 +1032,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Same description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Update with same description and same URL
         var updatedParsedInfo = new ParsedInfo
@@ -1059,7 +1059,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Same description" // Same description
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert - Since nothing changed, should still be Updated (EF marks it as unchanged but method returns Updated)
         Assert.Equal(State.Updated, result);
@@ -1094,7 +1094,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1102,7 +1102,7 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
             .Include(v => v.Series)
-            .FirstOrDefaultAsync(v => v.Title == "Unpublished Volume");
+            .FirstOrDefaultAsync(v => v.Title == "Unpublished Volume", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.False(volume.IsPublishedOnSite);
@@ -1138,7 +1138,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1146,7 +1146,7 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
-            .FirstOrDefaultAsync(s => s.Title == "Newline Authors Series");
+            .FirstOrDefaultAsync(s => s.Title == "Newline Authors Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.Equal(3, series.Authors.Count);
@@ -1180,7 +1180,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Update with 0 total volumes (unknown)
         var updatedParsedInfo = new ParsedInfo
@@ -1207,12 +1207,12 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
-            .FirstOrDefaultAsync(s => s.Title == "Zero Total Series");
+            .FirstOrDefaultAsync(s => s.Title == "Zero Total Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.Equal(5, series.TotalVolumes);
@@ -1247,14 +1247,14 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
-            .FirstOrDefaultAsync(s => s.Title == "Manhwa Series");
+            .FirstOrDefaultAsync(s => s.Title == "Manhwa Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.Equal(SeriesType.Manhwa, series.Type);
@@ -1288,12 +1288,12 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Verify initial images are set
         using (var context = _dbContextFactory.CreateDbContext())
         {
-            var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Cover Test Volume");
+            var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Cover Test Volume", TestContext.Current.CancellationToken);
             Assert.NotNull(vol);
             Assert.Equal("images/cover.jpg", vol.CoverImageUrl);
             Assert.Equal("images/small/cover.jpg", vol.CoverImageUrlSmall);
@@ -1327,7 +1327,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Updated description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Updated, result);
@@ -1337,6 +1337,7 @@ public class VolumeInfoParserTests : IDisposable
         _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Never());
     }
 
+    [Fact]
     public async Task AiGen_ReleaseDateInPast_SetsReleaseDateToNow()
     {
         // Arrange - Release date in the past (not > DateTime.Now)
@@ -1348,7 +1349,7 @@ public class VolumeInfoParserTests : IDisposable
             VolumeNumber = 1,
             Series = "Past Release Series",
             Cover = "https://example.com/cover.jpg",
-            Release = pastReleaseDate, // Past date - condition Release > DateTime.Now is false
+            Release = null,
             Publisher = "Test Publisher",
             VolumeType = VolumeType.Physical,
             Isbn = "978-1234567890",
@@ -1368,7 +1369,7 @@ public class VolumeInfoParserTests : IDisposable
         var beforeTest = DateTimeOffset.Now;
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         var afterTest = DateTimeOffset.Now;
 
@@ -1377,11 +1378,10 @@ public class VolumeInfoParserTests : IDisposable
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "Past Release Volume");
+            .FirstOrDefaultAsync(v => v.Title == "Past Release Volume", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         // Since Release is in the past and PreorderStartDate is null, ReleaseDate should be set to Now
-        Assert.NotNull(volume.ReleaseDate);
         Assert.True(volume.ReleaseDate >= beforeTest && volume.ReleaseDate <= afterTest,
             "ReleaseDate should be set to approximately now when Release is in the past and no PreorderStartDate");
     }
@@ -1414,7 +1414,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Special edition"
         };
 
-        await _parserService.Parse(firstParsedInfo);
+        await _parserService.Parse(firstParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Create volume with same series and number but different title
         var secondParsedInfo = new ParsedInfo
@@ -1441,7 +1441,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Regular edition"
         };
 
-        var result = await _parserService.Parse(secondParsedInfo);
+        var result = await _parserService.Parse(secondParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert - Should create a new volume since title is different
         Assert.Equal(State.Added, result);
@@ -1449,7 +1449,7 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var volumes = await context.Volumes
             .Where(v => v.Series!.Title == "Multi Title Series" && v.Number == 1)
-            .ToListAsync();
+            .ToListAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(2, volumes.Count);
     }
@@ -1483,7 +1483,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1491,11 +1491,11 @@ public class VolumeInfoParserTests : IDisposable
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
             .Include(s => s.Authors)
-            .FirstOrDefaultAsync(s => s.Title == "Empty Author Series");
+            .FirstOrDefaultAsync(s => s.Title == "Empty Author Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         // Split with RemoveEmptyEntries should result in 0 authors
-        Assert.Equal(0, series.Authors.Count);
+        Assert.Empty(series.Authors);
     }
 
     [Fact]
@@ -1526,7 +1526,7 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Act - Update with same age restriction
         var updatedParsedInfo = new ParsedInfo
@@ -1553,12 +1553,12 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
-            .FirstOrDefaultAsync(v => v.Title == "Age Test Volume");
+            .FirstOrDefaultAsync(v => v.Title == "Age Test Volume", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.Equal(16, volume.AgeRestriction);
@@ -1592,12 +1592,12 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(initialParsedInfo);
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
 
         // Verify initial state
         using (var context = _dbContextFactory.CreateDbContext())
         {
-            var series = await context.Series.FirstOrDefaultAsync(s => s.Title == "Null Total Series");
+            var series = await context.Series.FirstOrDefaultAsync(s => s.Title == "Null Total Series", TestContext.Current.CancellationToken);
             Assert.NotNull(series);
             Assert.Equal(0, series.TotalVolumes);
         }
@@ -1627,11 +1627,11 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.Parse(updatedParsedInfo);
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         using var context2 = _dbContextFactory.CreateDbContext();
-        var updatedSeries = await context2.Series.FirstOrDefaultAsync(s => s.Title == "Null Total Series");
+        var updatedSeries = await context2.Series.FirstOrDefaultAsync(s => s.Title == "Null Total Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(updatedSeries);
         Assert.Equal(10, updatedSeries.TotalVolumes);
@@ -1665,13 +1665,13 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        await _parserService.Parse(preorderParsedInfo);
+        await _parserService.Parse(preorderParsedInfo, TestContext.Current.CancellationToken);
 
         // Get the original PreorderStart
         DateTimeOffset? originalPreorderStart;
         using (var context = _dbContextFactory.CreateDbContext())
         {
-            var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Was Preorder Volume");
+            var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Was Preorder Volume", TestContext.Current.CancellationToken);
             Assert.NotNull(vol);
             Assert.NotNull(vol.PreorderStart);
             originalPreorderStart = vol.PreorderStart;
@@ -1702,13 +1702,13 @@ public class VolumeInfoParserTests : IDisposable
             Description = "Test description"
         };
 
-        var result = await _parserService.Parse(releasedParsedInfo);
+        var result = await _parserService.Parse(releasedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Updated, result);
 
         using var context2 = _dbContextFactory.CreateDbContext();
-        var volume = await context2.Volumes.FirstOrDefaultAsync(v => v.Title == "Was Preorder Volume");
+        var volume = await context2.Volumes.FirstOrDefaultAsync(v => v.Title == "Was Preorder Volume", TestContext.Current.CancellationToken);
 
         Assert.NotNull(volume);
         Assert.False(volume.IsPreorder);
@@ -1745,14 +1745,14 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
 
         using var context = _dbContextFactory.CreateDbContext();
         var publisher = await context.Publishers
-            .FirstOrDefaultAsync(p => p.Name == "Brand New Publisher");
+            .FirstOrDefaultAsync(p => p.Name == "Brand New Publisher", TestContext.Current.CancellationToken);
 
         Assert.NotNull(publisher);
         // Publisher URL should be set to the full URL from volumeInfo.Url
@@ -1788,7 +1788,7 @@ public class VolumeInfoParserTests : IDisposable
         };
 
         // Act
-        var result = await _parserService.Parse(parsedInfo);
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(State.Added, result);
@@ -1797,12 +1797,213 @@ public class VolumeInfoParserTests : IDisposable
         var series = await context.Series
             .Include(s => s.Publisher)
             .ThenInclude(p => p!.Country)
-            .FirstOrDefaultAsync(s => s.Title == "Japan Series");
+            .FirstOrDefaultAsync(s => s.Title == "Japan Series", TestContext.Current.CancellationToken);
 
         Assert.NotNull(series);
         Assert.NotNull(series.Publisher);
         Assert.NotNull(series.Publisher.Country);
         Assert.Equal("jp", series.Publisher.Country.CountryCode);
         Assert.Equal("Japan", series.Publisher.Country.Name);
+    }
+
+    [Fact]
+    public async Task Parse_DuplicateIsbnWithUniqueSeriesMatch_UpdatesExistingVolume()
+    {
+        using (var context = _dbContextFactory.CreateDbContext())
+        {
+            var country = await context.Countries.SingleAsync(x => x.CountryCode == "uk", TestContext.Current.CancellationToken);
+            var publisher = new Publisher
+            {
+                Name = "Test Publisher",
+                Country = country,
+                Url = "https://example.com/publisher"
+            };
+
+            var otherSeries = new Series
+            {
+                Title = "Other Series",
+                Publisher = publisher,
+                Status = SeriesStatus.Ongoing,
+                Type = SeriesType.Manga,
+                IsPublishedOnSite = true
+            };
+
+            var matchedSeries = new Series
+            {
+                Title = "Matched Series",
+                Publisher = publisher,
+                Status = SeriesStatus.Ongoing,
+                Type = SeriesType.Manga,
+                IsPublishedOnSite = true
+            };
+
+            context.Volumes.AddRange(
+                new Volume
+                {
+                    Title = "Other Volume",
+                    Number = 1,
+                    ISBN = "shared-isbn",
+                    PurchaseUrl = "https://example.com/other-volume",
+                    Series = otherSeries,
+                    IsPublishedOnSite = true,
+                    ReleaseDate = DateTimeOffset.UtcNow,
+                    Type = VolumeType.Physical
+                },
+                new Volume
+                {
+                    Title = "Matched Volume",
+                    Number = 2,
+                    ISBN = "shared-isbn",
+                    PurchaseUrl = "https://example.com/matched-volume",
+                    Series = matchedSeries,
+                    IsPublishedOnSite = true,
+                    ReleaseDate = DateTimeOffset.UtcNow.AddDays(-1),
+                    Type = VolumeType.Physical,
+                    Description = "Original description"
+                });
+
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var parsedInfo = new ParsedInfo
+        {
+            Title = "Matched Volume",
+            Authors = "Test Author",
+            VolumeNumber = 2,
+            Series = "Matched Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "Test Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "shared-isbn",
+            TotalVolumes = 5,
+            SeriesStatus = SeriesStatus.Completed,
+            OriginalSeriesTitle = "Original",
+            Url = "https://example.com/matched-volume-updated",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 18,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Updated description"
+        };
+
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
+
+        Assert.Equal(State.Updated, result);
+
+        using var assertContext = _dbContextFactory.CreateDbContext();
+        var volumes = await assertContext.Volumes
+            .IgnoreQueryFilters()
+            .Include(v => v.Series)
+            .Where(v => v.ISBN == "shared-isbn")
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, volumes.Count);
+
+        var matchedVolume = Assert.Single(volumes, v => v.Series!.Title == "Matched Series" && v.Number == 2 && v.Title == "Matched Volume");
+        Assert.Equal("Updated description", matchedVolume.Description);
+        Assert.Equal("https://example.com/matched-volume-updated", matchedVolume.PurchaseUrl);
+        Assert.Equal(18, matchedVolume.AgeRestriction);
+        Assert.Equal(SeriesStatus.Completed, matchedVolume.Series!.Status);
+        Assert.Equal(5, matchedVolume.Series.TotalVolumes);
+    }
+
+    [Fact]
+    public async Task Parse_DuplicateIsbnWithoutUniqueFallback_CreatesNewVolume()
+    {
+        using (var context = _dbContextFactory.CreateDbContext())
+        {
+            var country = await context.Countries.SingleAsync(x => x.CountryCode == "uk", TestContext.Current.CancellationToken);
+            var publisher = new Publisher
+            {
+                Name = "Test Publisher",
+                Country = country,
+                Url = "https://example.com/publisher"
+            };
+
+            var firstSeries = new Series
+            {
+                Title = "Existing Series One",
+                Publisher = publisher,
+                Status = SeriesStatus.Ongoing,
+                Type = SeriesType.Manga,
+                IsPublishedOnSite = true
+            };
+
+            var secondSeries = new Series
+            {
+                Title = "Existing Series Two",
+                Publisher = publisher,
+                Status = SeriesStatus.Ongoing,
+                Type = SeriesType.Manga,
+                IsPublishedOnSite = true
+            };
+
+            context.Volumes.AddRange(
+                new Volume
+                {
+                    Title = "Volume One",
+                    Number = 1,
+                    ISBN = "shared-isbn",
+                    PurchaseUrl = "https://example.com/volume-one",
+                    Series = firstSeries,
+                    IsPublishedOnSite = true,
+                    ReleaseDate = DateTimeOffset.UtcNow,
+                    Type = VolumeType.Physical
+                },
+                new Volume
+                {
+                    Title = "Volume Two",
+                    Number = 2,
+                    ISBN = "shared-isbn",
+                    PurchaseUrl = "https://example.com/volume-two",
+                    Series = secondSeries,
+                    IsPublishedOnSite = true,
+                    ReleaseDate = DateTimeOffset.UtcNow.AddDays(-1),
+                    Type = VolumeType.Physical
+                });
+
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var parsedInfo = new ParsedInfo
+        {
+            Title = "Brand New Volume",
+            Authors = "Test Author",
+            VolumeNumber = 3,
+            Series = "Brand New Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "Test Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "shared-isbn",
+            TotalVolumes = 4,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://example.com/brand-new-volume",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Brand new description"
+        };
+
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
+
+        Assert.Equal(State.Added, result);
+
+        using var assertContext = _dbContextFactory.CreateDbContext();
+        var volumes = await assertContext.Volumes
+            .IgnoreQueryFilters()
+            .Include(v => v.Series)
+            .Where(v => v.ISBN == "shared-isbn")
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(3, volumes.Count);
+        Assert.Contains(volumes, v => v.Series!.Title == "Brand New Series" && v.Number == 3 && v.Title == "Brand New Volume");
     }
 }
