@@ -47,7 +47,7 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
         Assert.IsNotNull(result);
         Assert.AreEqual("Обіцянка", result.Title);
         Assert.AreEqual("Аватар. Останній Захисник", result.Series);
-        Assert.AreEqual(-1, result.VolumeNumber);
+        Assert.AreEqual(null, result.VolumeNumber);
         Assert.IsNotNull(result.Description);
     }
 

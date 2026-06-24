@@ -7,7 +7,7 @@ namespace MangaShelf.BL.Parsers;
 
 public class MolfarParser : BaseParser
 {
-    public MolfarParser(ILogger<BaseParser> logger,  IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    public MolfarParser(ILogger<BaseParser> logger, IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
     }
 
@@ -17,9 +17,11 @@ public class MolfarParser : BaseParser
 
     public override string Pagination => "/page/{0}/";
 
+    public override string VolumeTitleSelector => ".nameProduct";
+
     public override string GetPageUrl(int page)
     {
-        if(page == 1)
+        if (page == 1)
         {
             return this.SiteUrl + this.CatalogUrl;
         }
@@ -93,11 +95,21 @@ public class MolfarParser : BaseParser
 
     protected override bool GetIsPreorder(IDocument document)
     {
-        var badgeNode = document.QuerySelector(".bds");
-        if (badgeNode is null)
+        //var badgeNode = document.QuerySelector("span.bds.bgc7.tc1");
+        //if (badgeNode is null)
+        //    return false;
+
+        //return badgeNode.TextContent.Trim().Equals("Передзамовлення", StringComparison.OrdinalIgnoreCase);
+
+        var releseDateNode = document.QuerySelector(".productShortDescription");
+        if (releseDateNode is null)
             return false;
 
-        return badgeNode.TextContent.Trim().Equals("Передзамовлення", StringComparison.OrdinalIgnoreCase);
+        if(releseDateNode.TextContent.Contains("передзамовлення", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
     }
 
     protected override string? GetOriginalSeriesName(IDocument document)
@@ -117,15 +129,24 @@ public class MolfarParser : BaseParser
 
     protected override DateTimeOffset? GetReleaseDate(IDocument document)
     {
-        var releseDateNode = document.QuerySelector(".productShortDescription");
-        if(releseDateNode is null)
-            return null;
+        if (GetIsPreorder(document))
+        {
 
-        var releseDateText = releseDateNode.TextContent.Trim();
+            var releseDateNode = document.QuerySelector(".productShortDescription");
+            if (releseDateNode is null)
+                return null;
 
-        // Орієнтовна дата відправки передзамовлення 2 половина липня
+            var releseDateText = releseDateNode.TextContent.Trim();
 
-        return GetDateFromText(releseDateText);
+            // Орієнтовна дата відправки передзамовлення 2 половина липня
+
+            return GetDateFromText(releseDateText);
+        }
+        else
+        {
+            var year = GetFromTable(document, "Рік видання");
+            return ParseYearIntoLastDayOfYear(year);
+        }
     }
 
     private DateTimeOffset? GetDateFromText(string text)
@@ -251,38 +272,10 @@ public class MolfarParser : BaseParser
         return -1;
     }
 
-    protected override string GetSeries(IDocument document)
-    {
-        var titleNode = document.QuerySelector(".nameProduct");
-        if (titleNode is null)
-            return string.Empty;
-
-        return GetSeriesNameFromDefaultTitle(titleNode.TextContent);
-    }
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
         return SeriesStatus.Unknown;
-    }
-
-    protected override string GetVolumeTitle(IDocument document)
-    {
-        var titleNode = document.QuerySelector(".nameProduct");
-        if (titleNode is null)
-            return string.Empty;
-
-        return GetVolumeTitleFromDefaultTitle(titleNode.TextContent);
-
-    }
-
-    protected override int GetVolumeNumber(IDocument document)
-    {
-        var titleNode = document.QuerySelector(".nameProduct");
-        if (titleNode is null)
-            return -1;
-
-        return GetVolumeNumberFromDefaultTitle(titleNode.TextContent);
-
     }
 
     protected override string GetVolumeUrlBlockClass()

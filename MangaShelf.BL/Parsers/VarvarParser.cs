@@ -20,6 +20,8 @@ public class VarvarParser : BaseParser
 
     public override string Pagination => "&product-page={0}";
 
+    public override string VolumeTitleSelector => ".entry-title";
+
     protected override int? GetAgeRestriction(IDocument document)
     {
         return null;
@@ -201,20 +203,20 @@ public class VarvarParser : BaseParser
         return null;
     }
 
-    protected override string GetSeries(IDocument document)
-    {
-        var node = document.QuerySelector(".entry-title");
-        if (node is null)
-            return string.Empty;
+    //protected override string GetSeries(IDocument document)
+    //{
+    //    var node = document.QuerySelector(".entry-title");
+    //    if (node is null)
+    //        return string.Empty;
 
-        var title = node.TextContent;
+    //    var title = node.TextContent;
 
-        var splitted = title.Split(new[] { "том", "Том" }, StringSplitOptions.RemoveEmptyEntries);
-        if (splitted.Length == 0)
-            return title.Trim();
+    //    var splitted = title.Split(new[] { "том", "Том" }, StringSplitOptions.RemoveEmptyEntries);
+    //    if (splitted.Length == 0)
+    //        return title.Trim();
 
-        return splitted[0].Trim();
-    }
+    //    return splitted[0].Trim();
+    //}
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
@@ -229,34 +231,34 @@ public class VarvarParser : BaseParser
         return SeriesStatus.Unknown;
     }
 
-    protected override string GetVolumeTitle(IDocument document)
-    {
-        var series = GetSeries(document);
-        var node = document.QuerySelector(".entry-title");
-        if (node is null)
-            return string.Empty;
-        var title = node.TextContent;
-        var volumeTitle = title.Replace(series, "").Trim();
-        if (string.IsNullOrEmpty(volumeTitle))
-        {
-            return series;
-        }
-        return volumeTitle;
-    }
+    //protected override string GetVolumeTitle(IDocument document)
+    //{
+    //    var series = GetSeries(document);
+    //    var node = document.QuerySelector(".entry-title");
+    //    if (node is null)
+    //        return string.Empty;
+    //    var title = node.TextContent;
+    //    var volumeTitle = title.Replace(series, "").Trim();
+    //    if (string.IsNullOrEmpty(volumeTitle))
+    //    {
+    //        return series;
+    //    }
+    //    return volumeTitle;
+    //}
 
-    protected override int GetVolumeNumber(IDocument document)
-    {
-        var node = document.QuerySelector(".entry-title");
-        if (node is null)
-            return -1;
-        var title = node.TextContent;
-        var indexOfVolume = title.IndexOf("том ", StringComparison.OrdinalIgnoreCase);
-        if (indexOfVolume == -1)
-            return -1;
+    //protected override int? GetVolumeNumber(IDocument document)
+    //{
+    //    var node = document.QuerySelector(".entry-title");
+    //    if (node is null)
+    //        return null;
+    //    var title = node.TextContent;
+    //    var indexOfVolume = title.IndexOf("том ", StringComparison.OrdinalIgnoreCase);
+    //    if (indexOfVolume == -1)
+    //        return null;
 
-        var volumePart = title.Substring(indexOfVolume + 4).Trim();
-        return int.TryParse(volumePart, out int volumeNumber) ? volumeNumber : -1;
-    }
+    //    var volumePart = title.Substring(indexOfVolume + 4).Trim();
+    //    return int.TryParse(volumePart, out int volumeNumber) ? volumeNumber : null;
+    //}
 
     protected override string GetVolumeUrlBlockClass()
     {

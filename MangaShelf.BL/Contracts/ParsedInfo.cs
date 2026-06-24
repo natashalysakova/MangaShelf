@@ -7,7 +7,7 @@ public record ParsedInfo
 {
     public required string Title { get; init; }
     public string? Authors { get; init; }
-    public required int VolumeNumber { get; init; }
+    public required int? VolumeNumber { get; init; }
     public required string Series { get; init; }
     public required string Cover { get; init; }
     public DateTimeOffset? Release { get; init; }

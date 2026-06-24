@@ -16,6 +16,8 @@ public class NashaIdeaParser : BaseParser
 
     public override string Pagination => "page/{0}";
 
+    public override string VolumeTitleSelector => "h1.product_title";
+
     protected override string? GetAuthors(IDocument document)
     {
         return null;
@@ -26,30 +28,6 @@ public class NashaIdeaParser : BaseParser
         var node = document.QuerySelectorAll(".woocommerce-product-gallery__image > a").First();
         var attribute = node.Attributes["href"];
         return attribute.Value;
-    }
-
-    protected override string GetSeries(IDocument document)
-    {
-        var tag = document.QuerySelector("h1.product_title");
-        var title = tag.InnerHtml;
-
-        return GetSeriesNameFromDefaultTitle(title);
-    }
-
-    protected override string GetVolumeTitle(IDocument document)
-    {
-        var tag = document.QuerySelector("h1.product_title");
-        var title = tag.InnerHtml;
-
-        return GetVolumeTitleFromDefaultTitle(title);
-    }
-
-    protected override int GetVolumeNumber(IDocument document)
-    {
-        var tag = document.QuerySelector("h1.product_title");
-        var title = tag.InnerHtml.ToLower();
-
-        return GetVolumeNumberFromDefaultTitle(title);
     }
 
     protected override DateTimeOffset? GetReleaseDate(IDocument document)

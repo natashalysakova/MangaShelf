@@ -97,7 +97,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         Isbn = "978-617-8485-40-5",
         IsPreorder = false,
         Publisher = "Molfar Comics",
-        Release = DateTime.SpecifyKind(new DateTime(2025, 12, 31), DateTimeKind.Local),
+        Release = DateTimeOffset.Parse("2025-12-31 00:00:00 +02:00"),
         Series = "Ніч Живих Нявців",
         SeriesStatus = SeriesStatus.Unknown,
         TotalVolumes = null,
