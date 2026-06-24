@@ -121,6 +121,11 @@ public class VolumeInfoParser(
             volume.AgeRestriction = volumeInfo.AgeRestrictions.Value;
         }
 
+        if(volumeInfo.Isbn is not null && volume.ISBN != volumeInfo.Isbn)
+        {
+            volume.ISBN = volumeInfo.Isbn;
+        }
+
         if (!string.IsNullOrEmpty(volumeInfo.Cover) && volume.OriginalCoverUrl is null)
         {
             volume.OriginalCoverUrl = imageManager.DownloadFileFromWeb(volumeInfo.Cover, volume.Series.PublicId);
