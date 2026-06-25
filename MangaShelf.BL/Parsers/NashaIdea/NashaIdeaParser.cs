@@ -4,6 +4,7 @@ using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace MangaShelf.BL.Parsers.NashaIdea;
 
@@ -182,10 +183,9 @@ public class NashaIdeaParser : BaseParser
 
     protected override string? GetISBN(IDocument document)
     {
-        // var node = document.QuerySelector(".book-product-table-ibn");
-        // var text = node?.TextContent.Substring(node.TextContent.IndexOf(":") + 1).Trim();
-        // return text;
-        return null;
+        var node = document.QuerySelector(".book-product-table-isbn");
+        var text = node?.TextContent.Substring(node.TextContent.IndexOf(":") + 1).Trim();
+        return text;
     }
 
     protected override int? GetTotalVolumes(IDocument document)

@@ -31,6 +31,12 @@ else
     override protected void OnParametersSet()
     {
         base.OnParametersSet();
+
+        if (Text == null)
+        {
+            Text = Localizer["NoDescrption"];
+        }
+
         if (Text.Length > _previewLength)
         {
             _isTextLong = true;

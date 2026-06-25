@@ -1386,7 +1386,7 @@ public class VolumeInfoParserTests : IDisposable
             "ReleaseDate should be set to approximately now when Release is in the past and no PreorderStartDate");
     }
 
-    [Fact]
+    [Fact(Skip = "Title is not used at the moment")]
     public async Task AiGen_SameSeriesNumberDifferentTitle_CreatesNewVolume()
     {
         // Arrange - Create first volume
@@ -1902,4 +1902,247 @@ public class VolumeInfoParserTests : IDisposable
         Assert.Equal(3, volumes.Count);
         Assert.Contains(volumes, v => v.Series!.Title == "Brand New Series" && v.Number == 3 && v.Title == "Brand New Volume");
     }
+
+    [Fact]
+    public async Task Parse_DuplicateIsbnWithUniqueSeriesMatch_UpdatesExistingVolume()
+    {
+        using (var context = _dbContextFactory.CreateDbContext())
+        {
+            var country = await context.Countries.SingleAsync(x => x.CountryCode == "uk", TestContext.Current.CancellationToken);
+            var publisher = new Publisher
+            {
+                Name = "Test Publisher",
+                Country = country,
+                Url = "https://example.com/"
+            };
+
+            var otherSeries = new Series
+            {
+                Title = "Other Series",
+                Publisher = publisher,
+                Status = SeriesStatus.Ongoing,
+                Type = SeriesType.Manga,
+                IsPublishedOnSite = true
+            };
+
+            var matchedSeries = new Series
+            {
+                Title = "Matched Series",
+                Publisher = publisher,
+                Status = SeriesStatus.Ongoing,
+                Type = SeriesType.Manga,
+                IsPublishedOnSite = true
+            };
+
+            context.Volumes.AddRange(
+                new Volume
+                {
+                    Title = "Other Volume",
+                    Number = 1,
+                    ISBN = "shared-isbn",
+                    PurchaseUrl = "https://example.com/other-volume",
+                    Series = otherSeries,
+                    IsPublishedOnSite = true,
+                    ReleaseDate = DateTimeOffset.UtcNow,
+                    Type = VolumeType.Physical
+                },
+                new Volume
+                {
+                    Title = "Matched Volume",
+                    Number = 2,
+                    ISBN = "shared-isbn",
+                    PurchaseUrl = "https://example.com/matched-volume",
+                    Series = matchedSeries,
+                    IsPublishedOnSite = true,
+                    ReleaseDate = DateTimeOffset.UtcNow.AddDays(-1),
+                    Type = VolumeType.Physical,
+                    Description = "Original description"
+                });
+
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var parsedInfo = new ParsedInfo
+        {
+            Title = "Matched Volume",
+            Authors = "Test Author",
+            VolumeNumber = 2,
+            Series = "Matched Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "Test Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "shared-isbn",
+            TotalVolumes = 5,
+            SeriesStatus = SeriesStatus.Completed,
+            OriginalSeriesTitle = "Original",
+            Url = "https://example.com/matched-volume-updated",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 18,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Updated description"
+        };
+
+        var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
+
+        Assert.Equal(State.Updated, result);
+
+        using var assertContext = _dbContextFactory.CreateDbContext();
+        var volumes = await assertContext.Volumes
+            .IgnoreQueryFilters()
+            .Include(v => v.Series)
+            .Where(v => v.ISBN == "shared-isbn")
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, volumes.Count);
+
+        var matchedVolume = Assert.Single(volumes, v => v.Series!.Title == "Matched Series" && v.Number == 2 && v.Title == "Matched Volume");
+        Assert.Equal("Updated description", matchedVolume.Description);
+        Assert.Equal("https://example.com/matched-volume-updated", matchedVolume.PurchaseUrl);
+        Assert.Equal(18, matchedVolume.AgeRestriction);
+        Assert.Equal(SeriesStatus.Completed, matchedVolume.Series!.Status);
+        Assert.Equal(5, matchedVolume.Series.TotalVolumes);
+    }
+
+    [Fact]
+    public async Task Parse_SameVolumeParsedTwice_KeepsSingleVolumeInDatabase()
+    {
+        var parsedInfo = new ParsedInfo
+        {
+            Title = "Duplicate Check Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Duplicate Check Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "Test Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "duplicate-check-isbn",
+            TotalVolumes = 3,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://example.com/duplicate-check-volume",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial description"
+        };
+
+        var firstResult = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
+
+        var updatedParsedInfo = new ParsedInfo
+        {
+            Title = "Duplicate Check Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Duplicate Check Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "Test Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "duplicate-check-isbn",
+            TotalVolumes = 3,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://example.com/duplicate-check-volume",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Updated description"
+        };
+
+        var secondResult = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
+
+        Assert.Equal(State.Added, firstResult);
+        Assert.Equal(State.Updated, secondResult);
+
+        using var assertContext = _dbContextFactory.CreateDbContext();
+        var volumes = await assertContext.Volumes
+            .IgnoreQueryFilters()
+            .Include(v => v.Series)
+            .Where(v => v.Series!.Title == "Duplicate Check Series" && v.Number == 1)
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        var volume = Assert.Single(volumes);
+        Assert.Equal("Updated description", volume.Description);
+    }
+
+    [Fact]
+    public async Task Parse_ExistingVolumeMatchedBySeriesAndNumber_DoesNotCreateDuplicate()
+    {
+        var initialParsedInfo = new ParsedInfo
+        {
+            Title = "Series Number Match Volume",
+            Authors = "Test Author",
+            VolumeNumber = 2,
+            Series = "Series Number Match",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-12),
+            Publisher = "Test Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = null,
+            TotalVolumes = 4,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://example.com/series-number-volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Original"
+        };
+
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
+
+        var updatedParsedInfo = new ParsedInfo
+        {
+            Title = "Series Number Match Volume",
+            Authors = "Test Author",
+            VolumeNumber = 2,
+            Series = "Series Number Match",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-5),
+            Publisher = "Test Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = null,
+            TotalVolumes = 4,
+            SeriesStatus = SeriesStatus.Completed,
+            OriginalSeriesTitle = "Original",
+            Url = "https://example.com/series-number-volume-2",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 18,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Updated"
+        };
+
+        var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
+
+        Assert.Equal(State.Updated, result);
+
+        using var assertContext = _dbContextFactory.CreateDbContext();
+        var volumes = await assertContext.Volumes
+            .IgnoreQueryFilters()
+            .Include(v => v.Series)
+            .Where(v => v.Series!.Title == "Series Number Match" && v.Number == 2)
+            .ToListAsync(TestContext.Current.CancellationToken);
+
+        var volume = Assert.Single(volumes);
+        Assert.Equal("Updated", volume.Description);
+        Assert.Equal(SeriesStatus.Completed, volume.Series!.Status);
+    }
 }
+

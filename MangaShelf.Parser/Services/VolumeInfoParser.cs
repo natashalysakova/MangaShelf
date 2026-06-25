@@ -90,7 +90,7 @@ public class VolumeInfoParser(
             volume.PurchaseUrl = volumeInfo.Url;
         }
 
-        if (volumeInfo.SeriesStatus != volume.Series.Status)
+        if (volumeInfo.SeriesStatus != SeriesStatus.Unknown && volumeInfo.SeriesStatus != volume.Series.Status)
         {
             volume.Series.Status = volumeInfo.SeriesStatus;
         }

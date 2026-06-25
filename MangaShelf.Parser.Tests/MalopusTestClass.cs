@@ -20,7 +20,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual(null, result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
-        Assert.AreEqual("978-617-8168-12-4", result.Isbn);
+        Assert.AreEqual("9786178168124", result.Isbn);
         Assert.AreEqual(15, result.TotalVolumes);
         Assert.AreEqual(SeriesStatus.Completed, result.SeriesStatus);
         Assert.AreEqual("Sono Bisque Doll wa Koi wo Suru", result.OriginalSeriesTitle);
@@ -63,7 +63,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual(null, result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
-        Assert.AreEqual("978-617-8168-11-7", result.Isbn);
+        Assert.AreEqual("9786178168117", result.Isbn);
         Assert.AreEqual(1, result.TotalVolumes);
         Assert.AreEqual(SeriesStatus.OneShot, result.SeriesStatus);
         Assert.AreEqual("Nijigahara Holograph", result.OriginalSeriesTitle);

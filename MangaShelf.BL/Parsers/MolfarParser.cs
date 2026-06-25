@@ -290,7 +290,7 @@ public class MolfarParser : BaseParser
 
     protected override SeriesType GetSeriesType(IDocument document)
     {
-        return SeriesType.Unknown;
+        return SeriesType.Manga;
     }
 
     protected override string? GetDescription(IDocument document)
