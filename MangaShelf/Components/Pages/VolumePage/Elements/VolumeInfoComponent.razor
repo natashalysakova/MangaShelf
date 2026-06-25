@@ -12,7 +12,7 @@
         <MudTextField Variant="Variant.Filled" Label="@Localizer["Publisher"]" ReadOnly="true"
                       Value="@Volume.Series.Publisher.Name"></MudTextField>
 
-        <MudTextField Variant="Variant.Filled" Label="@Localizer["ISBN"]" ReadOnly="true" Value="@Volume.ISBN">
+        <MudTextField Mask="@(new PatternMask("000-000-0000-00-0"))" Variant="Variant.Filled" Label="@Localizer["ISBN"]" ReadOnly="true" Value="@Volume.ISBN">
         </MudTextField>
 
     </MudStack>

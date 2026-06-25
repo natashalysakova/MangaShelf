@@ -535,7 +535,10 @@ public class VolumeService(
             throw new Exception("Volume not found");
         }
 
-        volume.ReleaseDate = new DateTimeOffset(volumeDto.ReleaseDate!.Value, DateTimeOffset.Now.Offset);
+        var date = volumeDto.ReleaseDate!.Value;
+        var offset = TimeZoneInfo.Local.GetUtcOffset(date);
+
+        volume.ReleaseDate = new DateTimeOffset(date, offset);
         volume.PreorderStart = volumeDto.PreorderStart;
         volume.Title = volumeDto.Title;
         volume.Number = volumeDto.Number;

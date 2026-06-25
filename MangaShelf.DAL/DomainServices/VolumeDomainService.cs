@@ -30,10 +30,18 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(volumeInfo.ISBN))
+        {
+            var volumeByISBN = FindSingleMatchOrDefault(query, x => x.ISBN == volumeInfo.ISBN);
+            if(volumeByISBN != null)
+            {
+                return volumeByISBN;
+            }
+        }
+
         return FindSingleMatchOrDefault(query, x =>
             x.Series!.Title == volumeInfo.Series &&
-            x.Number == volumeInfo.VolumeNumber &&
-            x.Title == volumeInfo.Title);
+            x.Number == volumeInfo.VolumeNumber);
     }
 
     private static Volume? FindSingleMatchOrDefault(IQueryable<Volume> query, Expression<Func<Volume, bool>> predicate)

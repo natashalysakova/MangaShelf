@@ -129,6 +129,23 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
     }
 
     [TestMethod]
+    public async Task NashaIdea_VolumeISBN_ShouldBe()
+    {
+        var result = await Parser.Parse("https://nashaidea.com/product/m/");
+        Assert.IsNotNull(result);
+        Assert.AreEqual("9786178636647", result.Isbn);
+    }
+
+    [TestMethod]
+    [Ignore("Need to find a book with missing isbn")]
+    public async Task NashaIdea_VolumeISBN_ShouldNotBe()
+    {
+        var result = await Parser.Parse("https://nashaidea.com/product/m/");
+        Assert.IsNotNull(result);
+        Assert.AreEqual("", result.Isbn);
+    }
+
+    [TestMethod]
     public async Task NashaIdea_VolumeNumberAndTitle_ShouldBe()
     {
         var result = await Parser.Parse("https://nashaidea.com/product/zhoze-tygr-ta-ryba-tom-2/");

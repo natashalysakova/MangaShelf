@@ -228,11 +228,7 @@ public abstract class BaseParser : IPublisherParser
 
     private string GetVolumeTitleFromDefaultTitle(string title)
     {
-        var volIndex = title.ToLower().IndexOf("омнібус");
-        if (volIndex == -1)
-        {
-            volIndex = title.ToLower().LastIndexOf("том");
-        }
+        var volIndex = LookupIndex(title);
 
         if (volIndex == -1)
         {
@@ -244,15 +240,27 @@ public abstract class BaseParser : IPublisherParser
         }
     }
 
+    private int LookupIndex(string input)
+    {
+        var volIndex = input.ToLower().IndexOf("омнібус");
+
+        if (volIndex == -1)
+            volIndex = input.ToLower().IndexOf("том");
+
+        if (volIndex == -1)
+        {
+            volIndex = input.ToLower().LastIndexOf("книга");
+        }
+
+        return volIndex;
+    }
+
     private int? GetVolumeNumberFromDefaultTitle(string title)
     {
-        var volIndex = title.ToLower().IndexOf("омнібус"); 
-
-        if (volIndex == -1)
-            volIndex = title.ToLower().IndexOf("том");
-
+        var volIndex = LookupIndex(title);
         if (volIndex == -1)
             return null;
+
 
         var nextWord = title.IndexOf(" ", volIndex + 3);
         if (nextWord == -1)
@@ -277,7 +285,7 @@ public abstract class BaseParser : IPublisherParser
 
     private string GetSeriesNameFromDefaultTitle(string title)
     {
-        var volIndex = title.ToLower().LastIndexOf("том");
+        var volIndex = LookupIndex(title);
         if (volIndex == -1)
         {
             return title.Trim();

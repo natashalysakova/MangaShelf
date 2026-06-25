@@ -48,6 +48,30 @@ public class VolumeDomainServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task FindVolumeFromParsedInfo_WhenUrlDoesNotMatch_ReturnsIsbnMatch()
+    {
+        await using var context = CreateContext();
+
+        var isbnMatch = CreateVolume(CreateSeries("Series A"), "Volume A", 1, purchaseUrl: "https://example.com/volume-a", isbn: "isbn-a");
+        context.Volumes.Add(isbnMatch);
+        await context.SaveChangesAsync();
+
+        var service = CreateService(context);
+
+        var result = service.FindVolumeFromParsedInfo(new VolumeInfoRequest
+        {
+            Series = "Other Series",
+            VolumeNumber = 99,
+            Title = "Other Volume",
+            Url = "https://example.com/missing",
+            ISBN = "isbn-a"
+        });
+
+        Assert.NotNull(result);
+        Assert.Equal(isbnMatch.Id, result.Id);
+    }
+
+    [Fact]
     public async Task FindVolumeFromParsedInfo_WhenUrlAndIsbnDoNotMatch_ReturnsSeriesNumberAndTitleMatch()
     {
         await using var context = CreateContext();

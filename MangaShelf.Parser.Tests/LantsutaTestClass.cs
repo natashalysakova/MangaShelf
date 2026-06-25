@@ -21,7 +21,7 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
         Assert.AreEqual(DateTime.Parse("2024-12-31"), result.Release);
         Assert.AreEqual("LANTSUTA", result.Publisher);
         Assert.AreEqual(VolumeType.Physical, result.VolumeType);
-        Assert.AreEqual("978-617-8202-19-4", result.Isbn);
+        Assert.AreEqual("9786178202194", result.Isbn);
         Assert.AreEqual(null, result.TotalVolumes);
         Assert.AreEqual(SeriesStatus.Unknown, result.SeriesStatus);
         Assert.AreEqual(null, result.OriginalSeriesTitle);

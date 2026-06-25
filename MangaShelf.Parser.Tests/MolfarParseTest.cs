@@ -71,7 +71,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         Title = "Том 4",
         CountryCode = "ua",
         Cover = "https://molfar-comics.com/wp-content/uploads/2024/03/bride04-jpg.webp",
-        Isbn = "978-617-7885-93-0",
+        Isbn = "9786177885930",
         IsPreorder = false,
         Publisher = "Molfar Comics",
         Release = null,
@@ -80,7 +80,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         OriginalSeriesTitle = "яп. 魔法使いの嫁, Mahoutsukai no Yome",
         TotalVolumes =null,
         VolumeType = VolumeType.Physical,
-        SeriesType = SeriesType.Unknown,
+        SeriesType = SeriesType.Manga,
         AgeRestrictions = null,
         Url = "https://molfarpublishing.ua/product/narechena-chakluna-tom-4/",
         VolumeNumber = 4,
@@ -94,7 +94,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         CountryCode = "ua",
         Cover = "https://molfar-comics.com/wp-content/uploads/2025/04/cats01.jpg",
         Authors = "Hawkman,Mecha-Roots",
-        Isbn = "978-617-8485-40-5",
+        Isbn = "9786178485405",
         IsPreorder = false,
         Publisher = "Molfar Comics",
         Release = DateTimeOffset.Parse("2025-12-31 00:00:00 +02:00"),
@@ -102,7 +102,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         SeriesStatus = SeriesStatus.Unknown,
         TotalVolumes = null,
         VolumeType = VolumeType.Physical,
-        SeriesType = SeriesType.Unknown,
+        SeriesType = SeriesType.Manga,
         AgeRestrictions = null,
         Url = "https://molfarpublishing.ua/product/nich-zhyvykh-niavtsiv-tom-1/",
         VolumeNumber = 1,
@@ -116,7 +116,7 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         CountryCode = "ua",
         Cover = "https://molfarpublishing.ua/static/d2b106e6a59eb3aa80dd4df9fa36b810/07686/cats03.webp",
         Authors = "Hawkman,Mecha-Roots",
-        Isbn = "978-617-8485-67-2",
+        Isbn = "9786178485672",
         IsPreorder = true,
         Publisher = "Molfar Comics",
         Release = DateTime.SpecifyKind(new DateTime(2026, 7, 31), DateTimeKind.Local),
@@ -124,10 +124,22 @@ public class MolfarParseTest : BaseParserTestClass<MolfarParser>
         SeriesStatus = SeriesStatus.Unknown,
         TotalVolumes = null,
         VolumeType = VolumeType.Physical,
-        SeriesType = SeriesType.Unknown,
+        SeriesType = SeriesType.Manga,
         AgeRestrictions = null,
         Url = "https://molfarpublishing.ua/product/nich-zhyvykh-niavtsiv-tom-3/",
         VolumeNumber = 3,
         OriginalSeriesTitle = "яп. ニャイト・オブ・ザ・リビングキャット, Nyaito obu za Ribingu Kyatto"
     };
+
+    [TestMethod]
+    public async Task ParseVolume_ShouldReturnParsedVolume()
+    {
+        var result = await Parser.Parse("https://molfarpublishing.ua/product/knyha-mahii-z-nulia-1", CancellationToken.None);
+        Assert.IsNotNull(result);
+
+        result.Title.Should().Be("Книга 1");
+        result.Series.Should().Be("Книга магії з Нуля");
+        result.VolumeNumber.Should().Be(1);
+
+    }
 }
