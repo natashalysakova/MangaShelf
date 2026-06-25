@@ -31,6 +31,10 @@
                                 {
                                     <RatingComponent RatingValue="@VolumeState.CurrentStats.AvgRating"></RatingComponent>
                                 }
+                                else
+                                {
+                                    <RatingComponent RatingValue="@Volume.AvgRating"></RatingComponent>
+                                }
                                 <UserActionsComponent Volume="@Volume" />
                             </MudStack>
                         </MudItem>

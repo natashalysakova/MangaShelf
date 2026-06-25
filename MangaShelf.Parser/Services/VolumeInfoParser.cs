@@ -13,15 +13,15 @@ public interface IVolumeInfoParser
     Task<State> Parse(ParsedInfo volumeInfo, CancellationToken token = default);
 }
 public class VolumeInfoParser(
-    IDbContextFactory<MangaDbContext> dbContextFactory, 
-    ILogger<VolumeInfoParser> logger, 
+    IDbContextFactory<MangaDbContext> dbContextFactory,
+    ILogger<VolumeInfoParser> logger,
     IImageManager imageManager) : IVolumeInfoParser
 {
     public async Task<State> Parse(ParsedInfo volumeInfo, CancellationToken token = default)
     {
         using var context = await dbContextFactory.CreateDbContextAsync();
         var domainContextFactory = new DomainServiceFactory(context);
-        
+
         var country = await GetCountry(domainContextFactory, volumeInfo.CountryCode, token);
         var publisher = await GetOrCreatePublisher(domainContextFactory, volumeInfo, country, token);
         var series = await GetOrCreateSeries(domainContextFactory, volumeInfo, publisher, token);
@@ -40,31 +40,31 @@ public class VolumeInfoParser(
     private async Task<Country> GetCountry(DomainServiceFactory factory, string countryCode, CancellationToken token)
     {
         var countryService = factory.GetDomainService<ICountryDomainService>();
-        return await countryService.GetByCountryCodeAsync(countryCode, token) 
+        return await countryService.GetByCountryCodeAsync(countryCode, token)
             ?? await countryService.GetByCountryCodeAsync("uk", token);
     }
 
     private async Task<Publisher> GetOrCreatePublisher(DomainServiceFactory factory, ParsedInfo volumeInfo, Country country, CancellationToken token)
     {
         var publisherService = factory.GetDomainService<IPublisherDomainService>();
-        return await publisherService.GetByNameAsync(volumeInfo.Publisher, token) 
+        return await publisherService.GetByNameAsync(volumeInfo.Publisher, token)
             ?? new Publisher
-        {
-            Name = volumeInfo.Publisher,
-            Country = country,
-            Url = new Uri(volumeInfo.Url).ToString()
-        };
+            {
+                Name = volumeInfo.Publisher,
+                Country = country,
+                Url = new Uri(volumeInfo.Url).ToString()
+            };
     }
 
     private async Task<Series> GetOrCreateSeries(DomainServiceFactory factory, ParsedInfo volumeInfo, Publisher publisher, CancellationToken token)
     {
         var seriesService = factory.GetDomainService<ISeriesDomainService>();
         var series = await seriesService.GetByTitleAsync(volumeInfo.Series, volumeInfo.SeriesType, token);
-        
+
         if (series != null) return series;
 
         var authors = await GetSeriesAuthors(factory, volumeInfo, token);
-        
+
         return new Series
         {
             OriginalTitle = volumeInfo.OriginalSeriesTitle,
@@ -81,8 +81,11 @@ public class VolumeInfoParser(
     private async Task<List<Author>> GetSeriesAuthors(DomainServiceFactory factory, ParsedInfo volumeInfo, CancellationToken token)
     {
         if (volumeInfo.Authors is null) return [];
-        
-        var authorsList = volumeInfo.Authors.Split([',', ';', '\n'], StringSplitOptions.RemoveEmptyEntries);
+
+        var authorsList = volumeInfo.Authors
+            .Split([',', ';', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim())
+            .ToList();
         var authors = await factory.GetDomainService<IAuthorDomainService>().GetOrCreateByNames(authorsList, token);
         return authors.ToList();
     }
@@ -91,7 +94,7 @@ public class VolumeInfoParser(
     {
         var volumeService = factory.GetDomainService<IVolumeDomainService>();
         var volume = volumeService.FindVolumeFromParsedInfo(series.Id, volumeInfo.ToVolumeInfoRequest());
-        
+
         return volume ?? new Volume
         {
             Title = volumeInfo.Title,
@@ -154,7 +157,7 @@ public class VolumeInfoParser(
             volume.ReleaseDate = DateTimeOffset.UtcNow;
 
         if (volume.IsPreorder && volume.PreorderStart == null)
-            volume.PreorderStart = DateTimeOffset.Now;
+            volume.PreorderStart = DateTimeOffset.UtcNow;
     }
 
     private void UpdateAgeRestriction(ParsedInfo volumeInfo, Volume volume)

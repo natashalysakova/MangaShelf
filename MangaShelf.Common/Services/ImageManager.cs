@@ -249,7 +249,7 @@ public class ImageManager : IImageManager
         return coverImageUrl; // Return original if resize fails
     }
 
-    public string? DownloadFileFromWeb(string url, string publicId)
+    public async Task<string?> DownloadFileFromWeb(string url, string publicId)
     {
         if (url.Contains('?'))
         {
@@ -265,10 +265,10 @@ public class ImageManager : IImageManager
         {
             using (var client = new HttpClient())
             {
-                using (var response = client.GetAsync(url))
+                using (var response = await client.GetAsync(url))
                 {
                     byte[] imageBytes =
-                        response.Result.Content.ReadAsByteArrayAsync().Result;
+                        await response.Content.ReadAsByteArrayAsync();
 
                     var localDirectory = Path.Combine(serverRoot, destiantionFolder);
                     var localPath = Path.Combine(localDirectory, filename);
@@ -276,7 +276,7 @@ public class ImageManager : IImageManager
                     if (!Directory.Exists(localDirectory))
                         Directory.CreateDirectory(localDirectory);
 
-                    File.WriteAllBytes(localPath, imageBytes);
+                    await File.WriteAllBytesAsync(localPath, imageBytes);
                     _logger.LogInformation($"Downloaded image from {url} to {localPath}");
                 }
             }
