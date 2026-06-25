@@ -41,7 +41,7 @@ public class VolumeInfoParser(
             };
         }
 
-        var series = await seriesDomainService.GetByTitleAsync(volumeInfo.Series, token);
+        var series = await seriesDomainService.GetByTitleAsync(volumeInfo.Series, volumeInfo.SeriesType, token);
         if (series == null)
         {
             series = new Series()
@@ -63,7 +63,7 @@ public class VolumeInfoParser(
             }
         }
 
-        var volume = volumeDomainService.FindVolumeFromParsedInfo(volumeInfo.ToVolumeInfoRequest());
+        var volume = volumeDomainService.FindVolumeFromParsedInfo(series.Id, volumeInfo.ToVolumeInfoRequest());
         if (volume == null)
         {
             volume = new Volume()
@@ -122,7 +122,7 @@ public class VolumeInfoParser(
             volume.AgeRestriction = volumeInfo.AgeRestrictions.Value;
         }
 
-        if (volumeInfo.Isbn is not null && volume.ISBN != volumeInfo.Isbn)
+        if (volume.ISBN is null && volumeInfo.Isbn is not null)
         {
             volume.ISBN = volumeInfo.Isbn;
         }

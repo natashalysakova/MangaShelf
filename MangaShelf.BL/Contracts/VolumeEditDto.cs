@@ -52,6 +52,10 @@ public class VolumeEditDto
     public required string SeriesPublicId { get; set; }
     public SeriesStatus SeriesStatus { get; set; }
 
+    [Range(1, int.MaxValue, ErrorMessage = "Type must be selected")]
+    [EnumDataType(typeof(SeriesType), ErrorMessage = "Type is invalid")]
+    public SeriesType SeriesType { get; set; }
+
     [Range(1, int.MaxValue, ErrorMessage = "Total volumes must be positive")]
     public int? SeriesTotalVolumes { get; set; }
     public List<AuthorDto> SeriesAuthors { get; set; } = new();
