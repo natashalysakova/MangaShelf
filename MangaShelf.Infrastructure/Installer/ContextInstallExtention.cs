@@ -6,6 +6,7 @@ using MangaShelf.Infrastructure.Accounts;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -78,6 +79,7 @@ public static class ContextInstallExtention
             if (builder.Environment.IsDevelopment())
             {
                 options.EnableSensitiveDataLogging();
+                options.ConfigureWarnings(w => w.Log(RelationalEventId.MultipleCollectionIncludeWarning));
             }
 
             options

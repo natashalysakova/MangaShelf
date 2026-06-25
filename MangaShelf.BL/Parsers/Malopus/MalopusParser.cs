@@ -226,9 +226,9 @@ public class MalopusParser : BaseParser
         return VolumeType.Physical;
     }
 
-    protected override string GetISBN(IDocument document)
+    protected override string? GetISBN(IDocument document)
     {
-        return GetFromTable(document, "ISBN") ?? string.Empty;
+        return GetFromTable(document, "ISBN");
     }
 
     protected override int? GetTotalVolumes(IDocument document)

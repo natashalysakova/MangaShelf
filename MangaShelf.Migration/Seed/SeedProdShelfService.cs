@@ -2,6 +2,7 @@ using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using MangaShelf.DAL.Models;
+using MangaShelf.Migration.DataCorrections;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
@@ -37,23 +38,9 @@ public class SeedProdShelfService : ISeedDataService
         await SeedPublishers();
 
         await SeedUsers();
-
-
-        await ApplyDataCorrections();
     }
 
-    private async Task ApplyDataCorrections()
-    {
-        using var context = await _factory.CreateDbContextAsync();
 
-        foreach (var correction in _dataCorrections)
-        {
-            _logger.LogInformation($"Applying data correction: {correction.GetType().Name}");
-            await correction.ApplyCorrection(context);
-        }
-
-        await context.SaveChangesAsync();
-    }
 
     private async Task SeedUsers()
     {

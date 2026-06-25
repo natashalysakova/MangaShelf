@@ -1,6 +1,7 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using MangaShelf.BL.Contracts;
+using MangaShelf.Common.Helpers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
@@ -147,7 +148,7 @@ public abstract class BaseParser : IPublisherParser
                 Release = EnsureLocalOffset(GetReleaseDate(document)),
                 Publisher = GetPublisher(document),
                 VolumeType = GetVolumeType(document),
-                Isbn = GetISBN(document),
+                Isbn = VolumeHelper.NormalizedIsbn(GetISBN(document)),
                 TotalVolumes = GetTotalVolumes(document),
                 SeriesStatus = GetSeriesStatus(document),
                 OriginalSeriesTitle = GetOriginalSeriesName(document),
@@ -227,7 +228,12 @@ public abstract class BaseParser : IPublisherParser
 
     private string GetVolumeTitleFromDefaultTitle(string title)
     {
-        var volIndex = title.ToLower().LastIndexOf("том");
+        var volIndex = title.ToLower().IndexOf("омнібус");
+        if (volIndex == -1)
+        {
+            volIndex = title.ToLower().LastIndexOf("том");
+        }
+
         if (volIndex == -1)
         {
             return title.Trim();
@@ -240,7 +246,10 @@ public abstract class BaseParser : IPublisherParser
 
     private int? GetVolumeNumberFromDefaultTitle(string title)
     {
-        var volIndex = title.ToLower().IndexOf("том");
+        var volIndex = title.ToLower().IndexOf("омнібус"); 
+
+        if (volIndex == -1)
+            volIndex = title.ToLower().IndexOf("том");
 
         if (volIndex == -1)
             return null;

@@ -1,6 +1,7 @@
 ﻿using MangaShelf.Common.Interfaces;
 using MangaShelf.Infrastructure.Installer;
 using MangaShelf.Infrastructure.Seed;
+using MangaShelf.Migration.DataCorrections;
 
 public class Program
 {

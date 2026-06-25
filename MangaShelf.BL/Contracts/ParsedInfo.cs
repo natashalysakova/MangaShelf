@@ -13,7 +13,7 @@ public record ParsedInfo
     public DateTimeOffset? Release { get; init; }
     public required string Publisher { get; init; }
     public required VolumeType VolumeType { get; init; }
-    public required string Isbn { get; init; }
+    public string? Isbn { get; init; }
     public int? TotalVolumes { get; init; }
     public required SeriesStatus SeriesStatus { get; init; }
     public string? OriginalSeriesTitle { get; init; }

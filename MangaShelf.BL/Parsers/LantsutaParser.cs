@@ -57,7 +57,7 @@ public class LantsutaParser : BaseParser
         return attribute.Value;
     }
 
-    protected override string GetISBN(IDocument document)
+    protected override string? GetISBN(IDocument document)
     {
         return GetFromTable(document, "ISBN");
     }

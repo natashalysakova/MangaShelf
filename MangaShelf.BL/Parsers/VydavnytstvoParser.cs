@@ -62,11 +62,10 @@ public class VydavnytstvoParser : BaseParser
         return node?.GetAttribute("src") ?? string.Empty;
     }
 
-    protected override string GetISBN(IDocument document)
+    protected override string? GetISBN(IDocument document)
     {
         var node = document.QuerySelector(".woocommerce-product-attributes-item--attribute_isbn td");
-        return node?.TextContent.Trim() ?? string.Empty;
-
+        return node?.TextContent.Trim();
     }
 
     protected override bool GetIsPreorder(IDocument document)

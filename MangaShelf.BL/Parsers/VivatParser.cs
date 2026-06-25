@@ -22,7 +22,7 @@ namespace MangaShelf.BL.Parsers
 
         public override string Pagination => "?page={0}";
 
-        public override string VolumeTitleSelector => ".breadcrumbs > :last-child";
+        public override string VolumeTitleSelector => "h1";
 
         protected override int? GetAgeRestriction(IDocument document)
         {
@@ -31,7 +31,15 @@ namespace MangaShelf.BL.Parsers
 
         protected override string? GetAuthors(IDocument document)
         {
-            return GetFromTable(document, "Автор");
+            var autors = GetFromTable(document, "Автор");
+            var illustrators = GetFromTable(document, "Ілюстратор");
+
+            if(autors != null && illustrators != null)
+            {
+                return string.Join(',', autors, illustrators);
+            }
+
+            return autors ?? illustrators;
         }
 
         private string? GetFromTable(IDocument document, string fieldName)
@@ -77,7 +85,10 @@ namespace MangaShelf.BL.Parsers
         protected override string GetCover(IDocument document)
         {
             var node = document.QuerySelector(".swiper-slide-active div div picture img");
-            return Path.Combine(SiteUrl, node?.GetAttribute("src") ?? string.Empty);
+            var parsedPath = node?.GetAttribute("src") ?? string.Empty;
+
+            var url = SiteUrl + parsedPath;
+            return url;
         }
 
         protected override string? GetDescription(IDocument document)
@@ -141,6 +152,18 @@ namespace MangaShelf.BL.Parsers
             }
 
             return series;
+        }
+
+        protected override string GetVolumeTitle(IDocument document)
+        {
+            var baseName = base.GetVolumeTitle(document);
+            var seriesName = GetSeries(document);
+            return baseName.Replace(seriesName, "").Trim(new char[] { ' ', ',', '-', '–', '—', '.' });
+        }
+
+        protected override int? GetVolumeNumber(IDocument document)
+        {
+            return base.GetVolumeNumber(document);
         }
 
         protected override SeriesStatus GetSeriesStatus(IDocument document)

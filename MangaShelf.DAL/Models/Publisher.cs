@@ -3,6 +3,8 @@
 public class Publisher : BaseEntity
 {
     public required string Name { get; set; }
+    public List<string> AlternativeNames { get; set; } = new List<string>();
+
     public string? Url { get; set; }
 
     public Guid CountryId { get; set; }

@@ -66,12 +66,21 @@ public static class PaginationExtention
                 var likePattern = $"%{searchTerm}%";
                 var isVolumeNumber = int.TryParse(searchTerm, out var parsedNumber);
 
+                var matchedPublisherIds = query
+                    .Select(x => new { x.Series!.PublisherId, x.Series.Publisher!.AlternativeNames })
+                    .Distinct()
+                    .AsEnumerable()
+                    .Where(x => x.AlternativeNames.Any(n => n.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+                    .Select(x => x.PublisherId)
+                    .ToList();
+
                 // Chain WHERE clauses so every token must match at least one searchable field.
                 query = query.Where(x =>
                     EF.Functions.Like(x.Title!, likePattern) ||
                     EF.Functions.Like(x.Series!.Title, likePattern) ||
                     EF.Functions.Like(x.Series!.OriginalTitle, likePattern) ||
                     EF.Functions.Like(x.Series!.Publisher!.Name, likePattern) ||
+                    matchedPublisherIds.Contains(x.Series.PublisherId) ||
                     x.Series.Authors.Any(a => EF.Functions.Like(a.Name, likePattern)) ||
                     (isVolumeNumber && x.Number == parsedNumber));
             }
