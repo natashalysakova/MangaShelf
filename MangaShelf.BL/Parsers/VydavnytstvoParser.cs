@@ -17,6 +17,8 @@ public class VydavnytstvoParser : BaseParser
 
     public override string Pagination => "/page/{0}/?per_page=36";
 
+    public override string VolumeTitleSelector => ".product_title";
+
     protected override int? GetAgeRestriction(IDocument document)
     {
         var tags = document.QuerySelectorAll(".tagged_as a");
@@ -60,11 +62,10 @@ public class VydavnytstvoParser : BaseParser
         return node?.GetAttribute("src") ?? string.Empty;
     }
 
-    protected override string GetISBN(IDocument document)
+    protected override string? GetISBN(IDocument document)
     {
         var node = document.QuerySelector(".woocommerce-product-attributes-item--attribute_isbn td");
-        return node?.TextContent.Trim() ?? string.Empty;
-
+        return node?.TextContent.Trim();
     }
 
     protected override bool GetIsPreorder(IDocument document)
@@ -159,7 +160,7 @@ public class VydavnytstvoParser : BaseParser
 
     protected override string GetSeries(IDocument document)
     {
-        var header = document.QuerySelector(".product_title");
+        var header = document.QuerySelector(VolumeTitleSelector);
         if (header == null)
         {
             return string.Empty;
@@ -182,7 +183,7 @@ public class VydavnytstvoParser : BaseParser
 
     protected override string GetVolumeTitle(IDocument document)
     {
-        var header = document.QuerySelector(".product_title");
+        var header = document.QuerySelector(VolumeTitleSelector);
         if (header == null)
         {
             return string.Empty;
@@ -209,31 +210,31 @@ public class VydavnytstvoParser : BaseParser
     }
 
 
-    protected override int GetVolumeNumber(IDocument document)
-    {
-        var header = document.QuerySelector(".product_title");
-        if (header == null)
-        {
-            return -1;
-        }
+    //protected override int? GetVolumeNumber(IDocument document)
+    //{
+    //    var header = document.QuerySelector(VolumeTitleSelector);
+    //    if (header == null)
+    //    {
+    //        return null;
+    //    }
 
-        if (header.TextContent.Contains("Том"))
-        {
-            var parts = header.TextContent.Split(' ');
-            for (int i = 0; i < parts.Length - 1; i++)
-            {
-                if (parts[i].ToLower().Contains("том"))
-                {
-                    if (int.TryParse(parts[i + 1], out int number))
-                    {
-                        return number;
-                    }
-                }
-            }
-        }
+    //    if (header.TextContent.Contains("Том"))
+    //    {
+    //        var parts = header.TextContent.Split(' ');
+    //        for (int i = 0; i < parts.Length - 1; i++)
+    //        {
+    //            if (parts[i].ToLower().Contains("том"))
+    //            {
+    //                if (int.TryParse(parts[i + 1], out int number))
+    //                {
+    //                    return number;
+    //                }
+    //            }
+    //        }
+    //    }
 
-        return -1;
-    }
+    //    return null;
+    //}
 
     protected override string GetVolumeUrlBlockClass()
     {

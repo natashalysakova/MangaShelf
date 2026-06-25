@@ -8,8 +8,9 @@ public class MangaSystemDbContext : DbContext
 {
     public DbSet<Parser> Parsers { get; set; }
     public DbSet<ParserJob> Runs { get; set; }
-
     public DbSet<Settings> Settings { get; set; }
+
+    public DbSet<DataCorrection> DataCorrections { get; set; }
 
     public MangaSystemDbContext(DbContextOptions<MangaSystemDbContext> options) : base(options)
     {
@@ -49,5 +50,14 @@ public class MangaSystemDbContext : DbContext
         modelBuilder.Entity<Settings>()
             .HasIndex(s => new { s.Section, s.Key })
             .IsUnique();
+
+        modelBuilder.Entity<DataCorrection>()
+            .HasKey(x => x.Name);
     }
+}
+
+public class DataCorrection
+{
+    public required string Name { get; set; }
+    public DateTimeOffset AppliedOn { get; set; } = DateTimeOffset.UtcNow;
 }

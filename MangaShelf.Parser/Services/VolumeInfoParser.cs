@@ -1,4 +1,5 @@
 using MangaShelf.BL.Contracts;
+using MangaShelf.Common.Helpers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Interfaces;
@@ -75,6 +76,7 @@ public class VolumeInfoParser(
                 IsPublishedOnSite = series.IsPublishedOnSite,
                 ReleaseDate = MapReleaseDate(volumeInfo.Release),
                 Type = volumeInfo.VolumeType,
+                PurchaseUrl = volumeInfo.Url,
             };
         }
 
@@ -83,7 +85,7 @@ public class VolumeInfoParser(
             volume.Description = volumeInfo.Description;
         }
 
-        if (volume.PurchaseUrl is null || volume.PurchaseUrl != volumeInfo.Url)
+        if (volume.PurchaseUrl != volumeInfo.Url && volumeInfo.Url.Contains(publisher.Url)) // not 3rd party url
         {
             volume.PurchaseUrl = volumeInfo.Url;
         }
@@ -92,7 +94,6 @@ public class VolumeInfoParser(
         {
             volume.Series.Status = volumeInfo.SeriesStatus;
         }
-
 
         if (volumeInfo.TotalVolumes != null && (volume.Series.TotalVolumes == null || volumeInfo.TotalVolumes > volume.Series.TotalVolumes))
         {
@@ -121,7 +122,7 @@ public class VolumeInfoParser(
             volume.AgeRestriction = volumeInfo.AgeRestrictions.Value;
         }
 
-        if(volumeInfo.Isbn is not null && volume.ISBN != volumeInfo.Isbn)
+        if (volumeInfo.Isbn is not null && volume.ISBN != volumeInfo.Isbn)
         {
             volume.ISBN = volumeInfo.Isbn;
         }

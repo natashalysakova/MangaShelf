@@ -1,6 +1,8 @@
 using MangaShelf.DAL;
+using System.Linq;
+using System.Threading;
 
-namespace MangaShelf.Infrastructure.Seed;
+namespace MangaShelf.Migration.DataCorrections;
 
 public interface IDataCorrection
 {

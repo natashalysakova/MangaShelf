@@ -72,7 +72,7 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
         {
             Assert.AreEqual("Бойові шрами", result.Title);
             Assert.AreEqual("Бойові шрами", result.Series);
-            Assert.AreEqual(-1, result.VolumeNumber);
+            Assert.AreEqual(null, result.VolumeNumber);
             Assert.AreEqual(1, result.TotalVolumes);
             Assert.AreEqual(SeriesStatus.OneShot, result.SeriesStatus);
         }

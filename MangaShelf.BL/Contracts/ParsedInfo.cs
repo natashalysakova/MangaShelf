@@ -7,13 +7,13 @@ public record ParsedInfo
 {
     public required string Title { get; init; }
     public string? Authors { get; init; }
-    public required int VolumeNumber { get; init; }
+    public required int? VolumeNumber { get; init; }
     public required string Series { get; init; }
     public required string Cover { get; init; }
     public DateTimeOffset? Release { get; init; }
     public required string Publisher { get; init; }
     public required VolumeType VolumeType { get; init; }
-    public required string Isbn { get; init; }
+    public string? Isbn { get; init; }
     public int? TotalVolumes { get; init; }
     public required SeriesStatus SeriesStatus { get; init; }
     public string? OriginalSeriesTitle { get; init; }

@@ -1,4 +1,5 @@
-﻿using MangaShelf.Common.Interfaces;
+﻿using MangaShelf.Common.Helpers;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Models;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
@@ -26,15 +27,6 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
             if (volumeByUrl != null)
             {
                 return volumeByUrl;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(volumeInfo.ISBN))
-        {
-            var volumeByIsbn = FindSingleMatchOrDefault(query, x => x.ISBN == volumeInfo.ISBN);
-            if (volumeByIsbn != null)
-            {
-                return volumeByIsbn;
             }
         }
 

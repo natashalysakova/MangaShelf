@@ -1,11 +1,13 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using MangaShelf.BL.Contracts;
+using MangaShelf.Common.Helpers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace MangaShelf.BL.Parsers;
 
@@ -20,9 +22,24 @@ public abstract class BaseParser : IPublisherParser
         _htmlDownloader = htmlDownloader;
     }
 
-    protected abstract string GetVolumeTitle(IDocument document);
-    protected abstract string GetSeries(IDocument document);
-    protected abstract int GetVolumeNumber(IDocument document);
+    protected virtual string GetSeries(IDocument document)
+    {
+        var parsedHeader = ParseHeader(document);
+        return parsedHeader.Series;
+    }
+
+    protected virtual string GetVolumeTitle(IDocument document)
+    {
+        var parsedHeader = ParseHeader(document);
+        return parsedHeader.Title;
+    }
+
+    protected virtual int? GetVolumeNumber(IDocument document)
+    {
+        var parsedHeader = ParseHeader(document);
+        return parsedHeader.Number;
+    }
+
     protected abstract string? GetAuthors(IDocument document);
     protected abstract string GetCover(IDocument document);
     protected abstract DateTimeOffset? GetReleaseDate(IDocument document);
@@ -131,7 +148,7 @@ public abstract class BaseParser : IPublisherParser
                 Release = EnsureLocalOffset(GetReleaseDate(document)),
                 Publisher = GetPublisher(document),
                 VolumeType = GetVolumeType(document),
-                Isbn = GetISBN(document),
+                Isbn = VolumeHelper.NormalizedIsbn(GetISBN(document)),
                 TotalVolumes = GetTotalVolumes(document),
                 SeriesStatus = GetSeriesStatus(document),
                 OriginalSeriesTitle = GetOriginalSeriesName(document),
@@ -200,17 +217,23 @@ public abstract class BaseParser : IPublisherParser
             var month = 12;
             var day = 31;
 
-            var date = DateTime.SpecifyKind(new DateTime(yearNumber, month, day), DateTimeKind.Local);
+            var date = new DateTime(yearNumber, month, day);
+            var offset = TimeZoneInfo.Local.GetUtcOffset(date);
 
-            return new DateTimeOffset(date);
+            return new DateTimeOffset(date, offset);
         }
 
         return null;
     }
 
-    protected string GetVolumeTitleFromDefaultTitle(string title)
+    private string GetVolumeTitleFromDefaultTitle(string title)
     {
-        var volIndex = title.ToLower().LastIndexOf("том");
+        var volIndex = title.ToLower().IndexOf("омнібус");
+        if (volIndex == -1)
+        {
+            volIndex = title.ToLower().LastIndexOf("том");
+        }
+
         if (volIndex == -1)
         {
             return title.Trim();
@@ -221,12 +244,15 @@ public abstract class BaseParser : IPublisherParser
         }
     }
 
-    protected int GetVolumeNumberFromDefaultTitle(string title)
+    private int? GetVolumeNumberFromDefaultTitle(string title)
     {
-        var volIndex = title.ToLower().IndexOf("том");
+        var volIndex = title.ToLower().IndexOf("омнібус"); 
 
         if (volIndex == -1)
-            return volIndex;
+            volIndex = title.ToLower().IndexOf("том");
+
+        if (volIndex == -1)
+            return null;
 
         var nextWord = title.IndexOf(" ", volIndex + 3);
         if (nextWord == -1)
@@ -246,10 +272,10 @@ public abstract class BaseParser : IPublisherParser
             volume = title.Substring(nextWord, nextWhitespace - nextWord).Trim();
         }
 
-        return int.Parse(volume);
+        return int.TryParse(volume, out var n) ? n : null;
     }
 
-    protected string GetSeriesNameFromDefaultTitle(string title)
+    private string GetSeriesNameFromDefaultTitle(string title)
     {
         var volIndex = title.ToLower().LastIndexOf("том");
         if (volIndex == -1)
@@ -261,6 +287,19 @@ public abstract class BaseParser : IPublisherParser
             var series = title.Substring(0, volIndex).Trim([' ', ',', '.']);
             return series;
         }
+    }
+
+    public abstract string VolumeTitleSelector { get; }
+    protected (string Series, string Title, int? Number) ParseHeader(IDocument document)
+    {
+        var node = document.QuerySelector(VolumeTitleSelector);
+        var text = node?.TextContent?.Trim();
+
+        var title = GetVolumeTitleFromDefaultTitle(text);
+        var series = GetSeriesNameFromDefaultTitle(text);
+        var number = GetVolumeNumberFromDefaultTitle(text);
+
+        return (series, title, number);
     }
 
     public bool CanParse(string url)

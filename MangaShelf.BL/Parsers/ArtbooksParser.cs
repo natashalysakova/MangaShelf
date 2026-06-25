@@ -17,6 +17,8 @@ public class ArtbooksParser : BaseParser
 
     public override string Pagination => "/?page={0}";
 
+    public override string VolumeTitleSelector => ".title";
+
     private string? GetFromTable(IDocument document, string column)
     {
         var nodes = document.QuerySelectorAll(".info-book__right tr");
@@ -75,9 +77,9 @@ public class ArtbooksParser : BaseParser
         return coverNode.GetAttribute("src")!;
     }
 
-    protected override string GetISBN(IDocument document)
+    protected override string? GetISBN(IDocument document)
     {
-        return GetFromTable(document, "ISBN:") ?? string.Empty;
+        return GetFromTable(document, "ISBN:");
     }
 
     protected override bool GetIsPreorder(IDocument document)
@@ -128,31 +130,10 @@ public class ArtbooksParser : BaseParser
         return null;
     }
 
-    protected override string GetSeries(IDocument document)
-    {
-        var node = document.QuerySelector(".title");
-        var title = node.TextContent;
-
-        return GetSeriesNameFromDefaultTitle(title);
-    }
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
         return SeriesStatus.Unknown;
-    }
-
-    protected override string GetVolumeTitle(IDocument document)
-    {
-        var node = document.QuerySelector(".title");
-        var title = node.TextContent;
-        return GetVolumeTitleFromDefaultTitle(title);
-    }
-
-    protected override int GetVolumeNumber(IDocument document)
-    {
-        var node = document.QuerySelector(".title");
-        var title = node.TextContent;
-        return GetVolumeNumberFromDefaultTitle(title);
     }
 
     protected override string GetVolumeUrlBlockClass()

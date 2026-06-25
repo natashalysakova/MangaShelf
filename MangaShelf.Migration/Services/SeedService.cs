@@ -3,6 +3,7 @@ using MangaShelf.DAL.Identity;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using MangaShelf.Infrastructure.Seed;
+using MangaShelf.Migration.DataCorrections;
 using Microsoft.EntityFrameworkCore;
 
 public class SeedService(
@@ -16,6 +17,8 @@ public class SeedService(
         {
             await MakeSureDbCreatedAsync();
             await SeedDatabase();
+
+            await ApplyDataCorrections();
         }
         catch (Exception ex)
         {
@@ -27,6 +30,40 @@ public class SeedService(
         {
             // Signal the host to stop — this makes the container exit with code 0
             lifetime.StopApplication();
+        }
+    }
+
+    private async Task ApplyDataCorrections()
+    {
+        using var scope = serviceProvider.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<IServiceProvider>>();
+        
+        var _dataCorrections = scope.ServiceProvider.GetServices<IDataCorrection>().OrderBy(x => x.GetType().Name).ToList();
+
+        var _factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaDbContext>>();
+        using var context = await _factory.CreateDbContextAsync();
+
+        var systemContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
+        var systemContext = await systemContextFactory.CreateDbContextAsync();
+
+        foreach (var correction in _dataCorrections)
+        {
+            var correctionName = correction.GetType().Name;
+            var correctionResult = await systemContext.DataCorrections.FirstOrDefaultAsync(x => x.Name == correctionName);
+
+            if(correctionResult != null)
+            {
+                logger.LogInformation($"Data correction {correctionName} already applied on {correctionResult.AppliedOn}");
+                continue;
+            }
+
+
+            logger.LogInformation($"Applying data correction: {correction.GetType().Name}");
+            await correction.ApplyCorrection(context);
+            await context.SaveChangesAsync();
+
+            systemContext.DataCorrections.Add(new DataCorrection { Name = correctionName });
+            await systemContext.SaveChangesAsync();
         }
     }
 

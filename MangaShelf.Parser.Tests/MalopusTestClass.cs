@@ -58,7 +58,7 @@ public class MalopusTestClass : BaseParserTestClass<MalopusParser>
         Assert.AreEqual("Голограф Веселкового поля", result.Title);
         Assert.AreEqual("Голограф Веселкового поля", result.Series);
         Assert.AreEqual("Ініо Асано", result.Authors);
-        Assert.AreEqual(-1, result.VolumeNumber);
+        Assert.AreEqual(null, result.VolumeNumber);
         Assert.AreEqual("https://malopus.com.ua/content/images/24/600x600l80mc0/nijigahara-holograph-55453872054888.webp", result.Cover);
         Assert.AreEqual(null, result.Release);
         Assert.AreEqual("Mal'opus", result.Publisher);

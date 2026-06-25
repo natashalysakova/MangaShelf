@@ -29,7 +29,10 @@ public class VolumeService(
             .Where(x => x.IsPublishedOnSite)
             .Filter(paginationOptions);
 
-        var resultList = await result.ApplyPagination(paginationOptions).ToListAsync(token);
+        var resultList = await result
+            .ApplyPagination(paginationOptions)
+            .AsSplitQuery()
+            .ToListAsync(token);
 
         var totalPages = await result.GetTotalPagesAsync(paginationOptions);
 

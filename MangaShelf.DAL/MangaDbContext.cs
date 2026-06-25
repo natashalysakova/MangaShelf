@@ -106,6 +106,13 @@ public class MangaDbContext : DbContext
 
         modelBuilder.Entity<Author>()
             .HasIndex(a => a.Name);
+
+        modelBuilder.Entity<Publisher>()
+            .Property(e => e.AlternativeNames)
+            .HasConversion(
+                v => string.Join('|', v),
+                v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
+
     }
 
     private static LambdaExpression ConvertToDeleteFilter(Type type)

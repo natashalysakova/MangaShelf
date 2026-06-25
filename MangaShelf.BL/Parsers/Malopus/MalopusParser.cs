@@ -15,6 +15,8 @@ public class MalopusParser : BaseParser
     public override string CatalogUrl => "/manga/";
     public override string Pagination => "filter/page={0}/";
 
+    public override string VolumeTitleSelector => ".product-title";
+
     private string? GetFromTable(IDocument document, string headerText)
     {
         var nodes = document.QuerySelectorAll(".product-features__row");
@@ -191,14 +193,14 @@ public class MalopusParser : BaseParser
     {
     }
 
-    protected override int GetVolumeNumber(IDocument document)
+    protected override int? GetVolumeNumber(IDocument document)
     {
         var node = document.QuerySelector(".product-title");
         var title = node.InnerHtml;
 
         if (!lookupArray.Any(x => title.Contains(x)))
         {
-            return -1;
+            return null;
         }
 
         var lookupValue = lookupArray.Single(x => title.Contains(x));
@@ -216,28 +218,7 @@ public class MalopusParser : BaseParser
             volume = title.Substring(indexOfVolume, nextWhitespace - indexOfVolume);
         }
 
-
-        //var volInd = title.IndexOf("Том ");
-
-        //if (volInd == -1)
-        //{
-        //    volInd = title.IndexOf("Омнібус");
-
-        //    if(volInd == -1)
-        //        return volInd;
-        //}
-
-        //var nextWhiteSpace = title.IndexOf(' ', volInd);
-        //string volume;
-        //if (nextWhiteSpace == -1)
-        //{
-        //    volume = title.Substring(volInd + 1).Trim();
-        //}
-        //else
-        //{
-        //    volume = title.Substring(nextWhiteSpace).Trim();
-        //}
-        return int.Parse(volume);
+        return int.TryParse(volume, out var n) ? n : null;
     }
 
     protected override VolumeType GetVolumeType(IDocument document)
@@ -245,9 +226,9 @@ public class MalopusParser : BaseParser
         return VolumeType.Physical;
     }
 
-    protected override string GetISBN(IDocument document)
+    protected override string? GetISBN(IDocument document)
     {
-        return GetFromTable(document, "ISBN") ?? string.Empty;
+        return GetFromTable(document, "ISBN");
     }
 
     protected override int? GetTotalVolumes(IDocument document)
@@ -323,7 +304,12 @@ public class MalopusParser : BaseParser
 
         // var earliest = dates.OrderBy(x => x).FirstOrDefault();
         // return earliest;
-        return DateTimeOffset.Now;
+        if (GetIsPreorder(document))
+        {
+            return DateTimeOffset.Now;
+        }
+
+        return null;
     }
     protected override bool GetIsPreorder(IDocument document)
     {

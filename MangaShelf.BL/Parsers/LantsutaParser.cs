@@ -22,6 +22,8 @@ public class LantsutaParser : BaseParser
 
     public override string Pagination => "?page={0}";
 
+    public override string VolumeTitleSelector => ".name-product-title";
+
     private string? GetFromTable(IDocument document, string header)
     {
         var infoTable = document.QuerySelectorAll(".table--product-attributes tr");
@@ -55,7 +57,7 @@ public class LantsutaParser : BaseParser
         return attribute.Value;
     }
 
-    protected override string GetISBN(IDocument document)
+    protected override string? GetISBN(IDocument document)
     {
         return GetFromTable(document, "ISBN");
     }
@@ -186,7 +188,7 @@ public class LantsutaParser : BaseParser
 
     protected override string GetSeries(IDocument document)
     {
-        return GetFromTable(document, "Серія");
+        return GetFromTable(document, "Серія")!;
     }
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
@@ -196,7 +198,7 @@ public class LantsutaParser : BaseParser
 
     protected override string GetVolumeTitle(IDocument document)
     {
-        var node = document.QuerySelector(".name-product-title").InnerHtml;
+        var node = document.QuerySelector(VolumeTitleSelector).InnerHtml;
         var series = GetSeries(document);
         node = node.Replace(series, "").Trim();
         if (series.Contains('.'))
@@ -213,28 +215,28 @@ public class LantsutaParser : BaseParser
         return node;
     }
 
-    protected override int GetVolumeNumber(IDocument document)
-    {
-        var title = GetVolumeTitle(document);
-        if (title.Contains("Том"))
-        {
-            var volIndex = title.IndexOf("Том");
-            var nextWord = title.IndexOf(" ", volIndex + 3);
-            var nextWhitespace = title.IndexOf(" ", nextWord + 1);
-            string volume;
-            if (nextWhitespace == -1)
-            {
-                volume = title.Substring(nextWord).Trim();
-            }
-            else
-            {
-                volume = title.Substring(nextWord, nextWhitespace - nextWord).Trim();
-            }
-            return int.Parse(volume);
-        }
+    //protected override int? GetVolumeNumber(IDocument document)
+    //{
+    //    var title = GetVolumeTitle(document);
+    //    if (title.Contains("Том"))
+    //    {
+    //        var volIndex = title.IndexOf("Том");
+    //        var nextWord = title.IndexOf(" ", volIndex + 3);
+    //        var nextWhitespace = title.IndexOf(" ", nextWord + 1);
+    //        string volume;
+    //        if (nextWhitespace == -1)
+    //        {
+    //            volume = title.Substring(nextWord).Trim();
+    //        }
+    //        else
+    //        {
+    //            volume = title.Substring(nextWord, nextWhitespace - nextWord).Trim();
+    //        }
+    //        return int.TryParse(volume, out var n) ? n : null;
+    //    }
 
-        return -1;
-    }
+    //    return null;
+    //}
 
     protected override string GetVolumeUrlBlockClass()
     {
