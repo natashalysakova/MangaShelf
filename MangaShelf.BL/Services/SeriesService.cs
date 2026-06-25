@@ -5,6 +5,7 @@ using MangaShelf.BL.Dto;
 using Microsoft.EntityFrameworkCore;
 using MangaShelf.DAL;
 using MangaShelf.BL.Contracts;
+using MangaShelf.DAL.Models;
 
 namespace MangaShelf.BL.Services;
 
@@ -26,7 +27,7 @@ public class SeriesService : ISeriesService
         var serviceFactory = new DomainServiceFactory(context);
         var seriesService = serviceFactory.GetDomainService<ISeriesDomainService>();
 
-        var series = await seriesService.GetByTitleAsync(seriesTitle);
+        var series = await seriesService.GetByTitleAsync(seriesTitle, SeriesType.Unknown, CancellationToken.None);
         return series?.ToDto();
     }
 

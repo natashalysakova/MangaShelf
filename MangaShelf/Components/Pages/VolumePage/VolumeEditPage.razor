@@ -54,6 +54,14 @@
                         <MudNumericField T="int?" @bind-Value="Volume.SeriesTotalVolumes" Disabled="Volume.SeriesStatus == SeriesStatus.OneShot"
                                          Label="@Localizer["SeriesTotalVolumes"]" Variant="Variant.Outlined" FullWidth="true"
                                          Immediate="true" For="@(() => Volume.SeriesTotalVolumes)" />
+
+                        <MudSelect T="SeriesType" Value="Volume.SeriesType" Label="@Localizer["SeriesType"]"
+                                   Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.SeriesType)">
+                            @foreach (var  seriesType in Enum.GetValues<SeriesType>())
+                            {
+                                <MudSelectItem Value="@seriesType">@seriesType</MudSelectItem>
+                            }
+                        </MudSelect>
                     </MudStack>
 
                     <MudStack Class="mt-4" Spacing="2">

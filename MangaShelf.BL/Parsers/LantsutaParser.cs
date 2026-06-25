@@ -281,6 +281,17 @@ public class LantsutaParser : BaseParser
         var descriptionNode = document.QuerySelectorAll("#tab-description p");
         return string.Join("\n\n", descriptionNode.Select(n => n.TextContent.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)));
     }
+
+    protected override SeriesType GetSeriesType(IDocument document)
+    {
+        var title = GetVolumeTitle(document);
+        if (title.Contains("Роман"))
+        {
+            return SeriesType.Novel;
+        }
+        
+        return SeriesType.Manga;
+    }
 }
 
 public static class StringExtensions

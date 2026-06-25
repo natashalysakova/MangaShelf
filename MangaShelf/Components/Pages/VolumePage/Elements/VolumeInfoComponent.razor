@@ -5,14 +5,23 @@
 @inject IVolumePageLocalizationService Localizer
 
 <MudStack Class="mb-3">
-    <MudTextField Variant="Variant.Filled" Label="@Localizer["Author"]" ReadOnly="true" ShrinkLabel="true"
-                  Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
+    <MudStack Row Breakpoint="Breakpoint.SmAndDown">
+        @if (Volume.Series.Type != SeriesType.Unknown)
+        {
+            <MudTextField Variant="Variant.Filled" Label="@Localizer["SeriesType"]" ReadOnly="true" ShrinkLabel="true"
+                          Value="@Localizer[Volume.Series.Type]"></MudTextField>
+        }
+
+        <MudTextField Variant="Variant.Filled" Label="@Localizer["Author"]" ReadOnly="true" ShrinkLabel="true"
+                      FullWidth="true" Value="@string.Join(", ", @Volume.Series.Authors)"></MudTextField>
+    </MudStack>
 
     <MudStack Row Breakpoint="Breakpoint.SmAndDown">
         <MudTextField Variant="Variant.Filled" Label="@Localizer["Publisher"]" ReadOnly="true"
                       Value="@Volume.Series.Publisher.Name"></MudTextField>
 
-        <MudTextField Mask="@(new PatternMask("000-000-0000-00-0"))" Variant="Variant.Filled" Label="@Localizer["ISBN"]" ReadOnly="true" Value="@Volume.ISBN">
+        <MudTextField Mask="@(new PatternMask("000-000-0000-00-0"))" Variant="Variant.Filled" Label="@Localizer["ISBN"]"
+                      ReadOnly="true" Value="@Volume.ISBN">
         </MudTextField>
 
     </MudStack>
@@ -24,8 +33,11 @@
         {
             <MudTextField Variant="Variant.Filled" Label="@Localizer["VolumeNumber"]" ReadOnly="true"
                           Value="@Volume.Number"></MudTextField>
-            <MudTextField Variant="Variant.Filled" Label="@Localizer["TotalVolumes"]" ReadOnly="true"
-                          Value="@Volume.Series.TotalVolumes"></MudTextField>
+            @if (Volume.Series.TotalVolumes > 0)
+            {
+                <MudTextField Variant="Variant.Filled" Label="@Localizer["TotalVolumes"]" ReadOnly="true"
+                              Value="@Volume.Series.TotalVolumes"></MudTextField>
+            }
         }
 
         <MudTextField Variant="Variant.Filled" Label="@Localizer["Age"]" ReadOnly="true" Value="@Volume.AgeRestriction">

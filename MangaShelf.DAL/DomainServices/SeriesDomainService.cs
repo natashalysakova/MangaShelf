@@ -25,9 +25,14 @@ public class SeriesDomainService : BaseDomainService<Series>, ISeriesDomainServi
         return titles.Concat(originalTitles).Distinct()!;
     }
 
-    public async Task<Series?> GetByTitleAsync(string series, CancellationToken token = default)
+    public async Task<Series?> GetByTitleAsync(string series, SeriesType seriesType, CancellationToken token = default)
     {
-        return await _context.Series
-            .FirstOrDefaultAsync(s => s.Title.ToLower() == series.ToLower(), token);
+        var query = _context.Series
+            .Where(s => s.Title.ToLower() == series.ToLower() && s.Type == seriesType);
+        if(seriesType != SeriesType.Unknown)
+        {
+            query = query.Where(s => s.Type == SeriesType.Manga);
+        }
+        return await query.FirstOrDefaultAsync(token);
     }
 }

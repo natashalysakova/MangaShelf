@@ -15,20 +15,12 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
 
     }
 
-    public Volume? FindVolumeFromParsedInfo(VolumeInfoRequest volumeInfo)
+    public Volume? FindVolumeFromParsedInfo(Guid seriesId, VolumeInfoRequest volumeInfo)
     {
         var query = _context.Volumes
             .Include(x => x.Series)
+            .Where(x=> x.SeriesId == seriesId)
             .IgnoreQueryFilters();
-
-        if (!string.IsNullOrWhiteSpace(volumeInfo.Url))
-        {
-            var volumeByUrl = FindSingleMatchOrDefault(query, x => x.PurchaseUrl == volumeInfo.Url);
-            if (volumeByUrl != null)
-            {
-                return volumeByUrl;
-            }
-        }
 
         if (!string.IsNullOrWhiteSpace(volumeInfo.ISBN))
         {
@@ -39,8 +31,17 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(volumeInfo.Url))
+        {
+            var volumeByUrl = FindSingleMatchOrDefault(query, x => x.PurchaseUrl == volumeInfo.Url);
+            if (volumeByUrl != null)
+            {
+                return volumeByUrl;
+            }
+        }
+
         return FindSingleMatchOrDefault(query, x =>
-            x.Series!.Title == volumeInfo.Series &&
+            x.Series!.Id == seriesId &&
             x.Number == volumeInfo.VolumeNumber);
     }
 

@@ -6,7 +6,7 @@ namespace MangaShelf.DAL.Interfaces;
 
 public interface IVolumeDomainService : IDomainService<Volume>, IShelfDomainService
 {
-    Volume? FindVolumeFromParsedInfo(VolumeInfoRequest volumeInfo);
+    Volume? FindVolumeFromParsedInfo(Guid seriesId, VolumeInfoRequest volumeInfo);
     IQueryable<Volume> GetAllFullPaginated(IFilterOptions? paginationOptions = default);
     IQueryable<Volume> GetAllWithSeries(IFilterOptions? paginationOptions = default);
 

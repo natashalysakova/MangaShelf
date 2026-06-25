@@ -1,6 +1,7 @@
 ﻿using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Dto;
 using MangaShelf.BL.Mappers;
+using MangaShelf.Common.Helpers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.DomainServices;
@@ -542,7 +543,7 @@ public class VolumeService(
         volume.PreorderStart = volumeDto.PreorderStart;
         volume.Title = volumeDto.Title;
         volume.Number = volumeDto.Number;
-        volume.ISBN = volumeDto.ISBN;
+        volume.ISBN = VolumeHelper.NormalizedIsbn(volumeDto.ISBN);
         volume.AgeRestriction = volumeDto.AgeRestriction;
         volume.Description = volumeDto.Description;
 
