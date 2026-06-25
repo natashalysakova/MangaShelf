@@ -13,134 +13,180 @@ public interface IVolumeInfoParser
     Task<State> Parse(ParsedInfo volumeInfo, CancellationToken token = default);
 }
 public class VolumeInfoParser(
-    IDbContextFactory<MangaDbContext> dbContextFactory, 
-    ILogger<VolumeInfoParser> logger, 
+    IDbContextFactory<MangaDbContext> dbContextFactory,
+    ILogger<VolumeInfoParser> logger,
     IImageManager imageManager) : IVolumeInfoParser
 {
     public async Task<State> Parse(ParsedInfo volumeInfo, CancellationToken token = default)
     {
         using var context = await dbContextFactory.CreateDbContextAsync();
         var domainContextFactory = new DomainServiceFactory(context);
-        var countryDomainService = domainContextFactory.GetDomainService<ICountryDomainService>();
-        var publisherDomainService = domainContextFactory.GetDomainService<IPublisherDomainService>();
-        var seriesDomainService = domainContextFactory.GetDomainService<ISeriesDomainService>();
-        var authorDomainService = domainContextFactory.GetDomainService<IAuthorDomainService>();
-        var volumeDomainService = domainContextFactory.GetDomainService<IVolumeDomainService>();
 
-        var country = await countryDomainService.GetByCountryCodeAsync(volumeInfo.CountryCode, token) ?? await countryDomainService.GetByCountryCodeAsync("uk", token);
+        var country = await GetCountry(domainContextFactory, volumeInfo.CountryCode, token);
+        var publisher = await GetOrCreatePublisher(domainContextFactory, volumeInfo, country, token);
+        var series = await GetOrCreateSeries(domainContextFactory, volumeInfo, publisher, token);
+        var volume = await GetOrCreateVolume(domainContextFactory, volumeInfo, series, token);
 
-        var publisher = await publisherDomainService.GetByNameAsync(volumeInfo.Publisher, token);
-        if (publisher == null)
-        {
-            var uri = new Uri(volumeInfo.Url);
-            publisher = new Publisher()
+        UpdateVolumeProperties(volumeInfo, volume);
+        await HandleImages(volumeInfo, volume);
+
+        var result = await domainContextFactory.GetDomainService<IVolumeDomainService>().AddOrUpdate(volume, true, token);
+        logger.LogInformation($"{volume.GetFullVolumeName()} {volume.Number} was {result.State}");
+
+        return result.State;
+    }
+
+    // Helper methods
+    private async Task<Country> GetCountry(DomainServiceFactory factory, string countryCode, CancellationToken token)
+    {
+        var countryService = factory.GetDomainService<ICountryDomainService>();
+        return await countryService.GetByCountryCodeAsync(countryCode, token)
+            ?? await countryService.GetByCountryCodeAsync("uk", token);
+    }
+
+    private async Task<Publisher> GetOrCreatePublisher(DomainServiceFactory factory, ParsedInfo volumeInfo, Country country, CancellationToken token)
+    {
+        var publisherService = factory.GetDomainService<IPublisherDomainService>();
+        return await publisherService.GetByNameAsync(volumeInfo.Publisher, token)
+            ?? new Publisher
             {
                 Name = volumeInfo.Publisher,
                 Country = country,
                 Url = new Uri(volumeInfo.Url).ToString()
             };
-        }
+    }
 
-        var series = await seriesDomainService.GetByTitleAsync(volumeInfo.Series, volumeInfo.SeriesType, token);
-        if (series == null)
+    private async Task<Series> GetOrCreateSeries(DomainServiceFactory factory, ParsedInfo volumeInfo, Publisher publisher, CancellationToken token)
+    {
+        var seriesService = factory.GetDomainService<ISeriesDomainService>();
+        var series = await seriesService.GetByTitleAsync(volumeInfo.Series, volumeInfo.SeriesType, token);
+
+        if (series != null) return series;
+
+        var authors = await GetSeriesAuthors(factory, volumeInfo, token);
+
+        return new Series
         {
-            series = new Series()
-            {
-                OriginalTitle = volumeInfo.OriginalSeriesTitle,
-                Status = volumeInfo.SeriesStatus,
-                TotalVolumes = volumeInfo.TotalVolumes,
-                Title = volumeInfo.Series,
-                Publisher = publisher,
-                IsPublishedOnSite = volumeInfo.CanBePublished,
-                Type = volumeInfo.SeriesType
-            };
+            OriginalTitle = volumeInfo.OriginalSeriesTitle,
+            Status = volumeInfo.SeriesStatus,
+            TotalVolumes = volumeInfo.TotalVolumes,
+            Title = volumeInfo.Series,
+            Publisher = publisher,
+            IsPublishedOnSite = volumeInfo.CanBePublished,
+            Type = volumeInfo.SeriesType,
+            Authors = authors
+        };
+    }
 
-            if (volumeInfo.Authors is not null)
-            {
-                var autorsList = volumeInfo.Authors.Split([',', ';', '\n'], StringSplitOptions.RemoveEmptyEntries);
-                var authors = await authorDomainService.GetOrCreateByNames(autorsList, token);
-                series.Authors = authors.ToList();
-            }
-        }
+    private async Task<List<Author>> GetSeriesAuthors(DomainServiceFactory factory, ParsedInfo volumeInfo, CancellationToken token)
+    {
+        if (volumeInfo.Authors is null) return [];
 
-        var volume = volumeDomainService.FindVolumeFromParsedInfo(series.Id, volumeInfo.ToVolumeInfoRequest());
-        if (volume == null)
+        var authorsList = volumeInfo.Authors
+            .Split([',', ';', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim())
+            .ToList();
+        var authors = await factory.GetDomainService<IAuthorDomainService>().GetOrCreateByNames(authorsList, token);
+        return authors.ToList();
+    }
+
+    private async Task<Volume> GetOrCreateVolume(DomainServiceFactory factory, ParsedInfo volumeInfo, Series series, CancellationToken token)
+    {
+        var volumeService = factory.GetDomainService<IVolumeDomainService>();
+        var volume = volumeService.FindVolumeFromParsedInfo(series.Id, volumeInfo.ToVolumeInfoRequest());
+
+        return volume ?? new Volume
         {
-            volume = new Volume()
-            {
-                Title = volumeInfo.Title,
-                Series = series,
-                ISBN = volumeInfo.Isbn,
-                Number = volumeInfo.VolumeNumber,
-                AgeRestriction = volumeInfo.AgeRestrictions == null ? 18 : volumeInfo.AgeRestrictions.Value,
-                IsPublishedOnSite = series.IsPublishedOnSite,
-                ReleaseDate = MapReleaseDate(volumeInfo.Release),
-                Type = volumeInfo.VolumeType,
-                PurchaseUrl = volumeInfo.Url,
-            };
-        }
+            Title = volumeInfo.Title,
+            Series = series,
+            ISBN = volumeInfo.Isbn,
+            Number = volumeInfo.VolumeNumber,
+            AgeRestriction = volumeInfo.AgeRestrictions ?? 18,
+            IsPublishedOnSite = series.IsPublishedOnSite,
+            ReleaseDate = MapReleaseDate(volumeInfo.Release),
+            Type = volumeInfo.VolumeType,
+            PurchaseUrl = volumeInfo.Url,
+        };
+    }
 
-        if (volumeInfo.Description is not null && volume.Description != volumeInfo.Description)
-        {
+    private void UpdateVolumeProperties(ParsedInfo volumeInfo, Volume volume)
+    {
+        UpdateDescription(volumeInfo, volume);
+        UpdateUrl(volumeInfo, volume);
+        UpdateSeriesStatus(volumeInfo, volume);
+        UpdateTotalVolumes(volumeInfo, volume);
+        UpdatePreorderInfo(volumeInfo, volume);
+        UpdateAgeRestriction(volumeInfo, volume);
+        UpdateIsbn(volumeInfo, volume);
+        UpdateVolumeType(volumeInfo, volume);
+    }
+
+    private void UpdateDescription(ParsedInfo volumeInfo, Volume volume)
+    {
+        var currentValue = volume.Description;
+        if (volumeInfo.Description != null && !Equals(currentValue, volumeInfo.Description))
             volume.Description = volumeInfo.Description;
-        }
+    }
 
-        if (volume.PurchaseUrl != volumeInfo.Url && volumeInfo.Url.Contains(publisher.Url)) // not 3rd party url
-        {
+    private void UpdateUrl(ParsedInfo volumeInfo, Volume volume)
+    {
+        if (volume.PurchaseUrl != volumeInfo.Url && volumeInfo.Url.Contains(volume.Series.Publisher.Url))
             volume.PurchaseUrl = volumeInfo.Url;
-        }
+    }
 
+    private void UpdateSeriesStatus(ParsedInfo volumeInfo, Volume volume)
+    {
         if (volumeInfo.SeriesStatus != SeriesStatus.Unknown && volumeInfo.SeriesStatus != volume.Series.Status)
-        {
             volume.Series.Status = volumeInfo.SeriesStatus;
-        }
+    }
 
+    private void UpdateTotalVolumes(ParsedInfo volumeInfo, Volume volume)
+    {
         if (volumeInfo.TotalVolumes != null && (volume.Series.TotalVolumes == null || volumeInfo.TotalVolumes > volume.Series.TotalVolumes))
-        {
             volume.Series.TotalVolumes = volumeInfo.TotalVolumes;
-        }
+    }
 
+    private void UpdatePreorderInfo(ParsedInfo volumeInfo, Volume volume)
+    {
         var wasPreorder = volume.IsPreorder;
         volume.IsPreorder = volumeInfo.IsPreorder;
 
         if (volumeInfo.IsPreorder && volumeInfo.Release != null)
-        {
             volume.ReleaseDate = MapReleaseDate(volumeInfo.Release);
-        }
         else if (!volumeInfo.IsPreorder && wasPreorder)
-        {
             volume.ReleaseDate = DateTimeOffset.UtcNow;
-        }
 
         if (volume.IsPreorder && volume.PreorderStart == null)
-        {
-            volume.PreorderStart = DateTimeOffset.Now;
-        }
+            volume.PreorderStart = DateTimeOffset.UtcNow;
+    }
 
+    private void UpdateAgeRestriction(ParsedInfo volumeInfo, Volume volume)
+    {
         if (volumeInfo.AgeRestrictions != null && volume.AgeRestriction != volumeInfo.AgeRestrictions)
-        {
             volume.AgeRestriction = volumeInfo.AgeRestrictions.Value;
-        }
+    }
 
+    private void UpdateIsbn(ParsedInfo volumeInfo, Volume volume)
+    {
         if (volume.ISBN is null && volumeInfo.Isbn is not null)
-        {
             volume.ISBN = volumeInfo.Isbn;
-        }
+    }
 
-        if (!string.IsNullOrEmpty(volumeInfo.Cover) && volume.OriginalCoverUrl is null)
-        {
-            volume.OriginalCoverUrl = imageManager.DownloadFileFromWeb(volumeInfo.Cover, volume.Series.PublicId);
+    private void UpdateVolumeType(ParsedInfo volumeInfo, Volume volume)
+    {
+        if (volume.Type == VolumeType.NotSpecified && volumeInfo.VolumeType != VolumeType.NotSpecified)
+            volume.Type = volumeInfo.VolumeType;
+    }
 
-            var croppedImage = imageManager.CropImage(volume.OriginalCoverUrl);
+    private async Task HandleImages(ParsedInfo volumeInfo, Volume volume)
+    {
+        if (string.IsNullOrEmpty(volumeInfo.Cover) || volume.OriginalCoverUrl is not null)
+            return;
 
-            volume.CoverImageUrl = croppedImage ?? volume.OriginalCoverUrl;
-            volume.CoverImageUrlSmall = imageManager.CreateSmallImage(volume.CoverImageUrl);
-        }
-
-        var result = await volumeDomainService.AddOrUpdate(volume, true, token);
-        logger.LogInformation($"{volume.GetFullVolumeName()} {volume.Number} was {result.State}");
-
-        return result.State;
+        volume.OriginalCoverUrl = await imageManager.DownloadFileFromWeb(volumeInfo.Cover, volume.Series.PublicId);
+        var croppedImage = imageManager.CropImage(volume.OriginalCoverUrl);
+        volume.CoverImageUrl = croppedImage ?? volume.OriginalCoverUrl;
+        volume.CoverImageUrlSmall = imageManager.CreateSmallImage(volume.CoverImageUrl);
     }
 
     private DateTimeOffset MapReleaseDate(DateTimeOffset? release)

@@ -18,9 +18,9 @@ namespace MangaShelf.BL.Parsers
 
         public override string SiteUrl => "https://vivat.com.ua";
 
-        public override string CatalogUrl => "/category/manga/";
+        public override string CatalogUrl => "/category/manga/?filter=publisher_code_entityelement_is_vivat_or_ranok_or_laboratoriia_or_varvar-publishing";
 
-        public override string Pagination => "?page={0}";
+        public override string Pagination => "&page={0}";
 
         public override string VolumeTitleSelector => "h1";
 

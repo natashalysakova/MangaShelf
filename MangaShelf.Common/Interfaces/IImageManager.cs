@@ -3,7 +3,7 @@
 public interface IImageManager
 {
     string CreateSmallImage(string coverImageUrl);
-    string? DownloadFileFromWeb(string url, string publicId);
+    Task<string?> DownloadFileFromWeb(string url, string publicId);
     string SaveFlagFromCDN(string countryCode);
     string CropImage(string coverImageUrl);
     string? CropImage(string coverImageUrl, int left, int top, int right, int bottom);

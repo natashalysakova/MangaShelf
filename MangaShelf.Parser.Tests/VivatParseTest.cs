@@ -16,7 +16,8 @@ namespace MangaShelf.Parser.Tests
         [TestMethod]
         public async Task ParseGetVolumesUrls_ShouldReturnVolumeUrls()
         {
-            var result = await Parser.GetVolumesUrls("https://vivat.com.ua/category/manga/?page=1", CancellationToken.None);
+            var url = Parser.GetPageUrl(2);
+            var result = await Parser.GetVolumesUrls(url, CancellationToken.None);
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Count() > 0);
         }
@@ -34,8 +35,8 @@ namespace MangaShelf.Parser.Tests
         [TestMethod]
         public async Task ParseGetPageUrl_ShouldReturnFormattedUrl()
         {
-            var result = Parser.GetPageUrl(5);
-            Assert.AreEqual("https://vivat.com.ua/category/manga/?page=5", result);
+            var result = Parser.GetPageUrl(2);
+            Assert.AreEqual("https://vivat.com.ua/category/manga/?filter=publisher_code_entityelement_is_vivat_or_ranok_or_laboratoriia_or_varvar-publishing&page=2", result);
         }
 
 

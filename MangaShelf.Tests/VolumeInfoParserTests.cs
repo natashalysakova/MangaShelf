@@ -40,7 +40,7 @@ public class VolumeInfoParserTests : IDisposable
                 
         // Setup image manager mock
         _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns("images/cover.jpg");
+            .Returns(Task.FromResult<string?>("images/cover.jpg"));
         _imageManagerMock.Setup(x => x.CreateSmallImage(It.IsAny<string>()))
             .Returns("images/small/cover.jpg");
 
@@ -2143,6 +2143,371 @@ public class VolumeInfoParserTests : IDisposable
         var volume = Assert.Single(volumes);
         Assert.Equal("Updated", volume.Description);
         Assert.Equal(SeriesStatus.Completed, volume.Series!.Status);
+    }
+
+    [Fact]
+    public async Task Parse_ExistingVolume_UpdatesUrlOnlyForFirstPartyDomain()
+    {
+        // Arrange - Create initial volume and publisher URL from first-party domain.
+        var initialParsedInfo = new ParsedInfo
+        {
+            Title = "First Party URL Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "First Party URL Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "First Party Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-1111111111",
+            TotalVolumes = 2,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://firstparty.example.com",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
+
+        // Act - Third-party URL should not be applied.
+        var thirdPartyUpdate = new ParsedInfo
+        {
+            Title = "First Party URL Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "First Party URL Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "First Party Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-1111111111",
+            TotalVolumes = 2,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://thirdparty.example.org/products/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(thirdPartyUpdate, TestContext.Current.CancellationToken);
+
+        // Act - First-party URL should be applied.
+        var firstPartyUpdate = new ParsedInfo
+        {
+            Title = "First Party URL Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "First Party URL Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-10),
+            Publisher = "First Party Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-1111111111",
+            TotalVolumes = 2,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://firstparty.example.com/products/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(firstPartyUpdate, TestContext.Current.CancellationToken);
+
+        // Assert
+        using var context = _dbContextFactory.CreateDbContext();
+        var volume = await context.Volumes
+            .Include(v => v.Series)
+            .FirstOrDefaultAsync(v => v.Title == "First Party URL Volume", TestContext.Current.CancellationToken);
+
+        Assert.NotNull(volume);
+        Assert.Equal("https://firstparty.example.com/products/volume-1", volume.PurchaseUrl);
+    }
+
+    [Fact]
+    public async Task Parse_PreorderToNonPreorder_SetsReleaseDateToNow_AndKeepsInitialPreorderStart()
+    {
+        // Arrange - Create preorder volume first.
+        var preorderParsedInfo = new ParsedInfo
+        {
+            Title = "Transition Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Transition Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(20),
+            Publisher = "Transition Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-2222222222",
+            TotalVolumes = 4,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://transition.example.com/volume-1",
+            PreorderStartDate = DateTimeOffset.Now.AddDays(-15),
+            CountryCode = "uk",
+            IsPreorder = true,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Preorder"
+        };
+
+        await _parserService.Parse(preorderParsedInfo, TestContext.Current.CancellationToken);
+
+        DateTimeOffset? initialPreorderStart;
+        using (var firstContext = _dbContextFactory.CreateDbContext())
+        {
+            var firstVolume = await firstContext.Volumes
+                .FirstOrDefaultAsync(v => v.Title == "Transition Volume", TestContext.Current.CancellationToken);
+
+            Assert.NotNull(firstVolume);
+            Assert.True(firstVolume.IsPreorder);
+            Assert.NotNull(firstVolume.PreorderStart);
+            initialPreorderStart = firstVolume.PreorderStart;
+        }
+
+        // Act - Transition from preorder to released state.
+        var beforeUpdate = DateTimeOffset.UtcNow;
+
+        var releasedParsedInfo = new ParsedInfo
+        {
+            Title = "Transition Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Transition Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(2),
+            Publisher = "Transition Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-2222222222",
+            TotalVolumes = 4,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://transition.example.com/volume-1-updated",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Released"
+        };
+
+        await _parserService.Parse(releasedParsedInfo, TestContext.Current.CancellationToken);
+
+        var afterUpdate = DateTimeOffset.UtcNow;
+
+        // Assert
+        using var secondContext = _dbContextFactory.CreateDbContext();
+        var updatedVolume = await secondContext.Volumes
+            .FirstOrDefaultAsync(v => v.Title == "Transition Volume", TestContext.Current.CancellationToken);
+
+        Assert.NotNull(updatedVolume);
+        Assert.False(updatedVolume.IsPreorder);
+        Assert.Equal(initialPreorderStart, updatedVolume.PreorderStart);
+        Assert.True(updatedVolume.ReleaseDate >= beforeUpdate && updatedVolume.ReleaseDate <= afterUpdate,
+            "ReleaseDate should be set to approximately now when preorder transitions to non-preorder.");
+    }
+
+    [Fact]
+    public async Task Parse_TotalVolumesAcrossMultipleUpdates_OnlyIncreases()
+    {
+        // Arrange
+        var initialParsedInfo = new ParsedInfo
+        {
+            Title = "Monotonic Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Monotonic Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-5),
+            Publisher = "Monotonic Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-3333333333",
+            TotalVolumes = 5,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://monotonic.example.com/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
+
+        // Act - Decrease should be ignored.
+        var decreasedParsedInfo = new ParsedInfo
+        {
+            Title = "Monotonic Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Monotonic Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-5),
+            Publisher = "Monotonic Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-3333333333",
+            TotalVolumes = 3,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://monotonic.example.com/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(decreasedParsedInfo, TestContext.Current.CancellationToken);
+
+        // Act - Increase should be applied.
+        var increasedParsedInfo = new ParsedInfo
+        {
+            Title = "Monotonic Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Monotonic Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-5),
+            Publisher = "Monotonic Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-3333333333",
+            TotalVolumes = 7,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://monotonic.example.com/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(increasedParsedInfo, TestContext.Current.CancellationToken);
+
+        // Assert
+        using var context = _dbContextFactory.CreateDbContext();
+        var series = await context.Series
+            .FirstOrDefaultAsync(s => s.Title == "Monotonic Series", TestContext.Current.CancellationToken);
+
+        Assert.NotNull(series);
+        Assert.Equal(7, series.TotalVolumes);
+    }
+
+    [Fact]
+    public async Task Parse_VolumeTypeUpdateRules_OnlyPromotesFromNotSpecified()
+    {
+        // Arrange - Start with NotSpecified.
+        var initialParsedInfo = new ParsedInfo
+        {
+            Title = "Type Rules Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Type Rules Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-3),
+            Publisher = "Type Rules Publisher",
+            VolumeType = VolumeType.NotSpecified,
+            Isbn = "978-4444444444",
+            TotalVolumes = 1,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://typerules.example.com/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(initialParsedInfo, TestContext.Current.CancellationToken);
+
+        // Act - NotSpecified -> Physical should update.
+        var promoteTypeParsedInfo = new ParsedInfo
+        {
+            Title = "Type Rules Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Type Rules Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-3),
+            Publisher = "Type Rules Publisher",
+            VolumeType = VolumeType.Physical,
+            Isbn = "978-4444444444",
+            TotalVolumes = 1,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://typerules.example.com/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(promoteTypeParsedInfo, TestContext.Current.CancellationToken);
+
+        // Act - Physical -> Digital should not update.
+        var doNotOverrideParsedInfo = new ParsedInfo
+        {
+            Title = "Type Rules Volume",
+            Authors = "Test Author",
+            VolumeNumber = 1,
+            Series = "Type Rules Series",
+            Cover = "https://example.com/cover.jpg",
+            Release = DateTimeOffset.Now.AddDays(-3),
+            Publisher = "Type Rules Publisher",
+            VolumeType = VolumeType.Digital,
+            Isbn = "978-4444444444",
+            TotalVolumes = 1,
+            SeriesStatus = SeriesStatus.Ongoing,
+            OriginalSeriesTitle = "Original",
+            Url = "https://typerules.example.com/volume-1",
+            PreorderStartDate = null,
+            CountryCode = "uk",
+            IsPreorder = false,
+            AgeRestrictions = 16,
+            CanBePublished = true,
+            SeriesType = SeriesType.Manga,
+            Description = "Initial"
+        };
+
+        await _parserService.Parse(doNotOverrideParsedInfo, TestContext.Current.CancellationToken);
+
+        // Assert
+        using var context = _dbContextFactory.CreateDbContext();
+        var volume = await context.Volumes
+            .FirstOrDefaultAsync(v => v.Title == "Type Rules Volume", TestContext.Current.CancellationToken);
+
+        Assert.NotNull(volume);
+        Assert.Equal(VolumeType.Physical, volume.Type);
     }
 }
 

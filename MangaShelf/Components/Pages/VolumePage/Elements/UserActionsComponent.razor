@@ -2,47 +2,40 @@
 @using System.Threading.Tasks
 @inherits VolumeActionBase
 
-@if (VolumeState.CurrentUserStatus != null)
-{
+<MudStack Row Justify="Justify.Center">
     <AuthorizeView>
         <Authorized>
-            <MudStack Row Justify="Justify.Center">
+            @if (VolumeState.CurrentUserStatus != null)
+            {
                 <CardButtonTooltip Text="@Localizer["Like"]">
 
-                    <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsLiked"
-                                         Size="Size.Large"
-                                         @onclick="()=>ToggleLike()"
-                                         Icon="@CustomIcons.notFiledHeart" Color="@Color.Default"
-                                         ToggledIcon="@CustomIcons.filledHeart" ToggledColor="@Color.Error" />
+                <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsLiked" Size="Size.Large"
+                                     @onclick="() => ToggleLike()" Icon="@CustomIcons.notFiledHeart" Color="@Color.Default"
+                                     ToggledIcon="@CustomIcons.filledHeart" ToggledColor="@Color.Error" />
                 </CardButtonTooltip>
-                <CardButtonTooltip Text="@Localizer["GoToWebsite"]">
-                    <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large" Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
-                </CardButtonTooltip>
-
-                <CardButtonTooltip Text="@Localizer["Wishlist"]">
-                    <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsInWishlist"
-                                         Size="Size.Large"
-                                         @onclick="() => ToggleWishList()"
-                                         Icon="@CustomIcons.wishlist" Color="@Color.Default"
-                                         ToggledIcon="@CustomIcons.wishlist" ToggledColor="@Color.Warning" />
-@*                     <MudMenu Icon="@CustomIcons.bookshelf" Size="Size.Large"
-                             Color="Color.Warning"
-                             AriaLabel="Open user menu">
-
-                        @foreach (var action in availableActions)
-                        {
-                            <MudMenuItem Icon="@action.Icon" IconColor="@action.Color" Label="@Localizer[action.Lable]" @onclick="@action.Handler" />
-                        }
-                    </MudMenu> *@
-                </CardButtonTooltip>
-@*                 <MudTooltip Arrow="true" Delay="250" Duration="250" Placement="Placement.Top" Text="@Localizer["ReadingMenu"]">
-                    <MudIconButton OnClick="()=>ShowAddEditReadingDialog()" Size="Size.Large" Color="@Color.Success" Icon="@CustomIcons.reading"></MudIconButton>
-                </MudTooltip>
- *@
-            </MudStack>
+            }
         </Authorized>
     </AuthorizeView>
-}
+    <CardButtonTooltip Text="@Localizer["GoToWebsite"]">
+        <MudIconButton Href="@Volume.PurchaseUrl" Target="_blank" Size="Size.Large"
+                       Icon="@Icons.Material.Rounded.ShoppingCart"></MudIconButton>
+    </CardButtonTooltip>
+    <AuthorizeView>
+        <Authorized>
+            @if (VolumeState.CurrentUserStatus != null)
+            {
+                <CardButtonTooltip Text="@Localizer["Wishlist"]">
+                    <MudToggleIconButton @bind-Toggled="@VolumeState.CurrentUserStatus.IsInWishlist" Size="Size.Large"
+                                         @onclick="() => ToggleWishList()" Icon="@CustomIcons.wishlist" Color="@Color.Default"
+                                         ToggledIcon="@CustomIcons.wishlist" ToggledColor="@Color.Warning" />
+                </CardButtonTooltip>
+            }
+        </Authorized>
+
+    </AuthorizeView>
+
+</MudStack>
+
 
 
 @code {
@@ -53,11 +46,6 @@
 
     protected override void OnInitialized()
     {
-        VolumeState.OnUserStatusChanged += HandleUserStatusChanged;
-    }
-
-    private void HandleUserStatusChanged()
-    {
-        StateHasChanged();
+        VolumeState.OnUserStatusChanged += StateHasChanged;
     }
 }
