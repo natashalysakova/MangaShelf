@@ -89,7 +89,7 @@ public class SeedProdShelfService : ISeedDataService
                 {
                     CountryCode = region.TwoLetterISORegionName.ToLowerInvariant(),
                     Name = region.EnglishName,
-                    FlagUrl = _imageManager.SaveFlagFromCDN(region.TwoLetterISORegionName.ToLowerInvariant())
+                    FlagUrl = await _imageManager.SaveFlagFromCDN(region.TwoLetterISORegionName.ToLowerInvariant())
                 });
                 _logger.LogInformation($"Adding country {region.EnglishName} with code {region.TwoLetterISORegionName.ToLowerInvariant()}");
             }

@@ -1,0 +1,173 @@
+@using MangaShelf.Common.Interfaces
+@using MangaShelf.Components.Elements.ImageCrop
+@using MangaShelf.DAL.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@using System.Text.Json
+@using System.Linq
+
+@inject IImageFlow ImageFlow
+@inject IUiLocalizationService Localizer
+@inject ISnackbar Snackbar
+@inject IVolumeService VolumeService
+@inject ILogger<EditCover> Logger
+
+@if (Cover != null)
+{
+
+    <MudItem xs="12" Class="mt-4">
+        <MudPaper Class="pa-4 paper-manga-panel" Elevation="2">
+
+            <MudStack Row>
+
+                <MudStack>
+                    <MudText Typo="Typo.h6" Class="mb-3">@Localizer["UploadVolumeImage"]</MudText>
+
+                    <MudFileUpload @bind-Files="_selectedFile" Accept="image/*" />
+
+
+                    <MudCheckBox @bind-Value="_showPreviews" Color="Color.Secondary" Label="@(_showPreviews ? Localizer["HidePreviews"] : Localizer["ShowPreviews"])" />
+
+                    @if (_selectedFile != null)
+                    {
+                        <MudAlert Severity="Severity.Normal" Dense="true">
+                            @Localizer["SelectedFile"]: @_selectedFile.Name (@_selectedFile.Size @Localizer["Bytes"])
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Normal" Dense="true">
+                            @Localizer["NothingSelected"]
+                        </MudAlert>
+
+                    }
+                    <MudButton OnClick="UploadImage" Disabled="_processing || _selectedFile == null"
+                               Color="Color.Primary" Variant="Variant.Filled"
+                               StartIcon="@Icons.Material.Filled.Upload">
+                        @(_processing ? Localizer["Uploading"] : Localizer["UploadImage"])
+                    </MudButton>
+                </MudStack>
+                @if (Cover != null && _showPreviews)
+                {
+                    <MudPaper Elevation="5" Class="paper-manga-panel">
+
+                        <MudStack Row Breakpoint="Breakpoint.MdAndDown">
+
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">@Localizer["OriginalCover"]:</MudText>
+                                <MudImage Src="@Cover.OriginalCover" Alt="Uploaded Preview"
+                                          Class="rounded-lg" Style="max-width: 150px; height: auto;" />
+                            </MudStack>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">@Localizer["SmallCover"]:</MudText>
+                                <MudImage Src="@Cover.SmallCover" Alt="Uploaded Preview"
+                                          Class="rounded-lg" Style="max-width: 150px; height: auto;" />
+                            </MudStack>
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">@Localizer["CroppedCover"]:</MudText>
+                                <MudImage Src="@Cover.CroppedCover" Alt="Uploaded Preview"
+                                          Class="rounded-lg" Style="max-width: 150px; height: auto;" />
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                }
+
+            </MudStack>
+
+
+
+            <MudDivider Class="my-4" />
+
+            <CropComponent Cover="@Cover" Processing="_processing" CroppedImageUpdated="OnCroppedImageUpdated" />
+        </MudPaper>
+    </MudItem>
+}
+
+@code {
+    [Parameter]
+    public required VolumeCoverDto Cover { get; set; }
+
+
+    private bool _processing = false;
+    private bool _showPreviews = false;
+
+    private IBrowserFile? _selectedFile;
+
+    private async Task OnCroppedImageUpdated(ImageResult? croppedResult)
+    {
+        if (croppedResult != null)
+        {
+            Cover.CroppedCover = croppedResult.CroppedImage;
+            Cover.SmallCover = croppedResult.SmallImage;
+
+            await SaveImages();
+        }
+    }
+
+    private async Task SaveImages()
+    {
+        try
+        {
+            _processing = true;
+
+            if (Cover != null)
+            {
+                Cover = await VolumeService.UpdateImages(Cover);
+                StateHasChanged();
+                Snackbar.Add(Localizer["ChangesSaved"], Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving changes: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+        }
+    }
+
+    private async Task UploadImage()
+    {
+        if (_selectedFile == null || Cover == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _processing = true;
+            StateHasChanged();
+
+            using var stream = _selectedFile.OpenReadStream(10000000);// 10mb
+            var result = await ImageFlow.UploadAndProcessImage(stream, Cover.PublicId, _selectedFile.Name);
+
+            if (result != null)
+            {
+                Cover.OriginalCover = result.OriginalImage;
+                Cover.CroppedCover = result.CroppedImage;
+                Cover.SmallCover = result.SmallImage;
+
+                Cover = await VolumeService.UpdateImages(Cover);
+
+                Snackbar.Add(Localizer["ImageUploadedSuccessfully"], Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add(Localizer["ErrorUploadingImage"], Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error uploading image for volume cover with PublicId: {PublicId}", Cover.PublicId);
+            Snackbar.Add($"Error uploading image: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _processing = false;
+            StateHasChanged();
+        }
+    }
+}

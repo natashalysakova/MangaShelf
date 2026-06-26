@@ -15,7 +15,7 @@ namespace MangaShelf.Tests;
 public class VolumeInfoParserTests : IDisposable
 {
     private Mock<ILogger<VolumeInfoParser>> _loggerMock;
-    private Mock<IImageManager> _imageManagerMock;
+    private Mock<IImageFlow> _imageManagerMock;
     private IDbContextFactory<MangaDbContext> _dbContextFactory;
 
     private VolumeInfoParser _parserService;
@@ -36,13 +36,16 @@ public class VolumeInfoParserTests : IDisposable
 
         // Setup mocks
         _loggerMock = new Mock<ILogger<VolumeInfoParser>>();
-        _imageManagerMock = new Mock<IImageManager>();
+        _imageManagerMock = new Mock<IImageFlow>();
                 
         // Setup image manager mock
-        _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(Task.FromResult<string?>("images/cover.jpg"));
-        _imageManagerMock.Setup(x => x.CreateSmallImage(It.IsAny<string>()))
-            .Returns("images/small/cover.jpg");
+        _imageManagerMock.Setup(x=>x.DownloadAndProcessImage(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new ImageResult
+            {
+                OriginalImage = "images/cover.jpg",
+                SmallImage = "images/small/cover.jpg",
+                CroppedImage = "images/cover_crop.jpg"
+            });
 
         // Initialize database with test data
         InitializeTestData().Wait();
@@ -1333,8 +1336,7 @@ public class VolumeInfoParserTests : IDisposable
         Assert.Equal(State.Updated, result);
 
         // Verify image download was NOT called since both cover images already exist
-        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
-        _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Never());
+        _imageManagerMock.Verify(x => x.DownloadAndProcessImage(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
     }
 
     [Fact]

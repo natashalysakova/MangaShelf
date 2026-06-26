@@ -2,10 +2,11 @@
 
 public interface IImageManager
 {
-    string CreateSmallImage(string coverImageUrl);
+    Task<string?> CreateSmallImage(string coverImageUrl);
     Task<string?> DownloadFileFromWeb(string url, string publicId);
-    string SaveFlagFromCDN(string countryCode);
-    string CropImage(string coverImageUrl);
-    string? CropImage(string coverImageUrl, int left, int top, int right, int bottom);
+    Task<string?> SaveFlagFromCDN(string countryCode);
+    Task<string?> CropImage(string coverImageUrl);
+    Task<string?> CropImage(string coverImageUrl, CropZone cropZone);
     (int width, int height) GetImageDimensions(string coverImageUrl);
+    Task<string?> UploadImage(Stream imageStream, string publicId, string originalFileName);
 }

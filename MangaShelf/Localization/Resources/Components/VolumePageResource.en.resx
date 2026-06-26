@@ -306,4 +306,37 @@
   <data name="Readings" xml:space="preserve">
     <value>Readings</value>
   </data>
+  <data name="UploadVolumeImage" xml:space="preserve">
+    <value>Upload Volume Image</value>
+  </data>
+  <data name="SelectImage" xml:space="preserve">
+    <value>Select Image</value>
+  </data>
+  <data name="SelectedFile" xml:space="preserve">
+    <value>Selected file</value>
+  </data>
+  <data name="Bytes" xml:space="preserve">
+    <value>bytes</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="UploadImage" xml:space="preserve">
+    <value>Upload Image</value>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>Uploading...</value>
+  </data>
+  <data name="ImageUploadedSuccessfully" xml:space="preserve">
+    <value>Image uploaded successfully</value>
+  </data>
+  <data name="ErrorUploadingImage" xml:space="preserve">
+    <value>Error uploading image</value>
+  </data>
+  <data name="OriginalPreview" xml:space="preserve">
+    <value>Original Preview</value>
+  </data>
+  <data name="CroppedPreview" xml:space="preserve">
+    <value>Cropped Preview</value>
+  </data>
 </root>

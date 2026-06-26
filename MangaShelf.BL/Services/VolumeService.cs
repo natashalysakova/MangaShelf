@@ -5,6 +5,7 @@ using MangaShelf.Common.Helpers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.DomainServices;
+using MangaShelf.DAL.Exceptions;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
@@ -693,5 +694,24 @@ public class VolumeService(
         }
 
         return true;
+    }
+
+    public async Task<VolumeCoverDto> UpdateImages(VolumeCoverDto volumeCover, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var volume = await context.Volumes.FindAsync(volumeCover.Id, token);
+
+        if (volume == null)
+        {
+            throw new EntityNotFoundException();
+        }
+
+        volume.OriginalCoverUrl = volumeCover.OriginalCover;
+        volume.CoverImageUrlSmall = volumeCover.SmallCover;
+        volume.CoverImageUrl = volumeCover.CroppedCover;
+
+        await context.SaveChangesAsync(token);
+
+        return volume.ToCoverDto();
     }
 }

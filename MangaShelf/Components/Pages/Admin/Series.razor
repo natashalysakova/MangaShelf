@@ -48,7 +48,7 @@ else
                                 </MudChip>
                                 @if (series.TotalVolumes.HasValue)
                                 {
-                                    <MudChip T="string" Color="Color.Default" Size="Size.Small" Variant="Variant.Outlined" Style="color:white; border-color:rgba(255,255,255,0.4)">
+                                    <MudChip  T="string" Color="Color.Default" Size="Size.Small" Variant="Variant.Outlined" Style="color:white; border-color:rgba(255,255,255,0.4)">
                                         @series.TotalVolumes vol.
                                     </MudChip>
                                 }
@@ -69,7 +69,6 @@ else
                                        Color="Color.Surface"
                                        Variant="Variant.Filled"
                                        Size="Size.Small"
-                                       Title="Edit series"
                                        OnClick="() => OpenEditDialog(series)" />
                     </MudStack>
 

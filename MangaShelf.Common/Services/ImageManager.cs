@@ -1,5 +1,6 @@
 using ImageMagick;
 using Microsoft.Extensions.Logging;
+using System.Drawing;
 
 namespace MangaShelf.Common.Interfaces;
 
@@ -15,7 +16,7 @@ public class ImageManager : IImageManager
         _logger = logger;
     }
 
-    public string? CropImage(string imageUrl)
+    public async Task<string?> CropImage(string imageUrl)
     {
         var sourceImage = Path.Combine(serverRoot, imageUrl);
 
@@ -156,17 +157,17 @@ public class ImageManager : IImageManager
                 }
             }
 
-            return CropImage(imageUrl, left, top, right, bottom);
+            return await CropImage(imageUrl, new CropZone(left, top, right, bottom));
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error cropping image: " + ex.Message);
+            _logger.LogError("Error cropping image: " + ex.Message);
         }
 
         return null;
     }
 
-    public string? CropImage(string imageUrl, int left, int top, int right, int bottom)
+    public async Task<string?> CropImage(string imageUrl, CropZone cropZone)
     {
         var sourceImage = Path.Combine(serverRoot, imageUrl);
 
@@ -176,6 +177,11 @@ public class ImageManager : IImageManager
         try
         {
             using var image = new MagickImage(sourceImage);
+
+            var left = cropZone.Left;
+            var top = cropZone.Top;
+            var right = cropZone.Right;
+            var bottom = cropZone.Bottom;
 
             var width = (int)image.Width;
             var height = (int)image.Height;
@@ -197,11 +203,9 @@ public class ImageManager : IImageManager
                 var extension = fileInfo.Extension;
                 var fileName = $"{fileNameWithoutExtension}_crop{extension}";
                 var croppedImagePath = Path.Combine(Path.GetDirectoryName(sourceImage)!, fileName);
-                image.Write(croppedImagePath);
+                await image.WriteAsync(croppedImagePath);
 
                 var pathToReturn = Path.Combine(Path.GetDirectoryName(imageUrl)!, fileName);
-
-                CreateSmallImage(pathToReturn);
 
                 return pathToReturn;
 
@@ -209,14 +213,14 @@ public class ImageManager : IImageManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error cropping image: " + ex.Message);
+            _logger.LogError("Error cropping image: " + ex.Message);
         }
 
         return null;
 
     }
 
-    public string CreateSmallImage(string coverImageUrl)
+    public async Task<string?> CreateSmallImage(string coverImageUrl)
     {
         var sourceImage = Path.Combine(serverRoot, coverImageUrl);
 
@@ -232,12 +236,13 @@ public class ImageManager : IImageManager
             if (!Directory.Exists(destinationDirectory))
                 Directory.CreateDirectory(destinationDirectory);
 
-            // Resize image to 300px height
+            // Resize image to 360px height
             using var image = new MagickImage(sourceImage);
 
             var size = new MagickGeometry(0, 360);
 
-            image.Resize(size);
+            image.Resize(size, FilterType.Lanczos);
+            image.UnsharpMask(2, 1);
 
             // Save the result
             image.Write(destinationPath);
@@ -291,7 +296,7 @@ public class ImageManager : IImageManager
         }
     }
 
-    public string SaveFlagFromCDN(string countryCode)
+    public async Task<string?> SaveFlagFromCDN(string countryCode)
     {
         var urls = new List<string> {
         $"https://flagcdn.com/40x30/{countryCode}.webp" };
@@ -307,17 +312,17 @@ public class ImageManager : IImageManager
 
             using (var client = new HttpClient())
             {
-                using (var response = client.GetAsync(url))
+                using (var response = await client.GetAsync(url))
                 {
                     byte[] imageBytes =
-                        response.Result.Content.ReadAsByteArrayAsync().Result;
+                        await response.Content.ReadAsByteArrayAsync();
 
                     var localPath = Path.Combine(localDirectory, filename);
 
                     if (!Directory.Exists(localDirectory))
                         Directory.CreateDirectory(localDirectory);
 
-                    File.WriteAllBytes(localPath, imageBytes);
+                    await File.WriteAllBytesAsync(localPath, imageBytes);
                 }
             }
         }
@@ -335,6 +340,35 @@ public class ImageManager : IImageManager
         using (var image = new MagickImage(sourceImage))
         {
             return ((int)image.Width, (int)image.Height);
+        }
+    }
+
+    public async Task<string?> UploadImage(Stream imageStream, string publicId, string originalFileName)
+    {
+        try
+        {
+            var destinationFolder = Path.Combine(imageDir, "series", publicId);
+            var extension = Path.GetExtension(originalFileName);
+            var filename = $"{Guid.NewGuid()}{extension}";
+            var localDirectory = Path.Combine(serverRoot, destinationFolder);
+            var localPath = Path.Combine(localDirectory, filename);
+
+            if (!Directory.Exists(localDirectory))
+                Directory.CreateDirectory(localDirectory);
+
+            using var memoryStream = new MemoryStream();
+            await imageStream.CopyToAsync(memoryStream);
+            await File.WriteAllBytesAsync(localPath, memoryStream.ToArray());
+
+            _logger.LogInformation($"Uploaded image to {localPath}");
+
+            var imagePath = Path.Combine(destinationFolder, filename);
+
+            return imagePath;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 
@@ -367,5 +401,108 @@ public class ImageManager : IImageManager
         }
 
         return false;
+    }
+}
+
+public class ImageResult
+{
+    public required string OriginalImage { get; set; }
+    public required string CroppedImage { get; set; }
+    public required string SmallImage { get; set; }
+}
+
+public interface IImageFlow
+{
+    Task<ImageResult> DownloadAndProcessImage(string url, string seriesPublicId);
+    Task<ImageResult> UploadAndProcessImage(Stream localFileStream, string seriesPublicId, string fileName);
+    Task<ImageResult> ProcessCrop(string url, CropZone? cropZone = null);
+}
+
+public struct CropZone(int Left, int Top, int Right, int Bottom)
+{
+    public int Left { get; } = Left;
+    public int Top { get; } = Top;
+    public int Right { get; } = Right;
+    public int Bottom { get; } = Bottom;
+}
+
+public class ImageFlow : IImageFlow
+{
+    private readonly IImageManager _imageManager;
+    private readonly ILogger<ImageFlow> _logger;
+    public ImageFlow(IImageManager imageManager, ILogger<ImageFlow> logger)
+    {
+        _imageManager = imageManager;
+        _logger = logger;
+    }
+    
+    public async Task<ImageResult> DownloadAndProcessImage(string url, string seriesPublicId)
+    {
+        try
+        {
+            var originalImagePath = await _imageManager.DownloadFileFromWeb(url, seriesPublicId);
+            var croppedImagePath = await _imageManager.CropImage(originalImagePath);
+            var smallImagePath = await _imageManager.CreateSmallImage(croppedImagePath ?? originalImagePath);
+
+            return new ImageResult
+            {
+                OriginalImage = originalImagePath,
+                CroppedImage = croppedImagePath ?? originalImagePath,
+                SmallImage = smallImagePath ?? originalImagePath
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading and processing image from URL: {Url}", url);
+            throw;
+        }        
+    }
+
+    public async Task<ImageResult> ProcessCrop(string url, CropZone? cropZone = null)
+    {
+        try
+        {
+            var croppedImagePath = cropZone.HasValue ? 
+                await _imageManager.CropImage(url, cropZone.Value) : 
+                await _imageManager.CropImage(url);
+
+            var smallImagePath = await _imageManager.CreateSmallImage(croppedImagePath ?? url);
+
+            return new ImageResult
+            {
+                OriginalImage = url,
+                CroppedImage = croppedImagePath ?? url,
+                SmallImage = smallImagePath ?? url
+            };
+
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Error uploading and processing image from local path: {LocalPath}", url);
+            throw;
+        }
+    }
+
+    public async Task<ImageResult> UploadAndProcessImage(Stream localFileStream, string seriesPublicId, string fileName)
+    {
+        try
+        {
+            var originalImagePath = await _imageManager.UploadImage(localFileStream, seriesPublicId, fileName);
+            var croppedImagePath = await _imageManager.CropImage(originalImagePath);
+            var smallImagePath = await _imageManager.CreateSmallImage(croppedImagePath ?? originalImagePath);
+
+            return new ImageResult
+            {
+                OriginalImage = originalImagePath,
+                CroppedImage = croppedImagePath ?? originalImagePath,
+                SmallImage = smallImagePath ?? originalImagePath
+            };
+
+        }
+        catch (Exception)
+        {
+            _logger.LogError("Error uploading and processing image from local stream: {SeriesPublicId}, {FileName}", seriesPublicId, fileName);
+            throw;
+        }
     }
 }

@@ -5,12 +5,12 @@
     @if (_expanded)
     {
         <MudText>@Text</MudText>
-        <MudLink Variant="Variant.Text" Underline="Underline.Always"  Color="Color.Default" OnClick="() => _expanded = false">@Localizer["ShowLess"]</MudLink>
+        <MudLink Underline="Underline.Always"  Color="Color.Default" OnClick="() => _expanded = false">@Localizer["ShowLess"]</MudLink>
     }
     else
     {
         <MudText>@_shortText</MudText>
-        <MudLink Variant="Variant.Text" Underline="Underline.Always" Color="Color.Default" OnClick="() => _expanded = true">@Localizer["ShowMore"]</MudLink>
+        <MudLink Underline="Underline.Always" Color="Color.Default" OnClick="() => _expanded = true">@Localizer["ShowMore"]</MudLink>
     }
 }
 else

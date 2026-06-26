@@ -27,11 +27,6 @@ public class VolumeEditDto
     public int AgeRestriction { get; set; }
 
     [ReadOnly(true)]
-    public string? OriginalCoverUrl { get; set; }
-    [ReadOnly(true)]
-    public string? CoverImageUrl { get; set; }
-
-    [ReadOnly(true)]
     public string? PurchaseUrl { get; set; }
 
     public string? Description { get; set; }
@@ -59,6 +54,11 @@ public class VolumeEditDto
     [Range(1, int.MaxValue, ErrorMessage = "Total volumes must be positive")]
     public int? SeriesTotalVolumes { get; set; }
     public List<AuthorDto> SeriesAuthors { get; set; } = new();
+
+
+
+    public VolumeCoverDto Cover { get; set; }
+
 }
 
 public class RequiredWhenNotAOneShotAttribute : ValidationAttribute
