@@ -6,11 +6,23 @@
         @Localizer["BackToList"]
     </MudButton>
 
+    @if (HasChanges)
+    {
+        
     <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled"
-               StartIcon="@Icons.Material.Filled.Save" Disabled="!HasChanges">
+               StartIcon="@Icons.Material.Filled.Save">
         @Localizer["SaveChanges"]
     </MudButton>
-</MudStack>
+    }
+    else
+    {
+        <MudButton  OnClick="NavigateBack" Color="Color.Warning" Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Close">
+            @Localizer["Close"]
+        </MudButton>
+
+    }
+    </MudStack>
 
 @code {
     [Parameter]

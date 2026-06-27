@@ -10,13 +10,13 @@ public interface IVolumeService : IService
     Task<bool> DeleteVolume(Guid volumeId, CancellationToken token = default);
     Task<bool> ChangePublishedStatus(Guid volumeId, CancellationToken token = default);
     Task<Volume?> GetFullVolumeByIdAsync(Guid volumeId, CancellationToken token = default);
-    
+
     Task<(IEnumerable<Volume>, int)> GetAllFullVolumesAsync(IFilterOptions paginationOptions, IEnumerable<Func<Volume, bool>>? filterFunctions, IEnumerable<SortDefinitions<Volume>> sortDefinitions, bool showDeleted = false, CancellationToken token = default);
     Task<VolumeEditDto> GetFullVolumeForEdit(Guid volumeId, CancellationToken token = default);
     Task<VolumeEditDto> Update(VolumeEditDto volume, CancellationToken token = default);
     Task<IEnumerable<string>> FilterExistingVolumes(IEnumerable<string> volumesToParse, CancellationToken token = default);
     Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken);
-    
+
     Task<(IEnumerable<CardVolumeDto>, int)> GetAllVolumesAsync(IFilterOptions? paginationOptions = default, CancellationToken token = default);
     Task<(IEnumerable<CardVolumeDto>, int, IEnumerable<UserVolumeStatusDto>)> GetAllVolumesAsyncWithUserInfo(string? userId, IFilterOptions? paginationOptions = default, CancellationToken token = default);
     Task<IEnumerable<CardVolumeDto>> GetLatestPreorders(int count = 6, CancellationToken token = default);
@@ -39,7 +39,18 @@ public interface IVolumeService : IService
     Task<(UserVolumeStatusDto, VolumeStatsDto)> RemoveReadingAsync(Guid readingId, CancellationToken token = default);
 
 
+    Task<VolumeCoverDto> UpdateImages(VolumeCoverDto volumeCover, CancellationToken token = default);
+
     Task<IEnumerable<ReviewDto>> GetReviews(Guid volumeId, CancellationToken token = default);
     Task<Reading?> GetReading(Guid id, CancellationToken token = default);
     Task<Ownership?> GetOwnership(Guid id, CancellationToken token = default);
+}
+
+public class VolumeCoverDto
+{
+    public required Guid Id { get; set; }
+    public required string PublicId { get; set; }
+    public string? OriginalCover { get; set; } 
+    public string? SmallCover { get; set; }
+    public string? CroppedCover { get; set; }
 }

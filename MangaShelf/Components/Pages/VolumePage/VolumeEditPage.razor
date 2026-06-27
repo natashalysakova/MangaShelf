@@ -1,19 +1,14 @@
 ﻿@page "/admin/volumes/edit/{VolumeId:guid}"
 @using MangaShelf.BL.Contracts
 @using MangaShelf.BL.Dto
-@using MangaShelf.Common.Interfaces
-@using MangaShelf.Components.Elements.ImageCrop
 @using MangaShelf.DAL.Models
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
 @using Microsoft.JSInterop
 @using System.Text.Json
 @inject IVolumeService VolumeService
-@inject IImageManager ImageManager
-@inject IJSRuntime JS
 @inject IUiLocalizationService Localizer
 @inject ISnackbar Snackbar
-
-@rendermode InteractiveServer
 
 <PageTitle>@Localizer["EditVolume"]</PageTitle>
 
@@ -48,7 +43,7 @@
                                    Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.SeriesStatus)">
                             @foreach (var seriesStatus in Enum.GetValues<SeriesStatus>())
                             {
-                                <MudSelectItem Value="@seriesStatus">@seriesStatus</MudSelectItem>
+                                <MudSelectItem Value="@seriesStatus">@Localizer[seriesStatus]</MudSelectItem>
                             }
                         </MudSelect>
                         <MudNumericField T="int?" @bind-Value="Volume.SeriesTotalVolumes" Disabled="Volume.SeriesStatus == SeriesStatus.OneShot"
@@ -57,9 +52,9 @@
 
                         <MudSelect T="SeriesType" Value="Volume.SeriesType" Label="@Localizer["SeriesType"]"
                                    Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.SeriesType)">
-                            @foreach (var  seriesType in Enum.GetValues<SeriesType>())
+                            @foreach (var seriesType in Enum.GetValues<SeriesType>())
                             {
-                                <MudSelectItem Value="@seriesType">@seriesType</MudSelectItem>
+                                <MudSelectItem Value="@seriesType">@Localizer[seriesType]</MudSelectItem>
                             }
                         </MudSelect>
                     </MudStack>
@@ -85,13 +80,13 @@
                                        Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.Type)">
                                 @foreach (var volumeType in Enum.GetValues<VolumeType>())
                                 {
-                                    <MudSelectItem Value="@volumeType">@volumeType</MudSelectItem>
+                                    <MudSelectItem Value="@volumeType">@Localizer[volumeType]</MudSelectItem>
                                 }
                             </MudSelect>
                             <MudNumericField T="int" @bind-Value="Volume.AgeRestriction"
                                              Label="@Localizer["AgeRestriction"]" Variant="Variant.Outlined" FullWidth="true"
                                              Immediate="true" For="@(() => Volume!.AgeRestriction)" />
-                            <MudTextField @bind-Value="Volume.ISBN" Label="@Localizer["VolumeIsbn"]"
+                            <MudTextField @bind-Value="Volume.ISBN" Label="@Localizer["VolumeIsbn"]" Mask="@(new PatternMask("000-000-0000-00-0"))"
                                           Variant="Variant.Outlined" FullWidth="true" Immediate="true" For="@(() => Volume!.ISBN)" />
 
                         </MudStack>
@@ -113,13 +108,13 @@
                             <MudText Typo="Typo.subtitle1">@Localizer["SeriesAuthors"]</MudText>
                             <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Add"
                                        OnClick="AddAuthor">
-                                Add author
+                                @Localizer["AddAuthor"]
                             </MudButton>
                         </MudStack>
 
                         @if (Volume.SeriesAuthors.Count == 0)
                         {
-                            <MudText Color="Color.Secondary">No authors yet.</MudText>
+                            <MudText Color="Color.Secondary">@Localizer["NoAuthors"]</MudText>
                         }
                         else
                         {
@@ -139,28 +134,7 @@
                     </MudStack>
 
                     <MudDivider Class="my-4" />
-                    <MudText Typo="Typo.h6">@Localizer["MediaAndLinks"]</MudText>
-
-                    <MudStack Row="true" Spacing="2">
-                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center" Class="flex-grow-1">
-                            <MudTextField @bind-Value="Volume.OriginalCoverUrl" Label="@Localizer["OriginalCoverUrl"]"
-                                          Variant="Variant.Outlined" FullWidth="true" Disabled="true"
-                                          For="@(() => Volume!.OriginalCoverUrl)" />
-                            <MudTooltip Text="Copy to clipboard">
-                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary"
-                                               Disabled="@string.IsNullOrWhiteSpace(Volume?.OriginalCoverUrl)" />
-                            </MudTooltip>
-                        </MudStack>
-                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center" Class="flex-grow-1">
-                            <MudTextField @bind-Value="Volume.CoverImageUrl" Label="@Localizer["CoverImageUrl"]"
-                                          Variant="Variant.Outlined" FullWidth="true" Disabled="true"
-                                          For="@(() => Volume!.CoverImageUrl)" />
-                            <MudTooltip Text="Copy to clipboard">
-                                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary"
-                                               Disabled="@string.IsNullOrWhiteSpace(Volume?.CoverImageUrl)" />
-                            </MudTooltip>
-                        </MudStack>
-                    </MudStack>
+                    <MudText Typo="Typo.h6">@Localizer["Links"]</MudText>
 
                     <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center" Class="mt-4">
                         <MudTextField @bind-Value="Volume.PurchaseUrl" Label="@Localizer["PurchaseUrl"]"
@@ -227,23 +201,15 @@
             </MudItem>
         </EditForm>
 
-        <EditForm Model="Volume" OnValidSubmit="SaveImages">
-            <MudItem xs="12" Class="mt-4">
-                <MudPaper Class="pa-4" Elevation="2">
-                    <CropComponent OriginalCover="@Volume?.OriginalCoverUrl" CroppedCover="@Volume?.CoverImageUrl"
-                                   Processing="_processing" />
-                    <SaveChangesPanel HasChanges="_hasChanges" VolumePublicId="@CurrentVolumePublicId" />
-                </MudPaper>
-            </MudItem>
-        </EditForm>
-    }
+         <EditCover Cover="@Volume.Cover"/>
+     }
     else
     {
         <MudAlert Severity="Severity.Error">@Localizer["VolumeNotFound"]</MudAlert>
     }
 </MudContainer>
 
-@code {
+    @code {
     [Parameter]
     public Guid VolumeId { get; set; }
 
@@ -263,7 +229,7 @@
     private readonly Dictionary<string, string> _originalFieldValues = new();
     private readonly HashSet<string> _changedFields = new(StringComparer.Ordinal);
 
-
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadVolume();
@@ -287,10 +253,6 @@
             _originalVolumeSnapshot = CreateVolumeSnapshot();
             _dataChanged = false;
             _hasChanges = false;
-
-            if (Volume != null && !string.IsNullOrEmpty(Volume.OriginalCoverUrl))
-            {
-            }
         }
         catch (Exception ex)
         {
@@ -313,33 +275,6 @@
 
         return Task.CompletedTask;
     }
-
-
-    private async Task SaveImages()
-    {
-        try
-        {
-            _processing = true;
-
-            if (Volume != null)
-            {
-                Snackbar.Add(Localizer["ChangesSaved"], Severity.Success);
-                MarkAsSaved();
-
-                await Task.Delay(1000);
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error saving changes: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            _processing = false;
-        }
-    }
-
-
 
     private void OnFieldChanged(object? sender, FieldChangedEventArgs e)
     {
@@ -475,7 +410,7 @@
 
         Volume.SeriesStatus = status;
 
-        if(status == SeriesStatus.OneShot)
+        if (status == SeriesStatus.OneShot)
         {
             Volume.Number = null;
             Volume.SeriesTotalVolumes = 1;

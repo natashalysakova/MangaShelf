@@ -157,4 +157,400 @@
     <value>Late</value>
     <comment/>
   </data>
+  <data name="Preorders" xml:space="preserve">
+    <value>Preorders</value>
+    <comment/>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>Today</value>
+    <comment/>
+  </data>
+  <data name="NoPreorders" xml:space="preserve">
+    <value>No preorders</value>
+    <comment/>
+  </data>
+  <data name="Release" xml:space="preserve">
+    <value>Release</value>
+    <comment/>
+  </data>
+  <data name="NoNews" xml:space="preserve">
+    <value>No news</value>
+    <comment/>
+  </data>
+  <data name="ErrorLoadingReading" xml:space="preserve">
+    <value>Error loading reading</value>
+    <comment/>
+  </data>
+  <data name="ErrorAddingReading" xml:space="preserve">
+    <value>Error adding reading</value>
+    <comment/>
+  </data>
+  <data name="ErrorLoadingOwnership" xml:space="preserve">
+    <value>Error loading ownership</value>
+    <comment/>
+  </data>
+  <data name="NoDescrption" xml:space="preserve">
+    <value>No description</value>
+    <comment/>
+  </data>
+  <data name="ItsPreorder" xml:space="preserve">
+    <value>Preorder</value>
+    <comment/>
+  </data>
+  <data name="OrderBy" xml:space="preserve">
+    <value>Order by</value>
+    <comment/>
+  </data>
+  <data name="Preorder" xml:space="preserve">
+    <value>Preorder</value>
+    <comment/>
+  </data>
+  <data name="Released" xml:space="preserve">
+    <value>Released</value>
+    <comment/>
+  </data>
+  <data name="Wishlist" xml:space="preserve">
+    <value>Wishlist</value>
+    <comment/>
+  </data>
+  <data name="AddToLibrary" xml:space="preserve">
+    <value>Add to library</value>
+    <comment/>
+  </data>
+  <data name="PreorderArrived" xml:space="preserve">
+    <value>Preorder arrived</value>
+    <comment/>
+  </data>
+  <data name="Own" xml:space="preserve">
+    <value>Own</value>
+    <comment/>
+  </data>
+  <data name="Popularity" xml:space="preserve">
+    <value>Popularity</value>
+    <comment/>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>Rating</value>
+    <comment/>
+  </data>
+  <data name="PreorderDate" xml:space="preserve">
+    <value>Preorder date</value>
+    <comment/>
+  </data>
+  <data name="Published" xml:space="preserve">
+    <value>Publish</value>
+    <comment/>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+    <comment/>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+    <comment/>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+    <comment/>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+    <comment/>
+  </data>
+  <data name="ResultPerPage" xml:space="preserve">
+    <value>Results per page</value>
+    <comment/>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+    <comment/>
+  </data>
+  <data name="Catalog" xml:space="preserve">
+    <value>Catalog</value>
+    <comment/>
+  </data>
+  <data name="HomePage" xml:space="preserve">
+    <value>Home page</value>
+    <comment/>
+  </data>
+  <data name="MangaShelf" xml:space="preserve">
+    <value>Manga Shelf</value>
+    <comment/>
+  </data>
+  <data name="MyShelf" xml:space="preserve">
+    <value>My manga</value>
+    <comment/>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+    <comment/>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Account</value>
+    <comment/>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+    <comment/>
+  </data>
+  <data name="Main" xml:space="preserve">
+    <value>Main</value>
+    <comment/>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Admin</value>
+    <comment/>
+  </data>
+  <data name="SeriesTitle" xml:space="preserve">
+    <value>Series title</value>
+    <comment/>
+  </data>
+  <data name="ReleaseDate" xml:space="preserve">
+    <value>Release date</value>
+    <comment/>
+  </data>
+  <data name="No updates found for the selected date range." xml:space="preserve">
+    <value>No updates found for the selected date range.</value>
+    <comment/>
+  </data>
+  <data name="AdminVolumes" xml:space="preserve">
+    <value>AdminVolumes</value>
+    <comment/>
+  </data>
+  <data name="AgeRestriction" xml:space="preserve">
+    <value>AgeRestriction</value>
+    <comment/>
+  </data>
+  <data name="ApplyCrop" xml:space="preserve">
+    <value>ApplyCrop</value>
+    <comment/>
+  </data>
+  <data name="AutoCrop" xml:space="preserve">
+    <value>AutoCrop</value>
+    <comment/>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>BackToList</value>
+    <comment/>
+  </data>
+  <data name="Bottom" xml:space="preserve">
+    <value>Bottom</value>
+    <comment/>
+  </data>
+  <data name="ChangesSaved" xml:space="preserve">
+    <value>ChangesSaved</value>
+    <comment/>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+    <comment/>
+  </data>
+  <data name="CoverImage" xml:space="preserve">
+    <value>CoverImage</value>
+    <comment/>
+  </data>
+  <data name="CroppedCover" xml:space="preserve">
+    <value>CroppedCover</value>
+    <comment/>
+  </data>
+  <data name="CropSize" xml:space="preserve">
+    <value>CropSize</value>
+    <comment/>
+  </data>
+  <data name="CropSuccessful" xml:space="preserve">
+    <value>CropSuccessful</value>
+    <comment/>
+  </data>
+  <data name="CurrentCroppedVersion" xml:space="preserve">
+    <value>CurrentCroppedVersion</value>
+    <comment/>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+    <comment/>
+  </data>
+  <data name="EditVolume" xml:space="preserve">
+    <value>EditVolume</value>
+    <comment/>
+  </data>
+  <data name="ErrorUploadingImage" xml:space="preserve">
+    <value>ErrorUploadingImage</value>
+    <comment/>
+  </data>
+  <data name="FieldsCanBeOverwritten" xml:space="preserve">
+    <value>FieldsCanBeOverwritten</value>
+    <comment/>
+  </data>
+  <data name="HidePreviews" xml:space="preserve">
+    <value>HidePreviews</value>
+    <comment/>
+  </data>
+  <data name="Identifiers" xml:space="preserve">
+    <value>Identifiers</value>
+    <comment/>
+  </data>
+  <data name="ImageDimensions" xml:space="preserve">
+    <value>ImageDimensions</value>
+    <comment/>
+  </data>
+  <data name="ImageUploadedSuccessfully" xml:space="preserve">
+    <value>ImageUploadedSuccessfully</value>
+    <comment/>
+  </data>
+  <data name="InvalidCropBoundaries" xml:space="preserve">
+    <value>InvalidCropBoundaries</value>
+    <comment/>
+  </data>
+  <data name="IsDeleted" xml:space="preserve">
+    <value>IsDeleted</value>
+    <comment/>
+  </data>
+  <data name="Left" xml:space="preserve">
+    <value>Left</value>
+    <comment/>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Links</value>
+    <comment/>
+  </data>
+  <data name="ManualCrop" xml:space="preserve">
+    <value>ManualCrop</value>
+    <comment/>
+  </data>
+  <data name="ManualCropControls" xml:space="preserve">
+    <value>ManualCropControls</value>
+    <comment/>
+  </data>
+  <data name="NothingSelected" xml:space="preserve">
+    <value>NothingSelected</value>
+    <comment/>
+  </data>
+  <data name="OriginalCover" xml:space="preserve">
+    <value>OriginalCover</value>
+    <comment/>
+  </data>
+  <data name="PreorderStart" xml:space="preserve">
+    <value>PreorderStart</value>
+    <comment/>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Processing</value>
+    <comment/>
+  </data>
+  <data name="Publisher" xml:space="preserve">
+    <value>Publisher</value>
+    <comment/>
+  </data>
+  <data name="Publishing" xml:space="preserve">
+    <value>Publishing</value>
+    <comment/>
+  </data>
+  <data name="PurchaseUrl" xml:space="preserve">
+    <value>PurchaseUrl</value>
+    <comment/>
+  </data>
+  <data name="ResetBoundaries" xml:space="preserve">
+    <value>ResetBoundaries</value>
+    <comment/>
+  </data>
+  <data name="Right" xml:space="preserve">
+    <value>Right</value>
+    <comment/>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>SaveChanges</value>
+    <comment/>
+  </data>
+  <data name="SelectedFile" xml:space="preserve">
+    <value>SelectedFile</value>
+    <comment/>
+  </data>
+  <data name="SeriesAuthors" xml:space="preserve">
+    <value>SeriesAuthors</value>
+    <comment/>
+  </data>
+  <data name="SeriesDetails" xml:space="preserve">
+    <value>SeriesDetails</value>
+    <comment/>
+  </data>
+  <data name="SeriesId" xml:space="preserve">
+    <value>SeriesId</value>
+    <comment/>
+  </data>
+  <data name="SeriesOriginalTitle" xml:space="preserve">
+    <value>SeriesOriginalTitle</value>
+    <comment/>
+  </data>
+  <data name="SeriesPublicId" xml:space="preserve">
+    <value>SeriesPublicId</value>
+    <comment/>
+  </data>
+  <data name="SeriesStatus" xml:space="preserve">
+    <value>SeriesStatus</value>
+    <comment/>
+  </data>
+  <data name="SeriesTotalVolumes" xml:space="preserve">
+    <value>SeriesTotalVolumes</value>
+    <comment/>
+  </data>
+  <data name="SeriesType" xml:space="preserve">
+    <value>SeriesType</value>
+    <comment/>
+  </data>
+  <data name="ShowPreviewOverlay" xml:space="preserve">
+    <value>ShowPreviewOverlay</value>
+    <comment/>
+  </data>
+  <data name="SingleIssue" xml:space="preserve">
+    <value>SingleIssue</value>
+    <comment/>
+  </data>
+  <data name="SmallCover" xml:space="preserve">
+    <value>SmallCover</value>
+    <comment/>
+  </data>
+  <data name="Top" xml:space="preserve">
+    <value>Top</value>
+    <comment/>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>Uploading</value>
+    <comment/>
+  </data>
+  <data name="UploadVolumeImage" xml:space="preserve">
+    <value>UploadVolumeImage</value>
+    <comment/>
+  </data>
+  <data name="VolumeDetails" xml:space="preserve">
+    <value>VolumeDetails</value>
+    <comment/>
+  </data>
+  <data name="VolumeId" xml:space="preserve">
+    <value>VolumeId</value>
+    <comment/>
+  </data>
+  <data name="VolumeIsbn" xml:space="preserve">
+    <value>VolumeIsbn</value>
+    <comment/>
+  </data>
+  <data name="VolumeNotFound" xml:space="preserve">
+    <value>VolumeNotFound</value>
+    <comment/>
+  </data>
+  <data name="VolumeNumber" xml:space="preserve">
+    <value>VolumeNumber</value>
+    <comment/>
+  </data>
+  <data name="VolumePublicId" xml:space="preserve">
+    <value>VolumePublicId</value>
+    <comment/>
+  </data>
+  <data name="VolumeTitle" xml:space="preserve">
+    <value>VolumeTitle</value>
+    <comment/>
+  </data>
+  <data name="VolumeType" xml:space="preserve">
+    <value>VolumeType</value>
+    <comment/>
+  </data>
 </root>

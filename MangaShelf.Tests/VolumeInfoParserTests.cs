@@ -15,7 +15,7 @@ namespace MangaShelf.Tests;
 public class VolumeInfoParserTests : IDisposable
 {
     private Mock<ILogger<VolumeInfoParser>> _loggerMock;
-    private Mock<IImageManager> _imageManagerMock;
+    private Mock<IImageFlow> _imageManagerMock;
     private IDbContextFactory<MangaDbContext> _dbContextFactory;
 
     private VolumeInfoParser _parserService;
@@ -36,13 +36,16 @@ public class VolumeInfoParserTests : IDisposable
 
         // Setup mocks
         _loggerMock = new Mock<ILogger<VolumeInfoParser>>();
-        _imageManagerMock = new Mock<IImageManager>();
+        _imageManagerMock = new Mock<IImageFlow>();
                 
         // Setup image manager mock
-        _imageManagerMock.Setup(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(Task.FromResult<string?>("images/cover.jpg"));
-        _imageManagerMock.Setup(x => x.CreateSmallImage(It.IsAny<string>()))
-            .Returns("images/small/cover.jpg");
+        _imageManagerMock.Setup(x=>x.DownloadAndProcessImage(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new ImageResult
+            {
+                OriginalImage = "images/cover.jpg",
+                SmallImage = "images/small/cover.jpg",
+                CroppedImage = "images/cover_crop.jpg"
+            });
 
         // Initialize database with test data
         InitializeTestData().Wait();
@@ -135,7 +138,8 @@ public class VolumeInfoParserTests : IDisposable
         Assert.False(volume.IsPreorder);
         Assert.Equal("This is a test volume description.", volume.Description);
         Assert.Equal("https://example.com/volume1", volume.PurchaseUrl);
-        Assert.Equal("images/cover.jpg", volume.CoverImageUrl);
+        Assert.Equal("images/cover_crop.jpg", volume.CoverImageUrl);
+        Assert.Equal("images/cover.jpg", volume.OriginalCoverUrl);
         Assert.Equal("images/small/cover.jpg", volume.CoverImageUrlSmall);
 
         Assert.NotNull(volume.Series);
@@ -1295,7 +1299,8 @@ public class VolumeInfoParserTests : IDisposable
         {
             var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Cover Test Volume", TestContext.Current.CancellationToken);
             Assert.NotNull(vol);
-            Assert.Equal("images/cover.jpg", vol.CoverImageUrl);
+            Assert.Equal("images/cover.jpg", vol.OriginalCoverUrl);
+            Assert.Equal("images/cover_crop.jpg", vol.CoverImageUrl);
             Assert.Equal("images/small/cover.jpg", vol.CoverImageUrlSmall);
         }
 
@@ -1333,8 +1338,7 @@ public class VolumeInfoParserTests : IDisposable
         Assert.Equal(State.Updated, result);
 
         // Verify image download was NOT called since both cover images already exist
-        _imageManagerMock.Verify(x => x.DownloadFileFromWeb(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
-        _imageManagerMock.Verify(x => x.CreateSmallImage(It.IsAny<string>()), Times.Never());
+        _imageManagerMock.Verify(x => x.DownloadAndProcessImage(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
     }
 
     [Fact]

@@ -41,6 +41,7 @@ public static class ServicesInstallExtention
 
         // Image services
         builder.Services.AddScoped<IImageManager, ImageManager>();
+        builder.Services.AddScoped<IImageFlow, ImageFlow>();
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<IConfigurationService, ConfigurationService>();

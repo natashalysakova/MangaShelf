@@ -180,4 +180,16 @@
   <data name="No updates found for the selected date range." xml:space="preserve">
     <value>За вибраний період оновлень не знайдено.</value>
   </data>
+  <data name="AdminVolumes" xml:space="preserve">
+    <value>Том</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Назва</value>
+  </data>
+  <data name="Published" xml:space="preserve">
+    <value>Опубліковано</value>
+  </data>
 </root>

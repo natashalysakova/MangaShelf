@@ -168,7 +168,7 @@
         lastCheckTime = System.DateTimeOffset.Now;
         jobs = await parserService.GetJobs(100);
 
-        RunParse();
+        await RunParse();
     }
 
     private async Task RunParse()

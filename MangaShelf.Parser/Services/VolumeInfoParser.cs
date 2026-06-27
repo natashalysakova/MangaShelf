@@ -15,7 +15,7 @@ public interface IVolumeInfoParser
 public class VolumeInfoParser(
     IDbContextFactory<MangaDbContext> dbContextFactory,
     ILogger<VolumeInfoParser> logger,
-    IImageManager imageManager) : IVolumeInfoParser
+    IImageFlow imageFlow) : IVolumeInfoParser
 {
     public async Task<State> Parse(ParsedInfo volumeInfo, CancellationToken token = default)
     {
@@ -183,10 +183,18 @@ public class VolumeInfoParser(
         if (string.IsNullOrEmpty(volumeInfo.Cover) || volume.OriginalCoverUrl is not null)
             return;
 
-        volume.OriginalCoverUrl = await imageManager.DownloadFileFromWeb(volumeInfo.Cover, volume.Series.PublicId);
-        var croppedImage = imageManager.CropImage(volume.OriginalCoverUrl);
-        volume.CoverImageUrl = croppedImage ?? volume.OriginalCoverUrl;
-        volume.CoverImageUrlSmall = imageManager.CreateSmallImage(volume.CoverImageUrl);
+        try
+        {
+            var imageResult = await imageFlow.DownloadAndProcessImage(volumeInfo.Cover, volume.Series!.PublicId);
+            volume.OriginalCoverUrl = imageResult?.OriginalImage;
+            volume.CoverImageUrl = imageResult?.CroppedImage ?? volume.OriginalCoverUrl;
+            volume.CoverImageUrlSmall = imageResult?.SmallImage;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Failed to process image for volume {volume.GetFullVolumeName()}");
+            return;
+        }
     }
 
     private DateTimeOffset MapReleaseDate(DateTimeOffset? release)
