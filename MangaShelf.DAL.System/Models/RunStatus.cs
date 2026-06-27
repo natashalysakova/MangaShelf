@@ -2,10 +2,10 @@
 
 public enum RunStatus
 {
-    Waiting,
-    GatheringVolumes,
-    Running,
-    Finished,
-    Error,
-    Cancelled
+    Waiting = 0,
+    GatheringVolumes = 1,
+    Running = 2,
+    Finished = 3,
+    Error = 4,
+    Cancelled = 5
 }

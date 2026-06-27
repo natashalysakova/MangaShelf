@@ -171,8 +171,8 @@
 
                         @foreach (var item in context.AddedVolumes.OrderBy(x => x.FullName))
                         {
-                            var url = "/volume/" + item.PublicId;
-                            <MudLink Href="@url">@item.FullName</MudLink>
+                            var addedVolume = "/volume/" + item.PublicId;
+                            <MudLink Href="@addedVolume">@item.FullName</MudLink>
                         }
                     }
                 </MudStack>
@@ -190,8 +190,8 @@
 
                         @foreach (var item in context.UpdatedVolumes.OrderBy(x => x.FullName))
                         {
-                            var url = "/volume/" + item.PublicId;
-                            <MudLink Href="@url">@item.FullName</MudLink>
+                            var updatedVolume = "/volume/" + item.PublicId;
+                            <MudLink Href="@updatedVolume">@item.FullName</MudLink>
                         }
                     }
                 </MudStack>
@@ -213,7 +213,7 @@
     IEnumerable<ParserStatusDto> statuses = null;
     System.DateTimeOffset lastCheckTime;
     private Dictionary<Guid, CancellationToken> jobDictionary = new();
-    int LoadJobs = 20;
+    private const int LoadJobs = 20;
 
     protected override async Task OnInitializedAsync()
     {
@@ -291,6 +291,6 @@
     private async Task ToggleParserState(Guid id)
     {
 
-        await parserService.ToggleParserStatus(id, CancellationToken.None);
+        await parserService.ToggleParserStatus(id, tokenSource.Token);
     }
 }

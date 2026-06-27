@@ -18,5 +18,5 @@ public class ParseVolumeReference
 {
     public Guid VolumeId { get; set; }
     public required string FullName { get; set; }
-    public string PublicId { get; set; }
+    public required string PublicId { get; set; }
 }

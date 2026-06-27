@@ -131,7 +131,7 @@ public class ParseJobManagerService : IParseJobManagerService
 
             var notFinishedProperly = parserStatuses
                 .SelectMany(x => x.Jobs)
-                .Where(r => r.Status == RunStatus.Waiting || r.Status == RunStatus.Running);
+                .Where(r => r.Status == RunStatus.Waiting || r.Status == RunStatus.Running || r.Status == RunStatus.GatheringVolumes);
 
             foreach (var job in notFinishedProperly)
             {
@@ -301,7 +301,7 @@ public class ParseJobManagerService : IParseJobManagerService
         await SetStatusInternal(jobId, RunStatus.Running, volumesToParse.Count(), token);
     }
 
-    public async Task SetStatusInternal(Guid jobId, RunStatus status, int volumesCount = 0, CancellationToken token = default)
+    private async Task SetStatusInternal(Guid jobId, RunStatus status, int volumesCount = 0, CancellationToken token = default)
     {
         using var context = _dbContextFactory.CreateDbContext();
 

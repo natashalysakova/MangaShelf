@@ -168,9 +168,9 @@ public class VolumeInfoParser(
         if (volume.IsPreorder && volume.PreorderStart == null)
             volume.PreorderStart = DateTimeOffset.UtcNow;
 
-        if (!volume.IsPreorder && volume.ReleaseDate > DateTimeOffset.Now)
+        if (!volume.IsPreorder && volume.ReleaseDate > DateTimeOffset.UtcNow)
         {
-            volume.ReleaseDate = DateTimeOffset.Now;
+            volume.ReleaseDate = DateTimeOffset.UtcNow;
         }
     }
 
