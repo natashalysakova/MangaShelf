@@ -138,7 +138,8 @@ public class VolumeInfoParserTests : IDisposable
         Assert.False(volume.IsPreorder);
         Assert.Equal("This is a test volume description.", volume.Description);
         Assert.Equal("https://example.com/volume1", volume.PurchaseUrl);
-        Assert.Equal("images/cover.jpg", volume.CoverImageUrl);
+        Assert.Equal("images/cover_crop.jpg", volume.CoverImageUrl);
+        Assert.Equal("images/cover.jpg", volume.OriginalCoverUrl);
         Assert.Equal("images/small/cover.jpg", volume.CoverImageUrlSmall);
 
         Assert.NotNull(volume.Series);
@@ -1298,7 +1299,8 @@ public class VolumeInfoParserTests : IDisposable
         {
             var vol = await context.Volumes.FirstOrDefaultAsync(v => v.Title == "Cover Test Volume", TestContext.Current.CancellationToken);
             Assert.NotNull(vol);
-            Assert.Equal("images/cover.jpg", vol.CoverImageUrl);
+            Assert.Equal("images/cover.jpg", vol.OriginalCoverUrl);
+            Assert.Equal("images/cover_crop.jpg", vol.CoverImageUrl);
             Assert.Equal("images/small/cover.jpg", vol.CoverImageUrlSmall);
         }
 
