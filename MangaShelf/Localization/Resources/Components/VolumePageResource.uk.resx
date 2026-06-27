@@ -304,7 +304,196 @@
     <value>Редагувати запис</value>
   </data>
   <data name="Readings" xml:space="preserve">
-    <value>Readings</value>
+    <value>Читання</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Повернутися до списку</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Зберегти зміни</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="SeriesDetails" xml:space="preserve">
+    <value>Деталі серії</value>
+  </data>
+  <data name="SeriesOriginalTitle" xml:space="preserve">
+    <value>Оригінальна назва</value>
+  </data>
+  <data name="SeriesStatus" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="SeriesTotalVolumes" xml:space="preserve">
+    <value>Всього томів</value>
+  </data>
+  <data name="SeriesType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="SeriesAuthors" xml:space="preserve">
+    <value>Автори</value>
+  </data>
+  <data name="EditVolume" xml:space="preserve">
+    <value>Редагувати том</value>
+  </data>
+  <data name="VolumeDetails" xml:space="preserve">
+    <value>Деталі тому</value>
+  </data>
+  <data name="VolumeTitle" xml:space="preserve">
+    <value>Назва</value>
+  </data>
+  <data name="SingleIssue" xml:space="preserve">
+    <value>Один випуск</value>
+  </data>
+  <data name="VolumeType" xml:space="preserve">
+    <value>Тип тому</value>
+  </data>
+  <data name="AgeRestriction" xml:space="preserve">
+    <value>Вікове обмеження</value>
+  </data>
+  <data name="VolumeIsbn" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="Publishing" xml:space="preserve">
+    <value>Видавництво</value>
+  </data>
+  <data name="PreorderStart" xml:space="preserve">
+    <value>Початок передзамовлення</value>
+  </data>
+  <data name="ReleaseDate" xml:space="preserve">
+    <value>Дата виходу</value>
+  </data>
+  <data name="FieldsCanBeOverwritten" xml:space="preserve">
+    <value>Поля можуть бути перевизначені парсером</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Посилання</value>
+  </data>
+  <data name="PurchaseUrl" xml:space="preserve">
+    <value>URL для покупки</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Опис</value>
+  </data>
+  <data name="Identifiers" xml:space="preserve">
+    <value>Ідентифікатори</value>
+  </data>
+  <data name="VolumeId" xml:space="preserve">
+    <value>ID тому</value>
+  </data>
+  <data name="VolumePublicId" xml:space="preserve">
+    <value>Публічний ID тому</value>
+  </data>
+  <data name="SeriesId" xml:space="preserve">
+    <value>ID серії</value>
+  </data>
+  <data name="SeriesPublicId" xml:space="preserve">
+    <value>Публічний ID серії</value>
+  </data>
+  <data name="VolumeNotFound" xml:space="preserve">
+    <value>Том не знайдено</value>
+  </data>
+  <data name="ChangesSaved" xml:space="preserve">
+    <value>Зміни збережено</value>
+  </data>
+  <data name="HidePreviews" xml:space="preserve">
+    <value>Сховати прев'ю</value>
+  </data>
+  <data name="ShowPreviews" xml:space="preserve">
+    <value>Показати прев'ю</value>
+  </data>
+  <data name="NothingSelected" xml:space="preserve">
+    <value>Нічого не обрано</value>
+  </data>
+  <data name="OriginalCover" xml:space="preserve">
+    <value>Оригінальна обкладинка</value>
+  </data>
+  <data name="SmallCover" xml:space="preserve">
+    <value>Мала обкладинка</value>
+  </data>
+  <data name="CroppedCover" xml:space="preserve">
+    <value>Обрізана обкладинка</value>
+  </data>
+  <data name="Review" xml:space="preserve">
+    <value>Відгук</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Дата початку</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>Дата завершення</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="CoverImage" xml:space="preserve">
+    <value>Обкладинка</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Обробка</value>
+  </data>
+  <data name="AutoCrop" xml:space="preserve">
+    <value>Авто-обрізка</value>
+  </data>
+  <data name="ManualCrop" xml:space="preserve">
+    <value>Ручна обрізка</value>
+  </data>
+  <data name="ManualCropControls" xml:space="preserve">
+    <value>Керування ручною обрізкою</value>
+  </data>
+  <data name="ImageDimensions" xml:space="preserve">
+    <value>Розміри зображення</value>
+  </data>
+  <data name="Left" xml:space="preserve">
+    <value>Ліворуч</value>
+  </data>
+  <data name="Top" xml:space="preserve">
+    <value>Вгорі</value>
+  </data>
+  <data name="Right" xml:space="preserve">
+    <value>Праворуч</value>
+  </data>
+  <data name="Bottom" xml:space="preserve">
+    <value>Внизу</value>
+  </data>
+  <data name="CropSize" xml:space="preserve">
+    <value>Розмір обрізки</value>
+  </data>
+  <data name="ShowPreviewOverlay" xml:space="preserve">
+    <value>Показати накладання прев'ю</value>
+  </data>
+  <data name="ApplyCrop" xml:space="preserve">
+    <value>Застосувати обрізку</value>
+  </data>
+  <data name="ResetBoundaries" xml:space="preserve">
+    <value>Скинути кордони</value>
+  </data>
+  <data name="CurrentCroppedVersion" xml:space="preserve">
+    <value>Поточна обрізана версія</value>
+  </data>
+  <data name="InvalidCropBoundaries" xml:space="preserve">
+    <value>Неправильні кордони обрізки</value>
+  </data>
+  <data name="CropSuccessful" xml:space="preserve">
+    <value>Обрізку виконано</value>
+  </data>
+  <data name="VolumeReleasedMessage" xml:space="preserve">
+    <value>{title} надійшов у продаж.</value>
+  </data>
+  <data name="PreorderStartedMessage" xml:space="preserve">
+    <value>Розпочато передзамовлення {title}.</value>
+  </data>
+  <data name="ReleaseDateChangedMessage" xml:space="preserve">
+    <value>Дата виходу {title} змінена з {old} на {new}.</value>
+  </data>
+  <data name="VolumeUpdatedMessage" xml:space="preserve">
+    <value>{title} було оновлено.</value>
+  </data>
+  <data name="Unknown Value" xml:space="preserve">
+    <value>невідомо</value>
+  </data>
+  <data name="NoDescrption" xml:space="preserve">
+    <value>Опис відсутній</value>
   </data>
   <data name="UploadVolumeImage" xml:space="preserve">
     <value>Завантажити обкладинку тому</value>

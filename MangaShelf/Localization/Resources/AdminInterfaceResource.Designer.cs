@@ -79,6 +79,15 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Volumes.
+        /// </summary>
+        public static string AdminVolumes {
+            get {
+                return ResourceManager.GetString("AdminVolumes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string Delete {
@@ -97,11 +106,29 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to End Date.
+        /// </summary>
+        public static string End_Date {
+            get {
+                return ResourceManager.GetString("End Date", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Is Deleted.
         /// </summary>
         public static string IsDeleted {
             get {
                 return ResourceManager.GetString("IsDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No updates found for the selected date range..
+        /// </summary>
+        public static string No_updates_found_for_the_selected_date_range_ {
+            get {
+                return ResourceManager.GetString("No updates found for the selected date range.", resourceCulture);
             }
         }
         
@@ -124,6 +151,33 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Published.
+        /// </summary>
+        public static string Published {
+            get {
+                return ResourceManager.GetString("Published", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Range.
+        /// </summary>
+        public static string Range {
+            get {
+                return ResourceManager.GetString("Range", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recent Volume Updates.
+        /// </summary>
+        public static string Recent_Volume_Updates {
+            get {
+                return ResourceManager.GetString("Recent Volume Updates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure you want to remove this volume?.
         /// </summary>
         public static string RemoveVolumeDialogText {
@@ -138,6 +192,33 @@ namespace MangaShelf.Localization.Resources {
         public static string RemoveVolumeDialogTitle {
             get {
                 return ResourceManager.GetString("RemoveVolumeDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        public static string Search {
+            get {
+                return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start Date.
+        /// </summary>
+        public static string Start_Date {
+            get {
+                return ResourceManager.GetString("Start Date", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Title.
+        /// </summary>
+        public static string Title {
+            get {
+                return ResourceManager.GetString("Title", resourceCulture);
             }
         }
         

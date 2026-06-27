@@ -43,7 +43,7 @@
                                    Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.SeriesStatus)">
                             @foreach (var seriesStatus in Enum.GetValues<SeriesStatus>())
                             {
-                                <MudSelectItem Value="@seriesStatus">@seriesStatus</MudSelectItem>
+                                <MudSelectItem Value="@seriesStatus">@Localizer[seriesStatus]</MudSelectItem>
                             }
                         </MudSelect>
                         <MudNumericField T="int?" @bind-Value="Volume.SeriesTotalVolumes" Disabled="Volume.SeriesStatus == SeriesStatus.OneShot"
@@ -54,7 +54,7 @@
                                    Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.SeriesType)">
                             @foreach (var seriesType in Enum.GetValues<SeriesType>())
                             {
-                                <MudSelectItem Value="@seriesType">@seriesType</MudSelectItem>
+                                <MudSelectItem Value="@seriesType">@Localizer[seriesType]</MudSelectItem>
                             }
                         </MudSelect>
                     </MudStack>
@@ -80,13 +80,13 @@
                                        Variant="Variant.Outlined" FullWidth="true" For="@(() => Volume!.Type)">
                                 @foreach (var volumeType in Enum.GetValues<VolumeType>())
                                 {
-                                    <MudSelectItem Value="@volumeType">@volumeType</MudSelectItem>
+                                    <MudSelectItem Value="@volumeType">@Localizer[volumeType]</MudSelectItem>
                                 }
                             </MudSelect>
                             <MudNumericField T="int" @bind-Value="Volume.AgeRestriction"
                                              Label="@Localizer["AgeRestriction"]" Variant="Variant.Outlined" FullWidth="true"
                                              Immediate="true" For="@(() => Volume!.AgeRestriction)" />
-                            <MudTextField @bind-Value="Volume.ISBN" Label="@Localizer["VolumeIsbn"]"
+                            <MudTextField @bind-Value="Volume.ISBN" Label="@Localizer["VolumeIsbn"]" Mask="@(new PatternMask("000-000-0000-00-0"))"
                                           Variant="Variant.Outlined" FullWidth="true" Immediate="true" For="@(() => Volume!.ISBN)" />
 
                         </MudStack>
@@ -108,13 +108,13 @@
                             <MudText Typo="Typo.subtitle1">@Localizer["SeriesAuthors"]</MudText>
                             <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Add"
                                        OnClick="AddAuthor">
-                                Add author
+                                @Localizer["AddAuthor"]
                             </MudButton>
                         </MudStack>
 
                         @if (Volume.SeriesAuthors.Count == 0)
                         {
-                            <MudText Color="Color.Secondary">No authors yet.</MudText>
+                            <MudText Color="Color.Secondary">@Localizer["NoAuthors"]</MudText>
                         }
                         else
                         {

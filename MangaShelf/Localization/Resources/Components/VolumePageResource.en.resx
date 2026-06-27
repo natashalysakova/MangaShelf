@@ -339,4 +339,196 @@
   <data name="CroppedPreview" xml:space="preserve">
     <value>Cropped Preview</value>
   </data>
+  <data name="NoDescrption" xml:space="preserve">
+    <value>No description</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Back to List</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="SeriesDetails" xml:space="preserve">
+    <value>Series Details</value>
+  </data>
+  <data name="SeriesOriginalTitle" xml:space="preserve">
+    <value>Original Title</value>
+  </data>
+  <data name="SeriesStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="SeriesTotalVolumes" xml:space="preserve">
+    <value>Total Volumes</value>
+  </data>
+  <data name="SeriesType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="SeriesAuthors" xml:space="preserve">
+    <value>Authors</value>
+  </data>
+  <data name="EditVolume" xml:space="preserve">
+    <value>Edit Volume</value>
+  </data>
+  <data name="VolumeDetails" xml:space="preserve">
+    <value>Volume Details</value>
+  </data>
+  <data name="VolumeTitle" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="SingleIssue" xml:space="preserve">
+    <value>Single Issue</value>
+  </data>
+  <data name="VolumeType" xml:space="preserve">
+    <value>Volume Type</value>
+  </data>
+  <data name="AgeRestriction" xml:space="preserve">
+    <value>Age Restriction</value>
+  </data>
+  <data name="VolumeIsbn" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="Publishing" xml:space="preserve">
+    <value>Publishing</value>
+  </data>
+  <data name="PreorderStart" xml:space="preserve">
+    <value>Preorder Start</value>
+  </data>
+  <data name="ReleaseDate" xml:space="preserve">
+    <value>Release Date</value>
+  </data>
+  <data name="FieldsCanBeOverwritten" xml:space="preserve">
+    <value>Fields can be overwritten by parser</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Links</value>
+  </data>
+  <data name="PurchaseUrl" xml:space="preserve">
+    <value>Purchase URL</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Identifiers" xml:space="preserve">
+    <value>Identifiers</value>
+  </data>
+  <data name="VolumeId" xml:space="preserve">
+    <value>Volume ID</value>
+  </data>
+  <data name="VolumePublicId" xml:space="preserve">
+    <value>Volume Public ID</value>
+  </data>
+  <data name="SeriesId" xml:space="preserve">
+    <value>Series ID</value>
+  </data>
+  <data name="SeriesPublicId" xml:space="preserve">
+    <value>Series Public ID</value>
+  </data>
+  <data name="VolumeNotFound" xml:space="preserve">
+    <value>Volume not found</value>
+  </data>
+  <data name="ChangesSaved" xml:space="preserve">
+    <value>Changes saved</value>
+  </data>
+  <data name="HidePreviews" xml:space="preserve">
+    <value>Hide Previews</value>
+  </data>
+  <data name="ShowPreviews" xml:space="preserve">
+    <value>Show Previews</value>
+  </data>
+  <data name="NothingSelected" xml:space="preserve">
+    <value>Nothing selected</value>
+  </data>
+  <data name="OriginalCover" xml:space="preserve">
+    <value>Original Cover</value>
+  </data>
+  <data name="SmallCover" xml:space="preserve">
+    <value>Small Cover</value>
+  </data>
+  <data name="CroppedCover" xml:space="preserve">
+    <value>Cropped Cover</value>
+  </data>
+  <data name="Review" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="CoverImage" xml:space="preserve">
+    <value>Cover Image</value>
+  </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Processing</value>
+  </data>
+  <data name="AutoCrop" xml:space="preserve">
+    <value>Auto Crop</value>
+  </data>
+  <data name="ManualCrop" xml:space="preserve">
+    <value>Manual Crop</value>
+  </data>
+  <data name="ManualCropControls" xml:space="preserve">
+    <value>Manual Crop Controls</value>
+  </data>
+  <data name="ImageDimensions" xml:space="preserve">
+    <value>Image Dimensions</value>
+  </data>
+  <data name="Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Top" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="Bottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="CropSize" xml:space="preserve">
+    <value>Crop Size</value>
+  </data>
+  <data name="ShowPreviewOverlay" xml:space="preserve">
+    <value>Show Preview Overlay</value>
+  </data>
+  <data name="ApplyCrop" xml:space="preserve">
+    <value>Apply Crop</value>
+  </data>
+  <data name="ResetBoundaries" xml:space="preserve">
+    <value>Reset Boundaries</value>
+  </data>
+  <data name="CurrentCroppedVersion" xml:space="preserve">
+    <value>Cropped Version</value>
+  </data>
+  <data name="InvalidCropBoundaries" xml:space="preserve">
+    <value>Invalid crop boundaries</value>
+  </data>
+  <data name="CropSuccessful" xml:space="preserve">
+    <value>Crop successful</value>
+  </data>
+  <data name="VolumeReleasedMessage" xml:space="preserve">
+    <value>{title} was released on {date}.</value>
+  </data>
+  <data name="PreorderStartedMessage" xml:space="preserve">
+    <value>Preorders started for {title} on {date}.</value>
+  </data>
+  <data name="ReleaseDateChangedMessage" xml:space="preserve">
+    <value>Release date for {title} changed from {old} to {new}.</value>
+  </data>
+  <data name="VolumeUpdatedMessage" xml:space="preserve">
+    <value>{title} was updated on {date}.</value>
+  </data>
+  <data name="Unknown Value" xml:space="preserve">
+    <value>unknown</value>
+  </data>
+  <data name="PlanToRead" xml:space="preserve">
+    <value>Plan to Read</value>
+  </data>
 </root>
