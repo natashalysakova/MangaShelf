@@ -76,7 +76,7 @@ namespace MangaShelf.Tests
             // Arrange
             using var context = _dbContextFactory.CreateDbContext();
             var parser = new ParserModel { ParserName = "test", Status = ParserStatus.Idle };
-            var job = new ParserJob { Id = Guid.NewGuid(), Status = RunStatus.Waiting, ParserStatus = parser };
+            var job = new ParserJob { Id = Guid.NewGuid(), Status = RunStatus.Waiting, ParserStatus = parser, Type = ParserRunType.FullSite };
             context.Parsers.Add(parser);
             context.Runs.Add(job);
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
