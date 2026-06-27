@@ -1,5 +1,4 @@
 using MangaShelf.Common.Interfaces;
-using MangaShelf.DAL.Models;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MangaShelf.BL.Dto;

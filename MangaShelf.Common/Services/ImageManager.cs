@@ -1,6 +1,5 @@
 using ImageMagick;
 using Microsoft.Extensions.Logging;
-using System.Drawing;
 
 namespace MangaShelf.Common.Interfaces;
 

@@ -8,6 +8,7 @@ public class MangaSystemDbContext : DbContext
 {
     public DbSet<Parser> Parsers { get; set; }
     public DbSet<ParserJob> Runs { get; set; }
+    public DbSet<VolumeReference> VolumeReferences { get; set; }
     public DbSet<Settings> Settings { get; set; }
 
     public DbSet<DataCorrection> DataCorrections { get; set; }
@@ -32,17 +33,14 @@ public class MangaSystemDbContext : DbContext
         }
 
         modelBuilder.Entity<ParserJob>()
-            .Property(e => e.VolumesAdded)
-            .HasConversion(
-                v => string.Join('|', v),
-                v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
+            .HasMany(pj => pj.AddedVolumes)
+            .WithOne(vr => vr.AddedByJob)
+            .HasForeignKey(vr => vr.AddedParserJobId);
 
         modelBuilder.Entity<ParserJob>()
-           .Property(e => e.VolumesUpdated)
-           .HasConversion(
-               v => string.Join('|', v),
-               v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
-
+            .HasMany(pj => pj.UpdatedVolumes)
+            .WithOne(vr => vr.UpdatedByJob)
+            .HasForeignKey(vr => vr.UpdatedParserJobId);
 
         modelBuilder.Entity<Parser>()
             .HasIndex(p => p.ParserName).IsUnique();

@@ -1,11 +1,9 @@
-using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Models;
 using MangaShelf.Parser.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -122,13 +120,13 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
-        var volume = await context.Volumes
+        var volume = context.Volumes
             .Include(v => v.Series)
-            .ThenInclude(s => s!.Authors)
-            .FirstOrDefaultAsync(v => v.Title == "Volume 1", TestContext.Current.CancellationToken);
+                .ThenInclude(s => s.Authors)
+            .FirstOrDefault(v => v.Id == result.VolumeReference.VolumeId);
 
         Assert.NotNull(volume);
         Assert.Equal("Volume 1", volume.Title);
@@ -212,7 +210,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -259,7 +257,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -311,7 +309,7 @@ public class VolumeInfoParserTests : IDisposable
         var afterTest = DateTimeOffset.Now;
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -357,7 +355,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -400,7 +398,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -468,7 +466,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(secondParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var publishers = await context.Publishers
@@ -517,7 +515,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -560,7 +558,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -632,7 +630,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(secondParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var seriesCount = await context.Series
@@ -680,7 +678,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -749,7 +747,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -817,7 +815,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -929,7 +927,7 @@ public class VolumeInfoParserTests : IDisposable
         var afterTest = DateTimeOffset.Now;
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -1066,7 +1064,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert - Since nothing changed, should still be Updated (EF marks it as unchanged but method returns Updated)
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
     }
 
     [Fact]
@@ -1101,7 +1099,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -1145,7 +1143,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -1254,7 +1252,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -1335,7 +1333,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
 
         // Verify image download was NOT called since both cover images already exist
         _imageManagerMock.Verify(x => x.DownloadAndProcessImage(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
@@ -1378,7 +1376,7 @@ public class VolumeInfoParserTests : IDisposable
         var afterTest = DateTimeOffset.Now;
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volume = await context.Volumes
@@ -1448,7 +1446,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(secondParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert - Should create a new volume since title is different
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var volumes = await context.Volumes
@@ -1490,7 +1488,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -1709,7 +1707,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(releasedParsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
 
         using var context2 = _dbContextFactory.CreateDbContext();
         var volume = await context2.Volumes.FirstOrDefaultAsync(v => v.Title == "Was Preorder Volume", TestContext.Current.CancellationToken);
@@ -1752,7 +1750,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var publisher = await context.Publishers
@@ -1795,7 +1793,7 @@ public class VolumeInfoParserTests : IDisposable
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var context = _dbContextFactory.CreateDbContext();
         var series = await context.Series
@@ -1894,7 +1892,7 @@ public class VolumeInfoParserTests : IDisposable
 
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
-        Assert.Equal(State.Added, result);
+        Assert.Equal(State.Added, result.State);
 
         using var assertContext = _dbContextFactory.CreateDbContext();
         var volumes = await assertContext.Volumes
@@ -1992,7 +1990,7 @@ public class VolumeInfoParserTests : IDisposable
 
         var result = await _parserService.Parse(parsedInfo, TestContext.Current.CancellationToken);
 
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
 
         using var assertContext = _dbContextFactory.CreateDbContext();
         var volumes = await assertContext.Volumes
@@ -2066,8 +2064,8 @@ public class VolumeInfoParserTests : IDisposable
 
         var secondResult = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
-        Assert.Equal(State.Added, firstResult);
-        Assert.Equal(State.Updated, secondResult);
+        Assert.Equal(State.Added, firstResult.State);
+        Assert.Equal(State.Updated, secondResult.State);
 
         using var assertContext = _dbContextFactory.CreateDbContext();
         var volumes = await assertContext.Volumes
@@ -2135,7 +2133,7 @@ public class VolumeInfoParserTests : IDisposable
 
         var result = await _parserService.Parse(updatedParsedInfo, TestContext.Current.CancellationToken);
 
-        Assert.Equal(State.Updated, result);
+        Assert.Equal(State.Updated, result.State);
 
         using var assertContext = _dbContextFactory.CreateDbContext();
         var volumes = await assertContext.Volumes

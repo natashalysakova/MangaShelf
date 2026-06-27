@@ -7,7 +7,6 @@ using MangaShelf.DAL.Models;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.Metadata;
 
 namespace MangaShelf.BL.Parsers;
 

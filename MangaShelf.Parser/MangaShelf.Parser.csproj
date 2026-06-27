@@ -17,4 +17,8 @@
     <ProjectReference Include="..\MangaShelf.DAL\MangaShelf.DAL.csproj" />
     <ProjectReference Include="..\MangaShelf.Infrastructure\MangaShelf.Infrastructure.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts\" />
+  </ItemGroup>
 </Project>

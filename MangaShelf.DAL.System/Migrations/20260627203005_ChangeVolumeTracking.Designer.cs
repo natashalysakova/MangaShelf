@@ -4,6 +4,7 @@ using MangaShelf.DAL.System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MangaShelf.DAL.System.Migrations
 {
     [DbContext(typeof(MangaSystemDbContext))]
-    partial class MangaSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627203005_ChangeVolumeTracking")]
+    partial class ChangeVolumeTracking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

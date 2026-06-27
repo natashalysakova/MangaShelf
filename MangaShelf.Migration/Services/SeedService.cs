@@ -1,7 +1,6 @@
 ﻿using MangaShelf.DAL;
 using MangaShelf.DAL.Identity;
 using MangaShelf.DAL.System;
-using MangaShelf.DAL.System.Models;
 using MangaShelf.Infrastructure.Seed;
 using MangaShelf.Migration.DataCorrections;
 using Microsoft.EntityFrameworkCore;

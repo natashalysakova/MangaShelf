@@ -1,6 +1,5 @@
 using MangaShelf.BL.Mappers;
 using MangaShelf.DAL;
-using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MangaShelf.BL.Services;

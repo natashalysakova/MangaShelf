@@ -3,7 +3,6 @@ using MangaShelf.BL.Contracts;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.System.Models;
-using MangaShelf.Parser.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace MangaShelf.Parser.Services;
@@ -15,7 +14,7 @@ public class ParserService : IParseService
     private readonly IParserFactory _parserFactory;
     private readonly IVolumeInfoParser _volumeInfoParser;
     private readonly IVolumeService _volumeService;
-    private readonly IParserJobWriterService _parserWriteService;
+    private readonly IParseJobManagerService _jobManagerService;
     private readonly IParserReadService _parserReadService;
     private readonly ICacheInvalidator _cacheInvalidator;
     private readonly ParserServiceSettings _options;
@@ -26,7 +25,7 @@ public class ParserService : IParseService
         IConfigurationService configurationService,
         IVolumeInfoParser volumeInfoParser,
         IVolumeService volumeService,
-        IParserJobWriterService parserWriteService,
+        IParseJobManagerService jobManagerService,
         IParserReadService parserReadService,
         ICacheInvalidator cacheInvalidator)
     {
@@ -35,7 +34,7 @@ public class ParserService : IParseService
         _parserFactory = parserFactory;
         _volumeInfoParser = volumeInfoParser;
         _volumeService = volumeService;
-        _parserWriteService = parserWriteService;
+        _jobManagerService = jobManagerService;
         _parserReadService = parserReadService;
         _cacheInvalidator = cacheInvalidator;
         _options = configurationService.ParserService;
@@ -44,18 +43,84 @@ public class ParserService : IParseService
     private async Task ParseSite(IPublisherParser parser, Guid jobId, CancellationToken token)
     {
         _logger.LogDebug($"{parser.GetType().Name}: Starting parsing");
+
+        await _jobManagerService.RunJob(jobId, token);
+
+        var volumesToParse = await GetVolumesFromSite(parser, jobId, token);
+
+        if (_options.IgnoreExistingVolumes)
+        {
+            var filtered = await _volumeService.FilterExistingVolumes(volumesToParse, token);
+            volumesToParse = filtered.ToList();
+            _logger.LogDebug($"{volumesToParse.Count()} volumes left after filtering");
+        }
+
+        if(!volumesToParse.Any())
+        {
+            _logger.LogDebug("No volumes to parse, finishing job");
+            await _jobManagerService.SetToFinishedStatus(jobId, token);
+            return;
+        }
+
+        await _jobManagerService.SetToParsingStatus(jobId, volumesToParse, token);
+
+        var progress = 0.0;
+        var step = 100.0 / volumesToParse.Count();
+
+        foreach (var volume in volumesToParse)
+        {
+            if (token.IsCancellationRequested)
+            {
+                _logger.LogInformation("Worker stopping due to cancellation request");
+                throw new OperationCanceledException();
+            }
+
+            var jobStatus = await _parserReadService.GetJobStatusById(jobId, token);
+            if (jobStatus == RunStatus.Cancelled)
+            {
+                _logger.LogInformation("Job was cancelled, stopping parsing");
+                throw new OperationCanceledException();
+            }
+
+            await Task.Delay(_options.DelayBetweenParse, token);
+
+            ParseResult? result = default;
+            try
+            {
+                result = await ParsePageInternal(jobId, volume, parser, token);
+            }
+            catch (JobFailedException ex)
+            {
+                await _jobManagerService.RecordError(jobId, ex.InnerException, ex.Url, token: token);
+            }
+            catch (Exception ex)
+            {
+                await _jobManagerService.RecordError(jobId, ex, volume, token: token);
+            }
+            finally
+            {
+                progress += step;
+                await _jobManagerService.SetProgress(jobId, progress, result, token);
+            }
+        }
+
+        await _jobManagerService.SetToFinishedStatus(jobId, token);
+
+        _logger.LogDebug($"{parser.GetType().Name}: Finished parsing");
+    }
+
+    private async Task<IEnumerable<string>> GetVolumesFromSite(IPublisherParser parser, Guid jobId, CancellationToken token)
+    {
         bool pageExists = true;
         var currentPage = 0;
         var volumesToParse = new List<string>();
-
-        await _parserWriteService.RunJob(jobId, token);
 
         do
         {
             if (token.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker stopping due to cancellation request");
-                return;
+                throw new OperationCanceledException();
             }
 
             string pageUrl = string.Empty;
@@ -73,21 +138,20 @@ public class ParserService : IParseService
             {
                 pageExists = false;
                 _logger.LogInformation($"{parser.GetType().Name}: {ex.Message}");
-                await _parserWriteService.RecordErrorAndStop(jobId, ex, token);
-                break;
+                throw new JobFailedException(pageUrl, ex);
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 pageExists = false;
                 _logger.LogInformation($"{parser.GetType().Name}: Page not found {pageUrl} : {httpEx.Message}");
-                await _parserWriteService.RecordError(jobId, pageUrl, httpEx, token);
+                await _jobManagerService.RecordError(jobId, httpEx, pageUrl, token);
                 break;
             }
             catch (Exception ex)
             {
                 pageExists = false;
                 _logger.LogInformation($"{parser.GetType().Name}: Cannot get volumes from {pageUrl} : {ex.Message}");
-                await _parserWriteService.RecordError(jobId, pageUrl, ex, token);
+                await _jobManagerService.RecordError(jobId, ex, pageUrl, token);
                 break;
             }
 
@@ -99,78 +163,24 @@ public class ParserService : IParseService
                 _logger.LogDebug($"{parser.GetType().Name}: No volumes found on page {pageUrl}, last page reached");
                 break;
             }
-            if(volumes.Except(volumesToParse).Count() == 0)
+            if (volumes.Except(volumesToParse).Count() == 0)
             {
                 pageExists = false;
                 _logger.LogDebug($"{parser.GetType().Name}: No new volumes found on page {pageUrl}, last page reached");
                 break;
-            }   
+            }
 
             volumesToParse.AddRange(volumes);
-
-            var jobStatus = await _parserReadService.GetJobStatusById(jobId, token);
-            if (jobStatus == RunStatus.Cancelled)
-            {
-                _logger.LogInformation("Job was cancelled, stopping parsing");
-                return;
-            }
 
             await Task.Delay(_options.DelayBetweenParse, token);
 
         } while (pageExists);
 
-
-        if (_options.IgnoreExistingVolumes)
-        {
-            var filtered = await _volumeService.FilterExistingVolumes(volumesToParse, token);
-            volumesToParse = filtered.ToList();
-            _logger.LogDebug($"{volumesToParse.Count()} volumes left after filtering");
-        }
-
-        if(volumesToParse.Count == 0)
-        {
-            _logger.LogDebug("No volumes to parse, finishing job");
-            await _parserWriteService.SetToFinishedStatus(jobId, token);
-            return;
-        }
-
-        await _parserWriteService.SetToParsingStatus(jobId, volumesToParse, token);
-        var progress = 0.0;
-        var step = 100.0 / volumesToParse.Count;
-
-        foreach (var volume in volumesToParse)
-        {
-            if (token.IsCancellationRequested)
-            {
-                _logger.LogInformation("Worker stopping due to cancellation request");
-                return;
-            }
-            var jobStatus = await _parserReadService.GetJobStatusById(jobId, token);
-            if (jobStatus == RunStatus.Cancelled)
-            {
-                _logger.LogInformation("Job was cancelled, stopping parsing");
-                return;
-            }
-
-            await Task.Delay(_options.DelayBetweenParse, token);
-
-            var result = await ParsePageInternal(jobId, volume, parser, token);
-
-            progress += step;
-            await _parserWriteService.SetProgress(jobId, progress, volume, result == State.Updated, token);
-        }
-
-        await _parserWriteService.SetToFinishedStatus(jobId, token);
-
-        _logger.LogDebug($"{parser.GetType().Name}: Finished parsing");
+        return volumesToParse;
     }
 
-
-    private async Task<State> ParsePageInternal(Guid jobId, string url, IPublisherParser parser, CancellationToken token)
+    private async Task<ParseResult> ParsePageInternal(Guid jobId, string url, IPublisherParser parser, CancellationToken token)
     {
-        await _parserWriteService.RunSingleJob(jobId);
-        State result = default;
-
         ParsedInfo volumeInfo;
         try
         {
@@ -179,28 +189,30 @@ public class ParserService : IParseService
         }
         catch (Exception ex)
         {
-            await _parserWriteService.RecordError(jobId, url, ex, token: token);
             _logger.LogWarning($"{parser.GetType().Name}: Cannot parse volume {url} : {ex.Message}");
-            return result;
+            throw new JobFailedException(url, ex);
         }
 
         try
         {
-            result = await _volumeInfoParser.Parse(volumeInfo, token);
+            return await _volumeInfoParser.Parse(volumeInfo, token);
         }
         catch (Exception ex)
         {
-            await _parserWriteService.RecordError(jobId, url, volumeInfo.Json, ex, token);
             _logger.LogWarning($"{parser.GetType().Name}: Cannot create volume {volumeInfo.Series} - {volumeInfo.Title}: {ex.Message}");
-            await _parserWriteService.SetSingleJobToErrorStatus(jobId);
-            return result;
+            throw new JobFailedException(volumeInfo.Url, ex);
         }
+    }
 
-        await _parserWriteService.SetSingleJobToFinishedStatus(jobId);
+    private async Task<ParseResult> ParseSinglePage(Guid jobId, string url, IPublisherParser parser, CancellationToken token)
+    {
+        await _jobManagerService.RunJob(jobId, token);
+        ParseResult result = await ParsePageInternal(jobId, url, parser, token);
+        await _jobManagerService.SetToFinishedStatus(jobId, token);
         return result;
     }
 
-    
+
 
     public async Task RunParseJob(Guid jobId, CancellationToken token)
     {
@@ -228,7 +240,7 @@ public class ParserService : IParseService
             {
                 case ParserRunType.SingleUrl:
 
-                    await ParsePageInternal(jobId, job.Url!, parsers, token);
+                    await ParseSinglePage(jobId, job.Url!, parsers, token);
                     break;
                 case ParserRunType.FullSite:
                     await ParseSite(parsers, jobId, token);
@@ -237,9 +249,21 @@ public class ParserService : IParseService
                     break;
             }
         }
+        catch (JobFailedException ex)
+        {
+            _logger.LogError(ex, $"Job {jobId} failed: {ex.Message}");
+            await _jobManagerService.RecordErrorAndStop(jobId, ex.InnerException, ex.Url, token);
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Worker stopping due to cancellation request");
+            await _jobManagerService.SetToCancelledStatus(jobId, token);
+            throw;
+        }
         catch (Exception ex)
         {
-            await _parserWriteService.RecordErrorAndStop(jobId, ex, token);
+            await _jobManagerService.RecordErrorAndStop(jobId, ex, token: token);
             throw;
         }
 

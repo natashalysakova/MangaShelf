@@ -3,6 +3,7 @@
 public enum RunStatus
 {
     Waiting,
+    GatheringVolumes,
     Running,
     Finished,
     Error,

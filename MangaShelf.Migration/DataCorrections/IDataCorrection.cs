@@ -1,6 +1,4 @@
 using MangaShelf.DAL;
-using System.Linq;
-using System.Threading;
 
 namespace MangaShelf.Migration.DataCorrections;
 

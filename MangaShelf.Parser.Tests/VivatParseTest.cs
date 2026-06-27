@@ -1,12 +1,7 @@
-﻿using AngleSharp.Dom;
-using FluentAssertions;
+﻿using FluentAssertions;
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Parsers;
 using MangaShelf.DAL.Models;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MangaShelf.Parser.Tests
 {
