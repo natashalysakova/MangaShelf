@@ -236,6 +236,8 @@ public class ParserService : IParseService
 
         try
         {
+            await CheckParserStatus(job, parsers);
+
             switch (job.Type)
             {
                 case ParserRunType.SingleUrl:
@@ -255,6 +257,12 @@ public class ParserService : IParseService
             await _jobManagerService.RecordErrorAndStop(jobId, ex.InnerException, ex.Url, token);
             throw;
         }
+        catch(ParserDisabledException ex)
+        {
+            _logger.LogError(ex, $"Job {jobId} failed: {ex.Message}");
+            await _jobManagerService.RecordErrorAndStop(jobId, ex, token: token);
+            throw;
+        }
         catch (OperationCanceledException)
         {
             _logger.LogInformation("Worker stopping due to cancellation request");
@@ -269,4 +277,21 @@ public class ParserService : IParseService
 
         await _cacheInvalidator.RebuildCache(token);
     }
+
+    private async Task CheckParserStatus(ParserJob job, IPublisherParser parsers)
+    {
+        var parser = await _parserReadService.GetParserByName(parsers.ParserName);
+
+        if (!parser.IsActive)
+        {
+            throw new ParserDisabledException(parser.ParserName);
+        }
+    }
+}
+
+
+[Serializable]
+public class ParserDisabledException : Exception
+{
+    public ParserDisabledException(string name) : base($"Parser {name} is disabled") { }
 }

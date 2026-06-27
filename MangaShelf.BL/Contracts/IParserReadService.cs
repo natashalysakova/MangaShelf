@@ -11,4 +11,7 @@ public interface IParserReadService : IService
     Task<IEnumerable<ParserJob>> GetNewJobsSince(DateTimeOffset dateTime, CancellationToken token = default);
     Task<ParserJob?> GetJobById(Guid jobId, CancellationToken token = default);
     Task<RunStatus> GetJobStatusById(Guid jobId, CancellationToken token);
+    Task<Parser> GetParserByName(string parserName);
+
+    Task ToggleParserStatus(Guid parserId, CancellationToken token);
 }

@@ -354,6 +354,7 @@ public class ParseJobManagerService : IParseJobManagerService
                 parserStatus.Status = ParserStatus.Idle;
                 run.Finished = DateTimeOffset.Now;
                 run.Progress = 100;
+                parserStatus.NextRun = DateTimeOffset.Now.Add(_options.DelayBetweenRuns);
                 break;
             case RunStatus.Error or RunStatus.Cancelled:
                 parserStatus.Status = ParserStatus.Idle;
