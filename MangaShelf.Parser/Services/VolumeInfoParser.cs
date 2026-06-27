@@ -167,6 +167,11 @@ public class VolumeInfoParser(
 
         if (volume.IsPreorder && volume.PreorderStart == null)
             volume.PreorderStart = DateTimeOffset.UtcNow;
+
+        if (!volume.IsPreorder && volume.ReleaseDate > DateTimeOffset.Now)
+        {
+            volume.ReleaseDate = DateTimeOffset.Now;
+        }
     }
 
     private void UpdateAgeRestriction(ParsedInfo volumeInfo, Volume volume)

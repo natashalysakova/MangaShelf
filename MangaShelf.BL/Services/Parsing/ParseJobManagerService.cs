@@ -321,7 +321,7 @@ public class ParseJobManagerService : IParseJobManagerService
             throw new Exception($"No run found with id {jobId}");
         }
 
-        if (run.Type == ParserRunType.SingleUrl && run.Status == RunStatus.GatheringVolumes)
+        if (run.Type == ParserRunType.SingleUrl && status == RunStatus.GatheringVolumes)
         {
             // skip gathering volumes for single url runs, as we don't gather volumes for single url runs, we just parse the single url directly
             run.Status = RunStatus.Running;
