@@ -1,11 +1,6 @@
 using MangaShelf.BL.Contracts;
-using MangaShelf.BL.Enums;
-using MangaShelf.BL.Services;
-using MangaShelf.BL.Services.Parsing;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.Infrastructure.Installer;
-using MangaShelf.Infrastructure.Network;
-using MangaShelf.Parser.Contracts;
 using MangaShelf.Parser.Services;
 
 namespace MangaShelf.Parser;
@@ -24,7 +19,7 @@ public class Program
 
         var host = builder.Build();
 
-        host.Run();
+        await host.RunAsync();
     }
 }
 
@@ -36,7 +31,6 @@ public static class ParserInstaller
         builder.Services.AddSingleton<IParseJobRunner, ParseJobRunner>();
 
         builder.Services.AddScoped<IParseService, ParserService>();
-        builder.Services.AddScoped<IParserJobWriterService, ParserJobWiriterService>();
         builder.Services.AddScoped<IVolumeInfoParser, VolumeInfoParser>();
 
         var webAppBaseUrl = builder.Configuration["WebApp:BaseUrl"]

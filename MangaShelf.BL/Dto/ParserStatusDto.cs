@@ -11,6 +11,8 @@ public class ParserStatusDto
     public ParserStatus Status { get; set; }
     public double Progress { get; set; }
 
+    public bool IsActive { get; set; }
+
     public DateTimeOffset NextRun { get; set; }
 
     public Guid? RunningJobId { get; set; }

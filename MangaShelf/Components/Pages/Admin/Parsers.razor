@@ -28,7 +28,8 @@
 
                         var color = parser.Status switch
                         {
-                            ParserStatus.Idle => Color.Default,
+                            ParserStatus.Idle when parser.IsActive => Color.Default,
+                            ParserStatus.Idle when !parser.IsActive => Color.Error,
                             ParserStatus.Parsing => Color.Success,
                             ParserStatus.GatheringVolumes => Color.Info,
                             ParserStatus.Waiting => Color.Warning,
@@ -37,8 +38,16 @@
                     }
 
                     <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                        <MudStack Row>
+                            <MudTooltip Text="@(parser.IsActive ? "Disable" : "Enable")">
+                                <MudIconButton OnClick="(() => ToggleParserState(parser.Id))" Size="Size.Small"
+                                               Icon="@(parser.IsActive ? Icons.Material.Rounded.Stop : Icons.Material.Rounded.PlayCircle)"
+                                               Color="@(parser.IsActive ? Color.Error : Color.Success)">
+                                </MudIconButton>
+                            </MudTooltip>
 
-                        <MudText Typo="Typo.h6">@parser.ParserName</MudText>
+                            <MudText Typo="Typo.subtitle1" Color="@(parser.IsActive ? Color.Success : Color.Error)">@parser.ParserName</MudText>
+                        </MudStack>
 
                         <MudText Typo="Typo.h6" Color="@color"> @parser.Status </MudText>
 
@@ -55,7 +64,7 @@
                         else if (parser.Status == ParserStatus.Idle)
                         {
 
-                            <MudIconButton Class="@(parser.Status == ParserStatus.Idle ? "visible" : "hidden")" OnClick="(() => RunParser(parser.Id))" Size="Size.Large" Icon="@Icons.Material.Rounded.PlayArrow" Color="Color.Success"></MudIconButton>
+                            <MudIconButton Class="@(parser.Status == ParserStatus.Idle ? "visible" : "hidden")" OnClick="(() => RunParser(parser.Id))" Size="Size.Large" Icon="@Icons.Material.Rounded.PlayArrow" Color="Color.Success" Disabled="!parser.IsActive"></MudIconButton>
                         }
                         else
                         {
@@ -105,6 +114,7 @@
         color: var(--mud-palette-text-secondary) !important;
     }
 </style>
+<MudButton Variant="Variant.Filled" OnClick="@(() => { showPanel = !showPanel; })">@(showPanel ? "Hide panel" : "Show panel")</MudButton>
 
 <MudTable Items="jobs" Hover="true" Breakpoint="Breakpoint.Sm">
     <HeaderContent>
@@ -149,6 +159,45 @@
             }
         </MudTd>
     </RowTemplate>
+    <ChildRowContent>
+        <MudStack Row Class="m-3">
+
+            @if (context.AddedVolumes.Any())
+            {
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.subtitle1">Added:@context.AddedVolumes.Count</MudText>
+                    @if (showPanel)
+                    {
+
+                        @foreach (var item in context.AddedVolumes.OrderBy(x => x.FullName))
+                        {
+                            var addedVolume = "/volume/" + item.PublicId;
+                            <MudLink Href="@addedVolume">@item.FullName</MudLink>
+                        }
+                    }
+                </MudStack>
+            }
+
+            @if (context.UpdatedVolumes.Any())
+            {
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.subtitle1">Updated:@context.UpdatedVolumes.Count</MudText>
+
+                    @if (showPanel)
+                    {
+
+
+
+                        @foreach (var item in context.UpdatedVolumes.OrderBy(x => x.FullName))
+                        {
+                            var updatedVolume = "/volume/" + item.PublicId;
+                            <MudLink Href="@updatedVolume">@item.FullName</MudLink>
+                        }
+                    }
+                </MudStack>
+            }
+        </MudStack>
+    </ChildRowContent>
 </MudTable>
 
 
@@ -156,17 +205,20 @@
 
 
 @code {
+    bool showPanel = false;
+
     string url = null;
     CancellationTokenSource tokenSource = new();
     IEnumerable<ParserJob> jobs;
     IEnumerable<ParserStatusDto> statuses = null;
     System.DateTimeOffset lastCheckTime;
     private Dictionary<Guid, CancellationToken> jobDictionary = new();
+    private const int LoadJobs = 20;
 
     protected override async Task OnInitializedAsync()
     {
         lastCheckTime = System.DateTimeOffset.Now;
-        jobs = await parserService.GetJobs(100);
+        jobs = await parserService.GetJobs(LoadJobs);
 
         await RunParse();
     }
@@ -182,7 +234,7 @@
             // var result = await parserService.GetNewJobsSince(lastCheckTime, tokenSource.Token);
             // lastCheckTime = System.DateTimeOffset.Now;
 
-            jobs = await parserService.GetJobs(100);
+            jobs = await parserService.GetJobs(LoadJobs);
 
             await Task.Delay(2000);
 
@@ -234,5 +286,11 @@
         {
             await jobManager.CancelJob(id.Value);
         }
+    }
+
+    private async Task ToggleParserState(Guid id)
+    {
+
+        await parserService.ToggleParserStatus(id, tokenSource.Token);
     }
 }

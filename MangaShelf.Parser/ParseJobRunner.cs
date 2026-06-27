@@ -1,6 +1,5 @@
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
-using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
 namespace MangaShelf.Parser;

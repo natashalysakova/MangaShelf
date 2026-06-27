@@ -1,5 +1,4 @@
-﻿using MangaShelf.Common.Helpers;
-using MangaShelf.Common.Interfaces;
+﻿using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Models;
 using MangaShelf.DAL.Interfaces;
 using MangaShelf.DAL.Models;

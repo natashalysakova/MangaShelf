@@ -27,6 +27,8 @@ public class ParserReadService(IDbContextFactory<MangaSystemDbContext> dbContext
         var lastRuns = contex.Runs
             .Include(p => p.ParserStatus)
             .Include(r => r.Errors)
+            .Include(v => v.AddedVolumes)
+            .Include(v => v.UpdatedVolumes)
             .OrderByDescending(r => r.Created)
             .Take(count);
 
@@ -59,13 +61,19 @@ public class ParserReadService(IDbContextFactory<MangaSystemDbContext> dbContext
         return await newRuns.ToListAsync(token);
     }
 
+    public async Task<Parser> GetParserByName(string parserName)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        return await context.Parsers.FirstAsync(x=>x.ParserName == parserName);
+    }
+
     public async Task<IEnumerable<ParserStatusDto>> GetStatusesAsync(CancellationToken token = default)
     {
         using var context = dbContextFactory.CreateDbContext();
         List<ParserStatusDto> parserStatusDtos = new();
 
         var parsers = await context.Parsers
-            .Include(p => p.Jobs.OrderBy(r => r.Created).Where(x=>x.Status == RunStatus.Running))
+            .Include(p => p.Jobs.OrderBy(r => r.Created).Where(x=>x.Status == RunStatus.Running || x.Status == RunStatus.GatheringVolumes))
                 .ThenInclude(r => r.Errors)
             .ToListAsync(token);
 
@@ -75,5 +83,16 @@ public class ParserReadService(IDbContextFactory<MangaSystemDbContext> dbContext
         }
 
         return parserStatusDtos;
+    }
+
+    public async Task ToggleParserStatus(Guid parserId, CancellationToken token)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var parser = await context.Parsers.FirstOrDefaultAsync(p => p.Id == parserId, token);
+        if (parser != null)
+        {
+            parser.IsActive = !parser.IsActive;
+            await context.SaveChangesAsync(token);
+        }
     }
 }

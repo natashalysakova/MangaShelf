@@ -1,6 +1,5 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
-using AngleSharp.Io;
 using MangaShelf.BL.Enums;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;

@@ -10,6 +10,7 @@ using Xunit;
 using Assert = Xunit.Assert;
 
 using ParserModel = MangaShelf.DAL.System.Models.Parser;
+using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Tests;
 
@@ -36,7 +37,9 @@ public class ParserJobManagerServiceTests : IDisposable
             ScheduledJobsEnabled = true
         });
 
-        _service = new ParseJobManagerService(_dbContextFactory, configMock.Object);
+        var logger = new Mock<ILogger<ParseJobManagerService>>().Object;
+
+        _service = new ParseJobManagerService(_dbContextFactory, configMock.Object, logger);
     }
 
     [Fact]

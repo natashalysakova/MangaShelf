@@ -1,5 +1,4 @@
 using MangaShelf.BL.Contracts;
-using MangaShelf.Common.Helpers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Interfaces;
@@ -10,14 +9,17 @@ namespace MangaShelf.Parser.Services;
 
 public interface IVolumeInfoParser
 {
-    Task<State> Parse(ParsedInfo volumeInfo, CancellationToken token = default);
+    Task<ParseResult> Parse(ParsedInfo volumeInfo, CancellationToken token = default);
 }
+
+
+
 public class VolumeInfoParser(
     IDbContextFactory<MangaDbContext> dbContextFactory,
     ILogger<VolumeInfoParser> logger,
     IImageFlow imageFlow) : IVolumeInfoParser
 {
-    public async Task<State> Parse(ParsedInfo volumeInfo, CancellationToken token = default)
+    public async Task<ParseResult> Parse(ParsedInfo volumeInfo, CancellationToken token = default)
     {
         using var context = await dbContextFactory.CreateDbContextAsync();
         var domainContextFactory = new DomainServiceFactory(context);
@@ -33,7 +35,14 @@ public class VolumeInfoParser(
         var result = await domainContextFactory.GetDomainService<IVolumeDomainService>().AddOrUpdate(volume, true, token);
         logger.LogInformation($"{volume.GetFullVolumeName()} {volume.Number} was {result.State}");
 
-        return result.State;
+        var volumeReference = new ParseVolumeReference
+        {
+            VolumeId = result.Entity.Id,
+            FullName = result.Entity.GetFullVolumeName(),
+            PublicId = result.Entity.PublicId,
+        };
+
+        return new ParseResult(volumeReference, result.State);
     }
 
     // Helper methods
@@ -158,6 +167,11 @@ public class VolumeInfoParser(
 
         if (volume.IsPreorder && volume.PreorderStart == null)
             volume.PreorderStart = DateTimeOffset.UtcNow;
+
+        if (!volume.IsPreorder && volume.ReleaseDate > DateTimeOffset.UtcNow)
+        {
+            volume.ReleaseDate = DateTimeOffset.UtcNow;
+        }
     }
 
     private void UpdateAgeRestriction(ParsedInfo volumeInfo, Volume volume)

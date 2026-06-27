@@ -4,16 +4,21 @@ using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Xunit;
 using Assert = Xunit.Assert;
-using MangaShelf.Parser.Services;
 
 using ParserModel = MangaShelf.DAL.System.Models.Parser;
+using MangaShelf.DAL.Models;
+using MangaShelf.Common.Interfaces;
+using MangaShelf.BL.Contracts;
+using MangaShelf.BL.Services.Parsing;
+using Moq;
+using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Tests
 {
     public class ParserWriteServiceTest : IDisposable
     {
         private readonly IDbContextFactory<MangaSystemDbContext> _dbContextFactory;
-        private readonly ParserJobWiriterService _service;
+        private readonly IParseJobManagerService _service;
 
         public ParserWriteServiceTest()
         {
@@ -23,7 +28,9 @@ namespace MangaShelf.Tests
 
             var serviceProvider = services.BuildServiceProvider();
             _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
-            _service = new ParserJobWiriterService(_dbContextFactory);
+            var logger = new Mock<ILogger<ParseJobManagerService>>().Object;
+            var configuration = new Mock<IConfigurationService>().Object;
+            _service = new ParseJobManagerService(_dbContextFactory, configuration, logger);
         }
 
         [Fact]
@@ -33,7 +40,7 @@ namespace MangaShelf.Tests
             using var context = _dbContextFactory.CreateDbContext();
             var run = new ParserJob { Id = Guid.NewGuid(), Status = RunStatus.Running };
             context.Runs.Add(run);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var exception = new Exception("Test exception");
             var url = "https://test.com";
@@ -56,10 +63,10 @@ namespace MangaShelf.Tests
         {
             // Arrange
             var invalidId = Guid.NewGuid();
-            var exception = new Exception("Test exception");
+            var exception = new InvalidOperationException("Test exception");
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() =>
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.RecordError(invalidId, "url", "{}", exception, CancellationToken.None));
         }
 
@@ -69,21 +76,20 @@ namespace MangaShelf.Tests
             // Arrange
             using var context = _dbContextFactory.CreateDbContext();
             var parser = new ParserModel { ParserName = "test", Status = ParserStatus.Idle };
-            var job = new ParserJob { Id = Guid.NewGuid(), Status = RunStatus.Waiting, ParserStatus = parser };
+            var job = new ParserJob { Id = Guid.NewGuid(), Status = RunStatus.Waiting, ParserStatus = parser, Type = ParserRunType.FullSite };
             context.Parsers.Add(parser);
             context.Runs.Add(job);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
-            var result = await _service.RunJob(job.Id, CancellationToken.None);
+            await _service.RunJob(job.Id, CancellationToken.None);
 
             // Assert
-            Assert.True(result);
             using var verifyContext = _dbContextFactory.CreateDbContext();
             var updatedJob = verifyContext.Runs.Include(r => r.ParserStatus).First(r => r.Id == job.Id);
-            Assert.Equal(RunStatus.Running, updatedJob.Status);
+            Assert.Equal(RunStatus.GatheringVolumes, updatedJob.Status);
             Assert.Equal(ParserStatus.GatheringVolumes, updatedJob.ParserStatus.Status);
-            Assert.NotNull(updatedJob.Started);
+            Assert.NotEqual(default, updatedJob.Started);
         }
 
         [Fact]
@@ -95,16 +101,19 @@ namespace MangaShelf.Tests
             var job = new ParserJob { Id = Guid.NewGuid(), Progress = 0, ParserStatus = parser };
             context.Parsers.Add(parser);
             context.Runs.Add(job);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var parseResult = new ParseResult(new ParseVolumeReference() { VolumeId = Guid.NewGuid(), FullName = "Test Volume", PublicId = "TestPublicId" }, State.Added);
+
 
             // Act
-            await _service.SetProgress(job.Id, 50.0, "https://test.com", true, CancellationToken.None);
+            await _service.SetProgress(job.Id, 50.0, parseResult, CancellationToken.None);
 
             // Assert
             using var verifyContext = _dbContextFactory.CreateDbContext();
-            var updatedJob = verifyContext.Runs.First(r => r.Id == job.Id);
+            var updatedJob = verifyContext.Runs.Include(r => r.AddedVolumes).First(r => r.Id == job.Id);
             Assert.Equal(50.0, updatedJob.Progress);
-            Assert.Contains("https://test.com", updatedJob.VolumesUpdated);
+            Assert.Contains(parseResult.VolumeReference.VolumeId, updatedJob.AddedVolumes.Select(v => v.VolumeId));
         }
 
         public void Dispose()

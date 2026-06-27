@@ -1,7 +1,6 @@
 ﻿using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Dto;
 using MangaShelf.DAL.Models;
-using Pomelo.EntityFrameworkCore.MySql.Query.ExpressionVisitors.Internal;
 using Riok.Mapperly.Abstractions;
 
 namespace MangaShelf.BL.Mappers;

@@ -8,5 +8,7 @@ public class Parser : IEntity
     public string ParserName { get; set; } = null!;
     public DateTimeOffset NextRun { get; set; }
     public ParserStatus Status { get; set; }
+
+    public bool IsActive { get; set; }
     public virtual ICollection<ParserJob> Jobs { get; set; } = new List<ParserJob>();
 }

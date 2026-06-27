@@ -1,10 +1,11 @@
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
+using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections;
+using Microsoft.Extensions.Logging;
 using ParserModel = MangaShelf.DAL.System.Models.Parser;
 
 namespace MangaShelf.BL.Services.Parsing;
@@ -12,11 +13,16 @@ namespace MangaShelf.BL.Services.Parsing;
 public class ParseJobManagerService : IParseJobManagerService
 {
     private readonly IDbContextFactory<MangaSystemDbContext> _dbContextFactory;
+    private readonly ILogger<ParseJobManagerService> _logger;
     private readonly JobManagerSettings _options;
 
-    public ParseJobManagerService(IDbContextFactory<MangaSystemDbContext> dbContextFactory, IConfigurationService configurationService)
+    public ParseJobManagerService(
+        IDbContextFactory<MangaSystemDbContext> dbContextFactory,
+        IConfigurationService configurationService,
+        ILogger<ParseJobManagerService> logger)
     {
         _dbContextFactory = dbContextFactory;
+        _logger = logger;
         _options = configurationService.JobManager;
     }
 
@@ -115,7 +121,7 @@ public class ParseJobManagerService : IParseJobManagerService
         await context.SaveChangesAsync(token);
     }
 
-    private  async Task ResetStuckJobs(MangaSystemDbContext context)
+    private async Task ResetStuckJobs(MangaSystemDbContext context)
     {
         try
         {
@@ -125,7 +131,7 @@ public class ParseJobManagerService : IParseJobManagerService
 
             var notFinishedProperly = parserStatuses
                 .SelectMany(x => x.Jobs)
-                .Where(r => r.Status == RunStatus.Waiting || r.Status == RunStatus.Running);
+                .Where(r => r.Status == RunStatus.Waiting || r.Status == RunStatus.Running || r.Status == RunStatus.GatheringVolumes);
 
             foreach (var job in notFinishedProperly)
             {
@@ -182,5 +188,188 @@ public class ParseJobManagerService : IParseJobManagerService
             Type = parserRunType,
             Url = url
         };
+    }
+
+    public async Task RecordError(Guid jobId, Exception exception, string? url = null, CancellationToken token = default)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+
+        var run = context.Runs
+            .Include(x => x.ParserStatus)
+            .Single(r => r.Id == jobId);
+
+        run.Errors.Add(new ParserError
+        {
+            Url = url,
+            ExceptionMessage = exception.Message,
+            StackTrace = exception.StackTrace,
+            RunTime = DateTimeOffset.Now
+        });
+
+        await context.SaveChangesAsync(token);
+    }
+
+    public async Task RecordError(Guid jobId, string url, string json, Exception exception, CancellationToken token = default)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+
+        var run = context.Runs.Single(r => r.Id == jobId);
+
+        run.Errors.Add(new ParserError
+        {
+            Url = url,
+            VolumeJson = json,
+            ExceptionMessage = exception?.Message,
+            StackTrace = exception?.StackTrace,
+            RunTime = DateTimeOffset.Now
+        });
+
+        await context.SaveChangesAsync(token);
+    }
+
+    public async Task RecordErrorAndStop(Guid jobId, Exception exception, string? url = null, CancellationToken token = default)
+    {
+        await RecordError(jobId, exception, url, token);
+        await SetToErrorStatus(jobId, token);
+    }
+
+    public async Task SetProgress(Guid runId, double progress, ParseResult? result, CancellationToken token)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+
+        var parserStatus = context.Parsers
+            .Include(ps => ps.Jobs)
+                .ThenInclude(r => r.Errors)
+            .FirstOrDefault(ps => ps.Jobs.Any(r => r.Id == runId));
+
+        if (parserStatus == null)
+        {
+            throw new Exception($"No parser status found for run id {runId}");
+        }
+
+        var run = parserStatus.Jobs.FirstOrDefault(r => r.Id == runId);
+        if (run == null)
+        {
+            throw new Exception($"No run found with id {runId}");
+        }
+
+        run.Progress = progress;
+
+        if (result != null)
+        {
+            var volumeReference = new VolumeReference
+            {
+                VolumeId = result.VolumeReference.VolumeId,
+                FullName = result.VolumeReference.FullName,
+                PublicId = result.VolumeReference.PublicId,
+            };
+
+            if (result.State == State.Added)
+            {
+                volumeReference.AddedParserJobId = run.Id;
+                run.AddedVolumes.Add(volumeReference);
+            }
+            else if (result.State == State.Updated)
+            {
+                volumeReference.UpdatedParserJobId = run.Id;
+                run.UpdatedVolumes.Add(volumeReference);
+            }
+        }
+
+        context.Entry(run).State = EntityState.Modified;
+
+        await context.SaveChangesAsync(token);
+    }
+
+    public async Task SetToFinishedStatus(Guid jobId, CancellationToken token = default)
+    {
+        await SetStatusInternal(jobId, RunStatus.Finished, token: token);
+    }
+
+    public async Task SetToErrorStatus(Guid jobId, CancellationToken token = default)
+    {
+        await SetStatusInternal(jobId, RunStatus.Error, token: token);
+    }
+
+    public async Task SetToCancelledStatus(Guid jobId, CancellationToken token)
+    {
+        await SetStatusInternal(jobId, RunStatus.Cancelled, token: token);
+    }
+
+    public async Task SetToParsingStatus(Guid jobId, IEnumerable<string> volumesToParse, CancellationToken token = default)
+    {
+        await SetStatusInternal(jobId, RunStatus.Running, volumesToParse.Count(), token);
+    }
+
+    private async Task SetStatusInternal(Guid jobId, RunStatus status, int volumesCount = 0, CancellationToken token = default)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+
+        var parserStatus = context.Parsers
+            .Include(ps => ps.Jobs)
+                .ThenInclude(r => r.Errors)
+            .FirstOrDefault(ps => ps.Jobs.Any(r => r.Id == jobId));
+
+        if (parserStatus == null)
+        {
+            throw new Exception($"No parser status found for run id {jobId}");
+        }
+
+        var run = parserStatus.Jobs.FirstOrDefault(r => r.Id == jobId);
+        if (run == null)
+        {
+            throw new Exception($"No run found with id {jobId}");
+        }
+
+        if (run.Type == ParserRunType.SingleUrl && status == RunStatus.GatheringVolumes)
+        {
+            // skip gathering volumes for single url runs, as we don't gather volumes for single url runs, we just parse the single url directly
+            run.Status = RunStatus.Running;
+        }
+        else
+        {
+            run.Status = status;
+        }
+
+        switch (status)
+        {
+            case RunStatus.Waiting:
+                break;
+            case RunStatus.GatheringVolumes:
+                parserStatus.Status = ParserStatus.GatheringVolumes;
+                run.Started = DateTimeOffset.Now;
+                run.Progress = 0;
+                break;
+            case RunStatus.Running when run.Type == ParserRunType.FullSite:
+                parserStatus.Status = ParserStatus.Parsing;
+                run.VolumesFound = volumesCount;
+                break;
+            case RunStatus.Running when run.Type == ParserRunType.SingleUrl:
+                parserStatus.Status = ParserStatus.Parsing;
+                run.Progress = 0;
+                run.Started = DateTimeOffset.Now;
+                run.VolumesFound = 1;
+                break;
+            case RunStatus.Finished:
+                parserStatus.Status = ParserStatus.Idle;
+                run.Finished = DateTimeOffset.Now;
+                run.Progress = 100;
+                parserStatus.NextRun = DateTimeOffset.Now.Add(_options.DelayBetweenRuns);
+                break;
+            case RunStatus.Error or RunStatus.Cancelled:
+                parserStatus.Status = ParserStatus.Idle;
+                run.Finished = DateTimeOffset.Now;
+                run.Progress = -1;
+                break;
+            default:
+                break;
+        }
+
+        await context.SaveChangesAsync(token);
+    }
+
+    public async Task RunJob(Guid jobId, CancellationToken token = default)
+    {
+        await SetStatusInternal(jobId, RunStatus.GatheringVolumes, token: token);
     }
 }
