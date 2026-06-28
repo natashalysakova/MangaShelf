@@ -222,7 +222,7 @@ public class ParserService : IParseService
             throw new InvalidOperationException($"Job {jobId} not found");
         }
 
-        if(job.Status == RunStatus.Cancelled)
+        if(job.Status is not RunStatus.Waiting)
         {
             return;
         }
