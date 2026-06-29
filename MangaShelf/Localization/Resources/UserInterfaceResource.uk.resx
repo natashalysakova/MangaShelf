@@ -553,4 +553,16 @@
     <value>Тип тому</value>
     <comment/>
   </data>
+  <data name="LengthError" xml:space="preserve">
+    <value>Поле {0} Повинно бути від {2} до {1} символів.</value>
+    <comment/>
+  </data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve">
+    <value>Паролі не співпадають.</value>
+    <comment/>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Не валідна email адреса</value>
+    <comment/>
+  </data>
 </root>

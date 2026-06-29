@@ -2,9 +2,9 @@
 @if (!string.IsNullOrEmpty(DisplayMessage))
 {
     var statusMessageClass = DisplayMessage.StartsWith("Error") ? "danger" : "success";
-    <div class="alert alert-danger" role="alert">
+    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Elevation="0" Dense="true" Class="p-1">
         @DisplayMessage
-    </div>
+    </MudAlert>
 }
 
 @code {

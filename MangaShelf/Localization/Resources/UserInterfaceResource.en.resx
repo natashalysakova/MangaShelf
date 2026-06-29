@@ -553,4 +553,16 @@
     <value>Volume Type</value>
     <comment/>
   </data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve">
+    <value>Passwords do not match</value>
+    <comment/>
+  </data>
+  <data name="LengthError" xml:space="preserve">
+    <value>The {0} must be at least {2} and at max {1} characters long.</value>
+    <comment/>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Invalid e-mail address</value>
+    <comment/>
+  </data>
 </root>

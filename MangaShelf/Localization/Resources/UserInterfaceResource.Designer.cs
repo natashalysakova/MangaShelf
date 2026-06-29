@@ -77,6 +77,33 @@ namespace MangaShelf.Localization.Resources {
                 return ResourceManager.GetString("All", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Already have an account?.
+        /// </summary>
+        public static string AlreadyHaveAnAccount {
+            get {
+                return ResourceManager.GetString("AlreadyHaveAnAccount", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm password.
+        /// </summary>
+        public static string ConfirmPassword {
+            get {
+                return ResourceManager.GetString("ConfirmPassword", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Create a new account.
+        /// </summary>
+        public static string CreateANewAccount {
+            get {
+                return ResourceManager.GetString("CreateANewAccount", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to {count} days.
@@ -84,6 +111,15 @@ namespace MangaShelf.Localization.Resources {
         public static string Days {
             get {
                 return ResourceManager.GetString("Days", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Don't have an account?.
+        /// </summary>
+        public static string DontHaveAnAccount {
+            get {
+                return ResourceManager.GetString("DontHaveAnAccount", resourceCulture);
             }
         }
         
@@ -122,6 +158,15 @@ namespace MangaShelf.Localization.Resources {
                 return ResourceManager.GetString("ErrorLoadingReading", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string Email {
+            get {
+                return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to {count} days.
@@ -140,6 +185,15 @@ namespace MangaShelf.Localization.Resources {
                 return ResourceManager.GetString("Filter", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Forgot password?.
+        /// </summary>
+        public static string ForgotPassword {
+            get {
+                return ResourceManager.GetString("ForgotPassword", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Home.
@@ -147,6 +201,33 @@ namespace MangaShelf.Localization.Resources {
         public static string Home {
             get {
                 return ResourceManager.GetString("Home", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        public static string Login {
+            get {
+                return ResourceManager.GetString("Login", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Login here.
+        /// </summary>
+        public static string LoginHere {
+            get {
+                return ResourceManager.GetString("LoginHere", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Login with your account.
+        /// </summary>
+        public static string LoginWithYourAccount {
+            get {
+                return ResourceManager.GetString("LoginWithYourAccount", resourceCulture);
             }
         }
         
@@ -248,6 +329,15 @@ namespace MangaShelf.Localization.Resources {
                 return ResourceManager.GetString("Own", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string Password {
+            get {
+                return ResourceManager.GetString("Password", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Popularity.
@@ -338,6 +428,24 @@ namespace MangaShelf.Localization.Resources {
                 return ResourceManager.GetString("Released", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Register.
+        /// </summary>
+        public static string Register {
+            get {
+                return ResourceManager.GetString("Register", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Register here.
+        /// </summary>
+        public static string RegisterHere {
+            get {
+                return ResourceManager.GetString("RegisterHere", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Reset.
@@ -363,6 +471,33 @@ namespace MangaShelf.Localization.Resources {
         public static string Search {
             get {
                 return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        public static string Username {
+            get {
+                return ResourceManager.GetString("Username", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} must be at least {2} and at max {1} characters long..
+        /// </summary>
+        public static string LengthError {
+            get {
+                return ResourceManager.GetString("LengthError", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Passwords do not match.
+        /// </summary>
+        public static string PasswordsDoNotMatch {
+            get {
+                return ResourceManager.GetString("PasswordsDoNotMatch", resourceCulture);
             }
         }
         
@@ -399,6 +534,12 @@ namespace MangaShelf.Localization.Resources {
         public static string Wishlist {
             get {
                 return ResourceManager.GetString("Wishlist", resourceCulture);
+            }
+        }
+
+        public static string InvalidEmail {
+            get {
+                return ResourceManager.GetString("InvalidEmail", resourceCulture);
             }
         }
     }

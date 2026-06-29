@@ -5,6 +5,9 @@ using MangaShelf.Components.Account;
 using MangaShelf.Extentions;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Installer;
+using MangaShelf.Localization.Interfaces;
+using MangaShelf.Localization.Resources;
+using MangaShelf.Localization.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MudBlazor.Services;
 
@@ -38,7 +41,11 @@ public class Program
                 options.Cookie.MaxAge = TimeSpan.FromHours(24);
             });
         
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddDataAnnotationsLocalization(options =>
+        {
+            options.DataAnnotationLocalizerProvider = (type, factory) =>
+                factory.Create(typeof(UserInterfaceLocalizationService));
+        });
         builder.Services.AddMudServices();
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -61,19 +68,19 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
 
-        builder.Services.AddHttpClient<IAuthClient, AuthClient>(client =>
-        {
-            if(builder.Environment.IsDevelopment())
-            {
-                client.BaseAddress = new Uri("http://localhost:5090/");
-            }
-            else
-            {
-                var webAppBaseUrl = builder.Configuration["WebApp:BaseUrl"]
-                    ?? throw new InvalidOperationException("WebApp:BaseUrl is not configured.");
-                client.BaseAddress = new Uri(webAppBaseUrl);
-            }
-        });
+        // builder.Services.AddHttpClient<IAuthClient, AuthClient>(client =>
+        // {
+        //     if(builder.Environment.IsDevelopment())
+        //     {
+        //         client.BaseAddress = new Uri("http://localhost:5090/");
+        //     }
+        //     else
+        //     {
+        //         var webAppBaseUrl = builder.Configuration["WebApp:BaseUrl"]
+        //             ?? throw new InvalidOperationException("WebApp:BaseUrl is not configured.");
+        //         client.BaseAddress = new Uri(webAppBaseUrl);
+        //     }
+        // });
 
         if (builder.Environment.IsDevelopment())
         {

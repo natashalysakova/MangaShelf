@@ -2,8 +2,8 @@ using MangaShelf.DAL.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MangaShelf.BL.Contracts;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http.HttpResults;
+using MangaShelf.Localization.Interfaces;
+using MangaShelf.Controllers.Models;
 
 namespace MangaShelf.Controllers;
 
@@ -15,19 +15,22 @@ public class AuthController : Controller
     private readonly SignInManager<MangaIdentityUser> signInManager;
     private readonly IUserService userService;
     private readonly ILogger<AuthController> logger;
+    private readonly IUiLocalizationService localizer;
 
     public AuthController(
         IUserStore<MangaIdentityUser> userStore,
         UserManager<MangaIdentityUser> userManager,
         SignInManager<MangaIdentityUser> signInManager,
         IUserService userService,
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger,
+        IUiLocalizationService localizer)
     {
-                this.userStore = userStore;
+        this.userStore = userStore;
         this.userManager = userManager;
         this.signInManager = signInManager;
         this.userService = userService;
         this.logger = logger;
+        this.localizer = localizer;
     }
     [HttpPost]
     public async Task<IActionResult> Login(string username, string password, bool rememberMe, string? returnUrl = null)
@@ -52,7 +55,9 @@ public class AuthController : Controller
             return Redirect(returnUrl);
         }
         // Redirect back to login with error
-        return Redirect("/Account/Login?error=Invalid login attempt");
+
+        var errorMessage = localizer["Invalid login attempt"];
+        return Redirect($"/Account/Login?error={Uri.EscapeDataString(errorMessage)}");
     }
 
     [HttpPost]
@@ -69,7 +74,7 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register([FromForm] InputModel model, string? returnUrl = null)
+    public async Task<IActionResult> Register([FromForm] RegisterInputModel model, string? returnUrl = null)
     {
         var user = CreateUser();
         await userStore.SetUserNameAsync(user, model.Username, CancellationToken.None);
@@ -93,11 +98,14 @@ public class AuthController : Controller
 
 
         await signInManager.SignInAsync(user, isPersistent: true);
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            return RedirectToUrl(returnUrl);
+            var errorMessage = localizer["Invalid registration attempt"];
+            return Redirect($"/Account/Register?error={Uri.EscapeDataString(errorMessage)}&returnUrl={Uri.EscapeDataString(returnUrl ?? "/")}");
         }
-        return Redirect($"/Account/Register?error={Uri.EscapeDataString("Invalid registration attempt")}&returnUrl={Uri.EscapeDataString(returnUrl ?? "/")}");
+
+        return RedirectToUrl(returnUrl);
+
     }
 
     private IActionResult RedirectToUrl(string? returnUrl)
@@ -131,28 +139,4 @@ public class AuthController : Controller
         }
         return (IUserEmailStore<MangaIdentityUser>)userStore;
     }
-}
-
-public sealed class InputModel
-{
-    [Required]
-    [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
-    [Display(Name = "Username")]
-    public string Username { get; set; } = "";
-
-    [Required]
-    [EmailAddress]
-    [Display(Name = "Email")]
-    public string Email { get; set; } = "";
-
-    [Required]
-    [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-    [DataType(DataType.Password)]
-    [Display(Name = "Password")]
-    public string Password { get; set; } = "";
-
-    [DataType(DataType.Password)]
-    [Display(Name = "Confirm password")]
-    [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-    public string ConfirmPassword { get; set; } = "";
 }

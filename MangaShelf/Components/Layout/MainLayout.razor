@@ -20,18 +20,18 @@
         <NavMenu />
     </MudAppBar>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="catalog-container">
-            <MudPaper Width="100%" Square="true" Class="catalog-paper">
+        <MudContainer MaxWidth="MaxWidth.Large" >
+            <MudPaper Width="100%" Square="true" Class="catalog-paper" MinHeight="calc(100vh - 64px - 48px)">
                 @Body
             </MudPaper>
         </MudContainer>
-
         <MudScrollToTop>
             <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
         </MudScrollToTop>
-        <MudAppBar Elevation="0" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
-            <MudStack Row AlignItems="AlignItems.Center">
+        <MudAppBar Elevation="1" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="px-3 w-100">
                 <MudText Style="font-size:small">COPYRIGHT</MudText>
+                <MudSpacer />
                 <CultureSelector />
             </MudStack>
         </MudAppBar>

@@ -4,19 +4,28 @@
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 
-<p>
-    <MudSelect T="CultureInfo" @bind-Value="selectedCulture"
+@* <MudSelect T="CultureInfo" @bind-Value="selectedCulture"
                SelectedValuesChanged="ApplySelectedCultureAsync"
-               AdornmentIcon="fa-solid fa-globe" Adornment="Adornment.None"
+               Adornment="Adornment.None"
                Variant="Variant.Outlined" FullWidth="false" AutoFocus="false">
         @foreach (var culture in LocalizationService.SupportedCultures)
         {
             var countryCode = new RegionInfo(culture.Name).TwoLetterISORegionName;
             var url = $"https://flagcdn.com/{countryCode.ToLower()}.svg";
-            <MudSelectItem Value="culture"><img src="@url" width="30" /></MudSelectItem>
+            <MudSelectItem Value="culture"><img src="@url" width="20" /></MudSelectItem>
         }
-    </MudSelect>
-</p>
+    </MudSelect>  *@
+<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="m-0 p-0">
+    <MudIcon 
+        Icon="@Icons.Material.Filled.Language" Color="Color.Primary"
+        Size="Size.Medium" Class="m-0 p-0" />
+    @foreach (var culture in LocalizationService.SupportedCultures)
+    {
+        <MudButton OnClick="@(async () => { selectedCulture = culture; await ApplySelectedCultureAsync(); })" Color="Color.Inherit" Variant="Variant.Text" Class="m-0 p-0">
+            @culture.TwoLetterISOLanguageName
+        </MudButton>
+    }
+</MudStack>
 
 @code
 {
