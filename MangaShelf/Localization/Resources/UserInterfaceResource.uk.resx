@@ -565,4 +565,60 @@
     <value>Не валідна email адреса</value>
     <comment/>
   </data>
+  <data name="CreateANewAccount" xml:space="preserve">
+    <value>Створити новий акаунт</value>
+    <comment/>
+  </data>
+  <data name="AlreadyHaveAnAccount" xml:space="preserve">
+    <value>Вже маєте акаунт?</value>
+    <comment/>
+  </data>
+  <data name="LoginHere" xml:space="preserve">
+    <value>Увійти тут</value>
+    <comment/>
+  </data>
+  <data name="LoginWithYourAccount" xml:space="preserve">
+    <value>Увійдіть у свій акаунт</value>
+    <comment/>
+  </data>
+  <data name="DontHaveAnAccount" xml:space="preserve">
+    <value>Не маєте акаунта?</value>
+    <comment/>
+  </data>
+  <data name="RegisterHere" xml:space="preserve">
+    <value>Зареєструйтеся тут</value>
+    <comment/>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Забули пароль?</value>
+    <comment/>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Ім'я користувача</value>
+    <comment/>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Електронна пошта</value>
+    <comment/>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Пароль</value>
+    <comment/>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Підтвердження пароля</value>
+    <comment/>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Зареєструватися</value>
+    <comment/>
+  </data>
+  <data name="RequiredField" xml:space="preserve">
+    <value>Поле {0} є обов'язковим.</value>
+    <comment/>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Помилка</value>
+    <comment/>
+  </data>
 </root>

@@ -59,7 +59,7 @@ private string? Error { get; set; }
 
 private RegisterInputModel Input { get; set; } = new();
 
-private string? Message => Error is null ? null : $"Error: {Error}";
+private string? Message => Error is null ? null : $"{Localizer["Error"]}: {Error}";
 
 protected override void OnInitialized()
 {
