@@ -18,9 +18,12 @@
             <MudStack Spacing="3" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
                 <MudTextField @bind-Value="Input.Username" id="Input.Username" autocomplete="username"
                               aria-required="true" FullWidth="true" Label="@Localizer["Username"]"
+                              AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.Start"
                               For="@(() => Input.Username)" />
                 <MudTextField @bind-Value="Input.Password" id="Input.Password" type="password"
-                              autocomplete="new-password" aria-required="true" FullWidth="true" Label="@Localizer["Password"]"
+                              autocomplete="new-password" aria-required="true" FullWidth="true" 
+                              Label="@Localizer["Password"]" 
+                              AdornmentIcon="@Icons.Material.Filled.Key" Adornment="Adornment.Start"
                               InputType="InputType.Password" For="@(() => Input.Password)" />
                 <MudText Typo="Typo.subtitle1">
                     <MudLink Href="/Account/ForgotPassword">@Localizer["ForgotPassword"]</MudLink>

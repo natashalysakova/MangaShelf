@@ -41,7 +41,7 @@
         if (CultureInfo.CurrentCulture != selectedCulture)
         {
             var uri = new Uri(Navigation.Uri)
-                .GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+                .GetComponents(UriComponents.PathAndQuery, UriFormat.UriEscaped);
             var cultureEscaped = Uri.EscapeDataString(selectedCulture.Name);
             var uriEscaped = Uri.EscapeDataString(uri);
 

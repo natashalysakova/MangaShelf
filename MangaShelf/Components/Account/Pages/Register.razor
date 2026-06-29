@@ -21,18 +21,22 @@
             <MudTextField @bind-Value="Input.Username" id="Input.Username" autocomplete="username"
                             aria-required="true" FullWidth="true"
                             Label="@Localizer["Username"]" 
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"
                             For="@(() => Input.Username)" />
             <MudTextField @bind-Value="Input.Email" id="Input.Email" autocomplete="email"
                             aria-required="true" FullWidth="true"
                             Label="@Localizer["Email"]" 
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email"
                             For="@(() => Input.Email)" />
             <MudTextField @bind-Value="Input.Password" id="Input.Password" type="password"
                             autocomplete="new-password" aria-required="true" FullWidth="true"
                             Label="@Localizer["Password"]" InputType="InputType.Password"
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Key"
                             For="@(() => Input.Password)" />
             <MudTextField @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" type="password"
                             autocomplete="new-password" aria-required="true" FullWidth="true"
                             Label="@Localizer["ConfirmPassword"]" InputType="InputType.Password"  
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Check"
                             For="@(() => Input.ConfirmPassword)"  />
             <MudButton ButtonType="ButtonType.Submit" 
                 Size="Size.Large" Color="Color.Primary" 
