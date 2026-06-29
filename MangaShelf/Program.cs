@@ -61,6 +61,20 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
 
+        builder.Services.AddHttpClient<IAuthClient, AuthClient>(client =>
+        {
+            if(builder.Environment.IsDevelopment())
+            {
+                client.BaseAddress = new Uri("http://localhost:5090/");
+            }
+            else
+            {
+                var webAppBaseUrl = builder.Configuration["WebApp:BaseUrl"]
+                    ?? throw new InvalidOperationException("WebApp:BaseUrl is not configured.");
+                client.BaseAddress = new Uri(webAppBaseUrl);
+            }
+        });
+
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
