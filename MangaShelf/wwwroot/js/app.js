@@ -22,3 +22,10 @@
 
     window.scrollTo({ top, behavior: 'smooth' });
 };
+
+window.submitFormById = (id) => {
+    const form = document.getElementById(id);
+    if (!form) return;
+
+    form.submit();
+};

@@ -46,8 +46,19 @@ class AuthClient : IAuthClient
 
     public async Task<ApiResponse<UserDto>> RegisterAsync(InputModel model, string? returnUrl = null)
     {
-        var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(model), System.Text.Encoding.UTF8, "application/json");
-        var response = await httpClient.PostAsync($"Auth/Register", content);
+        var fields = new List<KeyValuePair<string, string>>
+        {
+            new(nameof(model.Username), model.Username),
+            new(nameof(model.Email), model.Email),
+            new(nameof(model.Password), model.Password),
+            new(nameof(model.ConfirmPassword), model.ConfirmPassword)
+        };
+
+        var requestUri = string.IsNullOrWhiteSpace(returnUrl)
+            ? "Auth/Register"
+            : $"Auth/Register?returnUrl={Uri.EscapeDataString(returnUrl)}";
+
+        var response = await httpClient.PostAsync(requestUri, new FormUrlEncodedContent(fields));
 
         return await HandleErrorResponse<UserDto>(response);
     }
@@ -56,13 +67,12 @@ class AuthClient : IAuthClient
     {
         if (!response.IsSuccessStatusCode)
         {
-            var errorContent = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+            var errorContent = await response.Content.ReadFromJsonAsync<IEnumerable<string>>()
+                ?? new[] { await response.Content.ReadAsStringAsync() };
             return ApiResponse<T>.Fail(errorContent);
         }
 
-        var responseData = await response.Content.ReadAsStringAsync();
-        var data = System.Text.Json.JsonSerializer.Deserialize<T>(responseData);
-        return ApiResponse<T>.Success(data);
+        return ApiResponse<T>.Success(default!);
     }
 }
 

@@ -97,8 +97,6 @@ public class AuthController : Controller
         {
             return RedirectToUrl(returnUrl);
         }
-        // Redirect back to login with error
-        
         return Redirect($"/Account/Register?error={Uri.EscapeDataString("Invalid registration attempt")}&returnUrl={Uri.EscapeDataString(returnUrl ?? "/")}");
     }
 
