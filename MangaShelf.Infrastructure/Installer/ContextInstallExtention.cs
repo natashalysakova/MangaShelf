@@ -44,7 +44,8 @@ public static class ContextInstallExtention
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<MangaIdentityDbContext>()
         .AddSignInManager()
-        .AddDefaultTokenProviders();
+        .AddDefaultTokenProviders()
+        .AddErrorDescriber<UkrainianIdentityErrorDescriber>();
 
         builder.Services.AddAuthentication(options =>
         {

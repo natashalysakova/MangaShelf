@@ -1,62 +1,45 @@
 @page "/Account/Login"
 @page "/login"
+@using MangaShelf.Controllers.Models
+@inject IUiLocalizationService Localizer
+@inject IJSRuntime JS
 
-@using MangaShelf.Components.Account
+<MudGrid Justify="Justify.Center">
+    <MudItem xs="12">
+        <MudStack Spacing="1" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <MudText Typo="Typo.h4">@Localizer["LoginWithYourAccount"]</MudText>
+            <MudText Typo="Typo.subtitle1">@Localizer["DontHaveAnAccount"] <MudLink Href="/Account/Register">@Localizer["RegisterHere"]</MudLink></MudText>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="12" sm="4">
+        <StatusMessage Message="@Error" />
+        <EditForm Model="Input" FormName="login" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <MudStack Spacing="3" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                <MudTextField @bind-Value="Input.Username" id="Input.Username" autocomplete="username"
+                              aria-required="true" FullWidth="true" Label="@Localizer["Username"]"
+                              AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.Start"
+                              For="@(() => Input.Username)" />
+                <MudTextField @bind-Value="Input.Password" id="Input.Password" type="password"
+                              autocomplete="new-password" aria-required="true" FullWidth="true" 
+                              Label="@Localizer["Password"]" 
+                              AdornmentIcon="@Icons.Material.Filled.Key" Adornment="Adornment.Start"
+                              InputType="InputType.Password" For="@(() => Input.Password)" />
+                <MudText Typo="Typo.subtitle1">
+                    <MudLink Href="/Account/ForgotPassword">@Localizer["ForgotPassword"]</MudLink>
+                </MudText>
 
-<PageTitle>Log in</PageTitle>
-
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <div class="alert alert-danger">@errorMessage</div>
-            }
-            <form method="post" action="/Auth/Login">
-                <input type="hidden" name="returnUrl" value="@ReturnUrl" />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <div class="form-floating mb-3">
-                    <input name="username" class="form-control" autocomplete="username" required/>
-                    <label class="form-label">Username</label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input type="password" name="password" class="form-control" autocomplete="current-password" required placeholder="password" />
-                    <label class="form-label">Password</label>
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <input type="checkbox" name="rememberMe" value="true" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a href="/Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="/Account/Register">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="/Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </form>
-        </section>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
-</div>
-
+                <MudButton ButtonType="ButtonType.Submit" Size="Size.Large" Color="Color.Primary"
+                           Variant="Variant.Filled" FullWidth="false">@Localizer["Login"]</MudButton>
+            </MudStack>
+        </EditForm>
+    </MudItem>
+</MudGrid>
+<form id="login-post-form" method="post" action="/Auth/Login" hidden>
+    <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+    <input type="hidden" name="Username" value="@Input.Username" />
+    <input type="password" hidden name="Password" value="@Input.Password" />
+</form>
 @code {
 
     [SupplyParameterFromQuery(Name = "returnUrl")]
@@ -67,6 +50,8 @@
     [SupplyParameterFromQuery(Name = "error")]
     private string? Error { get; set; }
 
+    private LoginInputModel Input { get; set; } = new();
+
     protected override void OnInitialized()
     {
         errorMessage = Error;
@@ -75,5 +60,10 @@
         {
             ReturnUrl = "/";
         }
+    }
+
+    private async Task HandleSubmit()
+    {
+        await JS.InvokeVoidAsync("submitFormById", "login-post-form");
     }
 }

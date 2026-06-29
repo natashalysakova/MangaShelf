@@ -91,6 +91,7 @@ h1:focus {
 
 .manga-gradient-background {
     background: linear-gradient(90deg, #0f172d 0%, #1a3788 50%, #124c69 100%);
+    background-color: #0f172d !important;
     border-bottom: 1px solid #104e64;
 }
 

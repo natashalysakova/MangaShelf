@@ -553,4 +553,72 @@
     <value>VolumeType</value>
     <comment/>
   </data>
+  <data name="LengthError" xml:space="preserve">
+    <value>The {0} must be at least {2} and at max {1} characters long.</value>
+    <comment/>
+  </data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve">
+    <value>Passwords do not match.</value>
+    <comment/>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Invalid e-mail address</value>
+    <comment/>
+  </data>
+  <data name="CreateANewAccount" xml:space="preserve">
+    <value>Create a new account</value>
+    <comment/>
+  </data>
+  <data name="AlreadyHaveAnAccount" xml:space="preserve">
+    <value>Already have an account?</value>
+    <comment/>
+  </data>
+  <data name="LoginHere" xml:space="preserve">
+    <value>Login here</value>
+    <comment/>
+  </data>
+  <data name="LoginWithYourAccount" xml:space="preserve">
+    <value>Login with your account</value>
+    <comment/>
+  </data>
+  <data name="DontHaveAnAccount" xml:space="preserve">
+    <value>Don't have an account?</value>
+    <comment/>
+  </data>
+  <data name="RegisterHere" xml:space="preserve">
+    <value>Register here</value>
+    <comment/>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Forgot password?</value>
+    <comment/>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Username</value>
+    <comment/>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+    <comment/>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+    <comment/>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirm password</value>
+    <comment/>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Register</value>
+    <comment/>
+  </data>
+  <data name="RequiredField" xml:space="preserve">
+    <value>The {0} field is required.</value>
+    <comment/>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+    <comment/>
+  </data>
 </root>

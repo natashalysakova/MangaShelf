@@ -1,170 +1,82 @@
 ﻿@page "/Account/Register"
 @page "/register"
+@using MangaShelf.Controllers.Models
 
-@using System.ComponentModel.DataAnnotations
-@using System.Text
-@using System.Text.Encodings.Web
-@using MangaShelf.Components.Account
-@using MangaShelf.DAL.Models;
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
+@inject IJSRuntime JS
+@inject IUiLocalizationService Localizer
 
-@inject UserManager<MangaIdentityUser> UserManager
-@inject IUserStore<MangaIdentityUser> UserStore
-@inject SignInManager<MangaIdentityUser> SignInManager
-@inject IEmailSender<MangaIdentityUser> EmailSender
-@inject ILogger<Register> Logger
-@inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
-@inject IUserService UserService
 
-<PageTitle>Register</PageTitle>
-
-<h1>Register</h1>
-
-<div class="row">
-    <div class="col-lg-6">
+<MudGrid Justify="Justify.Center">
+    <MudItem xs="12">
+        <MudStack Spacing="1" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <MudText Typo="Typo.h4">@Localizer["CreateANewAccount"]</MudText>
+            <MudText Typo="Typo.subtitle1">@Localizer["AlreadyHaveAnAccount"] <MudLink Href="/Account/Login">@Localizer["LoginHere"]</MudLink></MudText>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="12" sm="4">
         <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser"
-                  FormName="register">
+        <EditForm Model="Input" FormName="register" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <div class="form-floating mb-3">
-                <ValidationSummary class="text-danger" role="alert" />
-                <InputText @bind-Value="Input.Username" id="Input.Username" class="form-control" autocomplete="username"
-                           aria-required="true" />
-                <label for="Input.Username">Username</label>
-                <ValidationMessage For="() => Input.Username" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" aria-required="true"
-                           placeholder="name@example.com" />
-                <label for="Input.Email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control"
-                           autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.Password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword"
-                           class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.ConfirmPassword">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+        <MudStack Spacing="3" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+            <MudTextField @bind-Value="Input.Username" id="Input.Username" autocomplete="username"
+                            aria-required="true" FullWidth="true"
+                            Label="@Localizer["Username"]" 
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"
+                            For="@(() => Input.Username)" />
+            <MudTextField @bind-Value="Input.Email" id="Input.Email" autocomplete="email"
+                            aria-required="true" FullWidth="true"
+                            Label="@Localizer["Email"]" 
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email"
+                            For="@(() => Input.Email)" />
+            <MudTextField @bind-Value="Input.Password" id="Input.Password" type="password"
+                            autocomplete="new-password" aria-required="true" FullWidth="true"
+                            Label="@Localizer["Password"]" InputType="InputType.Password"
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Key"
+                            For="@(() => Input.Password)" />
+            <MudTextField @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" type="password"
+                            autocomplete="new-password" aria-required="true" FullWidth="true"
+                            Label="@Localizer["ConfirmPassword"]" InputType="InputType.Password"  
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Check"
+                            For="@(() => Input.ConfirmPassword)"  />
+            <MudButton ButtonType="ButtonType.Submit" 
+                Size="Size.Large" Color="Color.Primary" 
+                Variant="Variant.Filled" FullWidth="false">@Localizer["Register"]</MudButton>
+        </MudStack>
         </EditForm>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
-</div>
+    </MudItem>
+</MudGrid>
+
+<form id="register-post-form" method="post" action="/Auth/Register" hidden>
+<input type="hidden" name="returnUrl" value="@ReturnUrl" />
+<input type="hidden" name="Username" value="@Input.Username" />
+<input type="hidden" name="Email" value="@Input.Email" />
+<input type="password" hidden name="Password" value="@Input.Password" />
+<input type="password" hidden name="ConfirmPassword" value="@Input.ConfirmPassword" />
+</form>
 
 @code {
-    [SupplyParameterFromQuery(Name = "returnUrl")]
-    private string? ReturnUrl { get; set; }
+[SupplyParameterFromQuery(Name = "returnUrl")]
+private string? ReturnUrl { get; set; }
+
+[SupplyParameterFromQuery(Name = "error")]
+private string? Error { get; set; }
+
+private RegisterInputModel Input { get; set; } = new();
+
+private string? Message => Error is null ? null : $"{Localizer["Error"]}: {Error}";
+
+protected override void OnInitialized()
+{
+if (string.IsNullOrEmpty(ReturnUrl))
+{
+ReturnUrl = "/";
+}
+}
+
+private async Task HandleSubmit()
+{
+await JS.InvokeVoidAsync("submitFormById", "register-post-form");
+}
 
 
-    private IEnumerable<IdentityError>? identityErrors;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error =>
-error.Description))}";
-
-    public async Task RegisterUser(EditContext editContext)
-    {
-        var user = CreateUser();
-
-        await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
-
-        if (!result.Succeeded)
-        {
-            identityErrors = result.Errors;
-            return;
-        }
-
-        Logger.LogInformation("User created a new account with password.");
-
-        var userId = await UserManager.GetUserIdAsync(user);
-
-        await UserManager.AddToRoleAsync(user, "User");
-
-        var shelfUser = await UserService.RegisterShelfUserAsync(user);    
-        @*
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-         if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        } *@
-
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
-    }
-
-    private MangaIdentityUser CreateUser()
-    {
-        try
-        {
-            return Activator.CreateInstance<MangaIdentityUser>();
-        }
-        catch
-        {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. " +
-                $"Ensure that '{nameof(User)}' is not an abstract class and has a parameterless constructor.");
-        }
-    }
-
-    private IUserEmailStore<MangaIdentityUser> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<MangaIdentityUser>)UserStore;
-    }
-
-    private sealed class InputModel
-    {
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 2)]
-        [Display(Name = "Username")]
-        public string Username { get; set; } = "";
-
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
-        public string Email { get; set; } = "";
-
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; } = "";
-
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; } = "";
-    }
 }
