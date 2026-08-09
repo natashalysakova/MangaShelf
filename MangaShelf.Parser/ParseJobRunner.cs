@@ -103,10 +103,11 @@ internal class ParseJobRunner : IParseJobRunner, IDisposable
     {
         using (var scope = _serviceProvider.CreateScope())
         {
+            var jobManagerOptions = scope.ServiceProvider.GetRequiredService<IConfigurationService>().JobManager;
             var statusService = scope.ServiceProvider.GetRequiredService<IParseJobManagerService>();
             try
             {
-                if (_options.ScheduledJobsEnabled)
+                if (jobManagerOptions.ScheduledJobsEnabled)
                 {
                     await statusService.CreateScheduledJobs(token);
                 }

@@ -1,6 +1,364 @@
 ﻿@page "/admin/publishers"
-<h3>Publishers</h3>
+@attribute [Authorize(Roles = RoleTypes.Admin)]
+
+@inject IPublisherService PublisherService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="mb-4 mt-4">Publishers</MudText>
+
+<MudPaper Class="pa-4 mb-4" Elevation="1">
+	<MudText Typo="Typo.h6" Class="mb-2">Create publisher</MudText>
+	<MudGrid>
+		<MudItem xs="12" md="4">
+			<MudTextField T="string"
+						  Label="Name"
+						  Value="@createModel.Name"
+						  ValueChanged="@(value => createModel.Name = value ?? string.Empty)"
+						  Immediate="true"
+						  Required="true"
+						  Disabled="isLoading || isCreating" />
+		</MudItem>
+		<MudItem xs="12" md="4">
+			<MudTextField T="string"
+						  Label="Website URL"
+						  Value="@createModel.Url"
+						  ValueChanged="@(value => createModel.Url = value)"
+						  Immediate="true"
+						  Disabled="isLoading || isCreating" />
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<MudSelect T="Guid"
+					   Label="Country"
+					   Value="@createModel.CountryId"
+					   ValueChanged="@(value => createModel.CountryId = value)"
+					   Disabled="isLoading || isCreating">
+				@foreach (var country in countries)
+				{
+					<MudSelectItem Value="@country.Id">@country.Name (@country.CountryCode)</MudSelectItem>
+				}
+			</MudSelect>
+		</MudItem>
+		<MudItem xs="12" md="1" Class="d-flex align-end">
+			<MudButton Variant="Variant.Filled"
+					   Color="Color.Primary"
+					   Disabled="isLoading || isCreating"
+					   OnClick="CreatePublisherAsync">
+				Add
+			</MudButton>
+		</MudItem>
+	</MudGrid>
+</MudPaper>
+
+@if (isLoading)
+{
+	<MudStack AlignItems="AlignItems.Center" Class="mt-8">
+		<MudProgressCircular Indeterminate="true" Size="Size.Large" />
+	</MudStack>
+}
+else if (publishers.Count == 0)
+{
+	<MudAlert Severity="Severity.Info">No publishers found.</MudAlert>
+}
+else
+{
+	<MudTable Items="publishers" Dense="true" Hover="true" Bordered="true" Striped="true">
+		<HeaderContent>
+			<MudTh>Name</MudTh>
+			<MudTh>Country</MudTh>
+			<MudTh>Website</MudTh>
+			<MudTh>Status</MudTh>
+			<MudTh>Actions</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			@if (editingPublisherId == context.Id)
+			{
+				<MudTd DataLabel="Name">
+					<MudTextField T="string"
+								  Label="Name"
+								  Value="@editModel.Name"
+								  ValueChanged="@(value => editModel.Name = value ?? string.Empty)"
+								  Immediate="true" />
+				</MudTd>
+				<MudTd DataLabel="Country">
+					<MudSelect T="Guid"
+							   Label="Country"
+							   Value="@editModel.CountryId"
+							   ValueChanged="@(value => editModel.CountryId = value)">
+						@foreach (var country in countries)
+						{
+							<MudSelectItem Value="@country.Id">@country.Name (@country.CountryCode)</MudSelectItem>
+						}
+					</MudSelect>
+				</MudTd>
+				<MudTd DataLabel="Website">
+					<MudTextField T="string"
+								  Label="Website URL"
+								  Value="@editModel.Url"
+								  ValueChanged="@(value => editModel.Url = value)"
+								  Immediate="true" />
+				</MudTd>
+				<MudTd DataLabel="Status">
+					<MudChip T="string"
+							 Color="@(context.IsDeleted ? Color.Warning : Color.Success)"
+							 Variant="Variant.Filled"
+							 Size="Size.Small">
+						@(context.IsDeleted ? "Deleted" : "Active")
+					</MudChip>
+				</MudTd>
+				<MudTd DataLabel="Actions">
+					<MudIconButton Icon="@Icons.Material.Filled.Save"
+								   Color="Color.Primary"
+								   Disabled="isMutatingPublisherIds.Contains(context.Id)"
+								   OnClick="@(() => SaveEditAsync(context.Id))" />
+					<MudIconButton Icon="@Icons.Material.Filled.Close"
+								   Color="Color.Default"
+								   Disabled="isMutatingPublisherIds.Contains(context.Id)"
+								   OnClick="CancelEdit" />
+				</MudTd>
+			}
+			else
+			{
+				<MudTd DataLabel="Name">@context.Name</MudTd>
+				<MudTd DataLabel="Country">@FormatCountry(context)</MudTd>
+				<MudTd DataLabel="Website">
+					@if (string.IsNullOrWhiteSpace(context.Url))
+					{
+						<MudText Typo="Typo.body2">-</MudText>
+					}
+					else
+					{
+						<MudLink Href="@context.Url" Target="_blank">@context.Url</MudLink>
+					}
+				</MudTd>
+				<MudTd DataLabel="Status">
+					<MudChip T="string"
+							 Color="@(context.IsDeleted ? Color.Warning : Color.Success)"
+							 Variant="Variant.Filled"
+							 Size="Size.Small">
+						@(context.IsDeleted ? "Deleted" : "Active")
+					</MudChip>
+				</MudTd>
+				<MudTd DataLabel="Actions">
+					<MudIconButton Icon="@Icons.Material.Filled.Edit"
+								   Color="Color.Primary"
+								   Disabled="context.IsDeleted || isMutatingPublisherIds.Contains(context.Id)"
+								   OnClick="@(() => BeginEdit(context))" />
+
+					<MudIconButton Icon="@(context.IsDeleted ? Icons.Material.Filled.RestoreFromTrash : Icons.Material.Filled.Delete)"
+								   Color="@(context.IsDeleted ? Color.Success : Color.Error)"
+								   Disabled="isMutatingPublisherIds.Contains(context.Id)"
+								   OnClick="@(() => ConfirmStateChangeAsync(context))" />
+				</MudTd>
+			}
+		</RowTemplate>
+	</MudTable>
+}
 
 @code {
+	private List<AdminPublisherDto> publishers = [];
+	private List<PublisherCountryOptionDto> countries = [];
+
+	private bool isLoading = true;
+	private bool isCreating;
+	private Guid? editingPublisherId;
+
+	private readonly HashSet<Guid> isMutatingPublisherIds = [];
+
+	private PublisherUpsertModel createModel = new();
+	private PublisherUpsertModel editModel = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadDataAsync();
+	}
+
+	private async Task LoadDataAsync()
+	{
+		isLoading = true;
+
+		try
+		{
+			var loadedPublishers = await PublisherService.GetAllForAdminAsync();
+			var loadedCountries = await PublisherService.GetCountryOptionsAsync();
+
+			publishers = loadedPublishers.ToList();
+			countries = loadedCountries.ToList();
+
+			if (createModel.CountryId == Guid.Empty && countries.Count > 0)
+			{
+				createModel.CountryId = countries[0].Id;
+			}
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Failed to load publishers: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task CreatePublisherAsync()
+	{
+		if (isCreating)
+		{
+			return;
+		}
+
+		isCreating = true;
+
+		try
+		{
+			await PublisherService.CreateAsync(new PublisherUpsertDto
+			{
+				Name = createModel.Name,
+				Url = createModel.Url,
+				CountryId = createModel.CountryId
+			});
+
+			Snackbar.Add("Publisher created.", Severity.Success);
+			createModel = new PublisherUpsertModel
+			{
+				CountryId = countries.FirstOrDefault()?.Id ?? Guid.Empty
+			};
+
+			await LoadDataAsync();
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Failed to create publisher: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isCreating = false;
+		}
+	}
+
+	private void BeginEdit(AdminPublisherDto publisher)
+	{
+		if (publisher.IsDeleted)
+		{
+			return;
+		}
+
+		editingPublisherId = publisher.Id;
+		editModel = new PublisherUpsertModel
+		{
+			Name = publisher.Name,
+			Url = publisher.Url,
+			CountryId = publisher.CountryId
+		};
+	}
+
+	private void CancelEdit()
+	{
+		editingPublisherId = null;
+		editModel = new PublisherUpsertModel();
+	}
+
+	private async Task SaveEditAsync(Guid publisherId)
+	{
+		if (isMutatingPublisherIds.Contains(publisherId))
+		{
+			return;
+		}
+
+		isMutatingPublisherIds.Add(publisherId);
+		try
+		{
+			await PublisherService.UpdateAsync(publisherId, new PublisherUpsertDto
+			{
+				Name = editModel.Name,
+				Url = editModel.Url,
+				CountryId = editModel.CountryId
+			});
+
+			Snackbar.Add("Publisher updated.", Severity.Success);
+			editingPublisherId = null;
+			await LoadDataAsync();
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Failed to update publisher: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isMutatingPublisherIds.Remove(publisherId);
+		}
+	}
+
+	private async Task ConfirmStateChangeAsync(AdminPublisherDto publisher)
+	{
+		if (isMutatingPublisherIds.Contains(publisher.Id))
+		{
+			return;
+		}
+
+		var title = publisher.IsDeleted ? "Restore publisher" : "Delete publisher";
+		var message = publisher.IsDeleted
+			? $"Are you sure you want to restore {publisher.Name}?"
+			: $"Are you sure you want to delete {publisher.Name}?";
+		var confirmText = publisher.IsDeleted ? "Restore" : "Delete";
+
+		var confirmed = await DialogService.ShowMessageBoxAsync(
+			title,
+			message,
+			confirmText,
+			"Cancel");
+
+		if (confirmed is not true)
+		{
+			return;
+		}
+
+		isMutatingPublisherIds.Add(publisher.Id);
+		try
+		{
+			if (publisher.IsDeleted)
+			{
+				await PublisherService.RestoreAsync(publisher.Id);
+				Snackbar.Add("Publisher restored.", Severity.Success);
+			}
+			else
+			{
+				await PublisherService.DeleteAsync(publisher.Id);
+				Snackbar.Add("Publisher deleted.", Severity.Success);
+			}
+
+			await LoadDataAsync();
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Failed to change publisher state: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isMutatingPublisherIds.Remove(publisher.Id);
+		}
+	}
+
+	private static string FormatCountry(AdminPublisherDto publisher)
+	{
+		if (string.IsNullOrWhiteSpace(publisher.CountryName))
+		{
+			return "-";
+		}
+
+		if (string.IsNullOrWhiteSpace(publisher.CountryCode))
+		{
+			return publisher.CountryName;
+		}
+
+		return $"{publisher.CountryName} ({publisher.CountryCode.ToUpperInvariant()})";
+	}
+
+	private sealed class PublisherUpsertModel
+	{
+		public string Name { get; set; } = string.Empty;
+		public string? Url { get; set; }
+		public Guid CountryId { get; set; }
+	}
 
 }

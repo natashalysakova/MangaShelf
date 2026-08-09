@@ -21,21 +21,24 @@ public static class ContextInstallExtention
         var connectionString = builder.Configuration.GetConnectionString("AccountsDb") ?? throw new InvalidOperationException("Connection string 'AccountsDb' not found.");
         
         var accontDbVersion = ServerVersion.Parse("8.0");
-        builder.Services.AddDbContext<MangaIdentityDbContext>(
-            options =>
-            {
-                options
-                .UseMySql(connectionString, accontDbVersion,
-                    mysqlOptions =>
-                    {
-                        mysqlOptions.EnableRetryOnFailure();
-                    });
 
-                if (builder.Environment.IsDevelopment())
+        var options = new Action<DbContextOptionsBuilder>(options =>
+        {
+            options
+            .UseMySql(connectionString, accontDbVersion,
+                mysqlOptions =>
                 {
-                    options.EnableSensitiveDataLogging();
-                }
-            });
+                    mysqlOptions.EnableRetryOnFailure();
+                });
+
+            if (builder.Environment.IsDevelopment())
+            {
+                options.EnableSensitiveDataLogging();
+            }
+        });
+
+        builder.Services.AddDbContextFactory<MangaIdentityDbContext>(options);
+        builder.Services.AddDbContext<MangaIdentityDbContext>(options, optionsLifetime: ServiceLifetime.Singleton);
 
         builder.Services.AddIdentityCore<MangaIdentityUser>(options =>
          {
