@@ -1,6 +1,202 @@
 ﻿@page "/admin/users"
-<h3>Users</h3>
+@attribute [Authorize(Roles = RoleTypes.Admin)]
+
+@inject IUserService UserService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="mb-4 mt-4">Users</MudText>
+
+@if (isLoading)
+{
+	<MudStack AlignItems="AlignItems.Center" Class="mt-8">
+		<MudProgressCircular Indeterminate="true" Size="Size.Large" />
+	</MudStack>
+}
+else if (users is null || users.Count == 0)
+{
+	<MudAlert Severity="Severity.Info">No users found.</MudAlert>
+}
+else
+{
+	<MudTable Items="users" Dense="true" Hover="true" Bordered="true" Striped="true">
+		<HeaderContent>
+			<MudTh>Visible name</MudTh>
+			<MudTh>Username</MudTh>
+			<MudTh>Email</MudTh>
+			<MudTh>Status</MudTh>
+			<MudTh>User</MudTh>
+			<MudTh>Cataloger</MudTh>
+			<MudTh>Admin</MudTh>
+			<MudTh>Service</MudTh>
+			<MudTh>Actions</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd DataLabel="Visible name">@context.VisibleName</MudTd>
+			<MudTd DataLabel="Username">@context.UserName</MudTd>
+			<MudTd DataLabel="Email">@context.Email</MudTd>
+			<MudTd DataLabel="Status">
+				<MudChip T="string"
+						 Color="@(context.IsDeleted ? Color.Warning : Color.Success)"
+						 Variant="Variant.Filled"
+						 Size="Size.Small">
+					@(context.IsDeleted ? "Deleted" : "Active")
+				</MudChip>
+			</MudTd>
+			<MudTd DataLabel="User">
+				<MudCheckBox T="bool"
+							 Value="@HasRole(context, RoleTypes.User)"
+							 ValueChanged="@(value => OnRoleChangedAsync(context, RoleTypes.User, value))"
+							 Disabled="@(isUpdatingUserIds.Contains(context.IdentityUserId) || context.IsDeleted)" />
+			</MudTd>
+			<MudTd DataLabel="Cataloger">
+				<MudCheckBox T="bool"
+							 Value="@HasRole(context, RoleTypes.Cataloger)"
+							 ValueChanged="@(value => OnRoleChangedAsync(context, RoleTypes.Cataloger, value))"
+							 Disabled="@(isUpdatingUserIds.Contains(context.IdentityUserId) || context.IsDeleted)" />
+			</MudTd>
+			<MudTd DataLabel="Admin">
+				<MudCheckBox T="bool"
+							 Value="@HasRole(context, RoleTypes.Admin)"
+							 ValueChanged="@(value => OnRoleChangedAsync(context, RoleTypes.Admin, value))"
+							 Disabled="@(isUpdatingUserIds.Contains(context.IdentityUserId) || context.IsDeleted)" />
+			</MudTd>
+			<MudTd DataLabel="Service">
+				<MudCheckBox T="bool"
+							 Value="@HasRole(context, RoleTypes.Service)"
+							 ValueChanged="@(value => OnRoleChangedAsync(context, RoleTypes.Service, value))"
+							 Disabled="@(isUpdatingUserIds.Contains(context.IdentityUserId) || context.IsDeleted)" />
+			</MudTd>
+			<MudTd DataLabel="Actions">
+				<MudIconButton Icon="@(context.IsDeleted ? Icons.Material.Filled.RestoreFromTrash : Icons.Material.Filled.Delete)"
+							   Color="Color.Error"
+							   Disabled="@(isUpdatingUserIds.Contains(context.IdentityUserId) || isDeletingUserIds.Contains(context.IdentityUserId))"
+							   OnClick="@(() => ConfirmUserStateChangeAsync(context))" />
+			</MudTd>
+		</RowTemplate>
+	</MudTable>
+}
 
 @code {
+	private List<AdminUserDto> users = [];
+	private bool isLoading = true;
+	private readonly HashSet<string> isUpdatingUserIds = [];
+	private readonly HashSet<string> isDeletingUserIds = [];
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadUsersAsync();
+	}
+
+	private async Task LoadUsersAsync()
+	{
+		isLoading = true;
+		try
+		{
+			users = (await UserService.GetAllUsersWithRolesAsync()).ToList();
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Failed to load users: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private static bool HasRole(AdminUserDto user, string role)
+	{
+		return user.Roles.Contains(role, StringComparer.OrdinalIgnoreCase);
+	}
+
+	private async Task OnRoleChangedAsync(AdminUserDto user, string role, bool isEnabled)
+	{
+		if (isUpdatingUserIds.Contains(user.IdentityUserId))
+		{
+			return;
+		}
+
+		isUpdatingUserIds.Add(user.IdentityUserId);
+		try
+		{
+			var targetRoles = user.Roles.ToHashSet(StringComparer.OrdinalIgnoreCase);
+			if (isEnabled)
+			{
+				targetRoles.Add(role);
+			}
+			else
+			{
+				targetRoles.Remove(role);
+			}
+
+			var updatedRoles = await UserService.UpdateUserRolesAsync(user.IdentityUserId, targetRoles);
+			user.Roles = updatedRoles.OrderBy(x => x).ToList();
+			Snackbar.Add($"Roles updated for {user.UserName}", Severity.Success);
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Failed to update role: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isUpdatingUserIds.Remove(user.IdentityUserId);
+		}
+	}
+
+	private async Task ConfirmUserStateChangeAsync(AdminUserDto user)
+	{
+		if (isUpdatingUserIds.Contains(user.IdentityUserId) || isDeletingUserIds.Contains(user.IdentityUserId))
+		{
+			return;
+		}
+
+		var displayName = GetDisplayName(user);
+		var title = user.IsDeleted ? "Restore user" : "Delete user";
+		var message = user.IsDeleted
+			? $"Are you sure you want to restore {displayName}?"
+			: $"Are you sure you want to delete {displayName}? This cannot be undone.";
+		var confirmText = user.IsDeleted ? "Restore" : "Delete";
+		var confirmed = await DialogService.ShowMessageBoxAsync(
+			title,
+			message,
+			confirmText,
+			"Cancel");
+
+		if (confirmed is not true)
+		{
+			return;
+		}
+
+		isDeletingUserIds.Add(user.IdentityUserId);
+		try
+		{
+			if (user.IsDeleted)
+			{
+				await UserService.RestoreUserAsync(user.IdentityUserId);
+				user.IsDeleted = false;
+				Snackbar.Add($"Restored {displayName}", Severity.Success);
+			}
+			else
+			{
+				await UserService.DeleteUserAsync(user.IdentityUserId);
+				user.IsDeleted = true;
+				Snackbar.Add($"Deleted {displayName}", Severity.Success);
+			}
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Failed to delete user: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isDeletingUserIds.Remove(user.IdentityUserId);
+		}
+	}
+
+	private static string GetDisplayName(AdminUserDto user)
+	{
+		return user.VisibleName ?? user.UserName ?? user.Email ?? user.IdentityUserId;
+	}
 
 }

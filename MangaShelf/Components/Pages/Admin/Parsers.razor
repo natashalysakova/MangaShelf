@@ -130,7 +130,7 @@
     </HeaderContent>
     <RowTemplate Context="row">
         <MudTd>
-            @if (row.Status == RunStatus.Waiting || row.Status == RunStatus.Running)
+            @if (row.Status == RunStatus.Waiting || row.Status == RunStatus.Running || row.Status == RunStatus.GatheringVolumes)
             {
                 <MudIconButton Size="Size.Small" OnClick="(() => CancelJob(row.Id))" Icon="@Icons.Material.Rounded.Cancel" Color="Color.Error"></MudIconButton>
             }
