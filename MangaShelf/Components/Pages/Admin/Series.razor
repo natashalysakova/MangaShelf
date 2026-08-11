@@ -103,6 +103,9 @@ else
     }
 
     .series-card {
+        display: flex;
+        height: 100%;
+        min-width: 0;
         overflow: hidden;
         border-radius: 12px;
         background-size: cover !important;
@@ -111,8 +114,11 @@ else
     }
 
     .series-backdrop-overlay {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
         padding: 20px;
-        height: stretch;
         background: linear-gradient(135deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 100%);
         backdrop-filter: blur(6px);
     }
@@ -134,6 +140,8 @@ else
         display: flex;
         flex-direction: row;
         gap: 10px;
+        min-width: 0;
+        width: 100%;
         overflow-x: auto;
         overflow-y: hidden;
         padding: 12px 10px;

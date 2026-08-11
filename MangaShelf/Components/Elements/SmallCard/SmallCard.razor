@@ -7,7 +7,9 @@
 
 @if (Volume != null)
 {
+        
     <MudCard @onclick="OpenVolumeAsync" Style="position:relative;" Class="manga-card ">
+    <MudTooltip  Text="@($"{Volume.SeriesName} - {Volume.Title}")" Placement="Placement.Bottom" Color=" Color.Dark">
         <div class="image-container">
             <FallbackImage ImageUrl="@Volume.CoverImageUrlSmall" Class="@sideImageClass" Alt="@Volume.SeriesName" />
 
@@ -58,7 +60,9 @@
                 }
             </AuthorizeView>
         }
+        </MudTooltip>
     </MudCard>
+
 }
 else
 {

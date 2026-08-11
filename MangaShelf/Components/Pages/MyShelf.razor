@@ -23,18 +23,40 @@ else if (volumes is null || !volumes.Any())
 }
 else
 {
-    <MudGrid>
-        @foreach (var volume in volumes)
+    <MudStack Spacing="2">
+        @foreach (var seriesGroup in groupedSeries)
         {
-            <MudItem xs="12" sm="6" md="4" lg="3">
-                <UserVolumeCardComponent VolumeCard="volume" />
-            </MudItem>
+            <MudPaper Elevation="1" Class="series-group pa-3 pa-sm-4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
+                    <MudText Typo="Typo.h6">@seriesGroup.SeriesTitle</MudText>
+                    <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">
+                        @seriesGroup.Volumes.Count volume@(seriesGroup.Volumes.Count == 1 ? string.Empty : "s")
+                    </MudChip>
+                </MudStack>
+
+                <MudGrid Spacing="2">
+                    @foreach (var volume in seriesGroup.Volumes)
+                    {
+                        <MudItem xs="6" sm="4" md="3" lg="2" xl="2">
+                            <UserVolumeCardComponent VolumeCard="volume" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudPaper>
         }
-    </MudGrid>
+    </MudStack>
 }
+
+<style>
+    .series-group {
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--mud-palette-surface) 94%, var(--mud-palette-primary) 6%);
+    }
+</style>
 
 @code {
     IEnumerable<UserVolumeCard>? volumes;
+    List<SeriesVolumeGroup> groupedSeries = [];
     readonly UserShelfFilterOptions filterOptions = new();
     bool isLoading = true;
 
@@ -62,15 +84,55 @@ else
             isLoading = true;
             var userId = await GetUserId();
             volumes = await VolumeService.GetUserVolumes(userId, filterOptions);
+            groupedSeries = BuildSeriesGroups(volumes);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading user volumes: {ex.Message}");
             volumes = [];
+            groupedSeries = [];
         }
         finally
         {
             isLoading = false;
         }
+    }
+
+    private static List<SeriesVolumeGroup> BuildSeriesGroups(IEnumerable<UserVolumeCard>? userVolumes)
+    {
+        if (userVolumes is null)
+        {
+            return [];
+        }
+
+        return userVolumes
+            .GroupBy(v => string.IsNullOrWhiteSpace(v.SeriesTitle) ? "Unknown series" : v.SeriesTitle.Trim())
+            .Select(group =>
+            {
+                var sortedVolumes = group
+                    .OrderBy(v => !v.Number.HasValue)
+                    .ThenBy(v => v.Number ?? int.MaxValue)
+                    .ThenBy(v => v.ReleaseDate ?? DateTimeOffset.MaxValue)
+                    .ToList();
+
+                var latestRelease = group.Max(v => v.ReleaseDate ?? DateTimeOffset.MinValue);
+
+                return new SeriesVolumeGroup
+                {
+                    SeriesTitle = group.Key,
+                    LatestRelease = latestRelease,
+                    Volumes = sortedVolumes
+                };
+            })
+            .OrderByDescending(g => g.LatestRelease)
+            .ThenBy(g => g.SeriesTitle)
+            .ToList();
+    }
+
+    private sealed class SeriesVolumeGroup
+    {
+        public required string SeriesTitle { get; init; }
+        public DateTimeOffset LatestRelease { get; init; }
+        public required List<UserVolumeCard> Volumes { get; init; }
     }
 }

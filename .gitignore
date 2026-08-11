@@ -367,3 +367,4 @@ FodyWeavers.xsd
 .DS_Store
 .idea/
 .proxyai/
+.dotnet/
