@@ -27,15 +27,23 @@ public static partial class OwnershipMapper
 
         public static UserVolumeCard ToUserVolumeCard(this Ownership volume, IEnumerable<Reading> readings)
     {
+        if (volume.Volume is null)
+        {
+            throw new InvalidOperationException("Ownership volume details are required to map a user volume card.");
+        }
+
+        var volumeDetails = volume.Volume;
         var reading = readings.OrderByDescending(r => r.StartedAt).FirstOrDefault(r => r.VolumeId == volume.VolumeId);
-        var isLiked = volume.Volume.Likes.Any(l => l.UserId == volume.UserId);
+        var isLiked = volumeDetails.Likes.Any(l => l.UserId == volume.UserId);
         return new UserVolumeCard()
         {
-            PublicId = volume.Volume.PublicId,
+            PublicId = volumeDetails.PublicId,
             CurrentOwnershipStatus = volume.Status,
-            Number = volume.Volume.Number,
-            SeriesTitle = volume.Volume.Series.Title,
-            CoverImageUrlSmall = volume.Volume.CoverImageUrlSmall,
+            Number = volumeDetails.Number,
+            ReleaseDate = volumeDetails.ReleaseDate,
+            SeriesTitle = volumeDetails.Series.Title,
+            VolumeTitle = volumeDetails.Title,
+            CoverImageUrlSmall = volumeDetails.CoverImageUrlSmall,
             CurrentReadingStatus = reading?.Status ?? ReadingStatus.None,
             UserRating = readings.Where(r => r.Rating.HasValue && r.VolumeId == volume.VolumeId).Average(r => r.Rating),
             IsLiked = isLiked

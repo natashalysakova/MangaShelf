@@ -552,6 +552,7 @@ public class VolumeService(
         volume.Series.OriginalTitle = volumeDto.SeriesOriginalTitle;
         volume.Series.TotalVolumes = volumeDto.SeriesTotalVolumes;
         volume.Series.Status = volumeDto.SeriesStatus;
+        volume.Series.Type = volumeDto.SeriesType;
 
         volume.Type = volumeDto.Type;
 

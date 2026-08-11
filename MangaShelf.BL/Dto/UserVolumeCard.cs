@@ -4,10 +4,12 @@ namespace MangaShelf.BL.Dto;
 
 public class UserVolumeCard
 {
-    public string PublicId { get; set; }
+    public string PublicId { get; set; } = string.Empty;
     public int? Number { get; set; }
+    public DateTimeOffset? ReleaseDate { get; set; }
 
-    public string SeriesTitle { get; set; }
+    public string SeriesTitle { get; set; } = string.Empty;
+    public string VolumeTitle { get; set; } = string.Empty;
 
     public double? UserRating { get; set; }
 
