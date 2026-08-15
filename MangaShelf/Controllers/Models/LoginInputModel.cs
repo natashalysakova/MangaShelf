@@ -13,4 +13,7 @@ public sealed class LoginInputModel
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; } = string.Empty;
+
+        [Display(Name = "RememberMe")]
+        public bool RememberMe { get; set; }
     }

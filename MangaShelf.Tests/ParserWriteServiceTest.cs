@@ -12,6 +12,7 @@ using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Services.Parsing;
 using Moq;
 using Microsoft.Extensions.Logging;
+using MangaShelf.BL.Services.Parsing.Handlers;
 
 namespace MangaShelf.Tests
 {
@@ -30,7 +31,8 @@ namespace MangaShelf.Tests
             _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
             var logger = new Mock<ILogger<ParseJobManagerService>>().Object;
             var configuration = new Mock<IConfigurationService>().Object;
-            _service = new ParseJobManagerService(_dbContextFactory, configuration, logger);
+            var jobStateTransitoinPublisher = new JobStateTransitionPublisher(new Mock<ILogger<JobStateTransitionPublisher>>().Object);
+            _service = new ParseJobManagerService(_dbContextFactory, configuration, logger, jobStateTransitoinPublisher, Enumerable.Empty<IJobStateTransitionHandler>());
         }
 
         [Fact]

@@ -38,7 +38,15 @@ public class Program
             .AddCookie(options =>
             {
                 options.Cookie.Name = "auth_cookie";
-                options.Cookie.MaxAge = TimeSpan.FromHours(24);
+                options.Cookie.MaxAge = TimeSpan.FromDays(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None;
+                }
             });
         
         builder.Services.AddControllers().AddDataAnnotationsLocalization(options =>

@@ -1,5 +1,6 @@
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
+using MangaShelf.BL.Dto;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using MangaShelf.DAL.System;
@@ -10,36 +11,86 @@ using ParserModel = MangaShelf.DAL.System.Models.Parser;
 
 namespace MangaShelf.BL.Services.Parsing;
 
-public class ParseJobManagerService : IParseJobManagerService
+public class ParseJobManagerService : IParseJobManagerService, IDisposable
 {
     private readonly IDbContextFactory<MangaSystemDbContext> _dbContextFactory;
     private readonly ILogger<ParseJobManagerService> _logger;
     private readonly JobManagerSettings _options;
+    private readonly IJobStateTransitionPublisher _stateTransitionPublisher;
+    private readonly IEnumerable<IJobStateTransitionHandler> _handlers;
 
     public ParseJobManagerService(
         IDbContextFactory<MangaSystemDbContext> dbContextFactory,
         IConfigurationService configurationService,
-        ILogger<ParseJobManagerService> logger)
+        ILogger<ParseJobManagerService> logger,
+        IJobStateTransitionPublisher stateTransitionPublisher, IEnumerable<IJobStateTransitionHandler> handlers)
     {
-        _dbContextFactory = dbContextFactory;
         _logger = logger;
         _options = configurationService.JobManager;
+        _stateTransitionPublisher = stateTransitionPublisher;
+        _handlers = handlers;
+        _dbContextFactory = dbContextFactory;
+
+        foreach (var handle in handlers)
+        {
+            _stateTransitionPublisher.Subscribe(handle);
+        }
     }
 
     public async Task CancelJob(Guid jobId, CancellationToken token)
     {
-        using var context = _dbContextFactory.CreateDbContext();
-        var runningJob = await context.Runs.Include(r => r.ParserStatus).SingleOrDefaultAsync(r => r.Id == jobId);
+        await TransitionJobState(jobId, ParseJobTrigger.CancelJob, context: "User cancelled the job", token: token);
+        //using var context = _dbContextFactory.CreateDbContext();
+        //var runningJob = await context.Runs
+        //    .Include(r => r.ParserStatus)
+        //    .SingleOrDefaultAsync(r => r.Id == jobId, token);
 
-        if (runningJob != null)
-        {
-            runningJob.Status = RunStatus.Cancelled;
-            runningJob.Finished = DateTimeOffset.Now;
-            runningJob.Progress = -1;
-            runningJob.ParserStatus.Status = ParserStatus.Idle;
-        }
+        //if (runningJob == null)
+        //{
+        //    _logger.LogWarning("Attempted to cancel job {JobId} but job not found", jobId);
+        //    return;
+        //}
 
-        await context.SaveChangesAsync(token);
+        //// Get current state to create state machine
+        //var stateMachine = new ParseJobStateMachine(runningJob.Status);
+        //var previousState = runningJob.Status;
+
+        //// Fire the cancel trigger
+        //try
+        //{
+        //    stateMachine.FireTrigger(ParseJobTrigger.CancelJob, "User cancelled the job");
+
+        //    // Update the job status to the new state
+        //    runningJob.Status = stateMachine.CurrentState;
+        //    runningJob.Finished = DateTimeOffset.UtcNow;
+        //    runningJob.Progress = -1;
+
+        //    // Update parser status to Idle
+        //    if (runningJob.ParserStatus != null)
+        //    {
+        //        runningJob.ParserStatus.Status = ParserStatus.Idle;
+        //    }
+
+        //    await context.SaveChangesAsync(token);
+
+        //    // Publish the transition
+        //    var transition = new JobStateTransition
+        //    {
+        //        JobId = jobId,
+        //        FromState = previousState,
+        //        ToState = stateMachine.CurrentState,
+        //        Trigger = nameof(ParseJobTrigger.CancelJob),
+        //        TransitionTime = DateTimeOffset.UtcNow,
+        //        Context = "User cancelled the job"
+        //    };
+
+        //    await _stateTransitionPublisher.PublishAsync(transition, token);
+        //}
+        //catch (InvalidOperationException ex)
+        //{
+        //    _logger.LogWarning(ex, "Cannot cancel job {JobId} from state {CurrentState}", jobId, previousState);
+        //    throw;
+        //}
     }
 
     public async Task<int> CreateScheduledJobs(CancellationToken token)
@@ -67,15 +118,17 @@ public class ParseJobManagerService : IParseJobManagerService
                     continue;
                 }
 
-                _logger.LogDebug("Creating scheduled job for parser {ParserName}. NextRun was {NextRun}, updating to {NewNextRun}",
-                    parser.ParserName, parser.NextRun, currentTime + _options.DelayBetweenRuns);
-
                 var job = CreateJobInternal(parser, ParserRunType.FullSite);
                 parser.Jobs.Add(job);
-                parser.NextRun = DateTimeOffset.Now + _options.DelayBetweenRuns;
             }
 
             await dbContext.SaveChangesAsync(token);
+
+            var jobs = dbContext.Runs.Where(x=>x.Status == RunStatus.Created).ToList();
+            foreach (var job in jobs)
+            {
+                await TransitionJobState(job.Id, ParseJobTrigger.JobCreated, context: "Scheduled job created", token: token);
+            }
         }
         else
         {
@@ -99,6 +152,7 @@ public class ParseJobManagerService : IParseJobManagerService
         parser.Jobs.Add(job);
 
         await dbContext.SaveChangesAsync(token);
+        await TransitionJobState(job.Id, ParseJobTrigger.JobCreated, context: "Single job created", token: token);
         return job.Id;
     }
 
@@ -115,6 +169,7 @@ public class ParseJobManagerService : IParseJobManagerService
         parser.Jobs.Add(job);
 
         await dbContext.SaveChangesAsync(token);
+        await TransitionJobState(job.Id, ParseJobTrigger.JobCreated, context: "Parser job created", token: token);
         return job.Id;
     }
 
@@ -159,22 +214,24 @@ public class ParseJobManagerService : IParseJobManagerService
 
             foreach (var job in notFinishedProperly)
             {
-                job.Status = RunStatus.Error;
-                job.Finished = DateTimeOffset.Now;
-                job.Progress = -1;
-                job.Errors.Add(new ParserError()
-                {
-                    ErrorMessage = "Was automatically cancelled after restart",
-                    RunTime = job.Finished.Value
-                });
+                //job.Status = RunStatus.Error;
+                //job.Finished = DateTimeOffset.Now;
+                //job.Progress = -1;
+                //job.Errors.Add(new ParserError()
+                //{
+                //    ErrorMessage = "Was automatically cancelled after restart",
+                //    RunTime = job.Finished.Value
+                //});
+
+                await TransitionJobState(job.Id, ParseJobTrigger.JobFailed, context: "Was automatically cancelled after restart", token: default);
             }
 
-            foreach (var parser in parserStatuses)
-            {
-                parser.Status = ParserStatus.Idle;
-            }
+            //foreach (var parser in parserStatuses)
+            //{
+            //    parser.Status = ParserStatus.Idle;
+            //}
 
-            await context.SaveChangesAsync();
+            //await context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -191,13 +248,13 @@ public class ParseJobManagerService : IParseJobManagerService
                .OrderBy(r => r.Created)
                .ToListAsync(token);
 
-        var parsers = jobs.Select(x => x.ParserStatus).Distinct();
-        foreach (var parser in parsers)
-        {
-            parser.Status = ParserStatus.Waiting;
-        }
+        //var parsers = jobs.Select(x => x.ParserStatus).Distinct();
+        //foreach (var parser in parsers)
+        //{
+        //    parser.Status = ParserStatus.Waiting;
+        //}
 
-        await dbContext.SaveChangesAsync(token);
+        //await dbContext.SaveChangesAsync(token);
 
         return jobs.Select(j => j.Id);
     }
@@ -208,9 +265,10 @@ public class ParseJobManagerService : IParseJobManagerService
         {
             Created = DateTimeOffset.Now,
             Progress = 0,
-            Status = RunStatus.Waiting,
+            Status = RunStatus.Created,
             Type = parserRunType,
-            Url = url
+            Url = url,
+            ParserStatusId = parser.Id,
         };
     }
 
@@ -259,141 +317,208 @@ public class ParseJobManagerService : IParseJobManagerService
 
     public async Task SetProgress(Guid runId, double progress, ParseResult? result, CancellationToken token)
     {
-        using var context = _dbContextFactory.CreateDbContext();
+        await TransitionJobState(runId, ParseJobTrigger.UpdateProgress, context: progress.ToString(), result: result, token: token);
 
-        var parserStatus = context.Parsers
-            .Include(ps => ps.Jobs)
-                .ThenInclude(r => r.Errors)
-            .FirstOrDefault(ps => ps.Jobs.Any(r => r.Id == runId));
+        //using var context = _dbContextFactory.CreateDbContext();
 
-        if (parserStatus == null)
-        {
-            throw new Exception($"No parser status found for run id {runId}");
-        }
+        //var parserStatus = context.Parsers
+        //    .Include(ps => ps.Jobs)
+        //        .ThenInclude(r => r.Errors)
+        //    .FirstOrDefault(ps => ps.Jobs.Any(r => r.Id == runId));
 
-        var run = parserStatus.Jobs.FirstOrDefault(r => r.Id == runId);
-        if (run == null)
-        {
-            throw new Exception($"No run found with id {runId}");
-        }
+        //if (parserStatus == null)
+        //{
+        //    throw new Exception($"No parser status found for run id {runId}");
+        //}
 
-        run.Progress = progress;
+        //var run = parserStatus.Jobs.FirstOrDefault(r => r.Id == runId);
+        //if (run == null)
+        //{
+        //    throw new Exception($"No run found with id {runId}");
+        //}
 
-        if (result != null)
-        {
-            var volumeReference = new VolumeReference
-            {
-                VolumeId = result.VolumeReference.VolumeId,
-                FullName = result.VolumeReference.FullName,
-                PublicId = result.VolumeReference.PublicId,
-            };
+        //run.Progress = progress;
 
-            if (result.State == State.Added)
-            {
-                volumeReference.AddedParserJobId = run.Id;
-                run.AddedVolumes.Add(volumeReference);
-            }
-            else if (result.State == State.Updated)
-            {
-                volumeReference.UpdatedParserJobId = run.Id;
-                run.UpdatedVolumes.Add(volumeReference);
-            }
-        }
+        //if (result != null)
+        //{
+        //    var volumeReference = new VolumeReference
+        //    {
+        //        VolumeId = result.VolumeReference.VolumeId,
+        //        FullName = result.VolumeReference.FullName,
+        //        PublicId = result.VolumeReference.PublicId,
+        //    };
 
-        context.Entry(run).State = EntityState.Modified;
+        //    if (result.State == State.Added)
+        //    {
+        //        volumeReference.AddedParserJobId = run.Id;
+        //        run.AddedVolumes.Add(volumeReference);
+        //    }
+        //    else if (result.State == State.Updated)
+        //    {
+        //        volumeReference.UpdatedParserJobId = run.Id;
+        //        run.UpdatedVolumes.Add(volumeReference);
+        //    }
+        //}
 
-        await context.SaveChangesAsync(token);
+        //context.Entry(run).State = EntityState.Modified;
+
+        //await context.SaveChangesAsync(token);
     }
 
     public async Task SetToFinishedStatus(Guid jobId, CancellationToken token = default)
     {
-        await SetStatusInternal(jobId, RunStatus.Finished, token: token);
+        await TransitionJobState(jobId, ParseJobTrigger.Complete, context: "Job parsing completed successfully", token: token);
     }
 
     public async Task SetToErrorStatus(Guid jobId, CancellationToken token = default)
     {
-        await SetStatusInternal(jobId, RunStatus.Error, token: token);
+        await TransitionJobState(jobId, ParseJobTrigger.JobFailed, context: "Job encountered an error", token: token);
     }
 
     public async Task SetToCancelledStatus(Guid jobId, CancellationToken token)
     {
-        await SetStatusInternal(jobId, RunStatus.Cancelled, token: token);
+        await TransitionJobState(jobId, ParseJobTrigger.CancelJob, context: "Job was cancelled", token: token);
     }
 
     public async Task SetToParsingStatus(Guid jobId, IEnumerable<string> volumesToParse, CancellationToken token = default)
     {
-        await SetStatusInternal(jobId, RunStatus.Running, volumesToParse.Count(), token);
-    }
+        var volumeCount = volumesToParse.Count();
+        var context = $"Starting to parse {volumeCount} volumes";
+        await TransitionJobState(jobId, ParseJobTrigger.BeginParsing, context: context, token: token);
 
-    private async Task SetStatusInternal(Guid jobId, RunStatus status, int volumesCount = 0, CancellationToken token = default)
-    {
-        using var context = _dbContextFactory.CreateDbContext();
-
-        var parserStatus = context.Parsers
-            .Include(ps => ps.Jobs)
-                .ThenInclude(r => r.Errors)
-            .FirstOrDefault(ps => ps.Jobs.Any(r => r.Id == jobId));
-
-        if (parserStatus == null)
-        {
-            throw new Exception($"No parser status found for run id {jobId}");
-        }
-
-        var run = parserStatus.Jobs.FirstOrDefault(r => r.Id == jobId);
-        if (run == null)
-        {
-            throw new Exception($"No run found with id {jobId}");
-        }
-
-        if (run.Type == ParserRunType.SingleUrl && status == RunStatus.GatheringVolumes)
-        {
-            // skip gathering volumes for single url runs, as we don't gather volumes for single url runs, we just parse the single url directly
-            run.Status = RunStatus.Running;
-        }
-        else
-        {
-            run.Status = status;
-        }
-
-        switch (status)
-        {
-            case RunStatus.Waiting:
-                break;
-            case RunStatus.GatheringVolumes:
-                parserStatus.Status = ParserStatus.GatheringVolumes;
-                run.Started = DateTimeOffset.Now;
-                run.Progress = 0;
-                break;
-            case RunStatus.Running when run.Type == ParserRunType.FullSite:
-                parserStatus.Status = ParserStatus.Parsing;
-                run.VolumesFound = volumesCount;
-                break;
-            case RunStatus.Running when run.Type == ParserRunType.SingleUrl:
-                parserStatus.Status = ParserStatus.Parsing;
-                run.Progress = 0;
-                run.Started = DateTimeOffset.Now;
-                run.VolumesFound = 1;
-                break;
-            case RunStatus.Finished:
-                parserStatus.Status = ParserStatus.Idle;
-                run.Finished = DateTimeOffset.Now;
-                run.Progress = 100;
-                parserStatus.NextRun = DateTimeOffset.Now.Add(_options.DelayBetweenRuns);
-                break;
-            case RunStatus.Error or RunStatus.Cancelled:
-                parserStatus.Status = ParserStatus.Idle;
-                run.Finished = DateTimeOffset.Now;
-                run.Progress = -1;
-                break;
-            default:
-                break;
-        }
-
-        await context.SaveChangesAsync(token);
+        //// Update volumes count after transition
+        //using var dbContext = _dbContextFactory.CreateDbContext();
+        //var run = await dbContext.Runs.FirstOrDefaultAsync(r => r.Id == jobId, token);
+        //if (run != null)
+        //{
+        //    run.VolumesFound = volumeCount;
+        //    await dbContext.SaveChangesAsync(token);
+        //}
     }
 
     public async Task RunJob(Guid jobId, CancellationToken token = default)
     {
-        await SetStatusInternal(jobId, RunStatus.GatheringVolumes, token: token);
+        await TransitionJobState(jobId, ParseJobTrigger.StartGathering, context: "Starting volume gathering phase", token: token);
+    }
+
+    /// <summary>
+    /// Transitions a job to a new state using the state machine and publishes the transition event.
+    /// This is the central method for all state transitions.
+    /// </summary>
+    /// <param name="jobId">The job ID to transition</param>
+    /// <param name="trigger">The trigger to fire</param>
+    /// <param name="context">Optional context information about the transition</param>
+    /// <param name="exceptionDetails">Optional exception details if transitioning to error</param>
+    /// <param name="token">Cancellation token</param>
+    private async Task TransitionJobState(
+        Guid jobId,
+        ParseJobTrigger trigger,
+        string? context = null,
+        string? exceptionDetails = null,
+        ParseResult? result = null,
+        CancellationToken token = default)
+    {
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var job = await dbContext.Runs
+            .Include(r => r.ParserStatus)
+            .FirstOrDefaultAsync(r => r.Id == jobId, token);
+
+        if (job == null)
+        {
+            throw new InvalidOperationException($"Job {jobId} not found");
+        }
+
+        // Create state machine with current job state
+        var stateMachine = new ParseJobStateMachine(job.Status);
+
+        // Validate the trigger can be fired
+        if (!stateMachine.CanFire(trigger))
+        {
+            throw new InvalidOperationException(
+                $"Cannot fire trigger {trigger} on job {jobId} in state {job.Status}");
+        }
+
+        var previousState = job.Status;
+
+        try
+        {
+            // Fire the trigger to transition state
+            stateMachine.FireTrigger(trigger, context, exceptionDetails);
+
+            // Publish the transition event (handlers will persist it and update the job)
+            var transition = new JobStateTransition
+            {
+                JobId = jobId,
+                FromState = previousState,
+                ToState = stateMachine.CurrentState,
+                Trigger = trigger.ToString(),
+                TransitionTime = DateTimeOffset.UtcNow,
+                Context = context,
+                ExceptionDetails = exceptionDetails,
+                Result = result
+            };
+
+            await _stateTransitionPublisher.PublishAsync(transition, token);
+
+            //// Update the job's status immediately in this context to ensure consistency
+            //// This prevents race conditions where handlers haven't persisted yet
+            //job.Status = stateMachine.CurrentState;
+
+            //// Also update parser status
+            //if (job.ParserStatus != null)
+            //{
+            //    job.ParserStatus.Status = MapRunStatusToParserStatus(stateMachine.CurrentState);
+            //}
+
+            //// Set Started timestamp when transitioning to GatheringVolumes
+            //if (previousState == RunStatus.Waiting && stateMachine.CurrentState == RunStatus.GatheringVolumes)
+            //{
+            //    job.Started = transition.TransitionTime;
+            //}
+
+            //// Set Finished timestamp when transitioning to terminal states
+            //if (stateMachine.CurrentState.IsCompleted())
+            //{
+            //    job.Finished = transition.TransitionTime;
+            //}
+
+            //await dbContext.SaveChangesAsync(token);
+
+            _logger.LogInformation(
+                "Job {JobId} transitioned from {FromState} to {ToState} via {Trigger}",
+                jobId, previousState, stateMachine.CurrentState, trigger);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Failed to transition job {JobId} via trigger {Trigger} from state {CurrentState}",
+                jobId, trigger, job.Status);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Maps a RunStatus to the corresponding ParserStatus.
+    /// </summary>
+    private static ParserStatus MapRunStatusToParserStatus(RunStatus runStatus)
+    {
+        return runStatus switch
+        {
+            RunStatus.Waiting => ParserStatus.Waiting,
+            RunStatus.GatheringVolumes => ParserStatus.GatheringVolumes,
+            RunStatus.Running => ParserStatus.Parsing,
+            RunStatus.Finished => ParserStatus.Idle,
+            RunStatus.Error => ParserStatus.Idle,
+            RunStatus.Cancelled => ParserStatus.Idle,
+            _ => ParserStatus.Idle
+        };
+    }
+
+    public void Dispose()
+    {
+        foreach (var handler in _handlers)
+        {
+            _stateTransitionPublisher.Unsubscribe(handler);
+        }
     }
 }

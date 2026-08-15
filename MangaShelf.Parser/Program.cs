@@ -1,5 +1,7 @@
 using AngleSharp.Html;
 using MangaShelf.BL.Contracts;
+using MangaShelf.BL.Services.Parsing;
+using MangaShelf.BL.Services.Parsing.Handlers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.Infrastructure.Installer;
 using MangaShelf.Parser.Services;

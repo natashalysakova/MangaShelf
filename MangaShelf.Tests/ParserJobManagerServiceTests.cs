@@ -1,16 +1,16 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using AngleSharp;
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Services.Parsing;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
-
 using ParserModel = MangaShelf.DAL.System.Models.Parser;
-using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Tests;
 
@@ -39,7 +39,8 @@ public class ParserJobManagerServiceTests : IDisposable
 
         var logger = new Mock<ILogger<ParseJobManagerService>>().Object;
 
-        _service = new ParseJobManagerService(_dbContextFactory, configMock.Object, logger);
+        var jobStateTransitoinPublisher = new Mock<IJobStateTransitionPublisher>().Object;
+        _service = new ParseJobManagerService(_dbContextFactory, configMock.Object, logger, jobStateTransitoinPublisher, Enumerable.Empty<IJobStateTransitionHandler>());
     }
 
     [Fact]
