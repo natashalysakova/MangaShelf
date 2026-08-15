@@ -53,4 +53,9 @@ public static class RunStatusExtensions
     {
         return status == RunStatus.Created || status == RunStatus.Waiting;
     }
+
+    public static bool NotSuccessful(this RunStatus status)
+    {
+        return status == RunStatus.Error || status == RunStatus.Cancelled;
+    }
 }

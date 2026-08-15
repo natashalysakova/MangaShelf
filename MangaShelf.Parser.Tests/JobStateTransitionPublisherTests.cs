@@ -21,7 +21,6 @@ public class JobStateTransitionPublisherTests
     public void Setup()
     {
         _loggerMock = new Mock<ILogger<JobStateTransitionPublisher>>();
-        _publisher = new JobStateTransitionPublisher(_loggerMock.Object);
     }
 
     [TestMethod]
@@ -29,96 +28,6 @@ public class JobStateTransitionPublisherTests
     {
         // Assert
         Assert.AreEqual(0, _publisher.GetHandlerCount());
-    }
-
-    [TestMethod]
-    public void Subscribe_AddsHandler()
-    {
-        // Arrange
-        var handler = new Mock<IJobStateTransitionHandler>();
-
-        // Act
-        _publisher.Subscribe(handler.Object);
-
-        // Assert
-        Assert.AreEqual(1, _publisher.GetHandlerCount());
-    }
-
-    [TestMethod]
-    public void Subscribe_WithNullHandler_ThrowsArgumentNullException()
-    {
-        // Act & Assert
-        bool exceptionThrown = false;
-        try
-        {
-            _publisher.Subscribe(null!);
-        }
-        catch (ArgumentNullException)
-        {
-            exceptionThrown = true;
-        }
-
-        Assert.IsTrue(exceptionThrown, "ArgumentNullException should have been thrown");
-    }
-
-    [TestMethod]
-    public void Subscribe_MultipleTimes_CountsCorrectly()
-    {
-        // Arrange
-        var handler1 = new Mock<IJobStateTransitionHandler>();
-        var handler2 = new Mock<IJobStateTransitionHandler>();
-        var handler3 = new Mock<IJobStateTransitionHandler>();
-
-        // Act
-        _publisher.Subscribe(handler1.Object);
-        _publisher.Subscribe(handler2.Object);
-        _publisher.Subscribe(handler3.Object);
-
-        // Assert
-        Assert.AreEqual(3, _publisher.GetHandlerCount());
-    }
-
-    [TestMethod]
-    public void Subscribe_SameHandlerTwice_CountsOnlyOnce()
-    {
-        // Arrange
-        var handler = new Mock<IJobStateTransitionHandler>();
-
-        // Act
-        _publisher.Subscribe(handler.Object);
-        _publisher.Subscribe(handler.Object);
-
-        // Assert
-        Assert.AreEqual(1, _publisher.GetHandlerCount());
-    }
-
-    [TestMethod]
-    public void Unsubscribe_RemovesHandler()
-    {
-        // Arrange
-        var handler = new Mock<IJobStateTransitionHandler>();
-        _publisher.Subscribe(handler.Object);
-
-        // Act
-        _publisher.Unsubscribe(handler.Object);
-
-        // Assert
-        Assert.AreEqual(0, _publisher.GetHandlerCount());
-    }
-
-    [TestMethod]
-    public void Unsubscribe_UnregisteredHandler_DoesNothing()
-    {
-        // Arrange
-        var handler1 = new Mock<IJobStateTransitionHandler>();
-        var handler2 = new Mock<IJobStateTransitionHandler>();
-        _publisher.Subscribe(handler1.Object);
-
-        // Act
-        _publisher.Unsubscribe(handler2.Object);
-
-        // Assert
-        Assert.AreEqual(1, _publisher.GetHandlerCount());
     }
 
     [TestMethod]
@@ -136,10 +45,6 @@ public class JobStateTransitionPublisherTests
         handler3.Setup(h => h.HandleAsync(It.IsAny<JobStateTransition>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        _publisher.Subscribe(handler1.Object);
-        _publisher.Subscribe(handler2.Object);
-        _publisher.Subscribe(handler3.Object);
-
         var transition = new JobStateTransition
         {
             JobId = Guid.NewGuid(),
@@ -147,6 +52,8 @@ public class JobStateTransitionPublisherTests
             ToState = RunStatus.GatheringVolumes,
             Trigger = "StartGathering"
         };
+
+        _publisher = new JobStateTransitionPublisher(new[] { handler1.Object, handler2.Object, handler3.Object }, _loggerMock.Object);
 
         // Act
         await _publisher.PublishAsync(transition);
@@ -189,10 +96,6 @@ public class JobStateTransitionPublisherTests
         handler3.Setup(h => h.HandleAsync(It.IsAny<JobStateTransition>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        _publisher.Subscribe(handler1.Object);
-        _publisher.Subscribe(handler2.Object);
-        _publisher.Subscribe(handler3.Object);
-
         var transition = new JobStateTransition
         {
             JobId = Guid.NewGuid(),
@@ -200,6 +103,7 @@ public class JobStateTransitionPublisherTests
             ToState = RunStatus.GatheringVolumes,
             Trigger = "StartGathering"
         };
+        _publisher = new JobStateTransitionPublisher(new[] { handler1.Object, handler2.Object, handler3.Object }, _loggerMock.Object);
 
         // Act - should not throw, handlers 2 and 3 should still be called
         await _publisher.PublishAsync(transition);
@@ -218,8 +122,6 @@ public class JobStateTransitionPublisherTests
         handler.Setup(h => h.HandleAsync(It.IsAny<JobStateTransition>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new OperationCanceledException());
 
-        _publisher.Subscribe(handler.Object);
-
         var transition = new JobStateTransition
         {
             JobId = Guid.NewGuid(),
@@ -227,6 +129,9 @@ public class JobStateTransitionPublisherTests
             ToState = RunStatus.GatheringVolumes,
             Trigger = "StartGathering"
         };
+
+        _publisher = new JobStateTransitionPublisher(new[] { handler.Object }, _loggerMock.Object);
+
 
         var cts = new CancellationTokenSource();
         cts.Cancel();
@@ -256,7 +161,7 @@ public class JobStateTransitionPublisherTests
             .Callback<JobStateTransition, CancellationToken>((_, token) => capturedToken = token)
             .Returns(Task.CompletedTask);
 
-        _publisher.Subscribe(handler.Object);
+        _publisher = new JobStateTransitionPublisher(new[] { handler.Object }, _loggerMock.Object);
 
         var transition = new JobStateTransition
         {
@@ -303,7 +208,7 @@ public class JobStateTransitionPublisherTests
             .Callback<JobStateTransition, CancellationToken>((t, _) => capturedTransition = t)
             .Returns(Task.CompletedTask);
 
-        _publisher.Subscribe(handler.Object);
+        _publisher = new JobStateTransitionPublisher(new[] { handler.Object }, _loggerMock.Object);
 
         var jobId = Guid.NewGuid();
         var transition = new JobStateTransition

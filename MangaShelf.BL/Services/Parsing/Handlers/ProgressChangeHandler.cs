@@ -23,11 +23,6 @@ public class ProgressChangeHandler : IJobStateTransitionHandler
 
     public async Task HandleAsync(JobStateTransition transition, CancellationToken cancellationToken = default)
     {
-        if (transition.Trigger != nameof(ParseJobTrigger.UpdateProgress))
-        {
-            return;
-        }
-
         using var context = _dbContextFactory.CreateDbContext();
 
         var job = await context.Runs
@@ -40,7 +35,11 @@ public class ProgressChangeHandler : IJobStateTransitionHandler
             return;
         }
 
-        if (double.TryParse(transition.Context, out var progress))
+        if (transition.ToState.NotSuccessful())
+        {
+            job.Progress = -1;
+        }
+        else if (double.TryParse(transition.Context, out var progress))
         {
             job.Progress = progress;
         }

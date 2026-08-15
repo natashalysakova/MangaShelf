@@ -15,9 +15,6 @@ public interface IJobStateTransitionPublisher
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A task representing the asynchronous publish operation</returns>
     Task PublishAsync(JobStateTransition transition, CancellationToken cancellationToken = default);
-
-    void Subscribe(IJobStateTransitionHandler handler);
-    void Unsubscribe(IJobStateTransitionHandler handler);
 }
 
 /// <summary>

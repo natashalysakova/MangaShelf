@@ -10,43 +10,45 @@ namespace MangaShelf.BL.Services.Parsing;
 /// </summary>
 public class JobStateTransitionPublisher : IJobStateTransitionPublisher
 {
-    private readonly List<IJobStateTransitionHandler> _handlers = new();
+    private readonly IEnumerable<IJobStateTransitionHandler> _handlers;
     private readonly ILogger<JobStateTransitionPublisher> _logger;
 
-    public JobStateTransitionPublisher(ILogger<JobStateTransitionPublisher> logger)
+    public JobStateTransitionPublisher(IEnumerable<IJobStateTransitionHandler> handlers, 
+        ILogger<JobStateTransitionPublisher> logger)
     {
+        _handlers = handlers;
         _logger = logger;
     }
 
-    /// <summary>
-    /// Registers a handler to be notified of state transitions.
-    /// </summary>
-    /// <param name="handler">The handler to register</param>
-    public void Subscribe(IJobStateTransitionHandler handler)
-    {
-        if (handler == null)
-        {
-            throw new ArgumentNullException(nameof(handler));
-        }
+    ///// <summary>
+    ///// Registers a handler to be notified of state transitions.
+    ///// </summary>
+    ///// <param name="handler">The handler to register</param>
+    //public void Subscribe(IJobStateTransitionHandler handler)
+    //{
+    //    if (handler == null)
+    //    {
+    //        throw new ArgumentNullException(nameof(handler));
+    //    }
 
-        if (!_handlers.Contains(handler))
-        {
-            _handlers.Add(handler);
-            _logger.LogDebug("Handler {HandlerType} subscribed to state transitions", handler.GetType().Name);
-        }
-    }
+    //    if (!_handlers.Contains(handler))
+    //    {
+    //        _handlers.Add(handler);
+    //        _logger.LogDebug("Handler {HandlerType} subscribed to state transitions", handler.GetType().Name);
+    //    }
+    //}
 
-    /// <summary>
-    /// Unregisters a handler from state transition notifications.
-    /// </summary>
-    /// <param name="handler">The handler to unregister</param>
-    public void Unsubscribe(IJobStateTransitionHandler handler)
-    {
-        if (_handlers.Remove(handler))
-        {
-            _logger.LogDebug("Handler {HandlerType} unsubscribed from state transitions", handler.GetType().Name);
-        }
-    }
+    ///// <summary>
+    ///// Unregisters a handler from state transition notifications.
+    ///// </summary>
+    ///// <param name="handler">The handler to unregister</param>
+    //public void Unsubscribe(IJobStateTransitionHandler handler)
+    //{
+    //    if (_handlers.Remove(handler))
+    //    {
+    //        _logger.LogDebug("Handler {HandlerType} unsubscribed from state transitions", handler.GetType().Name);
+    //    }
+    //}
 
     /// <summary>
     /// Publishes a state transition event to all registered handlers.
@@ -94,6 +96,6 @@ public class JobStateTransitionPublisher : IJobStateTransitionPublisher
     /// <returns>The count of active handlers</returns>
     public int GetHandlerCount()
     {
-        return _handlers.Count;
+        return _handlers.Count();
     }
 }

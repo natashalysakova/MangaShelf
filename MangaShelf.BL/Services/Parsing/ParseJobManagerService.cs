@@ -1,8 +1,6 @@
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Dto;
-using MangaShelf.Common.Interfaces;
-using MangaShelf.DAL.Models;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
 using Microsoft.EntityFrameworkCore;
@@ -11,30 +9,23 @@ using ParserModel = MangaShelf.DAL.System.Models.Parser;
 
 namespace MangaShelf.BL.Services.Parsing;
 
-public class ParseJobManagerService : IParseJobManagerService, IDisposable
+public class ParseJobManagerService : IParseJobManagerService
 {
     private readonly IDbContextFactory<MangaSystemDbContext> _dbContextFactory;
     private readonly ILogger<ParseJobManagerService> _logger;
     private readonly JobManagerSettings _options;
     private readonly IJobStateTransitionPublisher _stateTransitionPublisher;
-    private readonly IEnumerable<IJobStateTransitionHandler> _handlers;
 
     public ParseJobManagerService(
         IDbContextFactory<MangaSystemDbContext> dbContextFactory,
         IConfigurationService configurationService,
         ILogger<ParseJobManagerService> logger,
-        IJobStateTransitionPublisher stateTransitionPublisher, IEnumerable<IJobStateTransitionHandler> handlers)
+        IJobStateTransitionPublisher stateTransitionPublisher)
     {
         _logger = logger;
         _options = configurationService.JobManager;
         _stateTransitionPublisher = stateTransitionPublisher;
-        _handlers = handlers;
         _dbContextFactory = dbContextFactory;
-
-        foreach (var handle in handlers)
-        {
-            _stateTransitionPublisher.Subscribe(handle);
-        }
     }
 
     public async Task CancelJob(Guid jobId, CancellationToken token)
@@ -512,13 +503,5 @@ public class ParseJobManagerService : IParseJobManagerService, IDisposable
             RunStatus.Cancelled => ParserStatus.Idle,
             _ => ParserStatus.Idle
         };
-    }
-
-    public void Dispose()
-    {
-        foreach (var handler in _handlers)
-        {
-            _stateTransitionPublisher.Unsubscribe(handler);
-        }
     }
 }
