@@ -1,65 +1,67 @@
 @using MangaShelf.BL.Services
 
 @inject ICacheService CacheService
+@inject IUiLocalizationService Localizer
+@inject IVolumePageLocalizationService VolumePageLocalizer
 
 <MudPaper Class="pa-4 mb-4" Elevation="2">
     <MudStack Spacing="3">
         <MudStack Row AlignItems="AlignItems.Center">
-            <MudText Typo="Typo.h6">Shelf filters</MudText>
+            <MudText Typo="Typo.h6">@Localizer["ShelfFilters"]</MudText>
             <MudSpacer />
         </MudStack>
 
         <MudStack Row>
-            <MudAutocomplete T="string" Label="Search" @bind-Value="_searchTerm" SearchFunc="@SearchAutocomplete"
+            <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Value="_searchTerm" SearchFunc="@SearchAutocomplete"
                              Variant="Variant.Outlined" Clearable="true" ResetValueOnEmptyText="true"
                              SelectValueOnTab="true" CoerceValue="true"
                              AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
 
-            <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="ClearFiltersAsync">Reset</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFiltersAsync">Apply</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="ClearFiltersAsync">@Localizer["Reset"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFiltersAsync">@Localizer["Apply"]</MudButton>
 
         </MudStack>
 
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6">
-                <MudText Typo="Typo.subtitle2" Class="mb-2">Ownership status</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@Localizer["OwnershipStatus"]</MudText>
                 <MudChipSet @bind-SelectedValues="SelectedOwnershipStatuses"
                             SelectionMode="SelectionMode.MultiSelection" CheckMark="true" Variant="Variant.Outlined">
                     @foreach (var status in _ownershipStatuses)
                     {
-                        <MudChip T="VolumeStatus" Value="@status" Text="@status.ToString()"
+                        <MudChip T="VolumeStatus" Value="@status" Text="@GetStatusDisplayName(status)"
                                  SelectedColor="Color.Tertiary" />
                     }
                 </MudChipSet>
             </MudItem>
 
             <MudItem xs="12" md="6">
-                <MudText Typo="Typo.subtitle2" Class="mb-2">Reading status</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@Localizer["ReadingStatus"]</MudText>
                 <MudChipSet @bind-SelectedValues="SelectedReadingStatuses" SelectionMode="SelectionMode.MultiSelection"
                             CheckMark="true" Variant="Variant.Outlined">
                     @foreach (var status in _readingStatuses)
                     {
-                        <MudChip T="ReadingStatus" Value="@status" Text="@status.ToString()"
+                        <MudChip T="ReadingStatus" Value="@status" Text="@GetStatusDisplayName(status)"
                                  SelectedColor="Color.Tertiary" />
                     }
                 </MudChipSet>
             </MudItem>
 
             <MudItem xs="12" md="4">
-                <MudSelect T="string" @bind-Value="_likedSelection" Label="Liked" Variant="Variant.Outlined"
+                <MudSelect T="string" @bind-Value="_likedSelection" Label="@Localizer["Liked"]" Variant="Variant.Outlined"
                            FullWidth="true">
-                    <MudSelectItem T="string" Value="@(string.Empty)">Any</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("true")">Liked</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("false")">Not liked</MudSelectItem>
+                    <MudSelectItem T="string" Value="@(string.Empty)">@Localizer["Any"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("true")">@Localizer["Liked"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("false")">@Localizer["NotLiked"]</MudSelectItem>
                 </MudSelect>
             </MudItem>
             <MudItem xs="6" md="4">
-                <MudNumericField T="int?" @bind-Value="_minRating" Label="Min rating" Variant="Variant.Outlined" Min="0"
+                <MudNumericField T="int?" @bind-Value="_minRating" Label="@Localizer["MinRating"]" Variant="Variant.Outlined" Min="0"
                                  Max="5" />
             </MudItem>
 
             <MudItem xs="6" md="4">
-                <MudNumericField T="int?" @bind-Value="_maxRating" Label="Max rating" Variant="Variant.Outlined" Min="0"
+                <MudNumericField T="int?" @bind-Value="_maxRating" Label="@Localizer["MaxRating"]" Variant="Variant.Outlined" Min="0"
                                  Max="5" />
             </MudItem>
         </MudGrid>
@@ -181,4 +183,24 @@ string.Empty;
 
         return 0.5 - (0.01 * position) - (0.001 * (normalizedItem.Length - normalizedSearch.Length));
     }
+
+    private string GetStatusDisplayName(VolumeStatus status) => status switch
+    {
+        VolumeStatus.Wishlist => Localizer["Wishlist"],
+        VolumeStatus.Preorder => Localizer["Preorder"],
+        VolumeStatus.Own => Localizer["Own"],
+        VolumeStatus.Gone => VolumePageLocalizer["Gone"],
+        _ => status.ToString()
+    };
+
+    private string GetStatusDisplayName(ReadingStatus status) => status switch
+    {
+        ReadingStatus.None => VolumePageLocalizer["NotRead"],
+        ReadingStatus.PlanToRead => VolumePageLocalizer["PlanToRead"],
+        ReadingStatus.Reading => VolumePageLocalizer["Reading"],
+        ReadingStatus.Completed => VolumePageLocalizer["Completed"],
+        ReadingStatus.OnHold => VolumePageLocalizer["OnHold"],
+        ReadingStatus.Dropped => VolumePageLocalizer["Dropped"],
+        _ => status.ToString()
+    };
 }

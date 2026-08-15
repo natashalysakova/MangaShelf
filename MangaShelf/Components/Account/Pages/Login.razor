@@ -25,6 +25,7 @@
                               Label="@Localizer["Password"]" 
                               AdornmentIcon="@Icons.Material.Filled.Key" Adornment="Adornment.Start"
                               InputType="InputType.Password" For="@(() => Input.Password)" />
+                <MudCheckBox T="bool" @bind-Checked="@Input.RememberMe" Label="@Localizer["RememberMe"]" />
                 <MudText Typo="Typo.subtitle1">
                     <MudLink Href="/Account/ForgotPassword">@Localizer["ForgotPassword"]</MudLink>
                 </MudText>
@@ -39,6 +40,7 @@
     <input type="hidden" name="returnUrl" value="@ReturnUrl" />
     <input type="hidden" name="Username" value="@Input.Username" />
     <input type="password" hidden name="Password" value="@Input.Password" />
+    <input type="hidden" name="rememberMe" value="@Input.RememberMe.ToString().ToLower()" />
 </form>
 @code {
 

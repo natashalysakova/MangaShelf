@@ -1,3 +1,6 @@
+@inject IUiLocalizationService Localizer
+@inject IVolumePageLocalizationService VolumePageLocalizer
+
 <div class="card-container" @onclick="OnCardClicked" role="button" tabindex="0" @onkeydown="OnCardKeyDown">
     <MudPaper Elevation="8" Class="user-volume-card d-flex flex-column h-100 overflow-hidden">
         <div class="cover-frame position-relative">
@@ -9,7 +12,7 @@
             {
                 <MudStack Class="cover-placeholder" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="1">
                     <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" />
-                    <MudText Typo="Typo.caption">No cover available</MudText>
+                    <MudText Typo="Typo.caption">@Localizer["NoCoverAvailable"]</MudText>
                 </MudStack>
             }
             @if (VolumeCard.IsLiked)
@@ -166,9 +169,25 @@
 
     private string GetCoverAltText() => $"{VolumeCard.SeriesTitle} volume cover";
 
-    private string GetOwnershipText() => $"{VolumeCard.CurrentOwnershipStatus}";
+    private string GetOwnershipText() => VolumeCard.CurrentOwnershipStatus switch
+    {
+        VolumeStatus.Wishlist => Localizer["Wishlist"],
+        VolumeStatus.Preorder => Localizer["Preorder"],
+        VolumeStatus.Own => Localizer["Own"],
+        VolumeStatus.Gone => VolumePageLocalizer["Gone"],
+        _ => VolumeCard.CurrentOwnershipStatus.ToString()
+    };
 
-    private string GetReadingText() => $"{VolumeCard.CurrentReadingStatus}";
+    private string GetReadingText() => VolumeCard.CurrentReadingStatus switch
+    {
+        ReadingStatus.None => VolumePageLocalizer["NotRead"],
+        ReadingStatus.PlanToRead => VolumePageLocalizer["PlanToRead"],
+        ReadingStatus.Reading => VolumePageLocalizer["Reading"],
+        ReadingStatus.Completed => VolumePageLocalizer["Completed"],
+        ReadingStatus.OnHold => VolumePageLocalizer["OnHold"],
+        ReadingStatus.Dropped => VolumePageLocalizer["Dropped"],
+        _ => VolumeCard.CurrentReadingStatus.ToString()
+    };
 
     private Color GetOwnershipColor() => VolumeCard.CurrentOwnershipStatus switch
     {

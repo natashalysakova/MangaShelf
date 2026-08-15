@@ -1,16 +1,17 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using AngleSharp;
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Services.Parsing;
+using MangaShelf.BL.Services.Parsing.Handlers;
 using MangaShelf.DAL.System;
 using MangaShelf.DAL.System.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
-
 using ParserModel = MangaShelf.DAL.System.Models.Parser;
-using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.Tests;
 
@@ -25,8 +26,11 @@ public class ParserJobManagerServiceTests : IDisposable
         services.AddDbContextFactory<MangaSystemDbContext>(options =>
             options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
 
-        var serviceProvider = services.BuildServiceProvider();
-        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
+        services.AddLogging();
+        services.AddScoped<IJobStateTransitionHandler, HandleJobErrorHandler>();
+        services.AddScoped<IJobStateTransitionHandler, NotifyJobStatusChangedHandler>();
+        services.AddScoped<IJobStateTransitionHandler, ParserStateHandler>();
+        services.AddScoped<IJobStateTransitionHandler, ProgressChangeHandler>();
 
         var configMock = new Mock<IConfigurationService>();
         configMock.Setup(x => x.JobManager).Returns(new JobManagerSettings
@@ -37,9 +41,17 @@ public class ParserJobManagerServiceTests : IDisposable
             ScheduledJobsEnabled = true
         });
 
+        services.AddScoped<IConfigurationService>(provider => configMock.Object);
+
+        var serviceProvider = services.BuildServiceProvider();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
+
+        
+
         var logger = new Mock<ILogger<ParseJobManagerService>>().Object;
 
-        _service = new ParseJobManagerService(_dbContextFactory, configMock.Object, logger);
+        var jobStateTransitoinPublisher = new JobStateTransitionPublisher(serviceProvider.GetServices<IJobStateTransitionHandler>(), new Mock<ILogger<JobStateTransitionPublisher>>().Object);
+        _service = new ParseJobManagerService(_dbContextFactory, configMock.Object, logger, jobStateTransitoinPublisher);
     }
 
     [Fact]

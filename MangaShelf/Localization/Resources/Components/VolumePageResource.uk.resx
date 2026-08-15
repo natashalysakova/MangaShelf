@@ -234,6 +234,9 @@
   <data name="Dropped" xml:space="preserve">
     <value>Покинуто</value>
   </data>
+  <data name="NotRead" xml:space="preserve">
+    <value>Не прочитано</value>
+  </data>
   <data name="Author" xml:space="preserve">
     <value>Автор</value>
   </data>
@@ -527,5 +530,8 @@
   </data>
   <data name="CroppedPreview" xml:space="preserve">
     <value>Обрізаний</value>
+  </data>
+  <data name="FullPage" xml:space="preserve">
+    <value>Повна Сторінка</value>
   </data>
 </root>

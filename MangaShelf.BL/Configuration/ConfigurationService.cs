@@ -94,7 +94,11 @@ public class ConfigurationService(
                 }
                 else if (targetType == typeof(TimeSpan))
                 {
-                    property.SetValue(obj, TimeSpan.Parse(config.Value, CultureInfo.InvariantCulture));
+                    var parts = config.Value.Split(':');
+                    int hours = int.Parse(parts[0]);
+                    int minutes = int.Parse(parts[1]);
+                    int seconds = int.Parse(parts[2]);
+                    property.SetValue(obj, new TimeSpan(hours, minutes, seconds));
                 }
                 else
                 {
