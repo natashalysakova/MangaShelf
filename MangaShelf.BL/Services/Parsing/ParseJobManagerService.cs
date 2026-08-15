@@ -47,19 +47,43 @@ public class ParseJobManagerService : IParseJobManagerService
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var currentTime = DateTimeOffset.Now;
-        var allParsers = await dbContext.Parsers.ToListAsync(token);
-        var parsersToRun = allParsers.Where(x => x.NextRun <= currentTime);
+        var allParsers = await dbContext.Parsers
+            .Include(p => p.Jobs)
+            .ToListAsync(token);
+        var parsersToRun = allParsers.Where(x => x.NextRun <= currentTime && x.IsActive).ToList();
 
-        foreach (var parser in parsersToRun)
+        _logger.LogInformation("CreateScheduledJobs: Found {TotalParsers} parsers, {ReadyParsers} ready to run. Current time: {CurrentTime}", 
+            allParsers.Count, parsersToRun.Count, currentTime);
+
+        if (parsersToRun.Count > 0)
         {
-            var job = CreateJobInternal(parser, ParserRunType.FullSite);
-            parser.Jobs.Add(job);
-            parser.NextRun = DateTimeOffset.Now + _options.DelayBetweenRuns;
+            foreach (var parser in parsersToRun)
+            {
+                bool activeParserJobs = parser.Jobs.Any(j => j.Status.IsActive());
+
+                if (activeParserJobs)
+                {
+                    _logger.LogDebug("Skipping parser {ParserName} because it has active jobs.", parser.ParserName);
+                    continue;
+                }
+
+                _logger.LogDebug("Creating scheduled job for parser {ParserName}. NextRun was {NextRun}, updating to {NewNextRun}",
+                    parser.ParserName, parser.NextRun, currentTime + _options.DelayBetweenRuns);
+
+                var job = CreateJobInternal(parser, ParserRunType.FullSite);
+                parser.Jobs.Add(job);
+                parser.NextRun = DateTimeOffset.Now + _options.DelayBetweenRuns;
+            }
+
+            await dbContext.SaveChangesAsync(token);
+        }
+        else
+        {
+            _logger.LogDebug("No parsers ready to run. Parser NextRun times: {ParserNextRuns}",
+                string.Join(", ", allParsers.Select(p => $"{p.ParserName}:{p.NextRun:O}")));
         }
 
-        await dbContext.SaveChangesAsync(token);
-
-        return parsersToRun.Count();
+        return parsersToRun.Count;
     }
 
     public async Task<Guid> CreateSingleJob(string parserName, string url, CancellationToken token)

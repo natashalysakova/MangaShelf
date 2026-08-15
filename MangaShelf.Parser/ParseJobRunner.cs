@@ -109,7 +109,15 @@ internal class ParseJobRunner : IParseJobRunner, IDisposable
             {
                 if (jobManagerOptions.ScheduledJobsEnabled)
                 {
-                    await statusService.CreateScheduledJobs(token);
+                    _logger.LogDebug("Running CreateScheduledJobs (ScheduledJobsEnabled={ScheduledJobsEnabled})", 
+                        jobManagerOptions.ScheduledJobsEnabled);
+                    var scheduledJobsCount = await statusService.CreateScheduledJobs(token);
+                    _logger.LogDebug("Created {ScheduledJobsCount} scheduled jobs", scheduledJobsCount);
+                }
+                else
+                {
+                    _logger.LogDebug("Scheduled jobs are disabled (ScheduledJobsEnabled={ScheduledJobsEnabled})", 
+                        jobManagerOptions.ScheduledJobsEnabled);
                 }
 
                 var jobs = await statusService.PrepareWaitingJobs(token);

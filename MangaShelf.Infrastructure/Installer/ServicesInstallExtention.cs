@@ -37,6 +37,7 @@ public static class ServicesInstallExtention
         builder.Services.AddScoped<IParserFactory, ParserFactory>();
         builder.Services.AddScoped<IJobRequester, JobRequester>();
         builder.Services.AddScoped<IParseJobManagerService, ParseJobManagerService>();
+        builder.Services.AddScoped<IJobUpdateService, JobUpdateService>();
         RegisterInterfaceWithimplementations<IPublisherParser>(builder);
 
         // Image services

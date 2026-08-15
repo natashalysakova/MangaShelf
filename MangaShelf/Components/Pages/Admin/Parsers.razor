@@ -4,6 +4,7 @@
 
 @inject IParserReadService parserService;
 @inject IJobRequester jobManager;
+@inject IJobUpdateService jobUpdateService;
 @implements IDisposable
 
 
@@ -64,7 +65,7 @@
                         else if (parser.Status == ParserStatus.Idle)
                         {
 
-                            <MudIconButton Class="@(parser.Status == ParserStatus.Idle ? "visible" : "hidden")" OnClick="(() => RunParser(parser.Id))" Size="Size.Large" Icon="@Icons.Material.Rounded.PlayArrow" Color="Color.Success" Disabled="!parser.IsActive"></MudIconButton>
+                            <MudIconButton Class="@(parser.Status == ParserStatus.Idle ? "visible" : "hidden")" OnClick="(() => RunParser(parser.Id))" Size="Size.Large" Icon="@Icons.Material.Rounded.PlayArrow" Color="Color.Success" Disabled="@(!parser.IsActive || parsersPendingSubmission.Contains(parser.Id))"></MudIconButton>
                         }
                         else
                         {
@@ -78,13 +79,9 @@
                             </MudProgressCircular>
                         }
 
-                        @{
-                            var difference = parser.NextRun - DateTimeOffset.Now;
-                            var text = $"{difference.Hours}h {difference.Minutes}m {difference.Seconds}s";
-                        }
                         <MudStack Row Spacing="1">
                             <MudText Typo="Typo.caption">Next Run in</MudText>
-                            <MudText Typo="Typo.caption">@text</MudText>
+                            <MudText Typo="Typo.caption">@GetCountdownText(parser.Id)</MudText>
                         </MudStack>
                     </MudStack>
                 </MudPaper>
@@ -114,7 +111,20 @@
         color: var(--mud-palette-text-secondary) !important;
     }
 </style>
-<MudButton Variant="Variant.Filled" OnClick="@(() => { showPanel = !showPanel; })">@(showPanel ? "Hide panel" : "Show panel")</MudButton>
+<MudStack Row Spacing="2" Class="mb-4">
+    <MudButton Variant="Variant.Filled" OnClick="@(() => { showPanel = !showPanel; })">@(showPanel ? "Hide panel" : "Show panel")</MudButton>
+    @{
+        var cancellableJobsCount = jobs?.Count(j => j.Status == RunStatus.Waiting || j.Status == RunStatus.Running || j.Status == RunStatus.GatheringVolumes) ?? 0;
+        var runningJobsCount = statuses?.Count(s => s.Status != ParserStatus.Idle) ?? 0;
+        var runAllDisabled = runningJobsCount > 0 || statuses?.All(s => !s.IsActive) == true;
+    }
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="RunAllParsers" Disabled="@runAllDisabled">
+        Run All
+    </MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CancelAllJobs" Disabled="@(cancellableJobsCount == 0)">
+        Cancel All (@cancellableJobsCount)
+    </MudButton>
+</MudStack>
 
 <MudTable Items="jobs" Hover="true" Breakpoint="Breakpoint.Sm">
     <HeaderContent>
@@ -130,18 +140,23 @@
     </HeaderContent>
     <RowTemplate Context="row">
         <MudTd>
-            @if (row.Status == RunStatus.Waiting || row.Status == RunStatus.Running || row.Status == RunStatus.GatheringVolumes)
+            @{
+                bool isCancelling = jobsPendingCancellation.Contains(row.Id);
+                bool canCancel = (row.Status == RunStatus.Waiting || row.Status == RunStatus.Running || row.Status == RunStatus.GatheringVolumes) && !isCancelling;
+            }
+            @if (canCancel || isCancelling)
             {
-                <MudIconButton Size="Size.Small" OnClick="(() => CancelJob(row.Id))" Icon="@Icons.Material.Rounded.Cancel" Color="Color.Error"></MudIconButton>
+                <MudIconButton Size="Size.Small" OnClick="(() => CancelJob(row.Id))" Icon="@Icons.Material.Rounded.Cancel" Color="Color.Error" Disabled="@isCancelling"></MudIconButton>
             }
         </MudTd>
         <MudTd DataLabel="Parser">@row.ParserStatus.ParserName</MudTd>
         <MudTd DataLabel="Created">@row.Created.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")</MudTd>
         <MudTd DataLabel="Started">@row.Started.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")</MudTd>
         @{
-            var className = "cell-" + @row.Status;
+            var displayStatus = jobsPendingCancellation.Contains(row.Id) ? RunStatus.Cancelled : row.Status;
+            var className = "cell-" + displayStatus;
         }
-        <MudTd Class="@className" DataLabel="Status">@row.Status</MudTd>
+        <MudTd Class="@className" DataLabel="Status">@displayStatus</MudTd>
         <MudTd DataLabel="Finished">@row.Finished?.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss.fff")</MudTd>
         <MudTd DataLabel="Url">@row.Url</MudTd>
         <MudTd DataLabel="Progress">@row.Progress.ToString("N2")</MudTd>
@@ -214,57 +229,186 @@
     System.DateTimeOffset lastCheckTime;
     private Dictionary<Guid, CancellationToken> jobDictionary = new();
     private const int LoadJobs = 20;
+    private System.Timers.Timer countdownTimer;
+    private Dictionary<Guid, string> countdownCache = new();
+    private HashSet<Guid> jobsPendingCancellation = new();
+    private HashSet<Guid> parsersPendingSubmission = new();
 
     protected override async Task OnInitializedAsync()
     {
         lastCheckTime = System.DateTimeOffset.Now;
-        jobs = await parserService.GetJobs(LoadJobs);
 
-        await RunParse();
+        // Subscribe to job update events
+        jobUpdateService.StatusesChanged += OnStatusesChanged;
+        jobUpdateService.JobsChanged += OnJobsChanged;
+
+        // Initialize with current data
+        statuses = jobUpdateService.CurrentStatuses;
+        jobs = jobUpdateService.CurrentJobs;
+
+        // Start polling in the background
+        _ = jobUpdateService.StartPollingAsync(tokenSource.Token);
+
+        // Start countdown timer for real-time updates
+        InitializeCountdownTimer();
     }
 
-    private async Task RunParse()
+    private void InitializeCountdownTimer()
     {
-        do
-        {
-            statuses = await parserService.GetStatusesAsync(tokenSource.Token);
-
-            StateHasChanged();
-
-            // var result = await parserService.GetNewJobsSince(lastCheckTime, tokenSource.Token);
-            // lastCheckTime = System.DateTimeOffset.Now;
-
-            jobs = await parserService.GetJobs(LoadJobs);
-
-            await Task.Delay(2000);
-
-        } while (!tokenSource.IsCancellationRequested);
+        countdownTimer = new System.Timers.Timer(1000); // Update every 1 second
+        countdownTimer.Elapsed += (sender, e) => UpdateCountdowns();
+        countdownTimer.AutoReset = true;
+        countdownTimer.Start();
     }
 
-    // private void AddToJobList(IEnumerable<ParserRun> newJobs)
-    // {
-    //     foreach (var job in newJobs)
-    //     {
-    //         var existingJob = jobs.FirstOrDefault(x => x.Id == job.Id);
-    //         if (existingJob == null)
-    //         {
-    //             jobs.Insert(0, job);
-    //         }
-    //     }
-    // }
+    private void UpdateCountdowns()
+    {
+        if (statuses == null) return;
+
+        bool hasChanges = false;
+        foreach (var parser in statuses)
+        {
+            var newText = CalculateCountdownText(parser.NextRun);
+
+            if (!countdownCache.TryGetValue(parser.Id, out var oldText) || oldText != newText)
+            {
+                countdownCache[parser.Id] = newText;
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges)
+        {
+            InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private string CalculateCountdownText(DateTimeOffset nextRun)
+    {
+        var difference = nextRun - DateTimeOffset.Now;
+        if (difference.TotalSeconds < 0)
+        {
+            return "0h 0m 0s";
+        }
+        return $"{(int)difference.TotalHours}h {difference.Minutes}m {difference.Seconds}s";
+    }
+
+    private string GetCountdownText(Guid parserId)
+    {
+        if (countdownCache.TryGetValue(parserId, out var text))
+        {
+            return text;
+        }
+        return "0h 0m 0s";
+    }
+
+    private void OnStatusesChanged(object? sender, ParserStatusesChangedEventArgs e)
+    {
+        statuses = e.NewStatuses;
+
+        // Clear parsers from pending submission set if their status changed (indicating job was picked up)
+        if (statuses != null && parsersPendingSubmission.Count > 0)
+        {
+            var pendingParsersWithStatusChanges = statuses
+                .Where(s => parsersPendingSubmission.Contains(s.Id) && s.Status != ParserStatus.Idle)
+                .Select(s => s.Id)
+                .ToList();
+
+            foreach (var parserId in pendingParsersWithStatusChanges)
+            {
+                parsersPendingSubmission.Remove(parserId);
+            }
+        }
+
+        // Update cache with new values instead of clearing
+        if (statuses != null)
+        {
+            foreach (var parser in statuses)
+            {
+                countdownCache[parser.Id] = CalculateCountdownText(parser.NextRun);
+            }
+        }
+        StateHasChanged();
+    }
+
+    private void OnJobsChanged(object? sender, ParserJobsChangedEventArgs e)
+    {
+        jobs = e.NewJobs;
+
+        // Remove jobs from pending cancellation set if they're confirmed as cancelled or finished
+        var jobsToRemove = jobsPendingCancellation
+            .Where(jobId => jobs.FirstOrDefault(j => j.Id == jobId) is { } job 
+                && (job.Status == RunStatus.Cancelled || job.Status == RunStatus.Finished || job.Status == RunStatus.Error))
+            .ToList();
+
+        foreach (var jobId in jobsToRemove)
+        {
+            jobsPendingCancellation.Remove(jobId);
+        }
+
+        StateHasChanged();
+    }
 
     public void Dispose()
     {
+        // Stop countdown timer
+        if (countdownTimer != null)
+        {
+            countdownTimer.Stop();
+            countdownTimer.Dispose();
+        }
+
+        // Unsubscribe from events
+        if (jobUpdateService != null)
+        {
+            jobUpdateService.StatusesChanged -= OnStatusesChanged;
+            jobUpdateService.JobsChanged -= OnJobsChanged;
+        }
+
+        // Cancel polling
         if (tokenSource != null)
         {
             tokenSource.Cancel();
+            tokenSource.Dispose();
         }
     }
 
     private async Task RunParser(Guid id)
     {
+        // Mark this parser as having a pending job submission
+        parsersPendingSubmission.Add(id);
+        StateHasChanged();
+
         await jobManager.CreateParserJob(id);
+        // Don't clear the pending set here - wait for server confirmation via OnJobsChanged
     }
+
+    private async Task RunAllParsers()
+    {
+        if (statuses == null) return;
+
+        // Get all active parsers that are idle
+        var parsersToRun = statuses
+            .Where(s => s.IsActive && s.Status == ParserStatus.Idle)
+            .Select(s => s.Id)
+            .ToList();
+
+        if (parsersToRun.Count == 0) return;
+
+        // Mark all parsers as having pending job submissions
+        foreach (var parserId in parsersToRun)
+        {
+            parsersPendingSubmission.Add(parserId);
+        }
+        StateHasChanged();
+
+        // Submit jobs for all parsers
+        foreach (var parserId in parsersToRun)
+        {
+            await jobManager.CreateParserJob(parserId);
+        }
+    }
+
     private async Task RunForUrl(MouseEventArgs args)
     {
         try
@@ -280,11 +424,43 @@
         }
 
     }
+
     private async Task CancelJob(Guid? id)
     {
         if (id != null)
         {
+            // Optimistically mark as cancelled locally
+            jobsPendingCancellation.Add(id.Value);
+            StateHasChanged();
+
+            // Send cancellation request to server
             await jobManager.CancelJob(id.Value);
+        }
+    }
+
+    private async Task CancelAllJobs()
+    {
+        if (jobs == null) return;
+
+        // Get all jobs that can be cancelled
+        var jobsToCancel = jobs
+            .Where(j => j.Status == RunStatus.Waiting || j.Status == RunStatus.Running || j.Status == RunStatus.GatheringVolumes)
+            .Select(j => j.Id)
+            .ToList();
+
+        if (jobsToCancel.Count == 0) return;
+
+        // Mark all jobs as pending cancellation
+        foreach (var jobId in jobsToCancel)
+        {
+            jobsPendingCancellation.Add(jobId);
+        }
+        StateHasChanged();
+
+        // Send cancellation requests to server
+        foreach (var jobId in jobsToCancel)
+        {
+            await jobManager.CancelJob(jobId);
         }
     }
 
