@@ -1,3 +1,4 @@
+using AngleSharp.Html;
 using MangaShelf.BL.Contracts;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.Infrastructure.Installer;
@@ -18,6 +19,9 @@ public class Program
         builder.AddParserServices();
 
         var host = builder.Build();
+
+        var cacheInvalidator = host.Services.GetRequiredService<ICacheInvalidator>();
+        await cacheInvalidator.RebuildCache();
 
         await host.RunAsync();
     }

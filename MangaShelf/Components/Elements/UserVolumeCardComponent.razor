@@ -1,4 +1,4 @@
-<MudLink Href="@($"/volume/{VolumeCard.PublicId}")" Class="text-decoration-none">
+<div class="card-container" @onclick="OnCardClicked" role="button" tabindex="0" @onkeydown="OnCardKeyDown">
     <MudPaper Elevation="8" Class="user-volume-card d-flex flex-column h-100 overflow-hidden">
         <div class="cover-frame position-relative">
             @if (!string.IsNullOrWhiteSpace(VolumeCard.CoverImageUrlSmall))
@@ -57,9 +57,19 @@
             </div>
         </MudStack>
     </MudPaper>
-</MudLink>
+</div>
 
 <style>
+    .card-container {
+        cursor: pointer;
+        outline: none;
+    }
+
+    .card-container:focus {
+        outline: 2px solid var(--mud-palette-primary);
+        border-radius: 16px;
+    }
+
     .user-volume-card {
         border-radius: 16px;
         background: linear-gradient(160deg, var(--mud-palette-surface) 0%, color-mix(in srgb, var(--mud-palette-surface) 88%, var(--mud-palette-primary) 12%) 100%);
@@ -136,13 +146,29 @@
     [Parameter]
     public UserVolumeCard VolumeCard { get; set; } = default!;
 
+    [Parameter]
+    public EventCallback<string> OnCardClick { get; set; }
+
+    private async Task OnCardClicked()
+    {
+        await OnCardClick.InvokeAsync(VolumeCard.PublicId);
+    }
+
+    private async Task OnCardKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            await OnCardClicked();
+        }
+    }
+
     private string GetRatingValueText() => $"{Math.Clamp(VolumeCard.UserRating!.Value, 0, 5):0.0}";
 
     private string GetCoverAltText() => $"{VolumeCard.SeriesTitle} volume cover";
 
     private string GetOwnershipText() => $"{VolumeCard.CurrentOwnershipStatus}";
 
-    private string GetReadingText() => $"Reading: {VolumeCard.CurrentReadingStatus}";
+    private string GetReadingText() => $"{VolumeCard.CurrentReadingStatus}";
 
     private Color GetOwnershipColor() => VolumeCard.CurrentOwnershipStatus switch
     {

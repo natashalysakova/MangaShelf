@@ -25,6 +25,8 @@ public interface IVolumeService : IService
     Task<IEnumerable<CardVolumeDto>> GetVolumesBySeriesId(Guid seriesId, CancellationToken token = default);
     Task<CardVolumeDto> GetVolumeCardById(Guid volumeId, CancellationToken token = default);
     Task<VolumeDto?> GetFullVolumeByPublicIdAsync(string volumePublicId, CancellationToken token = default);
+    Task<VolumeTitle> GetVolumeTitle(string publicId, CancellationToken token = default);
+
     Task<UserVolumeStatusDto> GetVolumeStatusInfo(Guid volumeId, string userIdentityId, CancellationToken token = default);
     Task<VolumeStatsDto> GetVolumeStats(Guid volumeId, CancellationToken token = default);
     Task<IEnumerable<UserVolumeCard>> GetUserVolumes(string userIdentityId, IUserShelfFilterOptions filterOptions, CancellationToken token = default);
@@ -44,6 +46,7 @@ public interface IVolumeService : IService
     Task<IEnumerable<ReviewDto>> GetReviews(Guid volumeId, CancellationToken token = default);
     Task<Reading?> GetReading(Guid id, CancellationToken token = default);
     Task<Ownership?> GetOwnership(Guid id, CancellationToken token = default);
+
 }
 
 public class VolumeCoverDto
@@ -53,4 +56,10 @@ public class VolumeCoverDto
     public string? OriginalCover { get; set; } 
     public string? SmallCover { get; set; }
     public string? CroppedCover { get; set; }
+}
+
+public class VolumeTitle
+{
+    public required string FullTitle { get; set; }
+    public string? OriginalTitle { get; set; }
 }
