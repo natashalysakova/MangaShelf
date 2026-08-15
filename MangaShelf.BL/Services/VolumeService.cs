@@ -715,4 +715,24 @@ public class VolumeService(
 
         return volume.ToCoverDto();
     }
+
+    public async Task<VolumeTitle> GetVolumeTitle(string publicId, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+
+        var volume = await context.Volumes
+            .Include(x => x.Series)
+            .SingleOrDefaultAsync(x => x.PublicId == publicId);
+        
+        if(volume == null)
+        {
+            throw new EntityNotFoundException();
+        }
+
+        return new VolumeTitle()
+        {
+            FullTitle = volume.GetFullVolumeName(),
+            OriginalTitle = volume.Series!.OriginalTitle
+        };
+    }
 }

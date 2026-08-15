@@ -1,0 +1,66 @@
+@using MangaShelf.Components.Pages.VolumePage
+@using MangaShelf.BL.Dto
+
+@inject IVolumePageLocalizationService Localizer
+@inject NavigationManager NavigationManager
+@inject IVolumeService VolumeService
+@inject ILogger<VolumeQuickViewModal> Logger
+
+<MudDialog MaxWidth="MaxWidth.Large" FullWidth="true">
+    <TitleContent>
+        @if (volumeTitle != null)
+        {
+            <MudItem xs="12">
+                <MudText Typo="Typo.h4">@volumeTitle.FullTitle</MudText>
+                <MudText Typo="Typo.caption">@volumeTitle.OriginalTitle</MudText>
+            </MudItem>
+        }
+        else
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+        }
+    </TitleContent>
+    <DialogContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Style="max-height: 70vh; overflow-y: auto; background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1rem;">
+            <VolumePageContent PublicId="@PublicId" ShowTitle="false" />
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">@Localizer["Close"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ViewFullSize">
+            <MudIcon Icon="@Icons.Material.Filled.OpenInFull" Class="mr-2" />
+            @Localizer["FullPage"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public required string PublicId { get; set; }
+
+    VolumeTitle? volumeTitle;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            volumeTitle = await VolumeService.GetVolumeTitle(PublicId);
+            MudDialog.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading volume title for PublicId: {PublicId}", PublicId);
+        }
+    }
+
+    private void Close() => MudDialog.Cancel();
+
+    private void ViewFullSize()
+    {
+        MudDialog.Cancel();
+        NavigationManager.NavigateTo($"/volume/{PublicId}");
+    }
+}

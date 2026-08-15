@@ -6,6 +6,7 @@
 @inherits UserContextComponent
 
 @inject IVolumeService VolumeService
+@inject IDialogService DialogService
 
 @attribute [Authorize]
 
@@ -38,7 +39,7 @@ else
                     @foreach (var volume in seriesGroup.Volumes)
                     {
                         <MudItem xs="6" sm="4" md="3" lg="2" xl="2">
-                            <UserVolumeCardComponent VolumeCard="volume" />
+                            <UserVolumeCardComponent VolumeCard="volume" OnCardClick="OpenVolumeModal" />
                         </MudItem>
                     }
                 </MudGrid>
@@ -62,6 +63,20 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadVolumesAsync();
+    }
+
+    private async Task OpenVolumeModal(string publicId)
+    {
+        var parameters = new DialogParameters<VolumeQuickViewModal>
+        {
+            { x => x.PublicId, publicId }
+        };
+
+        var dialog = await DialogService.ShowAsync<VolumeQuickViewModal>("", parameters);
+        await dialog.Result;
+
+        // Refresh volumes after modal closes in case any data changed
         await LoadVolumesAsync();
     }
 
