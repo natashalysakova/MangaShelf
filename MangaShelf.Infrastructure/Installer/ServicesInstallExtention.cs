@@ -4,6 +4,7 @@ using MangaShelf.BL.Enums;
 using MangaShelf.BL.Parsers;
 using MangaShelf.BL.Services;
 using MangaShelf.BL.Services.Parsing;
+using MangaShelf.BL.Services.Parsing.Handlers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.Common.Localization.Interfaces;
 using MangaShelf.Common.Localization.Services;
@@ -36,9 +37,17 @@ public static class ServicesInstallExtention
         builder.Services.AddKeyedScoped<IHtmlDownloader, MalopusHtmlDownloader>(HtmlDownloaderKeys.Malopus);
         builder.Services.AddScoped<IParserFactory, ParserFactory>();
         builder.Services.AddScoped<IJobRequester, JobRequester>();
-        builder.Services.AddScoped<IParseJobManagerService, ParseJobManagerService>();
         builder.Services.AddScoped<IJobUpdateService, JobUpdateService>();
         RegisterInterfaceWithimplementations<IPublisherParser>(builder);
+        builder.Services.AddScoped<IParseJobManagerService, ParseJobManagerService>();
+
+        // state-machine services
+        builder.Services.AddScoped<IJobStateTransitionPublisher, JobStateTransitionPublisher>();
+        builder.Services.AddScoped<IJobStateTransitionHandler, HandleJobErrorHandler>();
+        builder.Services.AddScoped<IJobStateTransitionHandler, NotifyJobStatusChangedHandler>();
+        builder.Services.AddScoped<IJobStateTransitionHandler, ProgressChangeHandler>();
+        builder.Services.AddScoped<IJobStateTransitionHandler, SaveJobStateHistoryHandler>();
+        builder.Services.AddScoped<IJobStateTransitionHandler, ParserStateHandler>();
 
         // Image services
         builder.Services.AddScoped<IImageManager, ImageManager>();

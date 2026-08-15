@@ -234,6 +234,9 @@
   <data name="Dropped" xml:space="preserve">
     <value>Dropped</value>
   </data>
+  <data name="NotRead" xml:space="preserve">
+    <value>Not Read</value>
+  </data>
   <data name="Author" xml:space="preserve">
     <value>Author</value>
   </data>
@@ -530,5 +533,8 @@
   </data>
   <data name="NoDescrption" xml:space="preserve">
     <value>No description</value>
+  </data>
+  <data name="FullPage" xml:space="preserve">
+    <value>Full Page</value>
   </data>
 </root>

@@ -12,6 +12,7 @@ public class MangaSystemDbContext : DbContext
     public DbSet<Settings> Settings { get; set; }
 
     public DbSet<DataCorrection> DataCorrections { get; set; }
+    public DbSet<JobStateHistory> JobStateHistories { get; set; }
 
     public MangaSystemDbContext(DbContextOptions<MangaSystemDbContext> options) : base(options)
     {
@@ -48,6 +49,12 @@ public class MangaSystemDbContext : DbContext
         modelBuilder.Entity<Settings>()
             .HasIndex(s => new { s.Section, s.Key })
             .IsUnique();
+
+        modelBuilder.Entity<JobStateHistory>()
+            .HasOne(h => h.Job)
+            .WithMany()
+            .HasForeignKey(h => h.JobId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<DataCorrection>()
             .HasKey(x => x.Name);

@@ -89,7 +89,8 @@ public class ParserReadService(IDbContextFactory<MangaSystemDbContext> dbContext
         List<ParserStatusDto> parserStatusDtos = new();
 
         var parsers = await context.Parsers
-            .Include(p => p.Jobs.OrderBy(r => r.Created).Where(x=>x.Status == RunStatus.Running || x.Status == RunStatus.GatheringVolumes))
+            .Include(p => p.Jobs.OrderBy(r => r.Created)
+            .Where(x=>x.Status == RunStatus.Running || x.Status == RunStatus.GatheringVolumes))
                 .ThenInclude(r => r.Errors)
             .ToListAsync(token);
 

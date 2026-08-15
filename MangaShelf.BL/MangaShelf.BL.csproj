@@ -7,9 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="1.4.0" />
-    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.14.0" />
+    <PackageReference Include="AngleSharp" Version="1.7.1" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.16.0" />
     <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
+    <PackageReference Include="Stateless" Version="5.20.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,12 +2,13 @@
 
 public enum RunStatus
 {
-    Waiting = 0,
-    GatheringVolumes = 1,
-    Running = 2,
-    Finished = 3,
-    Error = 4,
-    Cancelled = 5
+    Created = 0,
+    Waiting = 1,
+    GatheringVolumes = 2,
+    Running = 3,
+    Finished = 4,
+    Error = 5,
+    Cancelled = 6,
 }
 
 
@@ -33,26 +34,6 @@ public static class RunStatusExtensions
         return status == RunStatus.Finished || status == RunStatus.Error || status == RunStatus.Cancelled;
     }
 
-    public static bool IsError(this RunStatus status)
-    {
-        return status == RunStatus.Error;
-    }
-
-    public static bool IsCancelled(this RunStatus status)
-    {
-        return status == RunStatus.Cancelled;
-    }
-
-    public static bool IsWaiting(this RunStatus status)
-    {
-        return status == RunStatus.Waiting;
-    }
-
-    public static bool IsFinished(this RunStatus status)
-    {
-        return status == RunStatus.Finished;
-    }
-
     /// <summary>
     /// Determines whether the specified RunStatus is running (Running or GatheringVolumes).
     /// </summary>
@@ -61,5 +42,20 @@ public static class RunStatusExtensions
     public static bool IsRunning(this RunStatus status)
     {
         return status == RunStatus.Running || status == RunStatus.GatheringVolumes;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="status"></param>
+    /// <returns></returns>
+    public static bool IsIdle(this RunStatus status)
+    {
+        return status == RunStatus.Created || status == RunStatus.Waiting;
+    }
+
+    public static bool NotSuccessful(this RunStatus status)
+    {
+        return status == RunStatus.Error || status == RunStatus.Cancelled;
     }
 }

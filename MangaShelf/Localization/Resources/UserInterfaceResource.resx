@@ -621,4 +621,58 @@
     <value>Error</value>
     <comment/>
   </data>
+  <data name="NoCoverAvailable" xml:space="preserve">
+    <value>No cover available</value>
+  </data>
+  <data name="NoVolumesFound" xml:space="preserve">
+    <value>No volumes found</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Remember me</value>
+  </data>
+  <data name="UnknownSeries" xml:space="preserve">
+    <value>Unknown series</value>
+  </data>
+  <data name="VolumeCount" xml:space="preserve">
+    <value>volume</value>
+  </data>
+  <data name="VolumeCountPlural" xml:space="preserve">
+    <value>volumes</value>
+  </data>
+  <data name="ErrorLoadingVolumes" xml:space="preserve">
+    <value>Error loading volumes</value>
+  </data>
+  <data name="ShelfFilters" xml:space="preserve">
+    <value>Shelf filters</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="OwnershipStatus" xml:space="preserve">
+    <value>Ownership status</value>
+  </data>
+  <data name="ReadingStatus" xml:space="preserve">
+    <value>Reading status</value>
+  </data>
+  <data name="Liked" xml:space="preserve">
+    <value>Liked</value>
+  </data>
+  <data name="NotLiked" xml:space="preserve">
+    <value>Not liked</value>
+  </data>
+  <data name="MinRating" xml:space="preserve">
+    <value>Min rating</value>
+  </data>
+  <data name="MaxRating" xml:space="preserve">
+    <value>Max rating</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Any</value>
+  </data>
 </root>

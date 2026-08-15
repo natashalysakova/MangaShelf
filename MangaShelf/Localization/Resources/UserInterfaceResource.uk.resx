@@ -621,4 +621,58 @@
     <value>Помилка</value>
     <comment/>
   </data>
+  <data name="NoCoverAvailable" xml:space="preserve">
+    <value>Немає обкладинки</value>
+  </data>
+  <data name="NoVolumesFound" xml:space="preserve">
+    <value>Томи не знайдені</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Запам'ятати мене</value>
+  </data>
+  <data name="UnknownSeries" xml:space="preserve">
+    <value>Невідома серія</value>
+  </data>
+  <data name="VolumeCount" xml:space="preserve">
+    <value>том</value>
+  </data>
+  <data name="VolumeCountPlural" xml:space="preserve">
+    <value>томи</value>
+  </data>
+  <data name="ErrorLoadingVolumes" xml:space="preserve">
+    <value>Помилка завантаження томів</value>
+  </data>
+  <data name="ShelfFilters" xml:space="preserve">
+    <value>Фільтри полиці</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Скинути</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Застосувати</value>
+  </data>
+  <data name="OwnershipStatus" xml:space="preserve">
+    <value>Статус володіння</value>
+  </data>
+  <data name="ReadingStatus" xml:space="preserve">
+    <value>Статус читання</value>
+  </data>
+  <data name="Liked" xml:space="preserve">
+    <value>Сподобалося</value>
+  </data>
+  <data name="NotLiked" xml:space="preserve">
+    <value>Не сподобалося</value>
+  </data>
+  <data name="MinRating" xml:space="preserve">
+    <value>Мінімальна оцінка</value>
+  </data>
+  <data name="MaxRating" xml:space="preserve">
+    <value>Максимальна оцінка</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Будь-який</value>
+  </data>
 </root>

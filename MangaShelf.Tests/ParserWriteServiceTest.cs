@@ -1,17 +1,18 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using MangaShelf.DAL.System;
-using MangaShelf.DAL.System.Models;
-using Xunit;
-using Assert = Xunit.Assert;
-
-using ParserModel = MangaShelf.DAL.System.Models.Parser;
-using MangaShelf.DAL.Models;
-using MangaShelf.Common.Interfaces;
+using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Services.Parsing;
-using Moq;
+using MangaShelf.BL.Services.Parsing.Handlers;
+using MangaShelf.Common.Interfaces;
+using MangaShelf.DAL.Models;
+using MangaShelf.DAL.System;
+using MangaShelf.DAL.System.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
+using Assert = Xunit.Assert;
+using ParserModel = MangaShelf.DAL.System.Models.Parser;
 
 namespace MangaShelf.Tests
 {
@@ -25,12 +26,31 @@ namespace MangaShelf.Tests
             var services = new ServiceCollection();
             services.AddDbContextFactory<MangaSystemDbContext>(options =>
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
+            services.AddLogging();
+
+            services.AddScoped<IJobStateTransitionHandler, HandleJobErrorHandler>();
+            services.AddScoped<IJobStateTransitionHandler, NotifyJobStatusChangedHandler>();
+            services.AddScoped<IJobStateTransitionHandler, ParserStateHandler>();
+            services.AddScoped<IJobStateTransitionHandler, ProgressChangeHandler>();
+            services.AddScoped<IJobStateTransitionPublisher, JobStateTransitionPublisher>();
+
+            var configMock = new Mock<IConfigurationService>();
+            configMock.Setup(x => x.JobManager).Returns(new JobManagerSettings
+            {
+                DelayBetweenRuns = TimeSpan.FromHours(1),
+                MaxParallelParsers = 5,
+                ResetNextRun = false,
+                ScheduledJobsEnabled = true
+            });
+
+            services.AddScoped<IConfigurationService>(provider => configMock.Object);
+
 
             var serviceProvider = services.BuildServiceProvider();
             _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
             var logger = new Mock<ILogger<ParseJobManagerService>>().Object;
-            var configuration = new Mock<IConfigurationService>().Object;
-            _service = new ParseJobManagerService(_dbContextFactory, configuration, logger);
+            var jobStateTransitoinPublisher = serviceProvider.GetRequiredService<IJobStateTransitionPublisher>();
+            _service = new ParseJobManagerService(_dbContextFactory, configMock.Object, logger, jobStateTransitoinPublisher);
         }
 
         [Fact]
@@ -98,7 +118,7 @@ namespace MangaShelf.Tests
             // Arrange
             using var context = _dbContextFactory.CreateDbContext();
             var parser = new ParserModel { ParserName = "test", Status = ParserStatus.Parsing };
-            var job = new ParserJob { Id = Guid.NewGuid(), Progress = 0, ParserStatus = parser };
+            var job = new ParserJob { Id = Guid.NewGuid(), Progress = 25, ParserStatus = parser, Status = RunStatus.Running };
             context.Parsers.Add(parser);
             context.Runs.Add(job);
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
