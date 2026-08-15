@@ -12,7 +12,7 @@ namespace MangaShelf.BL.Parsers;
 
 public abstract class BaseParser : IPublisherParser
 {
-    private readonly ILogger<BaseParser> _logger;
+    protected readonly ILogger<BaseParser> _logger;
     private readonly IHtmlDownloader _htmlDownloader;
 
     public BaseParser(ILogger<BaseParser> logger, IHtmlDownloader htmlDownloader)
@@ -106,7 +106,7 @@ public abstract class BaseParser : IPublisherParser
             {
                 throw new Exception("Page does not contain any volumes. Probably last page reached.");
             }
-            var attribute = nodes.Where(x=> x.Attributes["href"] != null).Select(x => x.Attributes["href"]);
+            var attribute = nodes.Where(x => x.Attributes["href"] != null).Select(x => x.Attributes["href"]);
             return attribute.Select(x => x.Value);
         }
         catch
@@ -213,13 +213,21 @@ public abstract class BaseParser : IPublisherParser
     {
         if (year != null && int.TryParse(year, out var yearNumber))
         {
-            var month = 12;
-            var day = 31;
+            var dateTime = new DateTime(yearNumber, 12, 31);
+            var offset = TimeZoneInfo.Local.GetUtcOffset(dateTime);
+            return new DateTimeOffset(dateTime, offset);
+        }
 
-            var date = new DateTime(yearNumber, month, day);
-            var offset = TimeZoneInfo.Local.GetUtcOffset(date);
+        return null;
+    }
 
-            return new DateTimeOffset(date, offset);
+    protected static DateTimeOffset? ParseYearAndMonthIntoLastDayOfMonth(string? year, int month)
+    {
+        if (year != null && int.TryParse(year, out var yearNumber))
+        {
+            var dateTime = new DateTime(yearNumber, month, DateTime.DaysInMonth(yearNumber, month));
+            var offset = TimeZoneInfo.Local.GetUtcOffset(dateTime);
+            return new DateTimeOffset(dateTime, offset);
         }
 
         return null;

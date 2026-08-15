@@ -39,7 +39,7 @@ public enum SeriesType
     Manhwa = 2,
     Manhua = 3,
     Novel = 4,
-    OEL = 5,
+    GraphicNovel = 5,
     Comic = 6,
     Artbook = 7,
     Other = 8

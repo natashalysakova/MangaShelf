@@ -24,15 +24,31 @@ public class ParserReadService(IDbContextFactory<MangaSystemDbContext> dbContext
     {
         using var contex = dbContextFactory.CreateDbContext();
 
-        var lastRuns = contex.Runs
+        // Get the last X jobs ordered by creation date (descending)
+        var lastRuns = await contex.Runs
             .Include(p => p.ParserStatus)
             .Include(r => r.Errors)
             .Include(v => v.AddedVolumes)
             .Include(v => v.UpdatedVolumes)
             .OrderByDescending(r => r.Created)
-            .Take(count);
+            .Take(count)
+            .ToListAsync(cancellationToken);
 
-        return await lastRuns.ToListAsync(cancellationToken);
+        // Get all active jobs that are not in the last X
+        var activeRunsOutsideLastX = await contex.Runs
+            .Include(p => p.ParserStatus)
+            .Include(r => r.Errors)
+            .Include(v => v.AddedVolumes)
+            .Include(v => v.UpdatedVolumes)
+            .Where(r => (r.Status == RunStatus.Waiting || r.Status == RunStatus.Running || r.Status == RunStatus.GatheringVolumes)
+                && !lastRuns.Select(lr => lr.Id).Contains(r.Id))
+            .OrderByDescending(r => r.Created)
+            .ToListAsync(cancellationToken);
+
+        // Combine results: last X jobs + active jobs outside the last X
+        var combinedResults = lastRuns.Concat(activeRunsOutsideLastX).ToList();
+
+        return combinedResults;
     }
 
     public async Task<RunStatus> GetJobStatusById(Guid jobId, CancellationToken token)

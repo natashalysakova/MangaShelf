@@ -1,17 +1,26 @@
-﻿@inherits LayoutComponentBase
-@* @layout MangaShelf.Components.Layout.MainLayout *@
-
-<h1>Manage your account</h1>
-
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
-    <div class="row">
-        <div class="col-lg-3">
-            <ManageNavMenu />
-        </div>
-        <div class="col-lg-9">
-            @Body
-        </div>
-    </div>
-</div>
+﻿@using MangaShelf.Components.Layout
+@inherits LayoutComponentBase
+@layout MangaShelf.Components.Layout.MainLayout
+@Body
+@* <MudLayout>
+    <MudAppBar Elevation="1" Class="manga-gradient-background">
+        <NavMenu />
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" >
+            <MudPaper Width="100%" Square="true" Class="catalog-paper" MinHeight="calc(100vh - 64px - 48px)">
+                @Body
+            </MudPaper>
+        </MudContainer>
+        <MudScrollToTop>
+            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
+        </MudScrollToTop>
+        <MudAppBar Elevation="1" Dense="true" Fixed="false" Class="manga-gradient-background" Style="z-index:auto;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="px-3 w-100">
+                <MudText Style="font-size:small">COPYRIGHT</MudText>
+                <MudSpacer />
+                <CultureSelector />
+            </MudStack>
+        </MudAppBar>
+    </MudMainContent>
+</MudLayout> *@
