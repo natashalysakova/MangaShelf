@@ -17,13 +17,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="8.8.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageReference Include="MSTest" Version="4.1.0" />
+    <PackageReference Include="FluentAssertions" Version="8.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
+    <PackageReference Include="MSTest" Version="4.3.3" />
+    <PackageReference Include="Moq" Version="4.20.72" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MangaShelf.Parser\MangaShelf.Parser.csproj" />
+    <ProjectReference Include="..\MangaShelf.BL\MangaShelf.BL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
