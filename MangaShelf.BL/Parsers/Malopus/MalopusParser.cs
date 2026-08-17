@@ -100,7 +100,7 @@ public class MalopusParser : BaseParser
       if (splitted.Length == 2 || splitted.Length == 3)
         {
             month = LookupList.Single(x => x.season == splitted[0]).month;
-            year = int.Parse(splitted[1]);
+            year = GetYear(splitted[1]);
             day = DateTime.DaysInMonth(year, month);
 
             if(year == DateTime.Now.Year && month == 2 && month < DateTime.Now.Month)
@@ -114,7 +114,24 @@ public class MalopusParser : BaseParser
         }
 
         return null;
-    }       
+    }
+
+    private int GetYear(string year)
+    {
+        if (year.Contains('–'))
+        {
+            var splitted = year.Split(new[] { '-', ' ', '–' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var lastYear = splitted.Last();
+            if(lastYear.Length == 2)
+            {
+                lastYear = "20" + lastYear;
+            }
+
+            return int.Parse(lastYear);
+        }
+
+        return int.Parse(year);
+    }
 
     private (string season, int month)[] LookupList = [
         ("осінь", 11),
