@@ -90,6 +90,7 @@ public class ParseJobStateMachine
         //   - CancelJob → Cancelled (if user cancels during gathering)
         _machine.Configure(RunStatus.GatheringVolumes)
             .Permit(ParseJobTrigger.BeginParsing, RunStatus.Running)
+            .Permit(ParseJobTrigger.Complete, RunStatus.Finished)
             .Permit(ParseJobTrigger.JobFailed, RunStatus.Error)
             .Permit(ParseJobTrigger.CancelJob, RunStatus.Cancelled);
 
