@@ -13,6 +13,9 @@ public enum ParseJobTrigger
     /// <summary>Trigger to move from Waiting to GatheringVolumes</summary>
     StartGathering,
 
+    /// <summary>Trigger to skip GatheringVolumes and go directly to Running (for SingleUrl jobs)</summary>
+    SkipGathering,
+
     /// <summary>Trigger to move from GatheringVolumes to Running</summary>
     BeginParsing,
 
@@ -77,6 +80,7 @@ public class ParseJobStateMachine
         //   - CancelJob → Cancelled (if user cancels before start)
         _machine.Configure(RunStatus.Waiting)
             .Permit(ParseJobTrigger.StartGathering, RunStatus.GatheringVolumes)
+            .Permit(ParseJobTrigger.SkipGathering, RunStatus.Running)
             .Permit(ParseJobTrigger.CancelJob, RunStatus.Cancelled)
             .Permit(ParseJobTrigger.JobFailed, RunStatus.Error);
 

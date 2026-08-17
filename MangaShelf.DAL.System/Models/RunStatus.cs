@@ -58,4 +58,9 @@ public static class RunStatusExtensions
     {
         return status == RunStatus.Error || status == RunStatus.Cancelled;
     }
+
+    public static bool IsSuccessful(this RunStatus status)
+    {
+        return status == RunStatus.Finished;
+    }
 }

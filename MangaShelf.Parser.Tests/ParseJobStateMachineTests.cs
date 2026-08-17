@@ -435,4 +435,66 @@ public class ParseJobStateMachineTests
         Assert.IsTrue(capturedArgs.TransitionTime >= beforeTime);
         Assert.IsTrue(capturedArgs.TransitionTime <= afterTime);
     }
+
+    [TestMethod]
+    public void FireTrigger_WaitingToRunningViaSkipGathering_Succeeds()
+    {
+        // Arrange
+        var stateMachine = new ParseJobStateMachine(RunStatus.Waiting);
+
+        // Act
+        stateMachine.FireTrigger(ParseJobTrigger.SkipGathering);
+
+        // Assert
+        Assert.AreEqual(RunStatus.Running, stateMachine.CurrentState);
+    }
+
+    [TestMethod]
+    public void CanFire_WaitingWithSkipGathering_ReturnsTrue()
+    {
+        // Arrange
+        var stateMachine = new ParseJobStateMachine(RunStatus.Waiting);
+
+        // Act
+        var canFire = stateMachine.CanFire(ParseJobTrigger.SkipGathering);
+
+        // Assert
+        Assert.IsTrue(canFire);
+    }
+
+    [TestMethod]
+    public void FireTrigger_WaitingToRunningViaSkipGathering_RaisesEvent()
+    {
+        // Arrange
+        var stateMachine = new ParseJobStateMachine(RunStatus.Waiting);
+        JobStateTransitionEventArgs? capturedArgs = null;
+
+        stateMachine.OnStateTransition += (sender, args) => capturedArgs = args;
+
+        // Act
+        stateMachine.FireTrigger(ParseJobTrigger.SkipGathering, "SingleUrl job");
+
+        // Assert
+        Assert.IsNotNull(capturedArgs);
+        Assert.AreEqual(RunStatus.Waiting, capturedArgs.FromState);
+        Assert.AreEqual(RunStatus.Running, capturedArgs.ToState);
+        Assert.AreEqual(ParseJobTrigger.SkipGathering, capturedArgs.Trigger);
+        Assert.AreEqual("SingleUrl job", capturedArgs.Context);
+    }
+
+    [TestMethod]
+    public void FullJobLifecycle_SingleUrl_Waiting_Running_Finished_Succeeds()
+    {
+        // Arrange
+        var stateMachine = new ParseJobStateMachine(RunStatus.Waiting);
+
+        // Act & Assert
+        Assert.AreEqual(RunStatus.Waiting, stateMachine.CurrentState);
+
+        stateMachine.FireTrigger(ParseJobTrigger.SkipGathering);
+        Assert.AreEqual(RunStatus.Running, stateMachine.CurrentState);
+
+        stateMachine.FireTrigger(ParseJobTrigger.Complete);
+        Assert.AreEqual(RunStatus.Finished, stateMachine.CurrentState);
+    }
 }

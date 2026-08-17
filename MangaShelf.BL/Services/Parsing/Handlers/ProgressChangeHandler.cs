@@ -39,6 +39,10 @@ public class ProgressChangeHandler : IJobStateTransitionHandler
         {
             job.Progress = -1;
         }
+        else if (transition.ToState.IsSuccessful())
+        {
+            job.Progress = 100;
+        }
         else if (double.TryParse(transition.Context, out var progress))
         {
             job.Progress = progress;
