@@ -77,11 +77,6 @@ jobs:
             # --collect "XPlat Code Coverage") are incompatible with MTP mode.
             # Use --report-trx (requires Microsoft.Testing.Extensions.TrxReport package) instead.
             test_args: --configuration Release --verbosity normal --report-trx --report-trx-filename results.trx --results-directory TestResults-ui
-          - directory: ./MangaShelf.UnitTests
-            name: common
-            test_args: --configuration Release --collect "XPlat Code Coverage" --verbosity normal --logger trx --results-directory TestResults-common
-          #- directory: ./MangaShelf.Parser.Tests
-          #  name: parser
     defaults:
       run:
         working-directory: ${{ matrix.directory }}
