@@ -1,15 +1,24 @@
 ﻿@page "/my-shelf"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
+@using MangaShelf.BL.Contracts
 @using MangaShelf.BL.Services
+@using MangaShelf.Common.Interfaces
+@using MangaShelf.DAL.Models
+@using MangaShelf.Components.Pages.VolumePage.Elements
+@using MudBlazor
 
 @inherits UserContextComponent
 
 @inject IVolumeService VolumeService
 @inject IDialogService DialogService
 @inject IUiLocalizationService Localizer
+@inject ISnackbar Snackbar
 
 @attribute [Authorize]
+@using static MangaShelf.Components.Pages.VolumePage.Elements.AddEditReadingDialog
 
 <UserShelfFilterComponent FilterOptions="filterOptions" FilterOptionsChanged="ReloadVolumesAsync" />
 
@@ -40,7 +49,7 @@ else
                     @foreach (var volume in seriesGroup.Volumes)
                     {
                         <MudItem xs="6" sm="4" md="3" lg="2" xl="2">
-                            <UserVolumeCardComponent VolumeCard="volume" OnCardClick="OpenVolumeModal" />
+                            <UserVolumeCardComponent VolumeCard="volume" OnCardClick="OpenVolumeModal" OnReadingStatusClick="OnReadingStatusClick" />
                         </MudItem>
                     }
                 </MudGrid>
@@ -79,6 +88,58 @@ else
 
         // Refresh volumes after modal closes in case any data changed
         await LoadVolumesAsync();
+    }
+
+    private async Task OnReadingStatusClick(Guid volumeId)
+    {
+        var userId = await GetUserId();
+
+        var reading = await VolumeService.GetActiveReading(volumeId, userId);
+
+        if(reading == null)
+        {
+            reading = new Reading
+            {
+                VolumeId = volumeId,
+                StartedAt = DateTime.UtcNow,
+                Rating = 0
+            };
+        }
+
+        reading.Status = ReadingStatus.Completed;
+        reading.FinishedAt = DateTimeOffset.Now;
+
+        var dialogOptions = new DialogOptions
+        {
+            FullWidth = true,
+            Position = DialogPosition.Center,
+            MaxWidth = MaxWidth.Small
+        };
+
+        var parameters = new DialogParameters
+        {
+            { nameof(AddEditReadingDialog.Reading), reading }
+        };
+
+        var dialog = await DialogService.ShowAsync<AddEditReadingDialog>("", parameters, dialogOptions);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            var resultData = result.Data as EditReadingDialogResult;
+            if (resultData != null)
+            {
+                try
+                {
+                    await VolumeService.AddEditReadingAsync(resultData.Reading, userId);
+                    await LoadVolumesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Error saving reading: {ex.Message}", Severity.Error);
+                }
+            }
+        }
     }
 
     private async Task ReloadVolumesAsync(UserShelfFilterOptions updatedFilterOptions)

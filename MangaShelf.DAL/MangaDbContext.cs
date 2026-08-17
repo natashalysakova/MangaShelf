@@ -113,6 +113,9 @@ public class MangaDbContext : DbContext
                 v => string.Join('|', v),
                 v => v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
 
+        modelBuilder.Entity<User>()
+            .HasIndex(x => x.IdentityUserId)
+            .IsUnique();
     }
 
     private static LambdaExpression ConvertToDeleteFilter(Type type)

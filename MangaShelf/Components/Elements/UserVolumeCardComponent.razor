@@ -53,11 +53,13 @@
                     <MudIcon Icon="@GetOwnershipIcon()" Size="Size.Small" Class="mr-1" />
                     @GetOwnershipText()
                 </MudChip>
-                <MudChip T="string" Variant="Variant.Outlined" Color="@GetReadingColor()" Class="status-chip">
-                    <MudIcon Icon="@GetReadingIcon()" Size="Size.Small" Class="mr-1" />
-                    @GetReadingText()
-                </MudChip>
-            </div>
+                <div @onclick:stopPropagation="true">
+                    <MudChip T="string" Variant="Variant.Outlined" Color="@GetReadingColor()" Class="status-chip reading-status-chip" OnClick="OnReadingStatusClicked">
+                        <MudIcon Icon="@GetReadingIcon()" Size="Size.Small" Class="mr-1" />
+                        @GetReadingText()
+                    </MudChip>
+                </div>
+                </div>
         </MudStack>
     </MudPaper>
 </div>
@@ -138,6 +140,10 @@
         width: fit-content;
     }
 
+    .reading-status-chip {
+        cursor: pointer;
+    }
+
     @@media (max-width: 600px) {
         .cover-frame {
             height: 200px;
@@ -152,9 +158,17 @@
     [Parameter]
     public EventCallback<string> OnCardClick { get; set; }
 
+    [Parameter]
+    public EventCallback<Guid> OnReadingStatusClick { get; set; }
+
     private async Task OnCardClicked()
     {
         await OnCardClick.InvokeAsync(VolumeCard.PublicId);
+    }
+
+    private async Task OnReadingStatusClicked()
+    {
+        await OnReadingStatusClick.InvokeAsync(VolumeCard.VolumeId);
     }
 
     private async Task OnCardKeyDown(KeyboardEventArgs e)

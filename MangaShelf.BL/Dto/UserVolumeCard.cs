@@ -10,6 +10,7 @@ public class UserVolumeCard
 
     public string SeriesTitle { get; set; } = string.Empty;
     public string VolumeTitle { get; set; } = string.Empty;
+    public Guid VolumeId { get; set; }
 
     public double? UserRating { get; set; }
 
