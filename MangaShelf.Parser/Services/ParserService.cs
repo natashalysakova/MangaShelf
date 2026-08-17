@@ -62,6 +62,12 @@ public class ParserService : IParseService
             return;
         }
 
+        if (token.IsCancellationRequested)
+        {
+            _logger.LogInformation("Worker stopping due to cancellation request");
+            throw new OperationCanceledException();
+        }
+
         await _jobManagerService.SetToParsingStatus(jobId, volumesToParse, token);
 
         var progress = 0.0;

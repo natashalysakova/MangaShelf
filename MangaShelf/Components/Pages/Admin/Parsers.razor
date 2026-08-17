@@ -5,6 +5,7 @@
 @inject IParserReadService parserService;
 @inject IJobRequester jobManager;
 @inject IJobUpdateService jobUpdateService;
+@inject IConfigurationService configurationService;
 @implements IDisposable
 
 
@@ -23,7 +24,7 @@
     {
         @foreach (ParserStatusDto parser in statuses)
         {
-            <MudItem Style="width: 250px;  height: 285px;">
+            <MudItem Style="width: 250px;  height: auto;">
                 <MudPaper Class="p-4">
                     @{
 
@@ -78,11 +79,14 @@
                                 </ChildContent>
                             </MudProgressCircular>
                         }
-
-                        <MudStack Row Spacing="1">
-                            <MudText Typo="Typo.caption">Next Run in</MudText>
-                            <MudText Typo="Typo.caption">@GetCountdownText(parser.Id)</MudText>
-                        </MudStack>
+                        @if (configurationService.JobManager.ScheduledJobsEnabled)
+                        {
+                            var visibility = "visibility:" + (parser.IsActive ? "visible" : "hidden");
+                            <MudStack Row Spacing="1" style="@visibility">
+                                <MudText Typo="Typo.caption">Next Run in</MudText>
+                                <MudText Typo="Typo.caption">@GetCountdownText(parser.Id)</MudText>
+                            </MudStack>
+                        }
                     </MudStack>
                 </MudPaper>
             </MudItem>
@@ -337,7 +341,7 @@
 
         // Remove jobs from pending cancellation set if they're confirmed as cancelled or finished
         var jobsToRemove = jobsPendingCancellation
-            .Where(jobId => jobs.FirstOrDefault(j => j.Id == jobId) is { } job 
+            .Where(jobId => jobs.FirstOrDefault(j => j.Id == jobId) is { } job
                 && (job.Status == RunStatus.Cancelled || job.Status == RunStatus.Finished || job.Status == RunStatus.Error))
             .ToList();
 
