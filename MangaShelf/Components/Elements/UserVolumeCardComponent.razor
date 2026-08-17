@@ -29,7 +29,7 @@
         </div>
 
         <MudStack Class="pa-4" Spacing="1">
-            @if(!VolumeCard.Number.HasValue && VolumeCard.SeriesTitle != VolumeCard.VolumeTitle)
+            @if(!VolumeCard.Number.HasValue && !string.IsNullOrWhiteSpace(VolumeCard.VolumeTitle) && VolumeCard.SeriesTitle != VolumeCard.VolumeTitle)
             {
                 <MudChip T="string" Variant="Variant.Filled" Color="@GetOwnershipColor()" Size="Size.Small"
                          Class="w-fit-content">
