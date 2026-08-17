@@ -38,6 +38,7 @@ public static partial class OwnershipMapper
         return new UserVolumeCard()
         {
             PublicId = volumeDetails.PublicId,
+            VolumeId = volumeDetails.Id,
             CurrentOwnershipStatus = volume.Status,
             Number = volumeDetails.Number,
             ReleaseDate = volumeDetails.ReleaseDate,

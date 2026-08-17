@@ -413,7 +413,10 @@ public class VolumeService(
             .Include(x => x.Readers)
             .FirstOrDefaultAsync(v => v.Id == reading.VolumeId);
         var user = await context.Users.FirstOrDefaultAsync(u => u.IdentityUserId == userIdentityId, token);
-        reading.UserId = user.Id;
+        if(reading.UserId == default)
+        {
+            reading.UserId = user.Id;
+        }
 
         DetachExisting(reading, context);
 
@@ -734,5 +737,26 @@ public class VolumeService(
             FullTitle = volume.GetFullVolumeName(),
             OriginalTitle = volume.Series!.OriginalTitle
         };
+    }
+
+    public async Task<Reading?> GetActiveReading(Guid volumeId, string userId)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+
+        var user = await context.Users
+            .AsNoTracking()
+            .Include(x=>x.Readings)
+            .Where(x => x.IdentityUserId == userId)
+            .SingleAsync();
+
+        var readings = user.Readings.Where(x => 
+            x.VolumeId == volumeId && 
+            (x.Status == ReadingStatus.Reading || x.Status == ReadingStatus.OnHold || x.Status == ReadingStatus.PlanToRead))
+            .OrderBy(x=>x.StartedAt).LastOrDefault();
+
+        readings?.User = null;
+        readings?.Volume = null;
+
+        return readings;
     }
 }
