@@ -389,7 +389,17 @@ public class ParseJobManagerService : IParseJobManagerService
 
     public async Task RunJob(Guid jobId, CancellationToken token = default)
     {
-        await TransitionJobState(jobId, ParseJobTrigger.StartGathering, context: "Starting volume gathering phase", token: token);
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var job = await dbContext.Runs.FindAsync(jobId);
+
+        if (job == null || job.Type == ParserRunType.SingleUrl)
+        {
+            await TransitionJobState(jobId, ParseJobTrigger.SkipGathering, context: "SingleUrl job - skipping volume gathering", token: token);
+        }
+        else
+        {
+            await TransitionJobState(jobId, ParseJobTrigger.StartGathering, context: "Starting volume gathering phase", token: token);
+        }
     }
 
     /// <summary>
