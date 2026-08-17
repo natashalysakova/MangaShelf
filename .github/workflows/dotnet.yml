@@ -111,46 +111,46 @@ jobs:
         with:
           key: test-results-${{ matrix.name }}
           path: ${{ matrix.directory }}/TestResults-${{ matrix.name }}/
-  coverage:
-      runs-on: ubuntu-latest
-      needs: test
-      permissions:
-        pull-requests: write
-      steps:
-      - name: Download Test Results
-        uses: actions/download-artifact@v5
-        with:
-          pattern: 'test-results-*'
-          path: test-results/
-      - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.4
-        with:
-          reports: "test-results/**/*.cobertura.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
-          targetdir: "${{ github.workspace }}/coverage-report" # REQUIRED # The directory where the generated report should be saved.
-          reporttypes: "Cobertura;MarkdownSummaryGithub" # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, Html_BlueRed, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MarkdownSummaryGithub, MarkdownDeltaSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, TextDeltaSummary, Xml, XmlSummary
-          verbosity: "Verbose" # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
-          title: "Code Coverage" # Optional title.
-          tag: "${{ github.run_number }}_${{ github.run_id }}" # Optional tag or build version.
-          customSettings: "" # Optional custom settings (separated by semicolon). See: https://github.com/danielpalme/ReportGenerator/wiki/Settings.
-          toolpath: "reportgeneratortool" # Default directory for installing the dotnet tool.   
-      - name: Publish Code Coverage Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: coverage-report/Cobertura.xml
-          badge: true
-          fail_below_min: false
-          format: markdown
-          hide_branch_rate: false
-          hide_complexity: false
-          indicators: true
-          output: both
-          thresholds: "30 60"
-      - uses: jwalton/gh-find-current-pr@v1
-        id: finder
-      - name: Add Coverage PR Comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event_name == 'pull_request' || steps.finder.outputs.pr != '0'
-        with:
-          number: ${{ steps.finder.outputs.pr }}
-          recreate: true
-          path: coverage-report/SummaryGithub.md
+  # coverage:
+  #     runs-on: ubuntu-latest
+  #     needs: test
+  #     permissions:
+  #       pull-requests: write
+  #     steps:
+  #     - name: Download Test Results
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         pattern: 'test-results-*'
+  #         path: test-results/
+  #     - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
+  #       uses: danielpalme/ReportGenerator-GitHub-Action@5.2.4
+  #       with:
+  #         reports: "test-results/**/*.cobertura.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
+  #         targetdir: "${{ github.workspace }}/coverage-report" # REQUIRED # The directory where the generated report should be saved.
+  #         reporttypes: "Cobertura;MarkdownSummaryGithub" # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, Html_BlueRed, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MarkdownSummaryGithub, MarkdownDeltaSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, TextDeltaSummary, Xml, XmlSummary
+  #         verbosity: "Verbose" # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+  #         title: "Code Coverage" # Optional title.
+  #         tag: "${{ github.run_number }}_${{ github.run_id }}" # Optional tag or build version.
+  #         customSettings: "" # Optional custom settings (separated by semicolon). See: https://github.com/danielpalme/ReportGenerator/wiki/Settings.
+  #         toolpath: "reportgeneratortool" # Default directory for installing the dotnet tool.   
+  #     - name: Publish Code Coverage Report
+  #       uses: irongut/CodeCoverageSummary@v1.3.0
+  #       with:
+  #         filename: coverage-report/Cobertura.xml
+  #         badge: true
+  #         fail_below_min: false
+  #         format: markdown
+  #         hide_branch_rate: false
+  #         hide_complexity: false
+  #         indicators: true
+  #         output: both
+  #         thresholds: "30 60"
+  #     - uses: jwalton/gh-find-current-pr@v1
+  #       id: finder
+  #     - name: Add Coverage PR Comment
+  #       uses: marocchino/sticky-pull-request-comment@v2
+  #       if: github.event_name == 'pull_request' || steps.finder.outputs.pr != '0'
+  #       with:
+  #         number: ${{ steps.finder.outputs.pr }}
+  #         recreate: true
+  #         path: coverage-report/SummaryGithub.md
