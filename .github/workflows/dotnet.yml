@@ -73,8 +73,13 @@ jobs:
         include:
           - directory: ./MangaShelf.Tests
             name: ui
+            # xunit.v3 uses Microsoft Testing Platform (MTP); VSTest flags (--logger trx,
+            # --collect "XPlat Code Coverage") are incompatible with MTP mode.
+            # Use --report-trx (requires Microsoft.Testing.Extensions.TrxReport package) instead.
+            test_args: --configuration Release --verbosity normal --report-trx --report-trx-filename results.trx --results-directory TestResults-ui
           - directory: ./MangaShelf.UnitTests
             name: common
+            test_args: --configuration Release --collect "XPlat Code Coverage" --verbosity normal --logger trx --results-directory TestResults-common
           #- directory: ./MangaShelf.Parser.Tests
           #  name: parser
     defaults:
@@ -85,13 +90,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
           cache: true
           cache-dependency-path: '${{ matrix.directory }}/**/*.csproj'
       - name: Restore dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --configuration Release --collect "XPlat Code Coverage" --verbosity normal --logger trx --results-directory TestResults-${{ matrix.name }}
+        run: dotnet test ${{ matrix.test_args }}
       - name: List test results directory
         run: ls -R TestResults-${{ matrix.name }}
       - name: Upload Test Results
