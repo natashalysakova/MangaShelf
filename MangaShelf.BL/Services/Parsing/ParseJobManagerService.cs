@@ -94,7 +94,7 @@ public class ParseJobManagerService : IParseJobManagerService
             .ToListAsync(token);
         var parsersToRun = allParsers.Where(x => x.NextRun <= currentTime && x.IsActive).ToList();
 
-        _logger.LogInformation("CreateScheduledJobs: Found {TotalParsers} parsers, {ReadyParsers} ready to run. Current time: {CurrentTime}", 
+        _logger.LogDebug("CreateScheduledJobs: Found {TotalParsers} parsers, {ReadyParsers} ready to run. Current time: {CurrentTime}", 
             allParsers.Count, parsersToRun.Count, currentTime);
 
         if (parsersToRun.Count > 0)
@@ -205,24 +205,8 @@ public class ParseJobManagerService : IParseJobManagerService
 
             foreach (var job in notFinishedProperly)
             {
-                //job.Status = RunStatus.Error;
-                //job.Finished = DateTimeOffset.Now;
-                //job.Progress = -1;
-                //job.Errors.Add(new ParserError()
-                //{
-                //    ErrorMessage = "Was automatically cancelled after restart",
-                //    RunTime = job.Finished.Value
-                //});
-
                 await TransitionJobState(job.Id, ParseJobTrigger.JobFailed, context: "Was automatically cancelled after restart", token: default);
             }
-
-            //foreach (var parser in parserStatuses)
-            //{
-            //    parser.Status = ParserStatus.Idle;
-            //}
-
-            //await context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -238,14 +222,6 @@ public class ParseJobManagerService : IParseJobManagerService
                .Where(r => r.Status == RunStatus.Waiting)
                .OrderBy(r => r.Created)
                .ToListAsync(token);
-
-        //var parsers = jobs.Select(x => x.ParserStatus).Distinct();
-        //foreach (var parser in parsers)
-        //{
-        //    parser.Status = ParserStatus.Waiting;
-        //}
-
-        //await dbContext.SaveChangesAsync(token);
 
         return jobs.Select(j => j.Id);
     }
@@ -309,51 +285,6 @@ public class ParseJobManagerService : IParseJobManagerService
     public async Task SetProgress(Guid runId, double progress, ParseResult? result, CancellationToken token)
     {
         await TransitionJobState(runId, ParseJobTrigger.UpdateProgress, context: progress.ToString(), result: result, token: token);
-
-        //using var context = _dbContextFactory.CreateDbContext();
-
-        //var parserStatus = context.Parsers
-        //    .Include(ps => ps.Jobs)
-        //        .ThenInclude(r => r.Errors)
-        //    .FirstOrDefault(ps => ps.Jobs.Any(r => r.Id == runId));
-
-        //if (parserStatus == null)
-        //{
-        //    throw new Exception($"No parser status found for run id {runId}");
-        //}
-
-        //var run = parserStatus.Jobs.FirstOrDefault(r => r.Id == runId);
-        //if (run == null)
-        //{
-        //    throw new Exception($"No run found with id {runId}");
-        //}
-
-        //run.Progress = progress;
-
-        //if (result != null)
-        //{
-        //    var volumeReference = new VolumeReference
-        //    {
-        //        VolumeId = result.VolumeReference.VolumeId,
-        //        FullName = result.VolumeReference.FullName,
-        //        PublicId = result.VolumeReference.PublicId,
-        //    };
-
-        //    if (result.State == State.Added)
-        //    {
-        //        volumeReference.AddedParserJobId = run.Id;
-        //        run.AddedVolumes.Add(volumeReference);
-        //    }
-        //    else if (result.State == State.Updated)
-        //    {
-        //        volumeReference.UpdatedParserJobId = run.Id;
-        //        run.UpdatedVolumes.Add(volumeReference);
-        //    }
-        //}
-
-        //context.Entry(run).State = EntityState.Modified;
-
-        //await context.SaveChangesAsync(token);
     }
 
     public async Task SetToFinishedStatus(Guid jobId, CancellationToken token = default)
