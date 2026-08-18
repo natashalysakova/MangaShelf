@@ -145,7 +145,7 @@ public class VolumeInfoParser(
 
     private void UpdateSeriesStatus(ParsedInfo volumeInfo, Volume volume)
     {
-        if (volumeInfo.SeriesStatus != SeriesStatus.Unknown)
+        if (volumeInfo.SeriesStatus == SeriesStatus.Unknown)
             return;
                 
         if(volumeInfo.SeriesStatus == SeriesStatus.OneShot)
