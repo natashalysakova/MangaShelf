@@ -540,6 +540,22 @@ public class VolumeService(
             throw new Exception("Volume not found");
         }
 
+        if (volume.SeriesId != volumeDto.SeriesId)
+        {
+            var reassignedSeries = context.Series
+                .Include(s => s.Authors)
+                .Include(s => s.Publisher)
+                .FirstOrDefault(s => s.Id == volumeDto.SeriesId);
+
+            if (reassignedSeries == null)
+            {
+                throw new Exception("Series not found");
+            }
+
+            volume.Series = reassignedSeries;
+            volume.SeriesId = reassignedSeries.Id;
+        }
+
         var date = volumeDto.ReleaseDate!.Value;
         var offset = TimeZoneInfo.Local.GetUtcOffset(date);
 
@@ -560,6 +576,15 @@ public class VolumeService(
         volume.Type = volumeDto.Type;
 
         UpdateAuthors(volumeDto, volume);
+
+        volume.SeriesId = volume.Series.Id;
+
+        if (!string.IsNullOrWhiteSpace(volume.Series.PublicId))
+        {
+            volumeDto.SeriesPublicId = volume.Series.PublicId;
+        }
+
+        volumeDto.SeriesId = volume.Series.Id;
 
         await context.SaveChangesAsync(token);
 

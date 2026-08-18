@@ -38,37 +38,18 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
                 return volumeByUrl;
             }
         }
+        
+        if(volumeInfo.VolumeNumber != null)
+        {
+            return await FindSingleMatchOrDefault(query, x =>
+                x.Series!.Id == seriesId &&
+                x.Number == volumeInfo.VolumeNumber);
+        }
+
 
         return await FindSingleMatchOrDefault(query, x =>
             x.Series!.Id == seriesId &&
-            x.Number == volumeInfo.VolumeNumber);
-    }
-
-    public async Task<Volume?> FindVolumeFromParsedInfo(VolumeInfoRequest volumeInfo)
-    {
-        var query = _context.Volumes
-            .Include(x => x.Series)
-            .IgnoreQueryFilters();
-
-        if (!string.IsNullOrWhiteSpace(volumeInfo.ISBN))
-        {
-            var volumeByISBN = await FindSingleMatchOrDefault(query, x => x.ISBN == volumeInfo.ISBN);
-            if (volumeByISBN != null)
-            {
-                return volumeByISBN;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(volumeInfo.Url))
-        {
-            var volumeByUrl = await FindSingleMatchOrDefault(query, x => x.PurchaseUrl == volumeInfo.Url);
-            if (volumeByUrl != null)
-            {
-                return volumeByUrl;
-            }
-        }
-
-        return null;
+            x.Title == volumeInfo.Title);
     }
 
     private static async Task<Volume?> FindSingleMatchOrDefault(IQueryable<Volume> query, Expression<Func<Volume, bool>> predicate)
