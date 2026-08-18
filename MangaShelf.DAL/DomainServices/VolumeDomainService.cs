@@ -14,7 +14,7 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
 
     }
 
-    public Volume? FindVolumeFromParsedInfo(Guid seriesId, VolumeInfoRequest volumeInfo)
+    public async Task<Volume?> FindVolumeFromParsedInfo(Guid seriesId, VolumeInfoRequest volumeInfo)
     {
         var query = _context.Volumes
             .Include(x => x.Series)
@@ -23,7 +23,7 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
 
         if (!string.IsNullOrWhiteSpace(volumeInfo.ISBN))
         {
-            var volumeByISBN = FindSingleMatchOrDefault(query, x => x.ISBN == volumeInfo.ISBN);
+            var volumeByISBN = await FindSingleMatchOrDefault(query, x => x.ISBN == volumeInfo.ISBN);
             if(volumeByISBN != null)
             {
                 return volumeByISBN;
@@ -32,24 +32,51 @@ public class VolumeDomainService : BaseDomainService<Volume>, IVolumeDomainServi
 
         if (!string.IsNullOrWhiteSpace(volumeInfo.Url))
         {
-            var volumeByUrl = FindSingleMatchOrDefault(query, x => x.PurchaseUrl == volumeInfo.Url);
+            var volumeByUrl = await FindSingleMatchOrDefault(query, x => x.PurchaseUrl == volumeInfo.Url);
             if (volumeByUrl != null)
             {
                 return volumeByUrl;
             }
         }
 
-        return FindSingleMatchOrDefault(query, x =>
+        return await FindSingleMatchOrDefault(query, x =>
             x.Series!.Id == seriesId &&
             x.Number == volumeInfo.VolumeNumber);
     }
 
-    private static Volume? FindSingleMatchOrDefault(IQueryable<Volume> query, Expression<Func<Volume, bool>> predicate)
+    public async Task<Volume?> FindVolumeFromParsedInfo(VolumeInfoRequest volumeInfo)
     {
-        var matches = query
+        var query = _context.Volumes
+            .Include(x => x.Series)
+            .IgnoreQueryFilters();
+
+        if (!string.IsNullOrWhiteSpace(volumeInfo.ISBN))
+        {
+            var volumeByISBN = await FindSingleMatchOrDefault(query, x => x.ISBN == volumeInfo.ISBN);
+            if (volumeByISBN != null)
+            {
+                return volumeByISBN;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(volumeInfo.Url))
+        {
+            var volumeByUrl = await FindSingleMatchOrDefault(query, x => x.PurchaseUrl == volumeInfo.Url);
+            if (volumeByUrl != null)
+            {
+                return volumeByUrl;
+            }
+        }
+
+        return null;
+    }
+
+    private static async Task<Volume?> FindSingleMatchOrDefault(IQueryable<Volume> query, Expression<Func<Volume, bool>> predicate)
+    {
+        var matches = await query
             .Where(predicate)
             .Take(2)
-            .ToList();
+            .ToListAsync();
 
         return matches.Count == 1 ? matches[0] : null;
     }

@@ -1,9 +1,38 @@
 ﻿using AngleSharp.Dom;
+using MangaShelf.BL.Enums;
+using MangaShelf.BL.Parsers.Malopus;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MangaShelf.BL.Parsers;
+
+public class MolfarArtbookParser : MolfarParser
+{
+    public override string CatalogUrl => "/catalog/artbooks";
+    public MolfarArtbookParser(ILogger<MolfarArtbookParser> logger, IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    {
+    }
+
+    protected override SeriesType GetSeriesType(IDocument document)
+    {
+        return SeriesType.Artbook;
+    }
+}
+
+public class MolfarRanobeParser : MolfarParser
+{
+    public override string CatalogUrl => "/catalog/light-novels";
+    public MolfarRanobeParser(ILogger<MolfarRanobeParser> logger, IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    {
+    }
+
+    protected override SeriesType GetSeriesType(IDocument document)
+    {
+        return SeriesType.LightNovel;
+    }
+}
 
 public class MolfarParser : BaseParser
 {

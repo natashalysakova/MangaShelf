@@ -4,21 +4,21 @@ using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Xml.Linq;
 
 namespace MangaShelf.BL.Parsers.Malopus;
 
-public class MalopusArtbookParser : MalopusParser
+public class MalopusBooksParser : MalopusParser
 {
-    public override string CatalogUrl => "/artbooks/";
-    public MalopusArtbookParser(ILogger<MalopusArtbookParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Malopus)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    public override string CatalogUrl => "/books/";
+    public MalopusBooksParser(ILogger<MalopusBooksParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Malopus)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
     }
 
     protected override SeriesType GetSeriesType(IDocument document)
     {
-        return SeriesType.Artbook;
+        return SeriesType.Book;
     }
+
     protected override SeriesStatus GetSeriesStatus(IDocument document)
     {
         return SeriesStatus.OneShot;
@@ -33,9 +33,14 @@ public class MalopusArtbookParser : MalopusParser
         }
 
         var name = node.TextContent.ToString().Trim();
-        if (name.StartsWith("Артбук"))
+        if (name.StartsWith("Книга-артбук"))
         {
-            name = name.Replace("Артбук", string.Empty).Trim();
+            name = name.Replace("Книга-артбук", string.Empty).Trim();
+        }
+
+        if (name.StartsWith("Книга"))
+        {
+            name = name.Replace("Книга", string.Empty).Trim();
         }
 
         return name;

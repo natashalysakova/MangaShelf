@@ -4,24 +4,19 @@ using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Xml.Linq;
 
 namespace MangaShelf.BL.Parsers.Malopus;
 
-public class MalopusArtbookParser : MalopusParser
+public class MalopusCookbooksParser : MalopusParser
 {
-    public override string CatalogUrl => "/artbooks/";
-    public MalopusArtbookParser(ILogger<MalopusArtbookParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Malopus)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
+    public override string CatalogUrl => "/cookbooks/";
+    public MalopusCookbooksParser(ILogger<MalopusCookbooksParser> logger, [FromKeyedServices(HtmlDownloaderKeys.Malopus)] IHtmlDownloader htmlDownloader) : base(logger, htmlDownloader)
     {
     }
 
     protected override SeriesType GetSeriesType(IDocument document)
     {
-        return SeriesType.Artbook;
-    }
-    protected override SeriesStatus GetSeriesStatus(IDocument document)
-    {
-        return SeriesStatus.OneShot;
+        return SeriesType.Cookbook;
     }
 
     protected override string GetSeries(IDocument document)
@@ -33,9 +28,9 @@ public class MalopusArtbookParser : MalopusParser
         }
 
         var name = node.TextContent.ToString().Trim();
-        if (name.StartsWith("Артбук"))
+        if (name.StartsWith("Кулінарна книга"))
         {
-            name = name.Replace("Артбук", string.Empty).Trim();
+            name = name.Replace("Кулінарна книга", string.Empty).Trim();
         }
 
         return name;
