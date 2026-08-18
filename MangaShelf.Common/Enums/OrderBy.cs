@@ -6,5 +6,5 @@ public enum OrderBy
     Popularity,
     Rating,
     ReleaseDate,
-    PreorderDate
+    NewAdditions,
 }

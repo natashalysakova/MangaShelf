@@ -145,7 +145,15 @@ public class VolumeInfoParser(
 
     private void UpdateSeriesStatus(ParsedInfo volumeInfo, Volume volume)
     {
-        if (volumeInfo.SeriesStatus != SeriesStatus.Unknown && volumeInfo.SeriesStatus != volume.Series.Status)
+        if (volumeInfo.SeriesStatus == SeriesStatus.Unknown)
+            return;
+                
+        if(volumeInfo.SeriesStatus == SeriesStatus.OneShot)
+        {
+            return;
+        }
+            
+        if(volumeInfo.SeriesStatus != volume.Series.Status)
             volume.Series.Status = volumeInfo.SeriesStatus;
     }
 

@@ -105,8 +105,8 @@ public static class PaginationExtention
             case OrderBy.Rating:
                 query = orderBy(query, x => x.AvgRating);
                 break;
-            case OrderBy.PreorderDate:
-                query = orderBy(query, x => x.PreorderStart);
+            case OrderBy.NewAdditions:
+                query = orderBy(query, x => x.CreatedAt);
                 break;
         }
 

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,79 +26,79 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string"/>
-              <xsd:attribute name="type" type="xsd:string"/>
-              <xsd:attribute name="mimetype" type="xsd:string"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string"/>
-              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -117,509 +117,383 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Catalog" xml:space="preserve">
-    <value>Каталог</value>
-    <comment/>
-  </data>
-  <data name="HomePage" xml:space="preserve">
-    <value>Головна сторінка</value>
-    <comment/>
-  </data>
-  <data name="MangaShelf" xml:space="preserve">
-    <value>Поличка манги</value>
-    <comment/>
-  </data>
-  <data name="MyShelf" xml:space="preserve">
-    <value>Моя манга</value>
-    <comment/>
-  </data>
-  <data name="Login" xml:space="preserve">
-    <value>Логін</value>
-    <comment/>
-  </data>
-  <data name="Account" xml:space="preserve">
-    <value>Аккаунт</value>
-    <comment/>
-  </data>
-  <data name="Logout" xml:space="preserve">
-    <value>Вихід</value>
-    <comment/>
-  </data>
   <data name="ThisIsPreorderVolume" xml:space="preserve">
     <value>Цей том доступний до передзамовлення до</value>
-    <comment/>
   </data>
   <data name="NoReviews" xml:space="preserve">
     <value>Немає відгуків для цього тому</value>
-    <comment/>
-  </data>
-  <data name="Main" xml:space="preserve">
-    <value>Головна</value>
-    <comment/>
-  </data>
-  <data name="Preorders" xml:space="preserve">
-    <value>Передзамовлення</value>
-    <comment/>
-  </data>
-  <data name="Admin" xml:space="preserve">
-    <value>Адмін</value>
-    <comment/>
-  </data>
-  <data name="Search" xml:space="preserve">
-    <value>Пошук</value>
-    <comment/>
-  </data>
-  <data name="Filter" xml:space="preserve">
-    <value>Фільтр</value>
-    <comment/>
-  </data>
-  <data name="Reset" xml:space="preserve">
-    <value>Скинути</value>
-    <comment/>
-  </data>
-  <data name="ResultPerPage" xml:space="preserve">
-    <value>Результатів на сторінці</value>
-    <comment/>
-  </data>
-  <data name="All" xml:space="preserve">
-    <value>Всі</value>
-    <comment/>
-  </data>
-  <data name="OrderBy" xml:space="preserve">
-    <value>Сортувати за</value>
-    <comment/>
-  </data>
-  <data name="SeriesTitle" xml:space="preserve">
-    <value>Назва серії</value>
-    <comment/>
-  </data>
-  <data name="ReleaseDate" xml:space="preserve">
-    <value>Дата виходу</value>
-    <comment/>
-  </data>
-  <data name="Popularity" xml:space="preserve">
-    <value>Популярність</value>
-    <comment/>
-  </data>
-  <data name="Rating" xml:space="preserve">
-    <value>Рейтинг</value>
-    <comment/>
-  </data>
-  <data name="PreorderDate" xml:space="preserve">
-    <value>Дата передзамовлення</value>
-    <comment/>
-  </data>
-  <data name="Preorder" xml:space="preserve">
-    <value>Передзамовлення</value>
-    <comment/>
-  </data>
-  <data name="Released" xml:space="preserve">
-    <value>Вийшло</value>
-    <comment/>
-  </data>
-  <data name="Wishlist" xml:space="preserve">
-    <value>Список бажань</value>
-    <comment/>
-  </data>
-  <data name="AddToLibrary" xml:space="preserve">
-    <value>Додати до бібліотеки</value>
-    <comment/>
-  </data>
-  <data name="PreorderArrived" xml:space="preserve">
-    <value>Передзамовлення прийшло</value>
-    <comment/>
-  </data>
-  <data name="Own" xml:space="preserve">
-    <value>У власності</value>
-    <comment/>
   </data>
   <data name="NewManga" xml:space="preserve">
     <value>Нова манга</value>
-    <comment/>
   </data>
   <data name="NewPreorders" xml:space="preserve">
     <value>Нові передзамовлення</value>
-    <comment/>
   </data>
   <data name="Home" xml:space="preserve">
     <value>Головна</value>
-    <comment/>
   </data>
   <data name="OneDay" xml:space="preserve">
     <value>{count} день</value>
-    <comment/>
   </data>
   <data name="FewDays" xml:space="preserve">
     <value>{count} дні</value>
-    <comment/>
   </data>
   <data name="Days" xml:space="preserve">
     <value>{count} днів</value>
-    <comment/>
   </data>
   <data name="DaysTillRelease" xml:space="preserve">
     <value>До релізу</value>
-    <comment/>
   </data>
   <data name="PreorderIsDue" xml:space="preserve">
     <value>Запізнюється</value>
-    <comment/>
+  </data>
+  <data name="Preorders" xml:space="preserve">
+    <value>Передзамовлення</value>
   </data>
   <data name="Today" xml:space="preserve">
     <value>Сьогодні</value>
-    <comment/>
   </data>
   <data name="NoPreorders" xml:space="preserve">
     <value>Немає передзамовлень</value>
-    <comment/>
   </data>
   <data name="Release" xml:space="preserve">
     <value>Вихід</value>
-    <comment/>
   </data>
   <data name="NoNews" xml:space="preserve">
     <value>Немає новин</value>
-    <comment/>
   </data>
   <data name="ErrorLoadingReading" xml:space="preserve">
     <value>Помилка завантаження читання</value>
-    <comment/>
   </data>
   <data name="ErrorAddingReading" xml:space="preserve">
     <value>Помилка додавання читання</value>
-    <comment/>
   </data>
   <data name="ErrorLoadingOwnership" xml:space="preserve">
     <value>Помилка завантаження володіння</value>
-    <comment/>
   </data>
   <data name="NoDescrption" xml:space="preserve">
     <value>Опис відсутній</value>
-    <comment/>
   </data>
   <data name="ItsPreorder" xml:space="preserve">
     <value>Передзамовлення</value>
-    <comment/>
+  </data>
+  <data name="OrderBy" xml:space="preserve">
+    <value>Порядок сортування</value>
+  </data>
+  <data name="Preorder" xml:space="preserve">
+    <value>Передзамовлення</value>
+  </data>
+  <data name="Released" xml:space="preserve">
+    <value>Вийшло</value>
+  </data>
+  <data name="Wishlist" xml:space="preserve">
+    <value>Список бажань</value>
+  </data>
+  <data name="AddToLibrary" xml:space="preserve">
+    <value>Додати до бібліотеки</value>
+  </data>
+  <data name="PreorderArrived" xml:space="preserve">
+    <value>Передзамовлення прийшло</value>
+  </data>
+  <data name="Own" xml:space="preserve">
+    <value>У власності</value>
+  </data>
+  <data name="Popularity" xml:space="preserve">
+    <value>Популярність</value>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>Рейтинг</value>
+  </data>
+  <data name="PreorderDate" xml:space="preserve">
+    <value>Дата передзамовлення</value>
   </data>
   <data name="Published" xml:space="preserve">
     <value>Опубліковано</value>
-    <comment/>
   </data>
   <data name="Title" xml:space="preserve">
     <value>Назва</value>
-    <comment/>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Фільтр</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Скинути</value>
+  </data>
+  <data name="ResultPerPage" xml:space="preserve">
+    <value>Результатів на сторінці</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Всі</value>
+  </data>
+  <data name="Catalog" xml:space="preserve">
+    <value>Каталог</value>
+  </data>
+  <data name="HomePage" xml:space="preserve">
+    <value>Головна сторінка</value>
+  </data>
+  <data name="MangaShelf" xml:space="preserve">
+    <value>Поличка манги</value>
+  </data>
+  <data name="MyShelf" xml:space="preserve">
+    <value>Моя манга</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Логін</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Аккаунт</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Вихід</value>
+  </data>
+  <data name="Main" xml:space="preserve">
+    <value>Головна</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Адмін</value>
+  </data>
+  <data name="SeriesTitle" xml:space="preserve">
+    <value>Назва серії</value>
+  </data>
+  <data name="ReleaseDate" xml:space="preserve">
+    <value>Дата виходу</value>
   </data>
   <data name="No updates found for the selected date range." xml:space="preserve">
     <value>За вибраний період оновлень не знайдено.</value>
-    <comment/>
   </data>
   <data name="AdminVolumes" xml:space="preserve">
     <value>Том</value>
-    <comment/>
   </data>
   <data name="AgeRestriction" xml:space="preserve">
     <value>Вікове обмеження</value>
-    <comment/>
   </data>
   <data name="ApplyCrop" xml:space="preserve">
     <value>Застосувати обрізку</value>
-    <comment/>
   </data>
   <data name="AutoCrop" xml:space="preserve">
     <value>Авто-обрізка</value>
-    <comment/>
   </data>
   <data name="BackToList" xml:space="preserve">
     <value>Повернутися до списку</value>
-    <comment/>
   </data>
   <data name="Bottom" xml:space="preserve">
     <value>Внизу</value>
-    <comment/>
   </data>
   <data name="ChangesSaved" xml:space="preserve">
     <value>Зміни збережено</value>
-    <comment/>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Закрити</value>
-    <comment/>
   </data>
   <data name="CoverImage" xml:space="preserve">
     <value>Обкладинка</value>
-    <comment/>
   </data>
   <data name="CroppedCover" xml:space="preserve">
     <value>Обрізана обкладинка</value>
-    <comment/>
   </data>
   <data name="CropSize" xml:space="preserve">
     <value>Розмір обрізки</value>
-    <comment/>
   </data>
   <data name="CropSuccessful" xml:space="preserve">
     <value>Обрізку виконано</value>
-    <comment/>
   </data>
   <data name="CurrentCroppedVersion" xml:space="preserve">
     <value>Поточна обрізана версія</value>
-    <comment/>
   </data>
   <data name="Description" xml:space="preserve">
     <value>Опис</value>
-    <comment/>
   </data>
   <data name="EditVolume" xml:space="preserve">
     <value>Редагувати том</value>
-    <comment/>
   </data>
   <data name="ErrorUploadingImage" xml:space="preserve">
     <value>Помилка завантаження зображення</value>
-    <comment/>
   </data>
   <data name="FieldsCanBeOverwritten" xml:space="preserve">
     <value>Поля можуть бути перевизначені парсером</value>
-    <comment/>
   </data>
   <data name="HidePreviews" xml:space="preserve">
     <value>Сховати прев'ю</value>
-    <comment/>
   </data>
   <data name="Identifiers" xml:space="preserve">
     <value>Ідентифікатори</value>
-    <comment/>
   </data>
   <data name="ImageDimensions" xml:space="preserve">
     <value>Розміри зображення</value>
-    <comment/>
   </data>
   <data name="ImageUploadedSuccessfully" xml:space="preserve">
     <value>Зображення успішно завантажено</value>
-    <comment/>
   </data>
   <data name="InvalidCropBoundaries" xml:space="preserve">
     <value>Неправильні кордони обрізки</value>
-    <comment/>
   </data>
   <data name="IsDeleted" xml:space="preserve">
     <value>Видалено</value>
-    <comment/>
   </data>
   <data name="Left" xml:space="preserve">
     <value>Ліворуч</value>
-    <comment/>
   </data>
   <data name="Links" xml:space="preserve">
     <value>Посилання</value>
-    <comment/>
   </data>
   <data name="ManualCrop" xml:space="preserve">
     <value>Ручна обрізка</value>
-    <comment/>
   </data>
   <data name="ManualCropControls" xml:space="preserve">
     <value>Керування ручною обрізкою</value>
-    <comment/>
   </data>
   <data name="NothingSelected" xml:space="preserve">
     <value>Нічого не обрано</value>
-    <comment/>
   </data>
   <data name="OriginalCover" xml:space="preserve">
     <value>Оригінальна обкладинка</value>
-    <comment/>
   </data>
   <data name="PreorderStart" xml:space="preserve">
     <value>Початок передзамовлення</value>
-    <comment/>
   </data>
   <data name="Processing" xml:space="preserve">
     <value>Обробка</value>
-    <comment/>
   </data>
   <data name="Publisher" xml:space="preserve">
     <value>Видавництво</value>
-    <comment/>
   </data>
   <data name="Publishing" xml:space="preserve">
     <value>Видавництво</value>
-    <comment/>
   </data>
   <data name="PurchaseUrl" xml:space="preserve">
     <value>URL для покупки</value>
-    <comment/>
   </data>
   <data name="ResetBoundaries" xml:space="preserve">
     <value>Скинути кордони</value>
-    <comment/>
   </data>
   <data name="Right" xml:space="preserve">
     <value>Праворуч</value>
-    <comment/>
   </data>
   <data name="SaveChanges" xml:space="preserve">
     <value>Зберегти зміни</value>
-    <comment/>
   </data>
   <data name="SelectedFile" xml:space="preserve">
     <value>Обрано файл</value>
-    <comment/>
   </data>
   <data name="SeriesAuthors" xml:space="preserve">
     <value>Автори</value>
-    <comment/>
   </data>
   <data name="SeriesDetails" xml:space="preserve">
     <value>Деталі серії</value>
-    <comment/>
   </data>
   <data name="SeriesId" xml:space="preserve">
     <value>ID серії</value>
-    <comment/>
   </data>
   <data name="SeriesOriginalTitle" xml:space="preserve">
     <value>Оригінальна назва</value>
-    <comment/>
   </data>
   <data name="SeriesPublicId" xml:space="preserve">
     <value>Публічний ID серії</value>
-    <comment/>
   </data>
   <data name="SeriesStatus" xml:space="preserve">
     <value>Статус</value>
-    <comment/>
   </data>
   <data name="SeriesTotalVolumes" xml:space="preserve">
     <value>Всього томів</value>
-    <comment/>
   </data>
   <data name="SeriesType" xml:space="preserve">
     <value>Тип</value>
-    <comment/>
   </data>
   <data name="ShowPreviewOverlay" xml:space="preserve">
     <value>Показати накладання прев'ю</value>
-    <comment/>
   </data>
   <data name="SingleIssue" xml:space="preserve">
     <value>Один випуск</value>
-    <comment/>
   </data>
   <data name="SmallCover" xml:space="preserve">
     <value>Мала обкладинка</value>
-    <comment/>
   </data>
   <data name="Top" xml:space="preserve">
     <value>Вгорі</value>
-    <comment/>
   </data>
   <data name="Uploading" xml:space="preserve">
     <value>Завантаження...</value>
-    <comment/>
   </data>
   <data name="UploadVolumeImage" xml:space="preserve">
     <value>Завантажити обкладинку тому</value>
-    <comment/>
   </data>
   <data name="VolumeDetails" xml:space="preserve">
     <value>Деталі тому</value>
-    <comment/>
   </data>
   <data name="VolumeId" xml:space="preserve">
     <value>ID тому</value>
-    <comment/>
   </data>
   <data name="VolumeIsbn" xml:space="preserve">
     <value>ISBN</value>
-    <comment/>
   </data>
   <data name="VolumeNotFound" xml:space="preserve">
     <value>Том не знайдено</value>
-    <comment/>
   </data>
   <data name="VolumeNumber" xml:space="preserve">
     <value>Номер тому</value>
-    <comment/>
   </data>
   <data name="VolumePublicId" xml:space="preserve">
     <value>Публічний ID тому</value>
-    <comment/>
   </data>
   <data name="VolumeTitle" xml:space="preserve">
     <value>Назва тому</value>
-    <comment/>
   </data>
   <data name="VolumeType" xml:space="preserve">
     <value>Тип тому</value>
-    <comment/>
   </data>
   <data name="LengthError" xml:space="preserve">
     <value>Поле {0} Повинно бути від {2} до {1} символів.</value>
-    <comment/>
   </data>
   <data name="PasswordsDoNotMatch" xml:space="preserve">
     <value>Паролі не співпадають.</value>
-    <comment/>
   </data>
   <data name="InvalidEmail" xml:space="preserve">
     <value>Не валідна email адреса</value>
-    <comment/>
   </data>
   <data name="CreateANewAccount" xml:space="preserve">
     <value>Створити новий акаунт</value>
-    <comment/>
   </data>
   <data name="AlreadyHaveAnAccount" xml:space="preserve">
     <value>Вже маєте акаунт?</value>
-    <comment/>
   </data>
   <data name="LoginHere" xml:space="preserve">
     <value>Увійти тут</value>
-    <comment/>
   </data>
   <data name="LoginWithYourAccount" xml:space="preserve">
     <value>Увійдіть у свій акаунт</value>
-    <comment/>
   </data>
   <data name="DontHaveAnAccount" xml:space="preserve">
     <value>Не маєте акаунта?</value>
-    <comment/>
   </data>
   <data name="RegisterHere" xml:space="preserve">
     <value>Зареєструйтеся тут</value>
-    <comment/>
   </data>
   <data name="ForgotPassword" xml:space="preserve">
     <value>Забули пароль?</value>
-    <comment/>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Ім'я користувача</value>
-    <comment/>
   </data>
   <data name="Email" xml:space="preserve">
     <value>Електронна пошта</value>
-    <comment/>
   </data>
   <data name="Password" xml:space="preserve">
     <value>Пароль</value>
-    <comment/>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
     <value>Підтвердження пароля</value>
-    <comment/>
   </data>
   <data name="Register" xml:space="preserve">
     <value>Зареєструватися</value>
-    <comment/>
   </data>
   <data name="RequiredField" xml:space="preserve">
     <value>Поле {0} є обов'язковим.</value>
-    <comment/>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Помилка</value>
-    <comment/>
   </data>
   <data name="NoCoverAvailable" xml:space="preserve">
     <value>Немає обкладинки</value>
@@ -645,12 +519,6 @@
   <data name="ShelfFilters" xml:space="preserve">
     <value>Фільтри полиці</value>
   </data>
-  <data name="Search" xml:space="preserve">
-    <value>Пошук</value>
-  </data>
-  <data name="Reset" xml:space="preserve">
-    <value>Скинути</value>
-  </data>
   <data name="Apply" xml:space="preserve">
     <value>Застосувати</value>
   </data>
@@ -674,5 +542,11 @@
   </data>
   <data name="Any" xml:space="preserve">
     <value>Будь-який</value>
+  </data>
+  <data name="NewAdditions" xml:space="preserve">
+    <value>Новинки</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Назва, автор, видавництво</value>
   </data>
 </root>

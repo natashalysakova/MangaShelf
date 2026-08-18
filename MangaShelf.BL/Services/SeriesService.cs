@@ -31,6 +31,47 @@ public class SeriesService : ISeriesService
         return series?.ToDto();
     }
 
+    public async Task<IReadOnlyList<SeriesWithVolumesDto>> SearchAsync(string? searchTerm, CancellationToken token = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(token);
+
+        var normalizedSearchTerm = searchTerm?.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedSearchTerm))
+        {
+            return [];
+        }
+
+        var series = await context.Series
+            .AsNoTracking()
+            .Include(s => s.Authors)
+            .Include(s => s.Publisher)
+            .Include(s => s.Volumes)
+            .Where(s =>
+                EF.Functions.Like(s.Title, $"%{normalizedSearchTerm}%") ||
+                (s.OriginalTitle != null && EF.Functions.Like(s.OriginalTitle, $"%{normalizedSearchTerm}%")))
+            .OrderBy(s => s.Title)
+            .Take(20)
+            .ToListAsync(token);
+
+        return series.Select(s => new SeriesWithVolumesDto
+        {
+            Id = s.Id,
+            PublicId = s.PublicId,
+            Title = s.Title,
+            OriginalTitle = s.OriginalTitle,
+            Aliases = s.Aliases,
+            MalId = s.MalId,
+            Type = s.Type,
+            Status = s.Status,
+            TotalVolumes = s.TotalVolumes,
+            IsPublishedOnSite = s.IsPublishedOnSite,
+            PublisherId = s.PublisherId,
+            Publisher = s.Publisher?.ToDto() ?? new PublisherSimpleDto { Name = string.Empty },
+            Authors = s.Authors.Select(a => a.Name).ToList(),
+            Volumes = s.Volumes.OrderBy(v => v.Number).Select(v => v.ToDto()).ToList()
+        }).ToList();
+    }
+
     public async Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();

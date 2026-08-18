@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,79 +26,79 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string"/>
-              <xsd:attribute name="type" type="xsd:string"/>
-              <xsd:attribute name="mimetype" type="xsd:string"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string"/>
-              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -117,509 +117,383 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Catalog" xml:space="preserve">
-    <value>Catalog</value>
-    <comment/>
-  </data>
-  <data name="HomePage" xml:space="preserve">
-    <value>Home page</value>
-    <comment/>
-  </data>
-  <data name="MangaShelf" xml:space="preserve">
-    <value>Manga Shelf</value>
-    <comment/>
-  </data>
-  <data name="MyShelf" xml:space="preserve">
-    <value>My manga</value>
-    <comment/>
-  </data>
-  <data name="Login" xml:space="preserve">
-    <value>Login</value>
-    <comment/>
-  </data>
-  <data name="Account" xml:space="preserve">
-    <value>Account</value>
-    <comment/>
-  </data>
-  <data name="Logout" xml:space="preserve">
-    <value>Logout</value>
-    <comment/>
-  </data>
   <data name="ThisIsPreorderVolume" xml:space="preserve">
     <value>This volume is available for preorder until</value>
-    <comment/>
   </data>
   <data name="NoReviews" xml:space="preserve">
     <value>No reviews for this volume</value>
-    <comment/>
-  </data>
-  <data name="Main" xml:space="preserve">
-    <value>Main</value>
-    <comment/>
-  </data>
-  <data name="Preorders" xml:space="preserve">
-    <value>Preorders</value>
-    <comment/>
-  </data>
-  <data name="Admin" xml:space="preserve">
-    <value>Admin</value>
-    <comment/>
-  </data>
-  <data name="Search" xml:space="preserve">
-    <value>Search</value>
-    <comment/>
-  </data>
-  <data name="Filter" xml:space="preserve">
-    <value>Filter</value>
-    <comment/>
-  </data>
-  <data name="Reset" xml:space="preserve">
-    <value>Reset</value>
-    <comment/>
-  </data>
-  <data name="ResultPerPage" xml:space="preserve">
-    <value>Results per page</value>
-    <comment/>
-  </data>
-  <data name="All" xml:space="preserve">
-    <value>All</value>
-    <comment/>
-  </data>
-  <data name="OrderBy" xml:space="preserve">
-    <value>Order by</value>
-    <comment/>
-  </data>
-  <data name="SeriesTitle" xml:space="preserve">
-    <value>Series title</value>
-    <comment/>
-  </data>
-  <data name="ReleaseDate" xml:space="preserve">
-    <value>Release date</value>
-    <comment/>
-  </data>
-  <data name="Popularity" xml:space="preserve">
-    <value>Popularity</value>
-    <comment/>
-  </data>
-  <data name="Rating" xml:space="preserve">
-    <value>Rating</value>
-    <comment/>
-  </data>
-  <data name="PreorderDate" xml:space="preserve">
-    <value>Preorder date</value>
-    <comment/>
-  </data>
-  <data name="Preorder" xml:space="preserve">
-    <value>Preorder</value>
-    <comment/>
-  </data>
-  <data name="Released" xml:space="preserve">
-    <value>Released</value>
-    <comment/>
-  </data>
-  <data name="Wishlist" xml:space="preserve">
-    <value>Wishlist</value>
-    <comment/>
-  </data>
-  <data name="AddToLibrary" xml:space="preserve">
-    <value>Add to library</value>
-    <comment/>
-  </data>
-  <data name="PreorderArrived" xml:space="preserve">
-    <value>Preorder arrived</value>
-    <comment/>
-  </data>
-  <data name="Own" xml:space="preserve">
-    <value>Own</value>
-    <comment/>
   </data>
   <data name="NewManga" xml:space="preserve">
     <value>New Manga</value>
-    <comment/>
   </data>
   <data name="NewPreorders" xml:space="preserve">
     <value>New Preorders</value>
-    <comment/>
   </data>
   <data name="Home" xml:space="preserve">
     <value>Home</value>
-    <comment/>
   </data>
   <data name="OneDay" xml:space="preserve">
     <value>{count} day</value>
-    <comment/>
   </data>
   <data name="FewDays" xml:space="preserve">
     <value>{count} days</value>
-    <comment/>
   </data>
   <data name="Days" xml:space="preserve">
     <value>{count} days</value>
-    <comment/>
   </data>
   <data name="DaysTillRelease" xml:space="preserve">
     <value> Days till release</value>
-    <comment/>
   </data>
   <data name="PreorderIsDue" xml:space="preserve">
     <value>Late</value>
-    <comment/>
+  </data>
+  <data name="Preorders" xml:space="preserve">
+    <value>Preorders</value>
   </data>
   <data name="Today" xml:space="preserve">
     <value>Today</value>
-    <comment/>
   </data>
   <data name="NoPreorders" xml:space="preserve">
     <value>No preorders</value>
-    <comment/>
   </data>
   <data name="Release" xml:space="preserve">
     <value>Release</value>
-    <comment/>
   </data>
   <data name="NoNews" xml:space="preserve">
     <value>No news</value>
-    <comment/>
   </data>
   <data name="ErrorLoadingReading" xml:space="preserve">
     <value>Error loading reading</value>
-    <comment/>
   </data>
   <data name="ErrorAddingReading" xml:space="preserve">
     <value>Error adding reading</value>
-    <comment/>
   </data>
   <data name="ErrorLoadingOwnership" xml:space="preserve">
     <value>Error loading ownership</value>
-    <comment/>
   </data>
   <data name="NoDescrption" xml:space="preserve">
     <value>No description</value>
-    <comment/>
   </data>
   <data name="ItsPreorder" xml:space="preserve">
     <value>Preorder</value>
-    <comment/>
+  </data>
+  <data name="OrderBy" xml:space="preserve">
+    <value>Order by</value>
+  </data>
+  <data name="Preorder" xml:space="preserve">
+    <value>Preorder</value>
+  </data>
+  <data name="Released" xml:space="preserve">
+    <value>Released</value>
+  </data>
+  <data name="Wishlist" xml:space="preserve">
+    <value>Wishlist</value>
+  </data>
+  <data name="AddToLibrary" xml:space="preserve">
+    <value>Add to library</value>
+  </data>
+  <data name="PreorderArrived" xml:space="preserve">
+    <value>Preorder arrived</value>
+  </data>
+  <data name="Own" xml:space="preserve">
+    <value>Own</value>
+  </data>
+  <data name="Popularity" xml:space="preserve">
+    <value>Popularity</value>
+  </data>
+  <data name="Rating" xml:space="preserve">
+    <value>Rating</value>
+  </data>
+  <data name="PreorderDate" xml:space="preserve">
+    <value>Preorder date</value>
   </data>
   <data name="Published" xml:space="preserve">
     <value>Publish</value>
-    <comment/>
   </data>
   <data name="Title" xml:space="preserve">
     <value>Title</value>
-    <comment/>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="ResultPerPage" xml:space="preserve">
+    <value>Results per page</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Catalog" xml:space="preserve">
+    <value>Catalog</value>
+  </data>
+  <data name="HomePage" xml:space="preserve">
+    <value>Home page</value>
+  </data>
+  <data name="MangaShelf" xml:space="preserve">
+    <value>Manga Shelf</value>
+  </data>
+  <data name="MyShelf" xml:space="preserve">
+    <value>My manga</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Main" xml:space="preserve">
+    <value>Main</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="SeriesTitle" xml:space="preserve">
+    <value>Series title</value>
+  </data>
+  <data name="ReleaseDate" xml:space="preserve">
+    <value>Release date</value>
   </data>
   <data name="No updates found for the selected date range." xml:space="preserve">
     <value>No updates found for the selected date range.</value>
-    <comment/>
   </data>
   <data name="AdminVolumes" xml:space="preserve">
     <value>Volumes</value>
-    <comment/>
   </data>
   <data name="AgeRestriction" xml:space="preserve">
     <value>Age Restriction</value>
-    <comment/>
   </data>
   <data name="ApplyCrop" xml:space="preserve">
     <value>Apply Crop</value>
-    <comment/>
   </data>
   <data name="AutoCrop" xml:space="preserve">
     <value>Auto Crop</value>
-    <comment/>
   </data>
   <data name="BackToList" xml:space="preserve">
     <value>Back to List</value>
-    <comment/>
   </data>
   <data name="Bottom" xml:space="preserve">
     <value>Bottom</value>
-    <comment/>
   </data>
   <data name="ChangesSaved" xml:space="preserve">
     <value>Changes saved</value>
-    <comment/>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
-    <comment/>
   </data>
   <data name="CoverImage" xml:space="preserve">
     <value>Cover Image</value>
-    <comment/>
   </data>
   <data name="CroppedCover" xml:space="preserve">
     <value>Cropped Cover</value>
-    <comment/>
   </data>
   <data name="CropSize" xml:space="preserve">
     <value>Crop Size</value>
-    <comment/>
   </data>
   <data name="CropSuccessful" xml:space="preserve">
     <value>Crop successful</value>
-    <comment/>
   </data>
   <data name="CurrentCroppedVersion" xml:space="preserve">
     <value>Cropped Version</value>
-    <comment/>
   </data>
   <data name="Description" xml:space="preserve">
     <value>Description</value>
-    <comment/>
   </data>
   <data name="EditVolume" xml:space="preserve">
     <value>Edit Volume</value>
-    <comment/>
   </data>
   <data name="ErrorUploadingImage" xml:space="preserve">
     <value>Error uploading image</value>
-    <comment/>
   </data>
   <data name="FieldsCanBeOverwritten" xml:space="preserve">
     <value>Fields can be overwritten by parser</value>
-    <comment/>
   </data>
   <data name="HidePreviews" xml:space="preserve">
     <value>Hide Previews</value>
-    <comment/>
   </data>
   <data name="Identifiers" xml:space="preserve">
     <value>Identifiers</value>
-    <comment/>
   </data>
   <data name="ImageDimensions" xml:space="preserve">
     <value>Image Dimensions</value>
-    <comment/>
   </data>
   <data name="ImageUploadedSuccessfully" xml:space="preserve">
     <value>Image uploaded successfully</value>
-    <comment/>
   </data>
   <data name="InvalidCropBoundaries" xml:space="preserve">
     <value>Invalid crop boundaries</value>
-    <comment/>
   </data>
   <data name="IsDeleted" xml:space="preserve">
     <value>Is Deleted</value>
-    <comment/>
   </data>
   <data name="Left" xml:space="preserve">
     <value>Left</value>
-    <comment/>
   </data>
   <data name="Links" xml:space="preserve">
     <value>Links</value>
-    <comment/>
   </data>
   <data name="ManualCrop" xml:space="preserve">
     <value>Manual Crop</value>
-    <comment/>
   </data>
   <data name="ManualCropControls" xml:space="preserve">
     <value>Manual Crop Controls</value>
-    <comment/>
   </data>
   <data name="NothingSelected" xml:space="preserve">
     <value>Nothing selected</value>
-    <comment/>
   </data>
   <data name="OriginalCover" xml:space="preserve">
     <value>Original Cover</value>
-    <comment/>
   </data>
   <data name="PreorderStart" xml:space="preserve">
     <value>Preorder Start</value>
-    <comment/>
   </data>
   <data name="Processing" xml:space="preserve">
     <value>Processing</value>
-    <comment/>
   </data>
   <data name="Publisher" xml:space="preserve">
     <value>Publisher</value>
-    <comment/>
   </data>
   <data name="Publishing" xml:space="preserve">
     <value>Publishing</value>
-    <comment/>
   </data>
   <data name="PurchaseUrl" xml:space="preserve">
     <value>Purchase URL</value>
-    <comment/>
   </data>
   <data name="ResetBoundaries" xml:space="preserve">
     <value>Reset Boundaries</value>
-    <comment/>
   </data>
   <data name="Right" xml:space="preserve">
     <value>Right</value>
-    <comment/>
   </data>
   <data name="SaveChanges" xml:space="preserve">
     <value>Save Changes</value>
-    <comment/>
   </data>
   <data name="SelectedFile" xml:space="preserve">
     <value>Selected file</value>
-    <comment/>
   </data>
   <data name="SeriesAuthors" xml:space="preserve">
     <value>Authors</value>
-    <comment/>
   </data>
   <data name="SeriesDetails" xml:space="preserve">
     <value>Series Details</value>
-    <comment/>
   </data>
   <data name="SeriesId" xml:space="preserve">
     <value>Series ID</value>
-    <comment/>
   </data>
   <data name="SeriesOriginalTitle" xml:space="preserve">
     <value>Original Title</value>
-    <comment/>
   </data>
   <data name="SeriesPublicId" xml:space="preserve">
     <value>Series Public ID</value>
-    <comment/>
   </data>
   <data name="SeriesStatus" xml:space="preserve">
     <value>Status</value>
-    <comment/>
   </data>
   <data name="SeriesTotalVolumes" xml:space="preserve">
     <value>Total Volumes</value>
-    <comment/>
   </data>
   <data name="SeriesType" xml:space="preserve">
     <value>Type</value>
-    <comment/>
   </data>
   <data name="ShowPreviewOverlay" xml:space="preserve">
     <value>Show Preview Overlay</value>
-    <comment/>
   </data>
   <data name="SingleIssue" xml:space="preserve">
     <value>Single Issue</value>
-    <comment/>
   </data>
   <data name="SmallCover" xml:space="preserve">
     <value>Small Cover</value>
-    <comment/>
   </data>
   <data name="Top" xml:space="preserve">
     <value>Top</value>
-    <comment/>
   </data>
   <data name="Uploading" xml:space="preserve">
     <value>Uploading...</value>
-    <comment/>
   </data>
   <data name="UploadVolumeImage" xml:space="preserve">
     <value>Upload Volume Image</value>
-    <comment/>
   </data>
   <data name="VolumeDetails" xml:space="preserve">
     <value>Volume Details</value>
-    <comment/>
   </data>
   <data name="VolumeId" xml:space="preserve">
     <value>Volume ID</value>
-    <comment/>
   </data>
   <data name="VolumeIsbn" xml:space="preserve">
     <value>ISBN</value>
-    <comment/>
   </data>
   <data name="VolumeNotFound" xml:space="preserve">
     <value>Volume not found</value>
-    <comment/>
   </data>
   <data name="VolumeNumber" xml:space="preserve">
     <value>Volume Number</value>
-    <comment/>
   </data>
   <data name="VolumePublicId" xml:space="preserve">
     <value>Volume Public ID</value>
-    <comment/>
   </data>
   <data name="VolumeTitle" xml:space="preserve">
     <value>Volume Title</value>
-    <comment/>
   </data>
   <data name="VolumeType" xml:space="preserve">
     <value>Volume Type</value>
-    <comment/>
-  </data>
-  <data name="PasswordsDoNotMatch" xml:space="preserve">
-    <value>Passwords do not match</value>
-    <comment/>
   </data>
   <data name="LengthError" xml:space="preserve">
     <value>The {0} must be at least {2} and at max {1} characters long.</value>
-    <comment/>
+  </data>
+  <data name="PasswordsDoNotMatch" xml:space="preserve">
+    <value>Passwords do not match</value>
   </data>
   <data name="InvalidEmail" xml:space="preserve">
     <value>Invalid e-mail address</value>
-    <comment/>
   </data>
   <data name="CreateANewAccount" xml:space="preserve">
     <value>Create a new account</value>
-    <comment/>
   </data>
   <data name="AlreadyHaveAnAccount" xml:space="preserve">
     <value>Already have an account?</value>
-    <comment/>
   </data>
   <data name="LoginHere" xml:space="preserve">
     <value>Login here</value>
-    <comment/>
   </data>
   <data name="LoginWithYourAccount" xml:space="preserve">
     <value>Login with your account</value>
-    <comment/>
   </data>
   <data name="DontHaveAnAccount" xml:space="preserve">
     <value>Don't have an account?</value>
-    <comment/>
   </data>
   <data name="RegisterHere" xml:space="preserve">
     <value>Register here</value>
-    <comment/>
   </data>
   <data name="ForgotPassword" xml:space="preserve">
     <value>Forgot password?</value>
-    <comment/>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Username</value>
-    <comment/>
   </data>
   <data name="Email" xml:space="preserve">
     <value>Email</value>
-    <comment/>
   </data>
   <data name="Password" xml:space="preserve">
     <value>Password</value>
-    <comment/>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
     <value>Confirm password</value>
-    <comment/>
   </data>
   <data name="Register" xml:space="preserve">
     <value>Register</value>
-    <comment/>
   </data>
   <data name="RequiredField" xml:space="preserve">
     <value>The {0} field is required.</value>
-    <comment/>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>
-    <comment/>
   </data>
   <data name="NoCoverAvailable" xml:space="preserve">
     <value>No cover available</value>
@@ -645,12 +519,6 @@
   <data name="ShelfFilters" xml:space="preserve">
     <value>Shelf filters</value>
   </data>
-  <data name="Search" xml:space="preserve">
-    <value>Search</value>
-  </data>
-  <data name="Reset" xml:space="preserve">
-    <value>Reset</value>
-  </data>
   <data name="Apply" xml:space="preserve">
     <value>Apply</value>
   </data>
@@ -674,5 +542,11 @@
   </data>
   <data name="Any" xml:space="preserve">
     <value>Any</value>
+  </data>
+  <data name="NewAdditions" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Title, series, author, publisher</value>
   </data>
 </root>

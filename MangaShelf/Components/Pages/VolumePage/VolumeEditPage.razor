@@ -7,6 +7,7 @@
 @using Microsoft.JSInterop
 @using System.Text.Json
 @inject IVolumeService VolumeService
+@inject IDialogService DialogService
 @inject IUiLocalizationService Localizer
 @inject ISnackbar Snackbar
 
@@ -28,7 +29,12 @@
             <MudItem xs="12" Class="mt-4">
                 <MudPaper Class="pa-4" Elevation="2">
                     <SaveChangesPanel HasChanges="_dataChanged" VolumePublicId="@CurrentVolumePublicId" />
-                    <MudText Typo="Typo.h6">@Localizer["SeriesDetails"]</MudText>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h6">@Localizer["SeriesDetails"]</MudText>
+                        <MudButton OnClick="OpenReassignSeriesDialog" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Search">
+                            @($"{Localizer["Search"]} {Localizer["SeriesTitle"]}")
+                        </MudButton>
+                    </MudStack>
 
                     <MudStack Row="true" Spacing="2">
                         <MudTextField @bind-Value="Volume.SeriesTitle" Label="@Localizer["SeriesTitle"]"
@@ -427,15 +433,99 @@
         StateHasChanged();
     }
 
+    private async Task OpenReassignSeriesDialog()
+    {
+        if (Volume == null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<ReassignSeriesDialog>
+        {
+            { dialog => dialog.CurrentSeriesId, Volume.SeriesId }
+        };
+
+        var dialog = await DialogService.ShowAsync<ReassignSeriesDialog>(string.Empty, parameters, new DialogOptions
+        {
+            FullWidth = true,
+            MaxWidth = MaxWidth.Medium
+        });
+
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: SeriesSimpleDto selectedSeries })
+        {
+            ApplySelectedSeries(selectedSeries);
+        }
+    }
+
+    private void ApplySelectedSeries(SeriesSimpleDto selectedSeries)
+    {
+        if (Volume == null)
+        {
+            return;
+        }
+
+        Volume.SeriesId = selectedSeries.Id;
+        Volume.SeriesPublicId = selectedSeries.PublicId;
+        Volume.SeriesTitle = selectedSeries.Title;
+        Volume.SeriesOriginalTitle = selectedSeries.OriginalTitle;
+        Volume.SeriesStatus = selectedSeries.Status;
+        Volume.SeriesType = selectedSeries.Type;
+        Volume.SeriesTotalVolumes = selectedSeries.TotalVolumes;
+        Volume.SeriesAuthors = selectedSeries.Authors
+            .Select(author => new AuthorDto { Name = author })
+            .ToList();
+
+        if (Volume.SeriesStatus == SeriesStatus.OneShot)
+        {
+            Volume.Number = null;
+            Volume.SeriesTotalVolumes ??= 1;
+        }
+
+        NotifySeriesSelectionChanged();
+        UpdateChangeFlags();
+        StateHasChanged();
+    }
+
+    private void NotifySeriesSelectionChanged()
+    {
+        if (Volume == null || _editContext == null)
+        {
+            return;
+        }
+
+        var changedFields = new[]
+        {
+            nameof(VolumeEditDto.SeriesId),
+            nameof(VolumeEditDto.SeriesPublicId),
+            nameof(VolumeEditDto.SeriesTitle),
+            nameof(VolumeEditDto.SeriesOriginalTitle),
+            nameof(VolumeEditDto.SeriesStatus),
+            nameof(VolumeEditDto.SeriesType),
+            nameof(VolumeEditDto.SeriesTotalVolumes),
+            nameof(VolumeEditDto.SeriesAuthors),
+            nameof(VolumeEditDto.Number),
+            nameof(VolumeEditDto.Title)
+        };
+
+        foreach (var fieldName in changedFields)
+        {
+            _editContext.NotifyFieldChanged(new FieldIdentifier(Volume, fieldName));
+        }
+
+        _editContext.Validate();
+    }
+
     private string CurrentVolumePublicId => Volume?.PublicId ?? string.Empty;
 
-    private void SaveData()
+    private async Task SaveData()
     {
         try
         {
             if (Volume != null)
             {
-                VolumeService.Update(Volume);
+                Volume = await VolumeService.Update(Volume);
+                ConfigureEditContext(Volume);
                 Snackbar.Add(Localizer["ChangesSaved"], Severity.Success);
                 MarkAsSaved();
             }
