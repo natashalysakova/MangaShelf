@@ -10,4 +10,5 @@ public interface ISeriesService : IService
     Task<IEnumerable<string>> GetAllTitlesAsync(CancellationToken stoppingToken);
     Task<IEnumerable<SeriesWithVolumesDto>> GetAllWithVolumesAsync(CancellationToken token = default);
     Task UpdateSeriesAsync(SeriesUpdateDto dto, CancellationToken token = default);
+    Task DeleteSeriesAsync(Guid seriesId, CancellationToken token = default);
 }

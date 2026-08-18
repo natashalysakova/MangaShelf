@@ -3,6 +3,7 @@
 @using MangaShelf.DAL.Models
 
 @inject ISeriesService SeriesService
+@inject IDialogService DialogService
 
 <MudDialog>
     <TitleContent>
@@ -43,11 +44,18 @@
         </MudStack>
     </DialogContent>
     <DialogActions>
+        <MudButton OnClick="Delete"
+                   Color="Color.Error"
+                   Variant="Variant.Text"
+                   Disabled="isSaving || isDeleting">
+            Delete
+        </MudButton>
+        <MudSpacer />
         <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
         <MudButton OnClick="Submit"
                    Color="Color.Primary"
                    Variant="Variant.Filled"
-                   Disabled="isSaving">
+                   Disabled="isSaving || isDeleting">
             @if (isSaving)
             {
                 <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
@@ -64,6 +72,7 @@
     private SeriesUpdateDto model = new() { Title = string.Empty };
     private string authorsText = string.Empty;
     private bool isSaving;
+    private bool isDeleting;
 
     protected override void OnParametersSet()
     {
@@ -87,6 +96,24 @@
             .ToList();
 
         await SeriesService.UpdateSeriesAsync(model);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private async Task Delete()
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            "Delete Series",
+            $"Delete '{Series.Title}' and all of its volumes?",
+            yesText: "Delete",
+            noText: "Cancel");
+
+        if (confirmed is not true)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        await SeriesService.DeleteSeriesAsync(Series.Id);
         MudDialog.Close(DialogResult.Ok(true));
     }
 

@@ -142,4 +142,25 @@ public class SeriesService : ISeriesService
         await context.SaveChangesAsync(token);
         _logger.LogInformation("Updated series {Id} ({Title})", series.Id, series.Title);
     }
+
+    public async Task DeleteSeriesAsync(Guid seriesId, CancellationToken token = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(token);
+
+        var series = await context.Series
+            .Include(s => s.Volumes)
+            .FirstOrDefaultAsync(s => s.Id == seriesId, token);
+
+        if (series is null)
+        {
+            _logger.LogWarning("Series {Id} not found for deletion", seriesId);
+            return;
+        }
+
+        context.RemoveRange(series.Volumes);
+        context.Remove(series);
+
+        await context.SaveChangesAsync(token);
+        _logger.LogInformation("Deleted series {Id} ({Title})", series.Id, series.Title);
+    }
 }
