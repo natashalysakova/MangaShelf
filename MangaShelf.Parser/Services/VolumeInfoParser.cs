@@ -102,7 +102,7 @@ public class VolumeInfoParser(
     private async Task<Volume> GetOrCreateVolume(DomainServiceFactory factory, ParsedInfo volumeInfo, Series series, CancellationToken token)
     {
         var volumeService = factory.GetDomainService<IVolumeDomainService>();
-        var volume = volumeService.FindVolumeFromParsedInfo(series.Id, volumeInfo.ToVolumeInfoRequest());
+        var volume = await volumeService.FindVolumeFromParsedInfo(series.Id, volumeInfo.ToVolumeInfoRequest());
 
         return volume ?? new Volume
         {

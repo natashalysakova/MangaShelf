@@ -38,9 +38,11 @@ public enum SeriesType
     Manga = 1, 
     Manhwa = 2,
     Manhua = 3,
-    Novel = 4,
+    LightNovel = 4,
     GraphicNovel = 5,
     Comic = 6,
     Artbook = 7,
-    Other = 8
+    Other = 8,
+    Cookbook = 9,
+    Book = 10
 }

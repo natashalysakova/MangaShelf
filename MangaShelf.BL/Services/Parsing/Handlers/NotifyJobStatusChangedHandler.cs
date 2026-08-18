@@ -45,7 +45,7 @@ public class NotifyJobStatusChangedHandler : IJobStateTransitionHandler
             job.Status = transition.ToState;
 
             // Set Started timestamp when transitioning from Waiting to the first active state (GatheringVolumes)
-            if (transition.FromState == RunStatus.Waiting && transition.ToState == RunStatus.GatheringVolumes)
+            if (transition.FromState == RunStatus.Waiting && transition.ToState.IsRunning())
             {
                 job.Started = transition.TransitionTime;
             }

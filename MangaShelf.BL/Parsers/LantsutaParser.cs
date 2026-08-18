@@ -287,7 +287,7 @@ public class LantsutaParser : BaseParser
         var title = GetVolumeTitle(document);
         if (title.Contains("Роман"))
         {
-            return SeriesType.Novel;
+            return SeriesType.LightNovel;
         }
         
         return SeriesType.Manga;

@@ -184,7 +184,7 @@ public class VovkulakaParser : BaseParser
             }
         }
 
-        return string.Empty;
+        return defaultNames.Series;
     }
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
@@ -219,10 +219,10 @@ public class VovkulakaParser : BaseParser
         var replaced = titleElement.TextContent.Replace(seriesTitle, string.Empty).Trim();
         if (replaced.StartsWith("."))
         {
-            replaced = replaced.Substring(1);
+            replaced = replaced.Substring(1).Trim();
         }
 
-        return replaced.Trim();
+        return string.IsNullOrEmpty(replaced) ? parsedHeader.Title : replaced;
     }
 
     protected override VolumeType GetVolumeType(IDocument document)

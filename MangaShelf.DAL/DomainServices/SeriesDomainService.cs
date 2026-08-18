@@ -28,11 +28,13 @@ public class SeriesDomainService : BaseDomainService<Series>, ISeriesDomainServi
     public async Task<Series?> GetByTitleAsync(string series, SeriesType seriesType, CancellationToken token = default)
     {
         var query = _context.Series
-            .Where(s => s.Title.ToLower() == series.ToLower() && s.Type == seriesType);
+            .Where(s => s.Title.ToLower() == series.ToLower());
+
         if(seriesType != SeriesType.Unknown)
         {
-            query = query.Where(s => s.Type == SeriesType.Manga);
+            query = query.Where(x => x.Type == seriesType);
         }
+
         return await query.FirstOrDefaultAsync(token);
     }
 }
