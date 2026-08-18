@@ -33,7 +33,7 @@ public class VolumeDomainServiceTests : IDisposable
 
         var service = CreateService(context);
 
-        var result = service.FindVolumeFromParsedInfo(isbnMatch.SeriesId, new VolumeInfoRequest
+        var result = await service.FindVolumeFromParsedInfo(isbnMatch.SeriesId, new VolumeInfoRequest
         {
             Series = "Other Series",
             VolumeNumber = 99,
@@ -57,7 +57,7 @@ public class VolumeDomainServiceTests : IDisposable
 
         var service = CreateService(context);
 
-        var result = service.FindVolumeFromParsedInfo(titleMatch.SeriesId, new VolumeInfoRequest
+        var result = await service.FindVolumeFromParsedInfo(titleMatch.SeriesId, new VolumeInfoRequest
         {
             Series = "Matched Series",
             VolumeNumber = 7,
@@ -81,7 +81,7 @@ public class VolumeDomainServiceTests : IDisposable
 
         var service = CreateService(context);
 
-        var result = service.FindVolumeFromParsedInfo(deletedVolume.SeriesId, new VolumeInfoRequest
+        var result = await service.FindVolumeFromParsedInfo(deletedVolume.SeriesId, new VolumeInfoRequest
         {
             Series = "Deleted Series",
             VolumeNumber = 5,
@@ -108,7 +108,7 @@ public class VolumeDomainServiceTests : IDisposable
 
         var service = CreateService(context);
 
-        var result = service.FindVolumeFromParsedInfo(expectedVolume.SeriesId, new VolumeInfoRequest
+        var result = await service.FindVolumeFromParsedInfo(expectedVolume.SeriesId, new VolumeInfoRequest
         {
             Series = "Series B",
             VolumeNumber = 2,
@@ -134,7 +134,7 @@ public class VolumeDomainServiceTests : IDisposable
 
         var service = CreateService(context);
 
-        var result = service.FindVolumeFromParsedInfo(Guid.NewGuid(), new VolumeInfoRequest
+        var result = await service.FindVolumeFromParsedInfo(Guid.NewGuid(), new VolumeInfoRequest
         {
             Series = "Missing Series",
             VolumeNumber = 999,
