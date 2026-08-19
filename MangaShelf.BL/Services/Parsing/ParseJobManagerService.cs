@@ -236,9 +236,9 @@ public class ParseJobManagerService : IParseJobManagerService
         await TransitionJobState(runId, ParseJobTrigger.UpdateProgress, context: progress.ToString(), result: result, token: token);
     }
 
-    public async Task SetToFinishedStatus(Guid jobId, CancellationToken token = default)
+    public async Task SetToFinishedStatus(Guid jobId, ParseResult? result = null, CancellationToken token = default)
     {
-        await TransitionJobState(jobId, ParseJobTrigger.Complete, context: "Job parsing completed successfully", token: token);
+        await TransitionJobState(jobId, ParseJobTrigger.Complete, context: "Job parsing completed successfully", result: result, token: token);
     }
 
     public async Task SetToErrorStatus(Guid jobId, CancellationToken token = default)
