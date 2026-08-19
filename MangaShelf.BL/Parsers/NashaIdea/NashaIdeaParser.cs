@@ -307,6 +307,17 @@ public class NashaIdeaParser : BaseParser
         return date;
     }
 
+    protected override SeriesType GetSeriesType(IDocument document)
+    {
+        var series = GetSeries(document);
+        if(series.Contains("Ранобе"))
+        {
+            return SeriesType.LightNovel;
+        }
+
+        return SeriesType.Manga;
+    }
+
     protected override string GetVolumeUrlBlockClass()
     {
         return ".woocommerce-loop-product__link";
