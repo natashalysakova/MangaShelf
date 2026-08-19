@@ -10,6 +10,8 @@
 @inject ICacheService CacheService
 @inject IUiLocalizationService Localizer
 @inject ProtectedLocalStorage ProtectedLocalStorage
+@inject ISnackbar Snackbar
+@inject ILogger<Catalog> Logger
 
 @inherits UserContextComponent
 
@@ -228,8 +230,16 @@
             OrderIsAsc = this.OrderIsAsc
         };
 
-        (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
-
+        try
+        {   
+            (volumes, _totalPages) = await VolumeService.GetAllVolumesAsync(paginationOption);
+        }     
+        catch (Exception ex)
+        {
+            Snackbar.Add(Localizer["ErrorLoadingVolumes"], Severity.Error);
+            Logger.LogError(ex, "Error loading volumes");
+        }
+        
         await SaveToStorage();
 
         _loading = false;

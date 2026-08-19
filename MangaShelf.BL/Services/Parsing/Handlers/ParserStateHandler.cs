@@ -45,12 +45,12 @@ public class ParserStateHandler : IJobStateTransitionHandler
 
         parser.Status = MapRunStatusToParserStatus(transition.ToState);
 
-        if(transition.ToState.IsActive() && parser.NextRun != default)
+        if(transition.ToState.IsActive() && parser.NextRun != default && job.Type == ParserRunType.FullSite)
         {
             parser.NextRun = default;
         }
 
-        if (transition.ToState.IsCompleted())
+        if (transition.ToState.IsCompleted() && job.Type == ParserRunType.FullSite)
         {
             parser.NextRun = DateTimeOffset.UtcNow + _configurationService.JobManager.DelayBetweenRuns;
         }

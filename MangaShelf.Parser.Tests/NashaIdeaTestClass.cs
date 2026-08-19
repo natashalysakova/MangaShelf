@@ -159,4 +159,15 @@ public class NashaIdeaTestClass : BaseParserTestClass<NashaIdeaParser>
             Assert.IsNotNull(result.Description);
         }
     }
+
+    [TestMethod]
+    [DataRow("https://nashaidea.com/product/mii-shchaslyvyi-shliub-ranobe-tom-1/", SeriesType.LightNovel)]
+    [DataRow("https://nashaidea.com/product/mii-shchaslyvyi-shliub-tom-1/", SeriesType.Manga)]
+    public async Task NashaIdea_SeriesType_ShouldBe(string url, SeriesType expectedSeriesType)
+    {
+        var result = await Parser.Parse(url);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(expectedSeriesType, result.SeriesType);
+    }
 }
