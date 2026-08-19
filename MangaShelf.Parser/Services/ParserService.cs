@@ -58,7 +58,7 @@ public class ParserService : IParseService
         if(!volumesToParse.Any())
         {
             _logger.LogDebug("No volumes to parse, finishing job");
-            await _jobManagerService.SetToFinishedStatus(jobId, token);
+            await _jobManagerService.SetToFinishedStatus(jobId, token:token);
             return;
         }
 
@@ -110,7 +110,7 @@ public class ParserService : IParseService
             }
         }
 
-        await _jobManagerService.SetToFinishedStatus(jobId, token);
+        await _jobManagerService.SetToFinishedStatus(jobId, token: token);
 
         _logger.LogDebug($"{parser.GetType().Name}: Finished parsing");
     }
@@ -214,7 +214,7 @@ public class ParserService : IParseService
     {
         await _jobManagerService.RunJob(jobId, token);
         ParseResult result = await ParsePageInternal(jobId, url, parser, token);
-        await _jobManagerService.SetToFinishedStatus(jobId, token);
+        await _jobManagerService.SetToFinishedStatus(jobId, result, token);
         return result;
     }
 

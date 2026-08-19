@@ -18,7 +18,7 @@ public interface IParseJobManagerService
     Task RecordErrorAndStop(Guid jobId, Exception exception, string? url = null, CancellationToken token = default);    
     Task SetToParsingStatus(Guid jobId, IEnumerable<string> volumesToParse, CancellationToken token = default);
     Task SetProgress(Guid runId, double progress, ParseResult? result, CancellationToken token);
-    Task SetToFinishedStatus(Guid jobId, CancellationToken token = default);
+    Task SetToFinishedStatus(Guid jobId, ParseResult? result = null, CancellationToken token = default);
     Task SetToCancelledStatus(Guid jobId, CancellationToken token);
     Task RunJob(Guid jobId, CancellationToken token = default);
 
