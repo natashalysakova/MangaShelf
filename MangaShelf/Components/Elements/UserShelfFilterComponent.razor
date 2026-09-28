@@ -75,7 +75,7 @@
     [Parameter]
     public EventCallback<UserShelfFilterOptions> FilterOptionsChanged { get; set; }
 
-    private readonly VolumeStatus[] _ownershipStatuses = Enum.GetValues<VolumeStatus>().Except(new[] { VolumeStatus.None
+    private readonly VolumeStatus[] _ownershipStatuses = Enum.GetValues<VolumeStatus>().Except(new[] { VolumeStatus.None, VolumeStatus.Wishlist
 }).ToArray();
     private readonly ReadingStatus[] _readingStatuses = Enum.GetValues<ReadingStatus>();
 

@@ -1,0 +1,127 @@
+@page "/wishlist"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using MangaShelf.BL.Contracts
+@using MangaShelf.BL.Services
+@using MangaShelf.DAL.Models
+@using MangaShelf.Components.Pages.VolumePage.Elements
+@using MudBlazor
+@inherits UserContextComponent
+
+@inject IVolumeService VolumeService
+@inject IDialogService DialogService
+@inject IUiLocalizationService Localizer
+@inject ISnackbar Snackbar
+
+@attribute [Authorize]
+@using static MangaShelf.Components.Pages.VolumePage.Elements.AddEditReadingDialog
+
+<MudText Typo="Typo.h5" Class="mb-3">@Localizer["Wishlist"]</MudText>
+
+@if (isLoading)
+{
+    <MudStack AlignItems="AlignItems.Center" Class="mt-8">
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+    </MudStack>
+}
+else if (volumes is null || !volumes.Any())
+{
+    <MudAlert Severity="Severity.Info">@Localizer["NoVolumesFound"]</MudAlert>
+}
+else
+{
+    <MudGrid Spacing="2">
+        @foreach (var volume in volumes)
+        {
+            <MudItem xs="6" sm="4" md="3" lg="2" xl="2">
+                <UserVolumeCardComponent VolumeCard="volume" OnCardClick="OpenVolumeModal" OnReadingStatusClick="OnReadingStatusClick" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    IEnumerable<UserVolumeCard>? volumes;
+    bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVolumesAsync();
+    }
+
+    private async Task OpenVolumeModal(string publicId)
+    {
+        var parameters = new DialogParameters<VolumeQuickViewModal>
+        {
+            { x => x.PublicId, publicId }
+        };
+
+        var dialog = await DialogService.ShowAsync<VolumeQuickViewModal>("", parameters);
+        await dialog.Result;
+        await LoadVolumesAsync();
+    }
+
+    private async Task OnReadingStatusClick(Guid volumeId)
+    {
+        var userId = await GetUserId();
+        var reading = await VolumeService.GetActiveReading(volumeId, userId);
+
+        if (reading == null)
+        {
+            reading = new Reading
+            {
+                VolumeId = volumeId,
+                StartedAt = DateTime.UtcNow,
+                Rating = 0
+            };
+        }
+
+        reading.Status = ReadingStatus.Completed;
+        reading.FinishedAt = DateTimeOffset.Now;
+
+        var dialog = await DialogService.ShowAsync<AddEditReadingDialog>("", new DialogParameters
+        {
+            { nameof(AddEditReadingDialog.Reading), reading }
+        }, new DialogOptions
+        {
+            FullWidth = true,
+            Position = DialogPosition.Center,
+            MaxWidth = MaxWidth.Small
+        });
+
+        var result = await dialog.Result;
+        if (result != null && !result.Canceled && result.Data is EditReadingDialogResult resultData)
+        {
+            try
+            {
+                await VolumeService.AddEditReadingAsync(resultData.Reading, userId);
+                await LoadVolumesAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error saving reading: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task LoadVolumesAsync()
+    {
+        try
+        {
+            isLoading = true;
+            var userId = await GetUserId();
+            volumes = await VolumeService.GetUserVolumes(userId, new UserShelfFilterOptions
+            {
+                CurrentOwnershipStatuses = [VolumeStatus.Wishlist]
+            });
+        }
+        catch
+        {
+            volumes = [];
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

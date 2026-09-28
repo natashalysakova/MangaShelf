@@ -41,7 +41,7 @@ else
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
                     <MudText Typo="Typo.h6">@seriesGroup.SeriesTitle</MudText>
                     <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">
-                        @seriesGroup.Volumes.Count @(seriesGroup.Volumes.Count == 1 ? Localizer["VolumeCount"] : Localizer["VolumeCountPlural"])
+                        @seriesGroup.Volumes.Count @GetVolumeCountLabel(seriesGroup.Volumes.Count)
                     </MudChip>
                 </MudStack>
 
@@ -160,7 +160,8 @@ else
         {
             isLoading = true;
             var userId = await GetUserId();
-            volumes = await VolumeService.GetUserVolumes(userId, filterOptions);
+            volumes = (await VolumeService.GetUserVolumes(userId, filterOptions))
+                .Where(v => v.CurrentOwnershipStatus != VolumeStatus.Wishlist);
             groupedSeries = BuildSeriesGroups(volumes);
         }
         catch (Exception ex)
@@ -211,5 +212,23 @@ else
         public required string SeriesTitle { get; init; }
         public DateTimeOffset LatestRelease { get; init; }
         public required List<UserVolumeCard> Volumes { get; init; }
+    }
+
+    private string GetVolumeCountLabel(int count)
+    {
+        var lastTwoDigits = count % 100;
+        var lastDigit = count % 10;
+
+        if (lastTwoDigits is >= 11 and <= 14)
+        {
+            return Localizer["VolumeCountMany"];
+        }
+
+        return lastDigit switch
+        {
+            1 => Localizer["VolumeCount"],
+            2 or 3 or 4 => Localizer["VolumeCountFew"],
+            _ => Localizer["VolumeCountMany"]
+        };
     }
 }

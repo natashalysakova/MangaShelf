@@ -183,6 +183,9 @@
   <data name="Preorder" xml:space="preserve">
     <value>Передзамовлення</value>
   </data>
+  <data name="PreorderShort" xml:space="preserve">
+    <value>Передзам.</value>
+  </data>
   <data name="Released" xml:space="preserve">
     <value>Вийшло</value>
   </data>
@@ -509,6 +512,12 @@
   </data>
   <data name="VolumeCount" xml:space="preserve">
     <value>том</value>
+  </data>
+  <data name="VolumeCountFew" xml:space="preserve">
+    <value>томи</value>
+  </data>
+  <data name="VolumeCountMany" xml:space="preserve">
+    <value>томів</value>
   </data>
   <data name="VolumeCountPlural" xml:space="preserve">
     <value>томи</value>

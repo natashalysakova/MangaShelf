@@ -183,6 +183,9 @@
   <data name="Preorder" xml:space="preserve">
     <value>Preorder</value>
   </data>
+  <data name="PreorderShort" xml:space="preserve">
+    <value>Preorder</value>
+  </data>
   <data name="Released" xml:space="preserve">
     <value>Released</value>
   </data>
@@ -509,6 +512,12 @@
   </data>
   <data name="VolumeCount" xml:space="preserve">
     <value>volume</value>
+  </data>
+  <data name="VolumeCountFew" xml:space="preserve">
+    <value>volumes</value>
+  </data>
+  <data name="VolumeCountMany" xml:space="preserve">
+    <value>volumes</value>
   </data>
   <data name="VolumeCountPlural" xml:space="preserve">
     <value>volumes</value>
