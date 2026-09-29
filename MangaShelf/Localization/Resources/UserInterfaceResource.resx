@@ -267,9 +267,6 @@
   <data name="AdminDashboard" xml:space="preserve">
     <value>Dashboard</value>
   </data>
-  <data name="AdminVolumesNav" xml:space="preserve">
-    <value>Volumes</value>
-  </data>
   <data name="AdminSeries" xml:space="preserve">
     <value>Series</value>
   </data>
@@ -304,7 +301,7 @@
     <value>No updates found for the selected date range.</value>
   </data>
   <data name="AdminVolumes" xml:space="preserve">
-    <value>AdminVolumes</value>
+    <value>Volumes</value>
   </data>
   <data name="AgeRestriction" xml:space="preserve">
     <value>AgeRestriction</value>

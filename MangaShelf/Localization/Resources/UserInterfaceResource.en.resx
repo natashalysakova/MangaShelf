@@ -267,9 +267,6 @@
   <data name="AdminDashboard" xml:space="preserve">
     <value>Dashboard</value>
   </data>
-  <data name="AdminVolumesNav" xml:space="preserve">
-    <value>Volumes</value>
-  </data>
   <data name="AdminSeries" xml:space="preserve">
     <value>Series</value>
   </data>

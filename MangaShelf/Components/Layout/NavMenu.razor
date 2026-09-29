@@ -76,8 +76,8 @@
                      TransformOrigin="Origin.TopRight">
                 <MudMenuItem Disabled="true" Class="manga-menu-heading">@Localizer["AdminPanel"]</MudMenuItem>
                 <MudDivider />
-                <MudMenuItem Href="@AdminRoute" Icon="@Icons.Material.Filled.Store" Class="@GetDropdownItemClass(AdminRoute)">@Localizer["AdminDashboard"]</MudMenuItem>
-                <MudMenuItem Href="@AdminVolumesRoute" Icon="@Icons.Material.Filled.Book" Class="@GetDropdownItemClass(AdminVolumesRoute)">@Localizer["AdminVolumesNav"]</MudMenuItem>
+                <MudMenuItem Href="@AdminRoute" Icon="@Icons.Material.Filled.Store" Class="@GetDropdownItemClass(AdminRoute, exactMatch: true)">@Localizer["AdminDashboard"]</MudMenuItem>
+                <MudMenuItem Href="@AdminVolumesRoute" Icon="@Icons.Material.Filled.Book" Class="@GetDropdownItemClass(AdminVolumesRoute)">@Localizer["AdminVolumes"]</MudMenuItem>
                 <MudMenuItem Href="@AddVolumeRoute" Icon="@Icons.Material.Outlined.Add" Class="@GetDropdownItemClass(AddVolumeRoute)">@Localizer["AddVolume"]</MudMenuItem>
                 <MudMenuItem Href="@AdminVolumeSubmissionsRoute" Icon="@Icons.Material.Filled.RateReview" Class="@GetDropdownItemClass(AdminVolumeSubmissionsRoute)">@Localizer["VolumeSubmissions"]</MudMenuItem>
                 <MudMenuItem Href="@AdminSeriesRoute" Icon="@Icons.Material.Filled.LibraryBooks" Class="@GetDropdownItemClass(AdminSeriesRoute)">@Localizer["AdminSeries"]</MudMenuItem>
@@ -107,7 +107,7 @@
                          Class="manga-header-menu-item"
                          AnchorOrigin="Origin.BottomRight"
                          TransformOrigin="Origin.TopRight">
-                    <MudMenuItem Href="@AccountManageRoute" Icon="@Icons.Material.Outlined.AccountCircle" Class="@GetDropdownItemClass(AccountManageRoute)">@Localizer["MyAccount"]</MudMenuItem>
+                    <MudMenuItem Href="@AccountManageRoute" Icon="@Icons.Material.Outlined.AccountCircle" Class="@GetDropdownItemClass(AccountManageRoute, exactMatch: true)">@Localizer["MyAccount"]</MudMenuItem>
                     <MudMenuItem Href="@AccountChangePasswordRoute" Icon="@Icons.Material.Outlined.Settings" Class="@GetDropdownItemClass(AccountChangePasswordRoute)">@Localizer["AccountSettings"]</MudMenuItem>
                     <MudDivider />
                     <form method="post" action="/Auth/Logout" class="manga-menu-logout">
@@ -185,11 +185,9 @@
     private string GetNavClass(params string[] routes) =>
         routes.Any(IsRouteOrChild) ? "manga-header-menu-item active" : "manga-header-menu-item";
 
-    private string GetDropdownItemClass(string route)
+    private string GetDropdownItemClass(string route, bool exactMatch = false)
     {
-        var requiresExactMatch = route.Equals(AdminRoute, StringComparison.OrdinalIgnoreCase)
-            || route.Equals(AccountManageRoute, StringComparison.OrdinalIgnoreCase);
-        var isActive = requiresExactMatch
+        var isActive = exactMatch
             ? currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
             : IsRouteOrChild(route);
 

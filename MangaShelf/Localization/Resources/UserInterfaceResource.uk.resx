@@ -267,9 +267,6 @@
   <data name="AdminDashboard" xml:space="preserve">
     <value>Панель керування</value>
   </data>
-  <data name="AdminVolumesNav" xml:space="preserve">
-    <value>Томи</value>
-  </data>
   <data name="AdminSeries" xml:space="preserve">
     <value>Серії</value>
   </data>
@@ -304,7 +301,7 @@
     <value>За вибраний період оновлень не знайдено.</value>
   </data>
   <data name="AdminVolumes" xml:space="preserve">
-    <value>Том</value>
+    <value>Томи</value>
   </data>
   <data name="AgeRestriction" xml:space="preserve">
     <value>Вікове обмеження</value>
