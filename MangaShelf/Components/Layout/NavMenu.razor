@@ -71,7 +71,7 @@
                      StartIcon="@Icons.Material.Outlined.Settings"
                      EndIcon="@Icons.Material.Filled.ArrowDropDown"
                      Variant="Variant.Text"
-                     Class="@GetAdminMenuClass()"
+                     Class="@GetNavClass(AdminRoute, AddVolumeRoute)"
                      AnchorOrigin="Origin.BottomRight"
                      TransformOrigin="Origin.TopRight">
                 <MudMenuItem Disabled="true" Class="manga-menu-heading">@Localizer["AdminPanel"]</MudMenuItem>
@@ -108,7 +108,7 @@
                          AnchorOrigin="Origin.BottomRight"
                          TransformOrigin="Origin.TopRight">
                     <MudMenuItem Href="@AccountManageRoute" Icon="@Icons.Material.Outlined.AccountCircle" Class="@GetDropdownItemClass(AccountManageRoute)">@Localizer["MyAccount"]</MudMenuItem>
-                    <MudMenuItem Href="@AccountSettingsRoute" Icon="@Icons.Material.Outlined.Settings" Class="@GetDropdownItemClass(AccountSettingsRoute)">@Localizer["AccountSettings"]</MudMenuItem>
+                    <MudMenuItem Href="@AccountChangePasswordRoute" Icon="@Icons.Material.Outlined.Settings" Class="@GetDropdownItemClass(AccountChangePasswordRoute)">@Localizer["AccountSettings"]</MudMenuItem>
                     <MudDivider />
                     <form method="post" action="/Auth/Logout" class="manga-menu-logout">
                         <MudButton ButtonType="ButtonType.Submit"
@@ -137,7 +137,7 @@
     private const string AdminUpdatesRoute = "/admin/updates";
     private const string AdminSettingsRoute = "/admin/settings";
     private const string AccountManageRoute = "/Account/Manage";
-    private const string AccountSettingsRoute = "/Account/Manage/ChangePassword";
+    private const string AccountChangePasswordRoute = "/Account/Manage/ChangePassword";
 
     private string loginUrl = "/login";
     private string currentPath = "/";
@@ -182,8 +182,8 @@
         currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
         || currentPath.StartsWith(route + "/", StringComparison.OrdinalIgnoreCase);
 
-    private string GetNavClass(string route) =>
-        IsRouteOrChild(route) ? "manga-header-menu-item active" : "manga-header-menu-item";
+    private string GetNavClass(params string[] routes) =>
+        routes.Any(IsRouteOrChild) ? "manga-header-menu-item active" : "manga-header-menu-item";
 
     private string GetDropdownItemClass(string route)
     {
@@ -195,11 +195,6 @@
 
         return isActive ? "manga-dropdown-item active" : "manga-dropdown-item";
     }
-
-    private string GetAdminMenuClass() =>
-        IsRouteOrChild(AdminRoute) || IsRouteOrChild(AddVolumeRoute)
-            ? "manga-header-menu-item active"
-            : "manga-header-menu-item";
 
     public void Dispose()
     {
