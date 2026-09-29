@@ -565,22 +565,12 @@
   <data name="SelectSeries" xml:space="preserve"><value>Select an existing series</value></data>
   <data name="CreateNewSeries" xml:space="preserve"><value>Create a new series</value></data>
   <data name="NewSeriesTitle" xml:space="preserve"><value>New series title</value></data>
-  <data name="SeriesOriginalTitle" xml:space="preserve"><value>Original series title</value></data>
-  <data name="SeriesType" xml:space="preserve"><value>Series type</value></data>
-  <data name="SeriesStatus" xml:space="preserve"><value>Series status</value></data>
-  <data name="SeriesTotalVolumes" xml:space="preserve"><value>Total volumes</value></data>
   <data name="CreateNewPublisher" xml:space="preserve"><value>Create a new publisher</value></data>
   <data name="SelectPublisher" xml:space="preserve"><value>Select publisher</value></data>
   <data name="NewPublisherName" xml:space="preserve"><value>New publisher name</value></data>
   <data name="PublisherUrl" xml:space="preserve"><value>Publisher website</value></data>
   <data name="NewPublisherCountry" xml:space="preserve"><value>Publisher country</value></data>
-  <data name="VolumeDetails" xml:space="preserve"><value>Volume details</value></data>
-  <data name="VolumeTitle" xml:space="preserve"><value>Volume title</value></data>
-  <data name="AgeRestriction" xml:space="preserve"><value>Age restriction</value></data>
-  <data name="PurchaseUrl" xml:space="preserve"><value>Purchase URL</value></data>
   <data name="IsPreorder" xml:space="preserve"><value>Preorder</value></data>
-  <data name="PreorderStart" xml:space="preserve"><value>Preorder start</value></data>
-  <data name="SingleIssue" xml:space="preserve"><value>Single issue</value></data>
   <data name="Submit" xml:space="preserve"><value>Submit</value></data>
   <data name="SignInRequired" xml:space="preserve"><value>Please sign in to submit a volume.</value></data>
   <data name="VolumeSubmissions" xml:space="preserve"><value>Volume submissions</value></data>

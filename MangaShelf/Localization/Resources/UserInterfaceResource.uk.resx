@@ -565,22 +565,12 @@
   <data name="SelectSeries" xml:space="preserve"><value>Вибрати наявну серію</value></data>
   <data name="CreateNewSeries" xml:space="preserve"><value>Створити нову серію</value></data>
   <data name="NewSeriesTitle" xml:space="preserve"><value>Назва нової серії</value></data>
-  <data name="SeriesOriginalTitle" xml:space="preserve"><value>Оригінальна назва серії</value></data>
-  <data name="SeriesType" xml:space="preserve"><value>Тип серії</value></data>
-  <data name="SeriesStatus" xml:space="preserve"><value>Статус серії</value></data>
-  <data name="SeriesTotalVolumes" xml:space="preserve"><value>Кількість томів</value></data>
   <data name="CreateNewPublisher" xml:space="preserve"><value>Створити нове видавництво</value></data>
   <data name="SelectPublisher" xml:space="preserve"><value>Вибрати видавництво</value></data>
   <data name="NewPublisherName" xml:space="preserve"><value>Назва нового видавництва</value></data>
   <data name="PublisherUrl" xml:space="preserve"><value>Сайт видавництва</value></data>
   <data name="NewPublisherCountry" xml:space="preserve"><value>Країна видавництва</value></data>
-  <data name="VolumeDetails" xml:space="preserve"><value>Інформація про том</value></data>
-  <data name="VolumeTitle" xml:space="preserve"><value>Назва тому</value></data>
-  <data name="AgeRestriction" xml:space="preserve"><value>Вікове обмеження</value></data>
-  <data name="PurchaseUrl" xml:space="preserve"><value>Посилання на придбання</value></data>
   <data name="IsPreorder" xml:space="preserve"><value>Передзамовлення</value></data>
-  <data name="PreorderStart" xml:space="preserve"><value>Початок передзамовлення</value></data>
-  <data name="SingleIssue" xml:space="preserve"><value>Окремий випуск</value></data>
   <data name="Submit" xml:space="preserve"><value>Надіслати</value></data>
   <data name="SignInRequired" xml:space="preserve"><value>Увійдіть, щоб запропонувати том.</value></data>
   <data name="VolumeSubmissions" xml:space="preserve"><value>Пропозиції томів</value></data>

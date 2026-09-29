@@ -48,13 +48,13 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             NewSeriesTotalVolumes = request.NewSeriesTotalVolumes,
             PublisherId = request.SeriesId.HasValue ? null : request.PublisherId,
             NewPublisherName = request.SeriesId.HasValue ? null : NormalizeOptional(request.NewPublisherName),
-            NewPublisherUrl = request.SeriesId.HasValue ? null : NormalizeOptional(request.NewPublisherUrl),
+            NewPublisherUrl = request.SeriesId.HasValue ? null : NormalizeWebUrl(request.NewPublisherUrl),
             NewPublisherCountryId = request.SeriesId.HasValue ? null : request.NewPublisherCountryId,
             Title = normalizedTitle,
             Number = request.Number,
             ISBN = normalizedIsbn,
             AgeRestriction = request.AgeRestriction,
-            PurchaseUrl = NormalizeOptional(request.PurchaseUrl),
+            PurchaseUrl = NormalizeWebUrl(request.PurchaseUrl),
             Description = NormalizeOptional(request.Description),
             IsPreorder = request.IsPreorder,
             PreorderStart = request.PreorderStart,
@@ -137,7 +137,7 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             Number = submission.Number,
             ISBN = normalizedIsbn,
             AgeRestriction = submission.AgeRestriction,
-            PurchaseUrl = submission.PurchaseUrl,
+            PurchaseUrl = NormalizeWebUrl(submission.PurchaseUrl),
             Description = submission.Description,
             IsPreorder = submission.IsPreorder,
             PreorderStart = submission.PreorderStart,
@@ -285,7 +285,7 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
         var publisher = new Publisher
         {
             Name = name,
-            Url = submission.NewPublisherUrl,
+            Url = NormalizeWebUrl(submission.NewPublisherUrl),
             CountryId = submission.NewPublisherCountryId.Value
         };
         context.Publishers.Add(publisher);
@@ -320,6 +320,23 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
 
     private static string? NormalizeOptional(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string? NormalizeWebUrl(string? value)
+    {
+        var normalized = NormalizeOptional(value);
+        if (normalized == null)
+        {
+            return null;
+        }
+
+        if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            throw new InvalidOperationException("URLs must use http or https.");
+        }
+
+        return normalized;
+    }
 
     private static VolumeSubmissionDto ToDto(VolumeSubmission submission)
     {
