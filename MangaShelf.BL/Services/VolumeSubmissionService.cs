@@ -1,19 +1,45 @@
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Dto;
 using MangaShelf.Common.Helpers;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MangaShelf.BL.Services;
 
-public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContextFactory) : IVolumeSubmissionService
+public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContextFactory, IImageFlow imageFlow) : IVolumeSubmissionService
 {
-    public async Task SubmitAsync(VolumeSubmissionRequestDto request, string submittedByIdentityUserId, CancellationToken token = default)
+    private static readonly HashSet<string> SupportedCoverExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+        ".gif"
+    };
+
+    public async Task SubmitAsync(
+        VolumeSubmissionRequestDto request,
+        string submittedByIdentityUserId,
+        Stream? coverStream,
+        string? coverFileName,
+        CancellationToken token = default)
     {
         if (string.IsNullOrWhiteSpace(submittedByIdentityUserId))
         {
             throw new InvalidOperationException("A signed-in user is required to submit a volume.");
+        }
+
+        if (coverStream == null || string.IsNullOrWhiteSpace(coverFileName) ||
+            (coverStream.CanSeek && coverStream.Length == 0))
+        {
+            throw new InvalidOperationException("A cover image is required.");
+        }
+        var coverExtension = Path.GetExtension(coverFileName);
+        if (!SupportedCoverExtensions.Contains(coverExtension))
+        {
+            throw new InvalidOperationException("Cover images must be JPG, PNG, WebP, or GIF files.");
         }
 
         using var context = await dbContextFactory.CreateDbContextAsync(token);
@@ -36,6 +62,7 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
 
         var submission = new VolumeSubmission
         {
+            Id = Guid.NewGuid(),
             SubmittedByIdentityUserId = submittedByIdentityUserId,
             CreatedBy = submittedByIdentityUserId,
             SeriesId = request.SeriesId,
@@ -62,6 +89,18 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             Type = request.Type,
             SingleIssue = request.SingleIssue
         };
+
+        var imageResult = await imageFlow.UploadAndProcessImage(coverStream, submission.Id.ToString(), coverFileName);
+        submission.OriginalCoverUrl = imageResult.OriginalImage;
+        submission.CoverImageUrl = imageResult.CroppedImage;
+        submission.CoverImageUrlSmall = imageResult.SmallImage;
+
+        if (string.IsNullOrWhiteSpace(submission.OriginalCoverUrl) ||
+            string.IsNullOrWhiteSpace(submission.CoverImageUrl) ||
+            string.IsNullOrWhiteSpace(submission.CoverImageUrlSmall))
+        {
+            throw new InvalidOperationException("The cover image could not be processed.");
+        }
 
         context.VolumeSubmissions.Add(submission);
         await context.SaveChangesAsync(token);
@@ -92,6 +131,13 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             ?? throw new InvalidOperationException("Volume submission not found.");
 
         EnsurePending(submission);
+
+        if (string.IsNullOrWhiteSpace(submission.OriginalCoverUrl) ||
+            string.IsNullOrWhiteSpace(submission.CoverImageUrl) ||
+            string.IsNullOrWhiteSpace(submission.CoverImageUrlSmall))
+        {
+            throw new InvalidOperationException("A cover image is required before approving this submission.");
+        }
 
         var series = submission.SeriesId.HasValue
             ? await context.Series.FirstOrDefaultAsync(x => x.Id == submission.SeriesId.Value, token)
@@ -144,6 +190,9 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             ReleaseDate = submission.ReleaseDate,
             Type = submission.Type,
             SingleIssue = submission.SingleIssue,
+            OriginalCoverUrl = submission.OriginalCoverUrl,
+            CoverImageUrl = submission.CoverImageUrl,
+            CoverImageUrlSmall = submission.CoverImageUrlSmall,
             Series = series,
             IsPublishedOnSite = true,
             CreatedBy = reviewedByIdentityUserId
@@ -366,6 +415,7 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             ReleaseDate = submission.ReleaseDate,
             Type = submission.Type,
             SingleIssue = submission.SingleIssue,
+            CoverImageUrl = submission.CoverImageUrl,
             ApprovedVolumeId = submission.ApprovedVolumeId,
             ReviewComment = submission.ReviewComment,
             SubmittedAt = submission.CreatedAt,

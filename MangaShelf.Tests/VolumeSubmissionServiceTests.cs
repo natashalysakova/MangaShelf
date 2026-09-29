@@ -1,8 +1,10 @@
 using MangaShelf.BL.Dto;
 using MangaShelf.BL.Services;
+using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace MangaShelf.Tests;
@@ -15,11 +17,20 @@ public class VolumeSubmissionServiceTests : IDisposable
 
     private readonly TestDbContextFactory _factory;
     private readonly VolumeSubmissionService _service;
+    private readonly Mock<IImageFlow> _imageFlow = new();
 
     public VolumeSubmissionServiceTests()
     {
         _factory = new TestDbContextFactory(_options);
-        _service = new VolumeSubmissionService(_factory);
+        _imageFlow
+            .Setup(x => x.UploadAndProcessImage(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new ImageResult
+            {
+                OriginalImage = "images/series/submission/cover.jpg",
+                CroppedImage = "images/series/submission/cover_crop.jpg",
+                SmallImage = "images/small/cover_crop.jpg"
+            });
+        _service = new VolumeSubmissionService(_factory, _imageFlow.Object);
     }
 
     [Fact]
@@ -39,7 +50,7 @@ public class VolumeSubmissionServiceTests : IDisposable
             await context.SaveChangesAsync(Token);
         }
 
-        await _service.SubmitAsync(NewSeriesSubmission(countryId), "submitter-id", Token);
+        await SubmitAsync(NewSeriesSubmission(countryId), "submitter-id");
 
         await using var resultContext = CreateContext();
         var submission = await resultContext.VolumeSubmissions.SingleAsync(Token);
@@ -47,6 +58,9 @@ public class VolumeSubmissionServiceTests : IDisposable
         Assert.Equal("submitter-id", submission.SubmittedByIdentityUserId);
         Assert.Equal("New series", submission.NewSeriesTitle);
         Assert.Equal("New publisher", submission.NewPublisherName);
+        Assert.Equal("images/series/submission/cover.jpg", submission.OriginalCoverUrl);
+        Assert.Equal("images/series/submission/cover_crop.jpg", submission.CoverImageUrl);
+        Assert.Equal("images/small/cover_crop.jpg", submission.CoverImageUrlSmall);
         Assert.Empty(await resultContext.Publishers.ToListAsync(Token));
         Assert.Empty(await resultContext.Series.ToListAsync(Token));
         Assert.Empty(await resultContext.Volumes.ToListAsync(Token));
@@ -69,7 +83,7 @@ public class VolumeSubmissionServiceTests : IDisposable
             await context.SaveChangesAsync(Token);
         }
 
-        await _service.SubmitAsync(NewSeriesSubmission(countryId), "submitter-id", Token);
+        await SubmitAsync(NewSeriesSubmission(countryId), "submitter-id");
         Guid submissionId;
         await using (var context = CreateContext())
         {
@@ -85,6 +99,9 @@ public class VolumeSubmissionServiceTests : IDisposable
         Assert.Equal("admin-id", submission.ReviewedByIdentityUserId);
         Assert.Equal(volume.Id, submission.ApprovedVolumeId);
         Assert.True(volume.IsPublishedOnSite);
+        Assert.Equal("images/series/submission/cover.jpg", volume.OriginalCoverUrl);
+        Assert.Equal("images/series/submission/cover_crop.jpg", volume.CoverImageUrl);
+        Assert.Equal("images/small/cover_crop.jpg", volume.CoverImageUrlSmall);
         Assert.Equal("New series", volume.Series!.Title);
         Assert.Equal("New publisher", volume.Series.Publisher!.Name);
     }
@@ -115,13 +132,13 @@ public class VolumeSubmissionServiceTests : IDisposable
             await context.SaveChangesAsync(Token);
         }
 
-        await _service.SubmitAsync(new VolumeSubmissionRequestDto
+        await SubmitAsync(new VolumeSubmissionRequestDto
         {
             SeriesId = seriesId,
             Number = 1,
             ReleaseDate = DateTimeOffset.UtcNow,
             Type = VolumeType.Physical
-        }, "submitter-id", Token);
+        }, "submitter-id");
 
         Guid submissionId;
         await using (var context = CreateContext())
@@ -163,13 +180,13 @@ public class VolumeSubmissionServiceTests : IDisposable
             await context.SaveChangesAsync(Token);
         }
 
-        await _service.SubmitAsync(new VolumeSubmissionRequestDto
+        await SubmitAsync(new VolumeSubmissionRequestDto
         {
             PublisherId = publisherId,
             NewSeriesTitle = "New series",
             ReleaseDate = DateTimeOffset.UtcNow,
             Type = VolumeType.Physical
-        }, "submitter-id", Token);
+        }, "submitter-id");
 
         Guid submissionId;
         await using (var context = CreateContext())
@@ -205,7 +222,7 @@ public class VolumeSubmissionServiceTests : IDisposable
             await context.SaveChangesAsync(Token);
         }
 
-        await _service.SubmitAsync(NewSeriesSubmission(countryId), "submitter-id", Token);
+        await SubmitAsync(NewSeriesSubmission(countryId), "submitter-id");
         Guid submissionId;
         await using (var context = CreateContext())
         {
@@ -266,11 +283,35 @@ public class VolumeSubmissionServiceTests : IDisposable
                 Number = 1,
                 PurchaseUrl = "javascript:alert(1)",
                 ReleaseDate = DateTimeOffset.UtcNow
-            }, "submitter-id", Token));
+            }, "submitter-id", new MemoryStream([1]), "cover.jpg", Token));
 
         Assert.Equal("URLs must use http or https.", exception.Message);
         await using var resultContext = CreateContext();
         Assert.Empty(await resultContext.VolumeSubmissions.ToListAsync(Token));
+    }
+
+    [Fact]
+    public async Task SubmitAsync_WithoutCover_RejectsSubmission()
+    {
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.SubmitAsync(new VolumeSubmissionRequestDto(), "submitter-id", null, null, Token));
+
+        Assert.Equal("A cover image is required.", exception.Message);
+        _imageFlow.Verify(
+            x => x.UploadAndProcessImage(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task SubmitAsync_UnsupportedCoverExtension_RejectsSubmission()
+    {
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.SubmitAsync(new VolumeSubmissionRequestDto(), "submitter-id", new MemoryStream([1]), "cover.svg", Token));
+
+        Assert.Equal("Cover images must be JPG, PNG, WebP, or GIF files.", exception.Message);
+        _imageFlow.Verify(
+            x => x.UploadAndProcessImage(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
     }
 
     public void Dispose()
@@ -281,6 +322,8 @@ public class VolumeSubmissionServiceTests : IDisposable
 
     private TestMangaDbContext CreateContext() => new(_options);
     private static CancellationToken Token => TestContext.Current.CancellationToken;
+    private Task SubmitAsync(VolumeSubmissionRequestDto request, string submittedBy) =>
+        _service.SubmitAsync(request, submittedBy, new MemoryStream([1]), "cover.jpg", Token);
 
     private static VolumeSubmissionRequestDto NewSeriesSubmission(Guid countryId) => new()
     {

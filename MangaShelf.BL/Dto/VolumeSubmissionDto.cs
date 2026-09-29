@@ -27,6 +27,7 @@ public class VolumeSubmissionRequestDto
     public DateTimeOffset ReleaseDate { get; set; }
     public VolumeType Type { get; set; } = VolumeType.Physical;
     public bool SingleIssue { get; set; }
+    public string? CoverImageUrl { get; set; }
 }
 
 public class VolumeSubmissionDto : VolumeSubmissionRequestDto
