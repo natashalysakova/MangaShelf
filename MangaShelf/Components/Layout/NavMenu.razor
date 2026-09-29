@@ -172,11 +172,21 @@
     private string GetNavClass(string route) =>
         IsActive(route) ? "manga-header-menu-item active" : "manga-header-menu-item";
 
-    private string GetDropdownItemClass(string route) =>
-        IsActive(route) ? "manga-dropdown-item active" : "manga-dropdown-item";
+    private string GetDropdownItemClass(string route)
+    {
+        var isActive = route.Equals("/admin", StringComparison.OrdinalIgnoreCase)
+            ? currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
+            : IsActive(route);
+
+        return isActive ? "manga-dropdown-item active" : "manga-dropdown-item";
+    }
 
     private string GetAdminMenuClass() =>
-        IsActive("/admin") ? "manga-header-menu-item active" : "manga-header-menu-item";
+        currentPath.Equals("/admin", StringComparison.OrdinalIgnoreCase)
+        || currentPath.StartsWith("/admin/", StringComparison.OrdinalIgnoreCase)
+        || IsActive("/volume/add")
+            ? "manga-header-menu-item active"
+            : "manga-header-menu-item";
 
     public void Dispose()
     {
