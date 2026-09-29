@@ -260,6 +260,13 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             throw new InvalidOperationException("Country is required for the new publisher.");
         }
 
+        var countryExists = await context.Countries
+            .AnyAsync(x => x.Id == submission.NewPublisherCountryId.Value, token);
+        if (!countryExists)
+        {
+            throw new InvalidOperationException("Selected country no longer exists.");
+        }
+
         var name = submission.NewPublisherName?.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -316,7 +323,6 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
 
     private static VolumeSubmissionDto ToDto(VolumeSubmission submission)
     {
-        var series = submission.Series;
         return new VolumeSubmissionDto
         {
             Id = submission.Id,

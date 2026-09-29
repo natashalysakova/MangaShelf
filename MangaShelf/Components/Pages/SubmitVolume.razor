@@ -1,0 +1,221 @@
+@page "/volume/add"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using MangaShelf.DAL.Models
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IVolumeSubmissionService SubmissionService
+@inject ISeriesService SeriesService
+@inject IPublisherService PublisherService
+@inject ISnackbar Snackbar
+@inject IUiLocalizationService Localizer
+
+<PageTitle>@Localizer["AddVolume"]</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-2">@Localizer["SubmitVolume"]</MudText>
+    <MudAlert Severity="Severity.Info" Class="mb-4">@Localizer["PendingApproval"]</MudAlert>
+
+    @if (_submitted)
+    {
+        <MudAlert Severity="Severity.Success">@Localizer["SubmissionSent"]</MudAlert>
+    }
+    else
+    {
+        <EditForm Model="_form" OnSubmit="SubmitAsync">
+            <MudPaper Class="pa-4">
+                <MudStack Spacing="3">
+                    <MudRadioGroup T="bool" @bind-Value="_creatingNewSeries">
+                        <MudRadio T="bool" Value="false">@Localizer["SelectSeries"]</MudRadio>
+                        <MudRadio T="bool" Value="true">@Localizer["CreateNewSeries"]</MudRadio>
+                    </MudRadioGroup>
+
+                    @if (_creatingNewSeries)
+                    {
+                        <MudTextField @bind-Value="_form.NewSeriesTitle" Label="@Localizer["NewSeriesTitle"]" Required="true" />
+                        <MudTextField @bind-Value="_form.NewSeriesOriginalTitle" Label="@Localizer["SeriesOriginalTitle"]" />
+                        <MudStack Row="true">
+                            <MudSelect T="SeriesType" @bind-Value="_form.NewSeriesType" Label="@Localizer["SeriesType"]" FullWidth="true">
+                                @foreach (var type in Enum.GetValues<SeriesType>())
+                                {
+                                    <MudSelectItem Value="@type">@Localizer[type]</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudSelect T="SeriesStatus" @bind-Value="_form.NewSeriesStatus" Label="@Localizer["SeriesStatus"]" FullWidth="true">
+                                @foreach (var status in Enum.GetValues<SeriesStatus>())
+                                {
+                                    <MudSelectItem Value="@status">@Localizer[status]</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudNumericField T="int?" @bind-Value="_form.NewSeriesTotalVolumes" Label="@Localizer["SeriesTotalVolumes"]" Min="0" />
+                        </MudStack>
+
+                        <MudSwitch T="bool" @bind-Value="_creatingNewPublisher" Color="Color.Primary">
+                            @Localizer["CreateNewPublisher"]
+                        </MudSwitch>
+                        @if (_creatingNewPublisher)
+                        {
+                            <MudTextField @bind-Value="_form.NewPublisherName" Label="@Localizer["NewPublisherName"]" Required="true" />
+                            <MudTextField @bind-Value="_form.NewPublisherUrl" Label="@Localizer["PublisherUrl"]" />
+                            <MudSelect T="Guid?" @bind-Value="_form.NewPublisherCountryId" Label="@Localizer["NewPublisherCountry"]" Required="true">
+                                @foreach (var country in _countries)
+                                {
+                                    <MudSelectItem T="Guid?" Value="@country.Id">@country.Name (@country.CountryCode)</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                        else
+                        {
+                            <MudSelect T="Guid?" @bind-Value="_form.PublisherId" Label="@Localizer["SelectPublisher"]" Required="true">
+                                @foreach (var publisher in _publishers)
+                                {
+                                    <MudSelectItem T="Guid?" Value="@publisher.Id">@publisher.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                    }
+                    else
+                    {
+                        <MudAutocomplete T="SeriesWithVolumesDto"
+                                         Label="@Localizer["SelectSeries"]"
+                                         Value="_selectedSeries"
+                                         ValueChanged="OnSeriesSelected"
+                                         SearchFunc="SearchSeriesAsync"
+                                         ToStringFunc="FormatSeries"
+                                         Variant="Variant.Outlined"
+                                         Clearable="true"
+                                         ResetValueOnEmptyText="true"
+                                         CoerceValue="false"
+                                         AdornmentIcon="@Icons.Material.Filled.Search" />
+                        @if (_selectedSeries != null)
+                        {
+                            <MudText Typo="Typo.body2">@($"{Localizer["Publisher"]}: {_selectedSeries.Publisher.Name}")</MudText>
+                        }
+                    }
+
+                    <MudDivider />
+                    <MudText Typo="Typo.h6">@Localizer["VolumeDetails"]</MudText>
+                    <MudTextField @bind-Value="_form.Title" Label="@Localizer["VolumeTitle"]" />
+                    <MudStack Row="true">
+                        <MudNumericField T="int?" @bind-Value="_form.Number" Label="@Localizer["VolumeNumber"]" Min="0" />
+                        <MudSelect T="VolumeType" @bind-Value="_form.Type" Label="@Localizer["VolumeType"]" FullWidth="true">
+                            @foreach (var type in Enum.GetValues<VolumeType>())
+                            {
+                                <MudSelectItem Value="@type">@Localizer[type]</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudNumericField T="int" @bind-Value="_form.AgeRestriction" Label="@Localizer["AgeRestriction"]" Min="0" />
+                    </MudStack>
+                    <MudTextField @bind-Value="_form.ISBN" Label="@Localizer["ISBN"]" />
+                    <MudTextField @bind-Value="_form.PurchaseUrl" Label="@Localizer["PurchaseUrl"]" />
+                    <MudDatePicker @bind-Date="_releaseDate" Label="@Localizer["ReleaseDate"]" Required="true" />
+                    <MudSwitch T="bool" @bind-Value="_form.IsPreorder" Color="Color.Primary">@Localizer["IsPreorder"]</MudSwitch>
+                    @if (_form.IsPreorder)
+                    {
+                        <MudDatePicker @bind-Date="_preorderStart" Label="@Localizer["PreorderStart"]" Clearable="true" />
+                    }
+                    <MudSwitch T="bool" @bind-Value="_form.SingleIssue" Color="Color.Primary">@Localizer["SingleIssue"]</MudSwitch>
+                    <MudTextField @bind-Value="_form.Description" Label="@Localizer["Description"]" Lines="4" />
+
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="_submitting">
+                        @(_submitting ? Localizer["Loading"] : Localizer["Submit"])
+                    </MudButton>
+                </MudStack>
+            </MudPaper>
+        </EditForm>
+    }
+</MudContainer>
+
+@code {
+    private readonly VolumeSubmissionRequestDto _form = new();
+    private IReadOnlyCollection<AdminPublisherDto> _publishers = [];
+    private IReadOnlyCollection<PublisherCountryOptionDto> _countries = [];
+    private SeriesWithVolumesDto? _selectedSeries;
+    private DateTime? _releaseDate = DateTime.Today;
+    private DateTime? _preorderStart;
+    private bool _creatingNewSeries;
+    private bool _creatingNewPublisher;
+    private bool _submitting;
+    private bool _submitted;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _publishers = (await PublisherService.GetAllForAdminAsync()).Where(x => !x.IsDeleted).ToList();
+        _countries = await PublisherService.GetCountryOptionsAsync();
+    }
+
+    private async Task<IEnumerable<SeriesWithVolumesDto>> SearchSeriesAsync(string value, CancellationToken token) =>
+        await SeriesService.SearchAsync(value, token);
+
+    private static string FormatSeries(SeriesWithVolumesDto? series) =>
+        series == null ? string.Empty : $"{series.Title} — {series.Publisher.Name}";
+
+    private void OnSeriesSelected(SeriesWithVolumesDto? series)
+    {
+        _selectedSeries = series;
+    }
+
+    private async Task SubmitAsync(EditContext _)
+    {
+        if (_submitting)
+        {
+            return;
+        }
+
+        if (!_creatingNewSeries && _selectedSeries == null)
+        {
+            Snackbar.Add(Localizer["SelectSeries"], Severity.Warning);
+            return;
+        }
+
+        _submitting = true;
+        try
+        {
+            var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                Snackbar.Add(Localizer["SignInRequired"], Severity.Error);
+                return;
+            }
+
+            _form.SeriesId = _creatingNewSeries ? null : _selectedSeries!.Id;
+            if (!_creatingNewSeries)
+            {
+                _form.NewSeriesTitle = null;
+                _form.NewSeriesOriginalTitle = null;
+            }
+            if (!_creatingNewSeries || _creatingNewPublisher)
+            {
+                _form.PublisherId = null;
+            }
+            if (!_creatingNewSeries || !_creatingNewPublisher)
+            {
+                _form.NewPublisherName = null;
+                _form.NewPublisherUrl = null;
+                _form.NewPublisherCountryId = null;
+            }
+            _form.ReleaseDate = _releaseDate.HasValue
+                ? new DateTimeOffset(DateTime.SpecifyKind(_releaseDate.Value, DateTimeKind.Local)).ToUniversalTime()
+                : default;
+            _form.PreorderStart = _preorderStart.HasValue
+                ? new DateTimeOffset(DateTime.SpecifyKind(_preorderStart.Value, DateTimeKind.Local)).ToUniversalTime()
+                : null;
+
+            await SubmissionService.SubmitAsync(_form, userId);
+            _submitted = true;
+            Snackbar.Add(Localizer["SubmissionSent"], Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+}

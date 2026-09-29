@@ -37,6 +37,12 @@
                 Class="manga-header-menu-item">
             @Localizer["Wishlist"]
         </MudButton>
+        <MudButton Href="/volume/add"
+                StartIcon="@Icons.Material.Outlined.Add"
+                Variant="Variant.Text"
+                Class="manga-header-menu-item">
+            @Localizer["AddVolume"]
+        </MudButton>
     </AuthorizeView>
     <AuthorizeView Roles="Admin">
         <MudButton Href="/admin"
