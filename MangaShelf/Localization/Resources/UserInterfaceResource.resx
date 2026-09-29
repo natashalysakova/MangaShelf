@@ -192,6 +192,9 @@
   <data name="Wishlist" xml:space="preserve">
     <value>Wishlist</value>
   </data>
+  <data name="NavigationWishlist" xml:space="preserve">
+    <value>Wishlist</value>
+  </data>
   <data name="AddToLibrary" xml:space="preserve">
     <value>Add to library</value>
   </data>
@@ -258,6 +261,36 @@
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
   </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Admin panel</value>
+  </data>
+  <data name="AdminDashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="AdminSeries" xml:space="preserve">
+    <value>Series</value>
+  </data>
+  <data name="AdminPublishers" xml:space="preserve">
+    <value>Publishers</value>
+  </data>
+  <data name="AdminUsers" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="AdminParsers" xml:space="preserve">
+    <value>Parsers</value>
+  </data>
+  <data name="AdminUpdates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="AdminSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="MyAccount" xml:space="preserve">
+    <value>My account</value>
+  </data>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
   <data name="SeriesTitle" xml:space="preserve">
     <value>Series title</value>
   </data>
@@ -268,7 +301,7 @@
     <value>No updates found for the selected date range.</value>
   </data>
   <data name="AdminVolumes" xml:space="preserve">
-    <value>AdminVolumes</value>
+    <value>Volumes</value>
   </data>
   <data name="AgeRestriction" xml:space="preserve">
     <value>AgeRestriction</value>

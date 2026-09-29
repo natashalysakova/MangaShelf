@@ -1,98 +1,174 @@
-﻿@inject NavigationManager NavigationManager
+@implements IDisposable
+@inject NavigationManager NavigationManager
 @inject IUiLocalizationService Localizer
 @rendermode InteractiveServer
 
+@if (IsAccountManagePage)
+{
+    <MudPopoverProvider />
+}
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-center px-0 my-0">
+<div class="manga-header">
+<MudContainer MaxWidth="MaxWidth.Large" Class="manga-header-inner d-flex align-center px-0 my-0">
+    <div class="manga-header-brand d-flex align-center">
+        <MudIcon Icon="@Icons.Custom.Brands.MudBlazor" Size="Size.Large" />
+        <MudButton Href="/">
+            <MudText Typo="Typo.h5" Class="manga-header-title mx-4">@Localizer["MangaShelf"]</MudText>
+        </MudButton>
+    </div>
 
-    <MudIcon Icon="@Icons.Custom.Brands.MudBlazor" Size="Size.Large" />
-    <MudButton Href="/" >
-        <MudText Typo="Typo.h5" Class="mx-4">@Localizer["MangaShelf"]</MudText>
-    </MudButton>
-    <MudButton Href="/catalog"
-               StartIcon="@Icons.Material.Outlined.ViewList"
-               Variant="Variant.Text"
-               Class="manga-header-menu-item">
-        @Localizer["Catalog"]
-    </MudButton>
+    <div class="manga-header-primary d-flex align-center">
+        <MudButton Href="/catalog"
+                   StartIcon="@Icons.Material.Outlined.ViewList"
+                   Variant="Variant.Text"
+                   Class="@GetNavClass("/catalog")">
+            @Localizer["Catalog"]
+        </MudButton>
+        <AuthorizeView Roles="User">
+            <MudButton Href="/my-shelf"
+                       StartIcon="@Icons.Material.Outlined.Home"
+                       Variant="Variant.Text"
+                       Class="@GetNavClass("/my-shelf")">
+                @Localizer["MyShelf"]
+            </MudButton>
+            <MudButton Href="/wishlist"
+                       StartIcon="@Icons.Material.Outlined.BookmarkBorder"
+                       Variant="Variant.Text"
+                       Class="@GetNavClass("/wishlist")">
+                @Localizer["NavigationWishlist"]
+            </MudButton>
+            <MudButton Href="/preorders"
+                       StartIcon="@Icons.Material.Outlined.ViewList"
+                       Variant="Variant.Text"
+                       Class="@GetNavClass("/preorders")">
+                @Localizer["Preorders"]
+            </MudButton>
+        </AuthorizeView>
+    </div>
+
+    <MudMenu @bind-Open="_primaryMenuOpen"
+             Label="@Localizer["Catalog"]"
+             StartIcon="@Icons.Material.Outlined.Menu"
+             EndIcon="@Icons.Material.Filled.ArrowDropDown"
+             Variant="Variant.Text"
+             Class="manga-header-menu-item manga-header-mobile-nav"
+             AnchorOrigin="Origin.BottomCenter"
+             TransformOrigin="Origin.TopCenter">
+        <MudMenuItem Href="/catalog" Icon="@Icons.Material.Outlined.ViewList" Class="@GetDropdownItemClass("/catalog")">@Localizer["Catalog"]</MudMenuItem>
+        <AuthorizeView Roles="User">
+            <MudMenuItem Href="/my-shelf" Icon="@Icons.Material.Outlined.Home" Class="@GetDropdownItemClass("/my-shelf")">@Localizer["MyShelf"]</MudMenuItem>
+            <MudMenuItem Href="/wishlist" Icon="@Icons.Material.Outlined.BookmarkBorder" Class="@GetDropdownItemClass("/wishlist")">@Localizer["NavigationWishlist"]</MudMenuItem>
+            <MudMenuItem Href="/preorders" Icon="@Icons.Material.Outlined.ViewList" Class="@GetDropdownItemClass("/preorders")">@Localizer["Preorders"]</MudMenuItem>
+        </AuthorizeView>
+    </MudMenu>
 
     <MudSpacer />
 
-    <AuthorizeView Roles="User">
-        <MudButton Href="/preorders"
-                StartIcon="@Icons.Material.Outlined.ViewList"
-                Variant="Variant.Text"
-                Class="manga-header-menu-item">
-            @Localizer["Preorders"]
-        </MudButton>
-        <MudButton Href="/my-shelf"
-                StartIcon="@Icons.Material.Outlined.Home"
-                Variant="Variant.Text"
-                Class="manga-header-menu-item">
-            @Localizer["MyShelf"]
-        </MudButton>
-        <MudButton Href="/wishlist"
-                StartIcon="@Icons.Material.Outlined.BookmarkBorder"
-                Variant="Variant.Text"
-                Class="manga-header-menu-item">
-            @Localizer["Wishlist"]
-        </MudButton>
-    </AuthorizeView>
-    <AuthorizeView Roles="Admin">
-        <MudButton Href="/admin"
-                   StartIcon="@Icons.Material.Outlined.Key"
-                   Variant="Variant.Text"
-                   Class="manga-header-menu-item">
-            @Localizer["Admin"]
-        </MudButton>
-    </AuthorizeView>
-    <AuthorizeView>
-        <NotAuthorized>
-            <MudButton Href="@loginUrl"
-                       StartIcon="@Icons.Material.Outlined.Login"
-                       Variant="Variant.Text"
-                       Class="manga-header-menu-item">
-                @Localizer["Login"]
-            </MudButton>
-        </NotAuthorized>
-        <Authorized>
-            <MudButton Href="/volume/add"
-                       StartIcon="@Icons.Material.Outlined.Add"
-                       Variant="Variant.Text"
-                       Class="manga-header-menu-item">
-                @Localizer["AddVolume"]
-            </MudButton>
-            <MudButton Href="/Account/Manage"
-                       StartIcon="@Icons.Material.Outlined.AccountCircle"
-                       Variant="Variant.Text"
-                       Class="manga-header-menu-item">
-                @Localizer["Account"]
-            </MudButton>
-            <form method="post" action="/Auth/Logout">
-                 <MudButton ButtonType="ButtonType.Submit"
-                           StartIcon="@Icons.Material.Outlined.Logout"
+    <div class="manga-header-actions d-flex align-center">
+        <AuthorizeView Roles="Admin">
+            <MudMenu @bind-Open="_adminMenuOpen"
+                     Label="@Localizer["Admin"]"
+                     StartIcon="@Icons.Material.Outlined.Settings"
+                     EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                     Variant="Variant.Text"
+                     Class="@GetNavClass(AdminRoute, AddVolumeRoute)"
+                     AnchorOrigin="Origin.BottomRight"
+                     TransformOrigin="Origin.TopRight">
+                <MudMenuItem Disabled="true" Class="manga-menu-heading">@Localizer["AdminPanel"]</MudMenuItem>
+                <MudDivider />
+                <MudMenuItem Href="@AdminRoute" Icon="@Icons.Material.Filled.Store" Class="@GetDropdownItemClass(AdminRoute, exactMatch: true)">@Localizer["AdminDashboard"]</MudMenuItem>
+                <MudMenuItem Href="@AdminVolumesRoute" Icon="@Icons.Material.Filled.Book" Class="@GetDropdownItemClass(AdminVolumesRoute)">@Localizer["AdminVolumes"]</MudMenuItem>
+                <MudMenuItem Href="@AddVolumeRoute" Icon="@Icons.Material.Outlined.Add" Class="@GetDropdownItemClass(AddVolumeRoute)">@Localizer["AddVolume"]</MudMenuItem>
+                <MudMenuItem Href="@AdminVolumeSubmissionsRoute" Icon="@Icons.Material.Filled.RateReview" Class="@GetDropdownItemClass(AdminVolumeSubmissionsRoute)">@Localizer["VolumeSubmissions"]</MudMenuItem>
+                <MudMenuItem Href="@AdminSeriesRoute" Icon="@Icons.Material.Filled.LibraryBooks" Class="@GetDropdownItemClass(AdminSeriesRoute)">@Localizer["AdminSeries"]</MudMenuItem>
+                <MudMenuItem Href="@AdminPublishersRoute" Icon="@Icons.Material.Filled.Print" Class="@GetDropdownItemClass(AdminPublishersRoute)">@Localizer["AdminPublishers"]</MudMenuItem>
+                <MudMenuItem Href="@AdminUsersRoute" Icon="@Icons.Material.Filled.Person" Class="@GetDropdownItemClass(AdminUsersRoute)">@Localizer["AdminUsers"]</MudMenuItem>
+                <MudMenuItem Href="@AdminParsersRoute" Icon="@Icons.Material.Filled.Web" Class="@GetDropdownItemClass(AdminParsersRoute)">@Localizer["AdminParsers"]</MudMenuItem>
+                <MudMenuItem Href="@AdminUpdatesRoute" Icon="@Icons.Material.Filled.Update" Class="@GetDropdownItemClass(AdminUpdatesRoute)">@Localizer["AdminUpdates"]</MudMenuItem>
+                <MudMenuItem Href="@AdminSettingsRoute" Icon="@Icons.Material.Filled.Settings" Class="@GetDropdownItemClass(AdminSettingsRoute)">@Localizer["AdminSettings"]</MudMenuItem>
+            </MudMenu>
+        </AuthorizeView>
+
+        <AuthorizeView>
+            <NotAuthorized>
+                <MudButton Href="@loginUrl"
+                           StartIcon="@Icons.Material.Outlined.Login"
                            Variant="Variant.Text"
                            Class="manga-header-menu-item">
-                    @Localizer["Logout"]
+                    @Localizer["Login"]
                 </MudButton>
-            </form>
-        </Authorized>
-    </AuthorizeView>
+            </NotAuthorized>
+            <Authorized>
+                <MudMenu @bind-Open="_accountMenuOpen"
+                         Label="@Localizer["Account"]"
+                         StartIcon="@Icons.Material.Outlined.AccountCircle"
+                         EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                         Variant="Variant.Text"
+                         Class="manga-header-menu-item"
+                         AnchorOrigin="Origin.BottomRight"
+                         TransformOrigin="Origin.TopRight">
+                    <MudMenuItem Href="@AccountManageRoute" Icon="@Icons.Material.Outlined.AccountCircle" Class="@GetDropdownItemClass(AccountManageRoute, exactMatch: true)">@Localizer["MyAccount"]</MudMenuItem>
+                    <MudMenuItem Href="@AccountChangePasswordRoute" Icon="@Icons.Material.Outlined.Settings" Class="@GetDropdownItemClass(AccountChangePasswordRoute)">@Localizer["AccountSettings"]</MudMenuItem>
+                    <MudDivider />
+                    <form method="post" action="/Auth/Logout" class="manga-menu-logout">
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   StartIcon="@Icons.Material.Outlined.Logout"
+                                   Variant="Variant.Text"
+                                   Class="manga-menu-logout-button">
+                            @Localizer["Logout"]
+                        </MudButton>
+                    </form>
+                </MudMenu>
+            </Authorized>
+        </AuthorizeView>
+    </div>
 </MudContainer>
+</div>
 
 @code {
+    private const string AdminRoute = "/admin";
+    private const string AdminVolumesRoute = "/admin/volumes";
+    private const string AddVolumeRoute = "/volume/add";
+    private const string AdminVolumeSubmissionsRoute = "/admin/volume-submissions";
+    private const string AdminSeriesRoute = "/admin/series";
+    private const string AdminPublishersRoute = "/admin/publishers";
+    private const string AdminUsersRoute = "/admin/users";
+    private const string AdminParsersRoute = "/admin/parsers";
+    private const string AdminUpdatesRoute = "/admin/updates";
+    private const string AdminSettingsRoute = "/admin/settings";
+    private const string AccountManageRoute = "/Account/Manage";
+    private const string AccountChangePasswordRoute = "/Account/Manage/ChangePassword";
+
     private string loginUrl = "/login";
+    private string currentPath = "/";
+    private bool _primaryMenuOpen;
+    private bool _adminMenuOpen;
+    private bool _accountMenuOpen;
+    private bool IsAccountManagePage =>
+        IsRouteOrChild(AccountManageRoute);
 
     protected override void OnInitialized()
     {
         NavigationManager.LocationChanged += OnLocationChanged;
+        UpdateCurrentPath();
         UpdateLoginUrl();
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
+        UpdateCurrentPath();
         UpdateLoginUrl();
-        StateHasChanged();
+        _primaryMenuOpen = false;
+        _adminMenuOpen = false;
+        _accountMenuOpen = false;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateCurrentPath()
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var path = relativePath.Split('?', '#')[0].TrimEnd('/');
+        currentPath = string.IsNullOrEmpty(path) ? "/" : "/" + path;
     }
 
     private void UpdateLoginUrl()
@@ -100,6 +176,22 @@
         var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         var currentUrl = string.IsNullOrEmpty(relativePath) ? "/" : "/" + relativePath;
         loginUrl = $"/login?returnUrl={Uri.EscapeDataString(currentUrl)}";
+    }
+
+    private bool IsRouteOrChild(string route) =>
+        currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
+        || currentPath.StartsWith(route + "/", StringComparison.OrdinalIgnoreCase);
+
+    private string GetNavClass(params string[] routes) =>
+        routes.Any(IsRouteOrChild) ? "manga-header-menu-item active" : "manga-header-menu-item";
+
+    private string GetDropdownItemClass(string route, bool exactMatch = false)
+    {
+        var isActive = exactMatch
+            ? currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
+            : IsRouteOrChild(route);
+
+        return isActive ? "manga-dropdown-item active" : "manga-dropdown-item";
     }
 
     public void Dispose()

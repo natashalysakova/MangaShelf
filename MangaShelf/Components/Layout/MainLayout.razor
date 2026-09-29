@@ -7,7 +7,10 @@
 @* Required *@
 <MudThemeProvider IsDarkMode="true" Theme="MangaShelfTheme" />
 
-<MudPopoverProvider />
+@if (!IsAccountManagePage)
+{
+    <MudPopoverProvider />
+}
 
 @* Needed for dialogs *@
 <MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.Large" CloseButton="true" BackdropClick="false"
@@ -59,6 +62,17 @@
 
     [Inject] private SignInManager<MangaIdentityUser> AuthService { get; set; }
     [Inject] private NavigationManager NavigationManager { get; set; }
+
+    private bool IsAccountManagePage
+    {
+        get
+        {
+            var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            var path = relativePath.Split('?', '#')[0];
+            return path.Equals("Account/Manage", StringComparison.OrdinalIgnoreCase)
+                || path.StartsWith("Account/Manage/", StringComparison.OrdinalIgnoreCase);
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

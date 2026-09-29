@@ -192,6 +192,9 @@
   <data name="Wishlist" xml:space="preserve">
     <value>Список бажань</value>
   </data>
+  <data name="NavigationWishlist" xml:space="preserve">
+    <value>Бажане</value>
+  </data>
   <data name="AddToLibrary" xml:space="preserve">
     <value>Додати до бібліотеки</value>
   </data>
@@ -247,7 +250,7 @@
     <value>Логін</value>
   </data>
   <data name="Account" xml:space="preserve">
-    <value>Аккаунт</value>
+    <value>Акаунт</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Вихід</value>
@@ -257,6 +260,36 @@
   </data>
   <data name="Admin" xml:space="preserve">
     <value>Адмін</value>
+  </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Адмін панель</value>
+  </data>
+  <data name="AdminDashboard" xml:space="preserve">
+    <value>Панель керування</value>
+  </data>
+  <data name="AdminSeries" xml:space="preserve">
+    <value>Серії</value>
+  </data>
+  <data name="AdminPublishers" xml:space="preserve">
+    <value>Видавництва</value>
+  </data>
+  <data name="AdminUsers" xml:space="preserve">
+    <value>Користувачі</value>
+  </data>
+  <data name="AdminParsers" xml:space="preserve">
+    <value>Парсери</value>
+  </data>
+  <data name="AdminUpdates" xml:space="preserve">
+    <value>Оновлення</value>
+  </data>
+  <data name="AdminSettings" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
+  <data name="MyAccount" xml:space="preserve">
+    <value>Мій акаунт</value>
+  </data>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>Налаштування</value>
   </data>
   <data name="SeriesTitle" xml:space="preserve">
     <value>Назва серії</value>
@@ -268,7 +301,7 @@
     <value>За вибраний період оновлень не знайдено.</value>
   </data>
   <data name="AdminVolumes" xml:space="preserve">
-    <value>Том</value>
+    <value>Томи</value>
   </data>
   <data name="AgeRestriction" xml:space="preserve">
     <value>Вікове обмеження</value>
