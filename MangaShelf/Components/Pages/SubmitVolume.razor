@@ -17,7 +17,6 @@
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
     <MudText Typo="Typo.h4" Class="mb-2">@Localizer["SubmitVolume"]</MudText>
-    <MudAlert Severity="Severity.Info" Class="mb-4">@Localizer["PendingApproval"]</MudAlert>
 
     @if (_submitted)
     {
@@ -25,6 +24,7 @@
     }
     else
     {
+        <MudAlert Severity="Severity.Info" Class="mb-4">@Localizer["PendingApproval"]</MudAlert>
         <EditForm Model="_form" OnSubmit="SubmitAsync">
             <MudPaper Class="pa-4">
                 <MudStack Spacing="3">

@@ -28,7 +28,7 @@ else
                     @if (!string.IsNullOrWhiteSpace(submission.CoverImageUrl))
                     {
                         <MudImage Src="@($"/{submission.CoverImageUrl}")" Alt="@submission.Title"
-                                  Style="max-height:220px;max-width:100%;object-fit:contain;" />
+                                  Style="max-height:220px;max-width:100%;object-fit:contain !important;" />
                     }
                     <MudText>@Localizer["Publisher"]: @submission.PublisherName</MudText>
                     <MudText Typo="Typo.body2">
