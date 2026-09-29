@@ -46,20 +46,29 @@
                 </MudChip>
             }
 
-            <MudDivider Class="my-1" />
+            @if( ShowOwinershipStatus || ShowReadingStatus)
+            {               
+                <MudDivider Class="my-1" />
 
-            <div class="status-chips">
-                <MudChip T="string" Variant="Variant.Outlined" Color="@GetOwnershipColor()" Class="status-chip">
-                    <MudIcon Icon="@GetOwnershipIcon()" Size="Size.Small" Class="mr-1" />
-                    @GetOwnershipText()
-                </MudChip>
-                <div @onclick:stopPropagation="true">
-                    <MudChip T="string" Variant="Variant.Outlined" Color="@GetReadingColor()" Class="status-chip reading-status-chip" OnClick="OnReadingStatusClicked">
-                        <MudIcon Icon="@GetReadingIcon()" Size="Size.Small" Class="mr-1" />
-                        @GetReadingText()
-                    </MudChip>
+                <div class="status-chips">
+                    @if(ShowOwinershipStatus)
+                    {
+                        <MudChip T="string" Variant="Variant.Outlined" Color="@GetOwnershipColor()" Class="status-chip">
+                            <MudIcon Icon="@GetOwnershipIcon()" Size="Size.Small" Class="mr-1" />
+                            @GetOwnershipText()
+                        </MudChip>
+                    }
+                    @if (ShowReadingStatus)
+                    {          
+                        <div @onclick:stopPropagation="true">
+                            <MudChip T="string" Variant="Variant.Outlined" Color="@GetReadingColor()" Class="status-chip reading-status-chip" OnClick="OnReadingStatusClicked">
+                                <MudIcon Icon="@GetReadingIcon()" Size="Size.Small" Class="mr-1" />
+                                @GetReadingText()
+                            </MudChip>
+                        </div>
+                    }
                 </div>
-                </div>
+            }
         </MudStack>
     </MudPaper>
 </div>
@@ -158,6 +167,13 @@
 
     [Parameter]
     public EventCallback<string> OnCardClick { get; set; }
+
+    [Parameter]
+    public bool ShowReadingStatus { get; set; } = true;
+
+    [Parameter]
+    public bool ShowOwinershipStatus { get; set; } = true;
+
 
     [Parameter]
     public EventCallback<Guid> OnReadingStatusClick { get; set; }
