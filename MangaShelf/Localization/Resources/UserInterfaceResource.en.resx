@@ -192,6 +192,9 @@
   <data name="Wishlist" xml:space="preserve">
     <value>Wishlist</value>
   </data>
+  <data name="NavigationWishlist" xml:space="preserve">
+    <value>Wishlist</value>
+  </data>
   <data name="AddToLibrary" xml:space="preserve">
     <value>Add to library</value>
   </data>
@@ -257,6 +260,15 @@
   </data>
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
+  </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Admin panel</value>
+  </data>
+  <data name="MyAccount" xml:space="preserve">
+    <value>My account</value>
+  </data>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>Settings</value>
   </data>
   <data name="SeriesTitle" xml:space="preserve">
     <value>Series title</value>

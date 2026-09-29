@@ -192,6 +192,9 @@
   <data name="Wishlist" xml:space="preserve">
     <value>Список бажань</value>
   </data>
+  <data name="NavigationWishlist" xml:space="preserve">
+    <value>Бажане</value>
+  </data>
   <data name="AddToLibrary" xml:space="preserve">
     <value>Додати до бібліотеки</value>
   </data>
@@ -257,6 +260,15 @@
   </data>
   <data name="Admin" xml:space="preserve">
     <value>Адмін</value>
+  </data>
+  <data name="AdminPanel" xml:space="preserve">
+    <value>Адмін панель</value>
+  </data>
+  <data name="MyAccount" xml:space="preserve">
+    <value>Мій акаунт</value>
+  </data>
+  <data name="AccountSettings" xml:space="preserve">
+    <value>Налаштування</value>
   </data>
   <data name="SeriesTitle" xml:space="preserve">
     <value>Назва серії</value>

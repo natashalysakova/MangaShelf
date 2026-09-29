@@ -109,6 +109,71 @@
     display: block;
 }
 
+.manga-header {
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+}
+
+.manga-header ::deep .manga-header-inner {
+    width: 100%;
+}
+
+.manga-header-brand,
+.manga-header-primary,
+.manga-header-actions {
+    flex: 0 0 auto;
+}
+
+.manga-header-actions {
+    margin-left: auto;
+}
+
+.manga-header ::deep .manga-header-mobile-nav {
+    display: none;
+}
+
+.manga-header ::deep .manga-header-menu-item.active,
+.manga-header ::deep .manga-dropdown-item.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white !important;
+}
+
+.manga-header ::deep .manga-menu-heading {
+    font-weight: 600;
+}
+
+.manga-header ::deep .manga-menu-logout {
+    margin: 0;
+}
+
+.manga-header ::deep .manga-menu-logout-button {
+    justify-content: flex-start;
+    width: 100%;
+    color: inherit;
+}
+
+@media (max-width: 1100px) {
+    .manga-header-primary {
+        display: none !important;
+    }
+
+    .manga-header ::deep .manga-header-mobile-nav {
+        display: inline-flex;
+    }
+}
+
+@media (max-width: 600px) {
+    .manga-header ::deep .manga-header-title {
+        display: none !important;
+    }
+
+    .manga-header-actions ::deep .mud-button-root,
+    .manga-header ::deep .manga-header-mobile-nav {
+        padding-inline: 8px;
+    }
+}
+
 @media (min-width: 641px) {
     .navbar-toggler {
         display: none;
