@@ -43,6 +43,12 @@
                        Class="@GetNavClass("/preorders")">
                 @Localizer["Preorders"]
             </MudButton>
+            <MudButton Href="@AddVolumeRoute"
+                       StartIcon="@Icons.Material.Outlined.Add"
+                       Variant="Variant.Text"
+                       Class="@GetNavClass(AddVolumeRoute)">
+                @Localizer["AddVolume"]
+            </MudButton>
         </AuthorizeView>
     </div>
 
@@ -59,6 +65,7 @@
             <MudMenuItem Href="/my-shelf" Icon="@Icons.Material.Outlined.Home" Class="@GetDropdownItemClass("/my-shelf")">@Localizer["MyShelf"]</MudMenuItem>
             <MudMenuItem Href="/wishlist" Icon="@Icons.Material.Outlined.BookmarkBorder" Class="@GetDropdownItemClass("/wishlist")">@Localizer["NavigationWishlist"]</MudMenuItem>
             <MudMenuItem Href="/preorders" Icon="@Icons.Material.Outlined.ViewList" Class="@GetDropdownItemClass("/preorders")">@Localizer["Preorders"]</MudMenuItem>
+            <MudMenuItem Href="@AddVolumeRoute" Icon="@Icons.Material.Outlined.Add" Class="@GetDropdownItemClass(AddVolumeRoute)">@Localizer["AddVolume"]</MudMenuItem>
         </AuthorizeView>
     </MudMenu>
 
@@ -71,14 +78,13 @@
                      StartIcon="@Icons.Material.Outlined.Settings"
                      EndIcon="@Icons.Material.Filled.ArrowDropDown"
                      Variant="Variant.Text"
-                     Class="@GetNavClass(AdminRoute, AddVolumeRoute)"
+                     Class="@GetNavClass(AdminRoute)"
                      AnchorOrigin="Origin.BottomRight"
                      TransformOrigin="Origin.TopRight">
                 <MudMenuItem Disabled="true" Class="manga-menu-heading">@Localizer["AdminPanel"]</MudMenuItem>
                 <MudDivider />
                 <MudMenuItem Href="@AdminRoute" Icon="@Icons.Material.Filled.Store" Class="@GetDropdownItemClass(AdminRoute, exactMatch: true)">@Localizer["AdminDashboard"]</MudMenuItem>
                 <MudMenuItem Href="@AdminVolumesRoute" Icon="@Icons.Material.Filled.Book" Class="@GetDropdownItemClass(AdminVolumesRoute)">@Localizer["AdminVolumes"]</MudMenuItem>
-                <MudMenuItem Href="@AddVolumeRoute" Icon="@Icons.Material.Outlined.Add" Class="@GetDropdownItemClass(AddVolumeRoute)">@Localizer["AddVolume"]</MudMenuItem>
                 <MudMenuItem Href="@AdminVolumeSubmissionsRoute" Icon="@Icons.Material.Filled.RateReview" Class="@GetDropdownItemClass(AdminVolumeSubmissionsRoute)">@Localizer["VolumeSubmissions"]</MudMenuItem>
                 <MudMenuItem Href="@AdminSeriesRoute" Icon="@Icons.Material.Filled.LibraryBooks" Class="@GetDropdownItemClass(AdminSeriesRoute)">@Localizer["AdminSeries"]</MudMenuItem>
                 <MudMenuItem Href="@AdminPublishersRoute" Icon="@Icons.Material.Filled.Print" Class="@GetDropdownItemClass(AdminPublishersRoute)">@Localizer["AdminPublishers"]</MudMenuItem>
