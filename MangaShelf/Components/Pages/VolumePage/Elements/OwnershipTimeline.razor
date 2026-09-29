@@ -14,7 +14,7 @@
             {
                 <MudStack AlignItems="AlignItems.Center" Row Spacing="1" Class="ownership-timeline-item"
                           @onclick="() => OpenSetOwnershipDialog(ownership)">
-                    <MudText Typo="Typo.body2">@ownership.Date.UtcDateTime.ToString("dd.MM.yyyy HH:mm") UTC</MudText>
+                    <MudText Typo="Typo.body2">@ownership.Date.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</MudText>
                     <MudSpacer></MudSpacer>
                     <MudText Typo="Typo.body2">@Localizer[ownership.Status]</MudText>
                     @* <MudIconButton OnClick="() => OpenSetOwnershipDialog(ownership)" Icon="@Icons.Material.Filled.Edit"
