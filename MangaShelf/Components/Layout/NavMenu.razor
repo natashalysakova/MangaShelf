@@ -56,6 +56,12 @@
             </MudButton>
         </NotAuthorized>
         <Authorized>
+            <MudButton Href="/volume/add"
+                       StartIcon="@Icons.Material.Outlined.Add"
+                       Variant="Variant.Text"
+                       Class="manga-header-menu-item">
+                @Localizer["AddVolume"]
+            </MudButton>
             <MudButton Href="/Account/Manage"
                        StartIcon="@Icons.Material.Outlined.AccountCircle"
                        Variant="Variant.Text"

@@ -1,0 +1,133 @@
+@page "/admin/volume-submissions"
+@using System.Security.Claims
+@using MangaShelf.DAL.Models
+
+@inject IVolumeSubmissionService SubmissionService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
+@inject IUiLocalizationService Localizer
+
+<MudText Typo="Typo.h4" Class="mt-4 mb-4">@Localizer["VolumeSubmissions"]</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_submissions.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">@Localizer["NoPendingSubmissions"]</MudAlert>
+}
+else
+{
+    <MudStack Spacing="3">
+        @foreach (var submission in _submissions)
+        {
+            <MudPaper Class="pa-4" Elevation="1">
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.h6">@submission.SeriesTitle — @submission.Title</MudText>
+                    <MudText>@Localizer["Publisher"]: @submission.PublisherName</MudText>
+                    <MudText Typo="Typo.body2">
+                        @Localizer["VolumeNumber"]: @submission.Number | @Localizer["ReleaseDate"]: @submission.ReleaseDate.ToLocalTime().ToString("d")
+                    </MudText>
+                    @if (!string.IsNullOrWhiteSpace(submission.ISBN))
+                    {
+                        <MudText Typo="Typo.body2">ISBN: @submission.ISBN</MudText>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(submission.PurchaseUrl))
+                    {
+                        <MudLink Href="@submission.PurchaseUrl" Target="_blank">@submission.PurchaseUrl</MudLink>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(submission.Description))
+                    {
+                        <MudText Typo="Typo.body2">@submission.Description</MudText>
+                    }
+                    <MudText Typo="Typo.caption">
+                        @Localizer["SubmittedBy"]: @submission.SubmittedByIdentityUserId |
+                        @submission.SubmittedAt.ToLocalTime().ToString("g")
+                    </MudText>
+
+                    <MudTextField @bind-Value="_reviewComment" Label="@Localizer["ReviewComment"]" />
+                    <MudStack Row="true" Spacing="2">
+                        <MudButton Color="Color.Success" Variant="Variant.Filled"
+                                   Disabled="@(_processingSubmissionId == submission.Id)"
+                                   OnClick="@(() => ReviewAsync(submission, true))">
+                            @Localizer["Approve"]
+                        </MudButton>
+                        <MudButton Color="Color.Error" Variant="Variant.Outlined"
+                                   Disabled="@(_processingSubmissionId == submission.Id)"
+                                   OnClick="@(() => ReviewAsync(submission, false))">
+                            @Localizer["Reject"]
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        }
+    </MudStack>
+}
+
+@code {
+    private List<VolumeSubmissionDto> _submissions = [];
+    private string? _reviewComment;
+    private Guid? _processingSubmissionId;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync() => await LoadSubmissionsAsync();
+
+    private async Task LoadSubmissionsAsync()
+    {
+        _loading = true;
+        try
+        {
+            _submissions = (await SubmissionService.GetPendingAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task ReviewAsync(VolumeSubmissionDto submission, bool approve)
+    {
+        if (_processingSubmissionId.HasValue)
+        {
+            return;
+        }
+
+        _processingSubmissionId = submission.Id;
+        try
+        {
+            var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+            var reviewerId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(reviewerId))
+            {
+                throw new InvalidOperationException("A signed-in administrator is required.");
+            }
+
+            if (approve)
+            {
+                await SubmissionService.ApproveAsync(submission.Id, reviewerId);
+                Snackbar.Add(Localizer["SubmissionApproved"], Severity.Success);
+            }
+            else
+            {
+                await SubmissionService.RejectAsync(submission.Id, reviewerId, _reviewComment);
+                Snackbar.Add(Localizer["SubmissionRejected"], Severity.Info);
+            }
+
+            _reviewComment = null;
+            await LoadSubmissionsAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _processingSubmissionId = null;
+        }
+    }
+}

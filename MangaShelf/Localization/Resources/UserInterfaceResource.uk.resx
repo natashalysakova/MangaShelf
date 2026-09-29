@@ -558,4 +558,27 @@
   <data name="SearchPlaceholder" xml:space="preserve">
     <value>Назва, автор, видавництво</value>
   </data>
+  <data name="AddVolume" xml:space="preserve"><value>Додати том</value></data>
+  <data name="SubmitVolume" xml:space="preserve"><value>Запропонувати том</value></data>
+  <data name="PendingApproval" xml:space="preserve"><value>Адміністратор перевірить пропозицію перед додаванням до каталогу.</value></data>
+  <data name="SubmissionSent" xml:space="preserve"><value>Том надіслано на затвердження адміністратору.</value></data>
+  <data name="SelectSeries" xml:space="preserve"><value>Вибрати наявну серію</value></data>
+  <data name="CreateNewSeries" xml:space="preserve"><value>Створити нову серію</value></data>
+  <data name="NewSeriesTitle" xml:space="preserve"><value>Назва нової серії</value></data>
+  <data name="CreateNewPublisher" xml:space="preserve"><value>Створити нове видавництво</value></data>
+  <data name="SelectPublisher" xml:space="preserve"><value>Вибрати видавництво</value></data>
+  <data name="NewPublisherName" xml:space="preserve"><value>Назва нового видавництва</value></data>
+  <data name="PublisherUrl" xml:space="preserve"><value>Сайт видавництва</value></data>
+  <data name="NewPublisherCountry" xml:space="preserve"><value>Країна видавництва</value></data>
+  <data name="IsPreorder" xml:space="preserve"><value>Передзамовлення</value></data>
+  <data name="Submit" xml:space="preserve"><value>Надіслати</value></data>
+  <data name="SignInRequired" xml:space="preserve"><value>Увійдіть, щоб запропонувати том.</value></data>
+  <data name="VolumeSubmissions" xml:space="preserve"><value>Пропозиції томів</value></data>
+  <data name="NoPendingSubmissions" xml:space="preserve"><value>Немає пропозицій, що очікують на перевірку.</value></data>
+  <data name="SubmittedBy" xml:space="preserve"><value>Автор пропозиції</value></data>
+  <data name="ReviewComment" xml:space="preserve"><value>Примітка до рішення (необов’язково)</value></data>
+  <data name="Approve" xml:space="preserve"><value>Затвердити</value></data>
+  <data name="Reject" xml:space="preserve"><value>Відхилити</value></data>
+  <data name="SubmissionApproved" xml:space="preserve"><value>Пропозицію затверджено, том додано до каталогу.</value></data>
+  <data name="SubmissionRejected" xml:space="preserve"><value>Пропозицію відхилено.</value></data>
 </root>
