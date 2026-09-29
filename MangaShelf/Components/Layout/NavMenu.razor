@@ -76,16 +76,16 @@
                      TransformOrigin="Origin.TopRight">
                 <MudMenuItem Disabled="true" Class="manga-menu-heading">@Localizer["AdminPanel"]</MudMenuItem>
                 <MudDivider />
-                <MudMenuItem Href="/admin" Icon="@Icons.Material.Filled.Store" Class="@GetDropdownItemClass("/admin")">Dashboard</MudMenuItem>
-                <MudMenuItem Href="/admin/volumes" Icon="@Icons.Material.Filled.Book" Class="@GetDropdownItemClass("/admin/volumes")">Volumes</MudMenuItem>
+                <MudMenuItem Href="/admin" Icon="@Icons.Material.Filled.Store" Class="@GetDropdownItemClass("/admin")">@Localizer["AdminDashboard"]</MudMenuItem>
+                <MudMenuItem Href="/admin/volumes" Icon="@Icons.Material.Filled.Book" Class="@GetDropdownItemClass("/admin/volumes")">@Localizer["AdminVolumesNav"]</MudMenuItem>
                 <MudMenuItem Href="/volume/add" Icon="@Icons.Material.Outlined.Add" Class="@GetDropdownItemClass("/volume/add")">@Localizer["AddVolume"]</MudMenuItem>
-                <MudMenuItem Href="/admin/volume-submissions" Icon="@Icons.Material.Filled.RateReview" Class="@GetDropdownItemClass("/admin/volume-submissions")">Volume submissions</MudMenuItem>
-                <MudMenuItem Href="/admin/series" Icon="@Icons.Material.Filled.LibraryBooks" Class="@GetDropdownItemClass("/admin/series")">Series</MudMenuItem>
-                <MudMenuItem Href="/admin/publishers" Icon="@Icons.Material.Filled.Print" Class="@GetDropdownItemClass("/admin/publishers")">Publishers</MudMenuItem>
-                <MudMenuItem Href="/admin/users" Icon="@Icons.Material.Filled.Person" Class="@GetDropdownItemClass("/admin/users")">Users</MudMenuItem>
-                <MudMenuItem Href="/admin/parsers" Icon="@Icons.Material.Filled.Web" Class="@GetDropdownItemClass("/admin/parsers")">Parsers</MudMenuItem>
-                <MudMenuItem Href="/admin/updates" Icon="@Icons.Material.Filled.Update" Class="@GetDropdownItemClass("/admin/updates")">Updates</MudMenuItem>
-                <MudMenuItem Href="/admin/settings" Icon="@Icons.Material.Filled.Settings" Class="@GetDropdownItemClass("/admin/settings")">Settings</MudMenuItem>
+                <MudMenuItem Href="/admin/volume-submissions" Icon="@Icons.Material.Filled.RateReview" Class="@GetDropdownItemClass("/admin/volume-submissions")">@Localizer["VolumeSubmissions"]</MudMenuItem>
+                <MudMenuItem Href="/admin/series" Icon="@Icons.Material.Filled.LibraryBooks" Class="@GetDropdownItemClass("/admin/series")">@Localizer["AdminSeries"]</MudMenuItem>
+                <MudMenuItem Href="/admin/publishers" Icon="@Icons.Material.Filled.Print" Class="@GetDropdownItemClass("/admin/publishers")">@Localizer["AdminPublishers"]</MudMenuItem>
+                <MudMenuItem Href="/admin/users" Icon="@Icons.Material.Filled.Person" Class="@GetDropdownItemClass("/admin/users")">@Localizer["AdminUsers"]</MudMenuItem>
+                <MudMenuItem Href="/admin/parsers" Icon="@Icons.Material.Filled.Web" Class="@GetDropdownItemClass("/admin/parsers")">@Localizer["AdminParsers"]</MudMenuItem>
+                <MudMenuItem Href="/admin/updates" Icon="@Icons.Material.Filled.Update" Class="@GetDropdownItemClass("/admin/updates")">@Localizer["AdminUpdates"]</MudMenuItem>
+                <MudMenuItem Href="/admin/settings" Icon="@Icons.Material.Filled.Settings" Class="@GetDropdownItemClass("/admin/settings")">@Localizer["AdminSettings"]</MudMenuItem>
             </MudMenu>
         </AuthorizeView>
 
@@ -107,8 +107,8 @@
                          Class="manga-header-menu-item"
                          AnchorOrigin="Origin.BottomRight"
                          TransformOrigin="Origin.TopRight">
-                    <MudMenuItem Href="/Account/Manage" Icon="@Icons.Material.Outlined.AccountCircle">@Localizer["MyAccount"]</MudMenuItem>
-                    <MudMenuItem Href="/Account/Manage/ChangePassword" Icon="@Icons.Material.Outlined.Settings">@Localizer["AccountSettings"]</MudMenuItem>
+                    <MudMenuItem Href="/Account/Manage" Icon="@Icons.Material.Outlined.AccountCircle" Class="@GetDropdownItemClass("/Account/Manage")">@Localizer["MyAccount"]</MudMenuItem>
+                    <MudMenuItem Href="/Account/Manage/ChangePassword" Icon="@Icons.Material.Outlined.Settings" Class="@GetDropdownItemClass("/Account/Manage/ChangePassword")">@Localizer["AccountSettings"]</MudMenuItem>
                     <MudDivider />
                     <form method="post" action="/Auth/Logout" class="manga-menu-logout">
                         <MudButton ButtonType="ButtonType.Submit"

@@ -264,6 +264,30 @@
   <data name="AdminPanel" xml:space="preserve">
     <value>Адмін панель</value>
   </data>
+  <data name="AdminDashboard" xml:space="preserve">
+    <value>Панель керування</value>
+  </data>
+  <data name="AdminVolumesNav" xml:space="preserve">
+    <value>Томи</value>
+  </data>
+  <data name="AdminSeries" xml:space="preserve">
+    <value>Серії</value>
+  </data>
+  <data name="AdminPublishers" xml:space="preserve">
+    <value>Видавництва</value>
+  </data>
+  <data name="AdminUsers" xml:space="preserve">
+    <value>Користувачі</value>
+  </data>
+  <data name="AdminParsers" xml:space="preserve">
+    <value>Парсери</value>
+  </data>
+  <data name="AdminUpdates" xml:space="preserve">
+    <value>Оновлення</value>
+  </data>
+  <data name="AdminSettings" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
   <data name="MyAccount" xml:space="preserve">
     <value>Мій акаунт</value>
   </data>
