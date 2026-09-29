@@ -3,6 +3,11 @@
 @inject IUiLocalizationService Localizer
 @rendermode InteractiveServer
 
+@if (IsAccountManagePage)
+{
+    <MudPopoverProvider />
+}
+
 <div class="manga-header">
 <MudContainer MaxWidth="MaxWidth.Large" Class="manga-header-inner d-flex align-center px-0 my-0">
     <div class="manga-header-brand d-flex align-center">
@@ -126,6 +131,8 @@
     private bool _primaryMenuOpen;
     private bool _adminMenuOpen;
     private bool _accountMenuOpen;
+    private bool IsAccountManagePage =>
+        currentPath.StartsWith("/Account/Manage", StringComparison.OrdinalIgnoreCase);
 
     protected override void OnInitialized()
     {
