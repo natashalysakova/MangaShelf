@@ -145,7 +145,7 @@
     private bool _adminMenuOpen;
     private bool _accountMenuOpen;
     private bool IsAccountManagePage =>
-        IsActive(AccountManageRoute);
+        IsRouteOrChild(AccountManageRoute);
 
     protected override void OnInitialized()
     {
@@ -178,12 +178,12 @@
         loginUrl = $"/login?returnUrl={Uri.EscapeDataString(currentUrl)}";
     }
 
-    private bool IsActive(string route) =>
+    private bool IsRouteOrChild(string route) =>
         currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
         || currentPath.StartsWith(route + "/", StringComparison.OrdinalIgnoreCase);
 
     private string GetNavClass(string route) =>
-        IsActive(route) ? "manga-header-menu-item active" : "manga-header-menu-item";
+        IsRouteOrChild(route) ? "manga-header-menu-item active" : "manga-header-menu-item";
 
     private string GetDropdownItemClass(string route)
     {
@@ -191,13 +191,13 @@
             || route.Equals(AccountManageRoute, StringComparison.OrdinalIgnoreCase);
         var isActive = requiresExactMatch
             ? currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
-            : IsActive(route);
+            : IsRouteOrChild(route);
 
         return isActive ? "manga-dropdown-item active" : "manga-dropdown-item";
     }
 
     private string GetAdminMenuClass() =>
-        IsActive(AdminRoute) || IsActive(AddVolumeRoute)
+        IsRouteOrChild(AdminRoute) || IsRouteOrChild(AddVolumeRoute)
             ? "manga-header-menu-item active"
             : "manga-header-menu-item";
 
