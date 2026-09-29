@@ -302,6 +302,18 @@ public class VolumeSubmissionServiceTests : IDisposable
             Times.Never);
     }
 
+    [Fact]
+    public async Task SubmitAsync_UnsupportedCoverExtension_RejectsSubmission()
+    {
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.SubmitAsync(new VolumeSubmissionRequestDto(), "submitter-id", new MemoryStream([1]), "cover.svg", Token));
+
+        Assert.Equal("Cover images must be JPG, PNG, WebP, or GIF files.", exception.Message);
+        _imageFlow.Verify(
+            x => x.UploadAndProcessImage(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
     public void Dispose()
     {
         using var context = CreateContext();

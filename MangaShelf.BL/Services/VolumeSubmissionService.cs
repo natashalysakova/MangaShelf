@@ -10,6 +10,15 @@ namespace MangaShelf.BL.Services;
 
 public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContextFactory, IImageFlow imageFlow) : IVolumeSubmissionService
 {
+    private static readonly HashSet<string> SupportedCoverExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+        ".gif"
+    };
+
     public async Task SubmitAsync(
         VolumeSubmissionRequestDto request,
         string submittedByIdentityUserId,
@@ -26,6 +35,11 @@ public class VolumeSubmissionService(IDbContextFactory<MangaDbContext> dbContext
             (coverStream.CanSeek && coverStream.Length == 0))
         {
             throw new InvalidOperationException("A cover image is required.");
+        }
+        var coverExtension = Path.GetExtension(coverFileName);
+        if (!SupportedCoverExtensions.Contains(coverExtension))
+        {
+            throw new InvalidOperationException("Cover images must be JPG, PNG, WebP, or GIF files.");
         }
 
         using var context = await dbContextFactory.CreateDbContextAsync(token);

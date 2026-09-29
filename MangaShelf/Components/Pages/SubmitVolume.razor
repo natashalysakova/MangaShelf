@@ -111,7 +111,7 @@
                     </MudStack>
                     <MudTextField @bind-Value="_form.ISBN" Label="@Localizer["ISBN"]" />
                     <label for="volume-cover">@Localizer["CoverImage"]</label>
-                    <InputFile id="volume-cover" OnChange="OnCoverSelected" accept="image/*" />
+                    <InputFile id="volume-cover" OnChange="OnCoverSelected" accept="image/jpeg,image/png,image/webp,image/gif" />
                     @if (_coverFile != null)
                     {
                         <MudText Typo="Typo.caption">@_coverFile.Name</MudText>
