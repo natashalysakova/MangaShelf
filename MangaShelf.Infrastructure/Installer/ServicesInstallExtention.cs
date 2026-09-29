@@ -21,6 +21,7 @@ public static class ServicesInstallExtention
         // Data services
         builder.Services.AddScoped<ICountryService, CountryService>();
         builder.Services.AddScoped<IVolumeService, VolumeService>();
+        builder.Services.AddScoped<IVolumeSubmissionService, VolumeSubmissionService>();
         builder.Services.AddScoped<ISeriesService, SeriesService>();
         builder.Services.AddScoped<IAuthorService, AuthorService>();
         builder.Services.AddScoped<IPublisherService, PublisherService>();

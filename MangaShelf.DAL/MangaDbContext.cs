@@ -21,6 +21,7 @@ public class MangaDbContext : DbContext
     public DbSet<Publisher> Publishers { get; set; }
     public DbSet<Series> Series { get; set; }
     public DbSet<Volume> Volumes { get; set; }
+    public DbSet<VolumeSubmission> VolumeSubmissions { get; set; }
     public DbSet<VolumeHistory> VolumeHistory { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Ownership> Ownerships { get; set; }
