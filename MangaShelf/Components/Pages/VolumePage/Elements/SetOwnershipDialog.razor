@@ -50,7 +50,7 @@
     {
         if (selectedDate.HasValue)
         {
-            Ownership.Date = DateTime.SpecifyKind(selectedDate.Value, DateTimeKind.Local);
+            Ownership.Date = DateTime.SpecifyKind(selectedDate.Value, DateTimeKind.Utc);
             MudDialog.Close(DialogResult.Ok(new SetOwnershipDialogResult
             {
                 Ownership = Ownership

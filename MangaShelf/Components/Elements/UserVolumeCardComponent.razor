@@ -19,7 +19,7 @@
             {
                 <MudIcon Icon="@Icons.Material.Filled.Favorite" Class="liked-heart-badge" />
             }
-            @if (VolumeCard.UserRating.HasValue)
+            @if (VolumeCard.UserRating is > 0)
             {
                 <MudChip T="string" Class="rating-badge" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small">
                     <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Class="mr-1" />
@@ -87,7 +87,7 @@
     }
 
     .cover-frame {
-        height: 240px;
+        height: 250px;
         background: linear-gradient(135deg, color-mix(in srgb, var(--mud-palette-dark) 72%, black 28%) 0%, color-mix(in srgb, var(--mud-palette-primary) 34%, var(--mud-palette-dark) 66%) 100%);
         overflow: hidden;
         position: relative;
@@ -116,6 +116,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: top center;
     }
 
     .cover-placeholder {
@@ -146,7 +147,7 @@
 
     @@media (max-width: 600px) {
         .cover-frame {
-            height: 200px;
+            height: 230px;
         }
     }
 </style>
@@ -186,7 +187,7 @@
     private string GetOwnershipText() => VolumeCard.CurrentOwnershipStatus switch
     {
         VolumeStatus.Wishlist => Localizer["Wishlist"],
-        VolumeStatus.Preorder => Localizer["Preorder"],
+        VolumeStatus.Preorder => Localizer["PreorderShort"],
         VolumeStatus.Own => Localizer["Own"],
         VolumeStatus.Gone => VolumePageLocalizer["Gone"],
         _ => VolumeCard.CurrentOwnershipStatus.ToString()
@@ -195,7 +196,7 @@
     private string GetReadingText() => VolumeCard.CurrentReadingStatus switch
     {
         ReadingStatus.None => VolumePageLocalizer["NotRead"],
-        ReadingStatus.PlanToRead => VolumePageLocalizer["PlanToRead"],
+        ReadingStatus.PlanToRead => VolumePageLocalizer["PlanToReadShort"],
         ReadingStatus.Reading => VolumePageLocalizer["Reading"],
         ReadingStatus.Completed => VolumePageLocalizer["Completed"],
         ReadingStatus.OnHold => VolumePageLocalizer["OnHold"],

@@ -639,6 +639,12 @@ public class VolumeService(
             .Select(g => g.First())
             .ToList();
 
+        var hasLibraryHistoryByVolume = ownerships
+            .GroupBy(o => o.VolumeId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Any(o => o.Status is VolumeStatus.Own or VolumeStatus.Preorder or VolumeStatus.Gone));
+
         var volumeIds = query.Select(o => o.VolumeId).ToList();
 
         var readings = await context.Readings
@@ -651,7 +657,7 @@ public class VolumeService(
             .ToHashSet();
 
         return query
-            .Where(o => MatchesShelfFilter(o, readings, likedVolumeIds, filterOptions))
+            .Where(o => MatchesShelfFilter(o, readings, likedVolumeIds, hasLibraryHistoryByVolume, filterOptions))
             .Select(o => o.ToUserVolumeCard(readings));
     }
 
@@ -659,8 +665,15 @@ public class VolumeService(
         Ownership ownership,
         IEnumerable<Reading> readings,
         ISet<Guid> likedVolumeIds,
+        IReadOnlyDictionary<Guid, bool> hasLibraryHistoryByVolume,
         IUserShelfFilterOptions filterOptions)
     {
+        if (ownership.Status == VolumeStatus.Wishlist &&
+            (!hasLibraryHistoryByVolume.TryGetValue(ownership.VolumeId, out var hasLibraryHistory) || !hasLibraryHistory))
+        {
+            return false;
+        }
+
         if (filterOptions.CurrentOwnershipStatuses?.Any() == true && !filterOptions.CurrentOwnershipStatuses.Contains(ownership.Status))
         {
             return false;

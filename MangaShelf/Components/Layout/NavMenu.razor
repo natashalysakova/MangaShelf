@@ -31,6 +31,12 @@
                 Class="manga-header-menu-item">
             @Localizer["MyShelf"]
         </MudButton>
+        <MudButton Href="/wishlist"
+                StartIcon="@Icons.Material.Outlined.BookmarkBorder"
+                Variant="Variant.Text"
+                Class="manga-header-menu-item">
+            @Localizer["Wishlist"]
+        </MudButton>
     </AuthorizeView>
     <AuthorizeView Roles="Admin">
         <MudButton Href="/admin"
