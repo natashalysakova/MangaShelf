@@ -174,7 +174,9 @@
 
     private string GetDropdownItemClass(string route)
     {
-        var isActive = route.Equals("/admin", StringComparison.OrdinalIgnoreCase)
+        var requiresExactMatch = route.Equals("/admin", StringComparison.OrdinalIgnoreCase)
+            || route.Equals("/Account/Manage", StringComparison.OrdinalIgnoreCase);
+        var isActive = requiresExactMatch
             ? currentPath.Equals(route, StringComparison.OrdinalIgnoreCase)
             : IsActive(route);
 
