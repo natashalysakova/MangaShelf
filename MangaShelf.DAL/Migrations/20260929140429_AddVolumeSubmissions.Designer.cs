@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MangaShelf.DAL.Migrations
 {
     [DbContext(typeof(MangaDbContext))]
-    [Migration("20260929131750_AddVolumeSubmissions")]
+    [Migration("20260929140429_AddVolumeSubmissions")]
     partial class AddVolumeSubmissions
     {
         /// <inheritdoc />
