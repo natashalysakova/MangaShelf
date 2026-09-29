@@ -124,7 +124,7 @@ else
 
     private string GetRatingValueText() => $"{Math.Clamp(Volume.AvgRating, 0, 5):0.0}";
 
-    private bool IsInLibrary() => CurrentUserStatus?.CurrentOwnershipStatus == VolumeStatus.Own;
+    private bool IsInLibrary() => CurrentUserStatus?.CurrentOwnershipStatus == VolumeStatus.Own || CurrentUserStatus?.CurrentOwnershipStatus == VolumeStatus.Preorder;
 
 
     protected override async Task OnParametersSetAsync()
