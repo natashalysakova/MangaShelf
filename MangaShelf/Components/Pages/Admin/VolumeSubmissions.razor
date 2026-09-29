@@ -25,6 +25,11 @@ else
             <MudPaper Class="pa-4" Elevation="1">
                 <MudStack Spacing="2">
                     <MudText Typo="Typo.h6">@submission.SeriesTitle — @submission.Title</MudText>
+                    @if (!string.IsNullOrWhiteSpace(submission.CoverImageUrl))
+                    {
+                        <MudImage Src="@($"/{submission.CoverImageUrl}")" Alt="@submission.Title"
+                                  Style="max-height:220px;max-width:100%;object-fit:contain;" />
+                    }
                     <MudText>@Localizer["Publisher"]: @submission.PublisherName</MudText>
                     <MudText Typo="Typo.body2">
                         @Localizer["VolumeNumber"]: @submission.Number | @Localizer["ReleaseDate"]: @submission.ReleaseDate.ToLocalTime().ToString("d")

@@ -110,6 +110,12 @@
                         <MudNumericField T="int" @bind-Value="_form.AgeRestriction" Label="@Localizer["AgeRestriction"]" Min="0" />
                     </MudStack>
                     <MudTextField @bind-Value="_form.ISBN" Label="@Localizer["ISBN"]" />
+                    <label for="volume-cover">@Localizer["Cover"]</label>
+                    <InputFile id="volume-cover" OnChange="OnCoverSelected" accept="image/*" />
+                    @if (_coverFile != null)
+                    {
+                        <MudText Typo="Typo.caption">@_coverFile.Name</MudText>
+                    }
                     <MudTextField @bind-Value="_form.PurchaseUrl" Label="@Localizer["PurchaseUrl"]" />
                     <MudDatePicker @bind-Date="_releaseDate" Label="@Localizer["ReleaseDate"]" Required="true" />
                     <MudSwitch T="bool" @bind-Value="_form.IsPreorder" Color="Color.Primary">@Localizer["IsPreorder"]</MudSwitch>
@@ -140,6 +146,8 @@
     private bool _creatingNewPublisher;
     private bool _submitting;
     private bool _submitted;
+    private IBrowserFile? _coverFile;
+    private const long MaxCoverSizeBytes = 10 * 1024 * 1024;
 
     protected override async Task OnInitializedAsync()
     {
@@ -158,6 +166,11 @@
         _selectedSeries = series;
     }
 
+    private void OnCoverSelected(InputFileChangeEventArgs args)
+    {
+        _coverFile = args.File;
+    }
+
     private async Task SubmitAsync(EditContext _)
     {
         if (_submitting)
@@ -168,6 +181,12 @@
         if (!_creatingNewSeries && _selectedSeries == null)
         {
             Snackbar.Add(Localizer["SelectSeries"], Severity.Warning);
+            return;
+        }
+
+        if (_coverFile == null)
+        {
+            Snackbar.Add(Localizer["Cover"], Severity.Warning);
             return;
         }
 
@@ -205,7 +224,8 @@
                 ? new DateTimeOffset(DateTime.SpecifyKind(_preorderStart.Value, DateTimeKind.Local)).ToUniversalTime()
                 : null;
 
-            await SubmissionService.SubmitAsync(_form, userId);
+            await using var coverStream = _coverFile.OpenReadStream(MaxCoverSizeBytes);
+            await SubmissionService.SubmitAsync(_form, userId, coverStream, _coverFile.Name);
             _submitted = true;
             Snackbar.Add(Localizer["SubmissionSent"], Severity.Success);
         }

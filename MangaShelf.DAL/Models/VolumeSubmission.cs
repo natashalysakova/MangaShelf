@@ -31,6 +31,10 @@ public class VolumeSubmission : BaseEntity
     public VolumeType Type { get; set; }
     public bool SingleIssue { get; set; }
 
+    public string? OriginalCoverUrl { get; set; }
+    public string? CoverImageUrl { get; set; }
+    public string? CoverImageUrlSmall { get; set; }
+
     public Guid? ApprovedVolumeId { get; set; }
     public string? ReviewedByIdentityUserId { get; set; }
     public DateTimeOffset? ReviewedAt { get; set; }
