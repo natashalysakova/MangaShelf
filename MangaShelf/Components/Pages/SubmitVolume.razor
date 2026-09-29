@@ -110,7 +110,7 @@
                         <MudNumericField T="int" @bind-Value="_form.AgeRestriction" Label="@Localizer["AgeRestriction"]" Min="0" />
                     </MudStack>
                     <MudTextField @bind-Value="_form.ISBN" Label="@Localizer["ISBN"]" />
-                    <label for="volume-cover">@Localizer["Cover"]</label>
+                    <label for="volume-cover">@Localizer["CoverImage"]</label>
                     <InputFile id="volume-cover" OnChange="OnCoverSelected" accept="image/*" />
                     @if (_coverFile != null)
                     {
@@ -186,7 +186,7 @@
 
         if (_coverFile == null)
         {
-            Snackbar.Add(Localizer["Cover"], Severity.Warning);
+            Snackbar.Add(Localizer["CoverImage"], Severity.Warning);
             return;
         }
 
