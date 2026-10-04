@@ -15,7 +15,8 @@
             <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Value="_searchTerm" SearchFunc="@SearchAutocomplete"
                              Variant="Variant.Outlined" Clearable="true" ResetValueOnEmptyText="true"
                              SelectValueOnTab="true" CoerceValue="true"
-                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
+                             OnKeyDown="@OnSearchKeyDown" />
 
             <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="ClearFiltersAsync">@Localizer["Reset"]</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFiltersAsync">@Localizer["Apply"]</MudButton>
@@ -107,6 +108,14 @@
         _likedSelection = ToSelection(FilterOptions.IsLiked);
         _minRating = FilterOptions.MinRating;
         _maxRating = FilterOptions.MaxRating;
+    }
+
+    private async Task OnSearchKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await ApplyFiltersAsync();
+        }
     }
 
     private async Task ApplyFiltersAsync()

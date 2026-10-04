@@ -70,11 +70,29 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string AccountSettings {
+            get {
+                return ResourceManager.GetString("AccountSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add to library.
         /// </summary>
         public static string AddToLibrary {
             get {
                 return ResourceManager.GetString("AddToLibrary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add volume.
+        /// </summary>
+        public static string AddVolume {
+            get {
+                return ResourceManager.GetString("AddVolume", resourceCulture);
             }
         }
         
@@ -88,7 +106,79 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AdminVolumes.
+        ///   Looks up a localized string similar to Dashboard.
+        /// </summary>
+        public static string AdminDashboard {
+            get {
+                return ResourceManager.GetString("AdminDashboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admin panel.
+        /// </summary>
+        public static string AdminPanel {
+            get {
+                return ResourceManager.GetString("AdminPanel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parsers.
+        /// </summary>
+        public static string AdminParsers {
+            get {
+                return ResourceManager.GetString("AdminParsers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publishers.
+        /// </summary>
+        public static string AdminPublishers {
+            get {
+                return ResourceManager.GetString("AdminPublishers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Series.
+        /// </summary>
+        public static string AdminSeries {
+            get {
+                return ResourceManager.GetString("AdminSeries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string AdminSettings {
+            get {
+                return ResourceManager.GetString("AdminSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updates.
+        /// </summary>
+        public static string AdminUpdates {
+            get {
+                return ResourceManager.GetString("AdminUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users.
+        /// </summary>
+        public static string AdminUsers {
+            get {
+                return ResourceManager.GetString("AdminUsers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Volumes.
         /// </summary>
         public static string AdminVolumes {
             get {
@@ -147,6 +237,15 @@ namespace MangaShelf.Localization.Resources {
         public static string ApplyCrop {
             get {
                 return ResourceManager.GetString("ApplyCrop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Approve.
+        /// </summary>
+        public static string Approve {
+            get {
+                return ResourceManager.GetString("Approve", resourceCulture);
             }
         }
         
@@ -228,6 +327,24 @@ namespace MangaShelf.Localization.Resources {
         public static string CreateANewAccount {
             get {
                 return ResourceManager.GetString("CreateANewAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create a new publisher.
+        /// </summary>
+        public static string CreateNewPublisher {
+            get {
+                return ResourceManager.GetString("CreateNewPublisher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create a new series.
+        /// </summary>
+        public static string CreateNewSeries {
+            get {
+                return ResourceManager.GetString("CreateNewSeries", resourceCulture);
             }
         }
         
@@ -495,6 +612,15 @@ namespace MangaShelf.Localization.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Preorder.
         /// </summary>
+        public static string IsPreorder {
+            get {
+                return ResourceManager.GetString("IsPreorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preorder.
+        /// </summary>
         public static string ItsPreorder {
             get {
                 return ResourceManager.GetString("ItsPreorder", resourceCulture);
@@ -628,11 +754,38 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More.
+        /// </summary>
+        public static string More {
+            get {
+                return ResourceManager.GetString("More", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to My account.
+        /// </summary>
+        public static string MyAccount {
+            get {
+                return ResourceManager.GetString("MyAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to My manga.
         /// </summary>
         public static string MyShelf {
             get {
                 return ResourceManager.GetString("MyShelf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wishlist.
+        /// </summary>
+        public static string NavigationWishlist {
+            get {
+                return ResourceManager.GetString("NavigationWishlist", resourceCulture);
             }
         }
         
@@ -660,6 +813,33 @@ namespace MangaShelf.Localization.Resources {
         public static string NewPreorders {
             get {
                 return ResourceManager.GetString("NewPreorders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publisher country.
+        /// </summary>
+        public static string NewPublisherCountry {
+            get {
+                return ResourceManager.GetString("NewPublisherCountry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New publisher name.
+        /// </summary>
+        public static string NewPublisherName {
+            get {
+                return ResourceManager.GetString("NewPublisherName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New series title.
+        /// </summary>
+        public static string NewSeriesTitle {
+            get {
+                return ResourceManager.GetString("NewSeriesTitle", resourceCulture);
             }
         }
         
@@ -696,6 +876,15 @@ namespace MangaShelf.Localization.Resources {
         public static string NoNews {
             get {
                 return ResourceManager.GetString("NoNews", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no pending submissions..
+        /// </summary>
+        public static string NoPendingSubmissions {
+            get {
+                return ResourceManager.GetString("NoPendingSubmissions", resourceCulture);
             }
         }
         
@@ -808,6 +997,15 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your submission will be reviewed by an administrator before it is added to the catalog..
+        /// </summary>
+        public static string PendingApproval {
+            get {
+                return ResourceManager.GetString("PendingApproval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Popularity.
         /// </summary>
         public static string Popularity {
@@ -862,6 +1060,15 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Preorder.
+        /// </summary>
+        public static string PreorderShort {
+            get {
+                return ResourceManager.GetString("PreorderShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PreorderStart.
         /// </summary>
         public static string PreorderStart {
@@ -894,6 +1101,15 @@ namespace MangaShelf.Localization.Resources {
         public static string Publisher {
             get {
                 return ResourceManager.GetString("Publisher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publisher website.
+        /// </summary>
+        public static string PublisherUrl {
+            get {
+                return ResourceManager.GetString("PublisherUrl", resourceCulture);
             }
         }
         
@@ -948,6 +1164,15 @@ namespace MangaShelf.Localization.Resources {
         public static string RegisterHere {
             get {
                 return ResourceManager.GetString("RegisterHere", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reject.
+        /// </summary>
+        public static string Reject {
+            get {
+                return ResourceManager.GetString("Reject", resourceCulture);
             }
         }
         
@@ -1024,6 +1249,15 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Review note (optional).
+        /// </summary>
+        public static string ReviewComment {
+            get {
+                return ResourceManager.GetString("ReviewComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Right.
         /// </summary>
         public static string Right {
@@ -1065,6 +1299,24 @@ namespace MangaShelf.Localization.Resources {
         public static string SelectedFile {
             get {
                 return ResourceManager.GetString("SelectedFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select publisher.
+        /// </summary>
+        public static string SelectPublisher {
+            get {
+                return ResourceManager.GetString("SelectPublisher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select an existing series.
+        /// </summary>
+        public static string SelectSeries {
+            get {
+                return ResourceManager.GetString("SelectSeries", resourceCulture);
             }
         }
         
@@ -1168,6 +1420,15 @@ namespace MangaShelf.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please sign in to submit a volume..
+        /// </summary>
+        public static string SignInRequired {
+            get {
+                return ResourceManager.GetString("SignInRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SingleIssue.
         /// </summary>
         public static string SingleIssue {
@@ -1182,6 +1443,60 @@ namespace MangaShelf.Localization.Resources {
         public static string SmallCover {
             get {
                 return ResourceManager.GetString("SmallCover", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submission approved and volume added to the catalog..
+        /// </summary>
+        public static string SubmissionApproved {
+            get {
+                return ResourceManager.GetString("SubmissionApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submission rejected..
+        /// </summary>
+        public static string SubmissionRejected {
+            get {
+                return ResourceManager.GetString("SubmissionRejected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Volume submitted for administrator approval..
+        /// </summary>
+        public static string SubmissionSent {
+            get {
+                return ResourceManager.GetString("SubmissionSent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submit.
+        /// </summary>
+        public static string Submit {
+            get {
+                return ResourceManager.GetString("Submit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submitted by.
+        /// </summary>
+        public static string SubmittedBy {
+            get {
+                return ResourceManager.GetString("SubmittedBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submit a volume.
+        /// </summary>
+        public static string SubmitVolume {
+            get {
+                return ResourceManager.GetString("SubmitVolume", resourceCulture);
             }
         }
         
@@ -1269,6 +1584,24 @@ namespace MangaShelf.Localization.Resources {
         /// <summary>
         ///   Looks up a localized string similar to volumes.
         /// </summary>
+        public static string VolumeCountFew {
+            get {
+                return ResourceManager.GetString("VolumeCountFew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to volumes.
+        /// </summary>
+        public static string VolumeCountMany {
+            get {
+                return ResourceManager.GetString("VolumeCountMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to volumes.
+        /// </summary>
         public static string VolumeCountPlural {
             get {
                 return ResourceManager.GetString("VolumeCountPlural", resourceCulture);
@@ -1326,6 +1659,15 @@ namespace MangaShelf.Localization.Resources {
         public static string VolumePublicId {
             get {
                 return ResourceManager.GetString("VolumePublicId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Volume submissions.
+        /// </summary>
+        public static string VolumeSubmissions {
+            get {
+                return ResourceManager.GetString("VolumeSubmissions", resourceCulture);
             }
         }
         
