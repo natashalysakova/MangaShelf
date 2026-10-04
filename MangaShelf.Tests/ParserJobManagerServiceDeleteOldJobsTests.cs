@@ -3,32 +3,23 @@ using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Services.Parsing;
 using MangaShelf.BL.Services.Parsing.Handlers;
 using MangaShelf.DAL.System;
-using MangaShelf.DAL.System.Models;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
-using Assert = Xunit.Assert;
-using ParserModel = MangaShelf.DAL.System.Models.Parser;
 
 namespace MangaShelf.Tests;
 
-public class ParserJobManagerServiceDeleteOldJobsTests : IDisposable
+public class ParserJobManagerServiceDeleteOldJobsTests
 {
-    private readonly SqliteConnection _connection;
     private readonly IDbContextFactory<MangaSystemDbContext> _dbContextFactory;
     private readonly ParseJobManagerService _service;
 
     public ParserJobManagerServiceDeleteOldJobsTests()
     {
-        _connection = new SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
         var services = new ServiceCollection();
         services.AddDbContextFactory<MangaSystemDbContext>(options =>
-            options.UseSqlite(_connection));
+            options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
 
         services.AddLogging();
         services.AddScoped<IJobStateTransitionHandler, HandleJobErrorHandler>();
@@ -59,15 +50,5 @@ public class ParserJobManagerServiceDeleteOldJobsTests : IDisposable
             new Mock<ILogger<JobStateTransitionPublisher>>().Object);
 
         _service = new ParseJobManagerService(_dbContextFactory, configMock.Object, logger, jobStateTransitionPublisher);
-    }
-
-
-
-
-
-
-    public void Dispose()
-    {
-        _connection.Dispose();
     }
 }
