@@ -46,7 +46,7 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
         public BackgroundWorkerSettings BackgroundWorker => new()
         {
             StartDelay = TimeSpan.Zero,
-            LoopDelay = TimeSpan.Zero
+
         };
 
         public JobManagerSettings JobManager => new()
@@ -73,6 +73,8 @@ public abstract class BaseParserTestClass<T> where T : class, IPublisherParser
 
         // Fix for CS0535: implement CacheSettings property
         public CacheSettings CacheSettings => new();
+
+        public CleanupSettings Cleanup => new();
 
         public void InvalidateSection<TSection>() where TSection : class, IConfigurationSection, new()
         {

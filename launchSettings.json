@@ -9,7 +9,9 @@
       "serviceActions": {
         "mangashelf": "StartDebugging",
         "mangashelf.db": "StartWithoutDebugging",
-        "mangashelf.parser": "StartDebugging"
+        "mangashelf.parser": "StartDebugging",
+        "chrome": "StartWithoutDebugging",
+        "mangashelf.migration": "StartDebugging"
       }
     }
   }

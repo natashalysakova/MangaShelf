@@ -20,5 +20,9 @@ public static class DefaultSettings
         .Add<CacheSettings>(nameof(CacheSettings.Enabled), true)
         .Add<CacheSettings>(nameof(CacheSettings.AbsoluteExpiration), TimeSpan.FromHours(6))
         .Add<CacheSettings>(nameof(CacheSettings.UpdateInterval), TimeSpan.FromHours(1))
+        .Add<CleanupSettings>(nameof(CleanupSettings.CleanupOldJobsAfterDays), 30)
+        .Add<CleanupSettings>(nameof(CleanupSettings.EnableJobCleanup), true)
+        .Add<CleanupSettings>(nameof(CleanupSettings.CleanupFailedJobs), false)
+        .Add<CleanupSettings>(nameof(CleanupSettings.CleanupInterval), TimeSpan.FromHours(6))
         .Build();
 }

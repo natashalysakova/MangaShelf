@@ -9,6 +9,8 @@ public interface IConfigurationService
     public JobManagerSettings JobManager { get; }
     public ParserServiceSettings ParserService { get; }
     public HtmlDownloaderSettings HtmlDownloader { get; }
+    public CleanupSettings Cleanup { get; }
+
     public CacheSettings CacheSettings { get; }
     public void InvalidateSection<TSection>() where TSection : class, IConfigurationSection, new();
     public Task<Settings> UpdateSectionValueAsync(Settings settings, CancellationToken token = default);

@@ -36,12 +36,20 @@ public class MangaSystemDbContext : DbContext
         modelBuilder.Entity<ParserJob>()
             .HasMany(pj => pj.AddedVolumes)
             .WithOne(vr => vr.AddedByJob)
-            .HasForeignKey(vr => vr.AddedParserJobId);
+            .HasForeignKey(vr => vr.AddedParserJobId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ParserJob>()
             .HasMany(pj => pj.UpdatedVolumes)
             .WithOne(vr => vr.UpdatedByJob)
-            .HasForeignKey(vr => vr.UpdatedParserJobId);
+            .HasForeignKey(vr => vr.UpdatedParserJobId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ParserJob>()
+            .HasMany(pj => pj.Errors)
+            .WithOne(pe => pe.ParserRun)
+            .HasForeignKey(pe => pe.ParserRunId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Parser>()
             .HasIndex(p => p.ParserName).IsUnique();

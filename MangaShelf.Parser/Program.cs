@@ -14,6 +14,7 @@ public class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddHostedService<Worker>();
+        builder.Services.AddHostedService<CleanupWorker>();
 
         builder.RegisterContextAndServices();
         builder.RegisterIdentityContextAndServices();

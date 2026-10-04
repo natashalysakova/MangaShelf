@@ -24,8 +24,6 @@ public class Program
             logging.AddConsole();
         });
 
-
-
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();

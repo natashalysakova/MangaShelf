@@ -1,4 +1,3 @@
-using AngleSharp;
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
 using MangaShelf.BL.Services.Parsing;
@@ -45,8 +44,6 @@ public class ParserJobManagerServiceTests : IDisposable
 
         var serviceProvider = services.BuildServiceProvider();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<MangaSystemDbContext>>();
-
-        
 
         var logger = new Mock<ILogger<ParseJobManagerService>>().Object;
 
@@ -104,9 +101,112 @@ public class ParserJobManagerServiceTests : IDisposable
         Assert.Contains(parsers, p => p.ParserName == "parser2");
     }
 
-    public void Dispose()
+    [Fact]
+    public async Task DeleteOldJobs_RemovesFinishedAndCancelledJobsOlderThanCutoff_WhenRemoveFailedJobsIsFalse()
+    {
+        var parser = await AddParserAsync();
+        var cutoffDate = DateTimeOffset.Now;
+
+        await AddJobAsync(parser.Id, RunStatus.Finished, cutoffDate.AddDays(-2));
+        await AddJobAsync(parser.Id, RunStatus.Cancelled, cutoffDate.AddDays(-2));
+        await AddJobAsync(parser.Id, RunStatus.Error, cutoffDate.AddDays(-2));
+        await AddJobAsync(parser.Id, RunStatus.Finished, cutoffDate.AddDays(2));
+
+        var deletedCount = await _service.DeleteOldJobs(cutoffDate, removeFailedJobs: false, CancellationToken.None);
+
+        Assert.Equal(2, deletedCount);
+
+        using var context = _dbContextFactory.CreateDbContext();
+        var remaining = context.Runs.ToList();
+        Assert.Equal(2, remaining.Count);
+        Assert.Contains(remaining, r => r.Status == RunStatus.Error);
+        Assert.Contains(remaining, r => r.Status == RunStatus.Finished && r.Created > cutoffDate);
+    }
+
+    [Fact]
+    public async Task DeleteOldJobs_RemovesErrorJobsToo_WhenRemoveFailedJobsIsTrue()
+    {
+        var parser = await AddParserAsync();
+        var cutoffDate = DateTimeOffset.Now;
+
+        await AddJobAsync(parser.Id, RunStatus.Finished, cutoffDate.AddDays(-2));
+        await AddJobAsync(parser.Id, RunStatus.Cancelled, cutoffDate.AddDays(-2));
+        await AddJobAsync(parser.Id, RunStatus.Error, cutoffDate.AddDays(-2));
+
+        var deletedCount = await _service.DeleteOldJobs(cutoffDate, removeFailedJobs: true, CancellationToken.None);
+
+        Assert.Equal(3, deletedCount);
+
+        using var context = _dbContextFactory.CreateDbContext();
+        Assert.Empty(context.Runs.ToList());
+    }
+
+    [Fact]
+    public async Task DeleteOldJobs_DoesNotRemoveActiveJobs_RegardlessOfAge()
+    {
+        var parser = await AddParserAsync();
+        var cutoffDate = DateTimeOffset.Now;
+
+        await AddJobAsync(parser.Id, RunStatus.Running, cutoffDate.AddDays(-5));
+        await AddJobAsync(parser.Id, RunStatus.Waiting, cutoffDate.AddDays(-5));
+        await AddJobAsync(parser.Id, RunStatus.GatheringVolumes, cutoffDate.AddDays(-5));
+
+        var deletedCount = await _service.DeleteOldJobs(cutoffDate, removeFailedJobs: true, CancellationToken.None);
+
+        Assert.Equal(0, deletedCount);
+
+        using var context = _dbContextFactory.CreateDbContext();
+        Assert.Equal(3, context.Runs.ToList().Count);
+    }
+
+    [Fact]
+    public async Task DeleteOldJobs_DoesNotRemoveJobsNewerThanCutoffDate()
+    {
+        var parser = await AddParserAsync();
+        var cutoffDate = DateTimeOffset.Now;
+
+        await AddJobAsync(parser.Id, RunStatus.Finished, cutoffDate.AddMinutes(1));
+        await AddJobAsync(parser.Id, RunStatus.Cancelled, cutoffDate.AddMinutes(1));
+
+        var deletedCount = await _service.DeleteOldJobs(cutoffDate, removeFailedJobs: true, CancellationToken.None);
+
+        Assert.Equal(0, deletedCount);
+
+        using var context = _dbContextFactory.CreateDbContext();
+        Assert.Equal(2, context.Runs.ToList().Count);
+    }
+
+    [Fact]
+    public async Task DeleteOldJobs_ReturnsZero_WhenNoJobsExist()
+    {
+        var deletedCount = await _service.DeleteOldJobs(DateTimeOffset.Now, removeFailedJobs: true, CancellationToken.None);
+
+        Assert.Equal(0, deletedCount);
+    }
+
+    private async Task AddJobAsync(Guid parserId, RunStatus status, DateTimeOffset created)
     {
         using var context = _dbContextFactory.CreateDbContext();
-        context.Database.EnsureDeleted();
+        context.Runs.Add(new ParserJob
+        {
+            Id = Guid.NewGuid(),
+            ParserStatusId = parserId,
+            Status = status,
+            Created = created,
+        });
+        await context.SaveChangesAsync();
+    }
+
+    private async Task<ParserModel> AddParserAsync(string name = "test")
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        var parser = new ParserModel { ParserName = name, Status = ParserStatus.Idle };
+        context.Parsers.Add(parser);
+        await context.SaveChangesAsync();
+        return parser;
+    }
+
+    public void Dispose()
+    {
     }
 }
