@@ -92,6 +92,14 @@
 
 @code
 {
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public bool? NewReleases { get; set; }
+
+    [SupplyParameterFromQuery]
+    [Parameter]
+    public bool? Preorders { get; set; }
+
     private bool _loading;
 
     private IReadOnlyCollection<ReleaseFilter> _selectedReleaseFilter = [ReleaseFilter.Released, ReleaseFilter.Preorder];
@@ -206,7 +214,31 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadFromStorage();
+        ApplyQueryFilters();
         await ReloadVolumes();
+    }
+
+    // Maps each query-string flag to the state it should apply when set to true.
+    // Add new entries here when introducing additional query-driven filters/settings,
+    // regardless of which field(s) they affect.
+    private IEnumerable<(bool? QueryValue, Action Apply)> QueryFilterMap =>
+    [
+        (NewReleases, () => _selectedReleaseFilter = [ReleaseFilter.Released]),
+        (Preorders, () => _selectedReleaseFilter = [ReleaseFilter.Preorder]),
+    ];
+
+    private void ApplyQueryFilters()
+    {
+        var activeFilter = QueryFilterMap.FirstOrDefault(m => m.QueryValue == true);
+        if (activeFilter.QueryValue != true)
+        {
+            return;
+        }
+
+        _orderBy = OrderBy.NewAdditions;
+        _orderIsAsc = false;
+
+        activeFilter.Apply();
     }
 
     private async Task ReloadVolumes()

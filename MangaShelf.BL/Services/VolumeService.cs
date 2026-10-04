@@ -668,12 +668,6 @@ public class VolumeService(
         IReadOnlyDictionary<Guid, bool> hasLibraryHistoryByVolume,
         IUserShelfFilterOptions filterOptions)
     {
-        if (ownership.Status == VolumeStatus.Wishlist &&
-            (!hasLibraryHistoryByVolume.TryGetValue(ownership.VolumeId, out var hasLibraryHistory) || !hasLibraryHistory))
-        {
-            return false;
-        }
-
         if (filterOptions.CurrentOwnershipStatuses?.Any() == true && !filterOptions.CurrentOwnershipStatuses.Contains(ownership.Status))
         {
             return false;

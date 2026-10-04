@@ -1,7 +1,7 @@
 ﻿@using MangaShelf.Components.Elements.SmallCard
 @if (Volumes.Any())
 {
-    <MudGrid Justify="@justification" Spacing="@spacing">
+    <MudGrid Justify="@justification" Class="mb-3" Spacing="@spacing">
         @RenderVolumeLines()
     </MudGrid>
 }

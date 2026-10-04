@@ -6,10 +6,10 @@
 
 <PageTitle>@Localizer["Home"]</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-3">@Localizer["NewManga"]</MudText>
+<HeaderComponent Header="@Localizer["NewManga"]" MoreUrl="/catalog?newReleases=true" />
 <MangaLine Volumes="@NewReleasedManga" />
 
-<MudText Typo="Typo.h4" Class="mt-3 mb-3">@Localizer["NewPreorders"]</MudText>
+<HeaderComponent Header="@Localizer["NewPreorders"]" MoreUrl="/catalog?preorders=true" />
 <MangaLine Volumes="@Preorders" />
 
 
@@ -17,10 +17,11 @@
 {
     private IEnumerable<CardVolumeDto>? NewReleasedManga { get; set; } = Enumerable.Empty<CardVolumeDto>();
     private IEnumerable<CardVolumeDto>? Preorders { get; set; } = Enumerable.Empty<CardVolumeDto>();
+    private int itemCount = 12;
 
     protected override async Task OnInitializedAsync()
     {
-        NewReleasedManga = await VolumeService.GetNewestReleases();
-        Preorders = await VolumeService.GetLatestPreorders();
+        NewReleasedManga = await VolumeService.GetNewestReleases(itemCount);
+        Preorders = await VolumeService.GetLatestPreorders(itemCount);
     }
 }

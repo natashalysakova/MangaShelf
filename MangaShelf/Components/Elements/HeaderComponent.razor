@@ -1,0 +1,17 @@
+@using MangaShelf.BL.Dto
+@using MangaShelf.BL.Contracts
+@inject IUiLocalizationService Localizer
+
+<MudStack Row AlignItems="AlignItems.Baseline">
+    <MudText Typo="Typo.h4" Class="mb-3">@Header</MudText>
+    <MudSpacer></MudSpacer>
+    <MudLink Href="@MoreUrl" Typo="Typo.h6" Color="Color.Tertiary" Class="mb-3">@Localizer["More"]</MudLink>
+</MudStack>
+
+@code{
+    [Parameter]
+    public string Header { get; set; }
+
+    [Parameter]
+    public string MoreUrl { get; set; }
+}
