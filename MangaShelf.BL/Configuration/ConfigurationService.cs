@@ -22,6 +22,7 @@ public class ConfigurationService(
     public ParserServiceSettings ParserService => GetSection<ParserServiceSettings>();
     public HtmlDownloaderSettings HtmlDownloader => GetSection<HtmlDownloaderSettings>();
     public CacheSettings CacheSettings => GetSection<CacheSettings>();
+    public CleanupSettings Cleanup => GetSection<CleanupSettings>();
 
     public async Task<Settings> UpdateSectionValueAsync(Settings settings, CancellationToken token = default)
     {

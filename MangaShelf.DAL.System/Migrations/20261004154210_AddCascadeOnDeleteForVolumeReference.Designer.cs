@@ -4,6 +4,7 @@ using MangaShelf.DAL.System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MangaShelf.DAL.System.Migrations
 {
     [DbContext(typeof(MangaSystemDbContext))]
-    partial class MangaSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261004154210_AddCascadeOnDeleteForVolumeReference")]
+    partial class AddCascadeOnDeleteForVolumeReference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +35,7 @@ namespace MangaShelf.DAL.System.Migrations
 
                     b.HasKey("Name");
 
-                    b.ToTable("DataCorrections", (string)null);
+                    b.ToTable("DataCorrections");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.JobStateHistory", b =>
@@ -67,7 +70,7 @@ namespace MangaShelf.DAL.System.Migrations
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobStateHistories", (string)null);
+                    b.ToTable("JobStateHistories");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.Parser", b =>
@@ -94,7 +97,7 @@ namespace MangaShelf.DAL.System.Migrations
                     b.HasIndex("ParserName")
                         .IsUnique();
 
-                    b.ToTable("Parsers", (string)null);
+                    b.ToTable("Parsers");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.ParserError", b =>
@@ -128,7 +131,7 @@ namespace MangaShelf.DAL.System.Migrations
 
                     b.HasIndex("ParserRunId");
 
-                    b.ToTable("ParserError", (string)null);
+                    b.ToTable("ParserError");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.ParserJob", b =>
@@ -168,7 +171,7 @@ namespace MangaShelf.DAL.System.Migrations
 
                     b.HasIndex("ParserStatusId");
 
-                    b.ToTable("Runs", (string)null);
+                    b.ToTable("Runs");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.Settings", b =>
@@ -200,7 +203,7 @@ namespace MangaShelf.DAL.System.Migrations
                     b.HasIndex("Section", "Key")
                         .IsUnique();
 
-                    b.ToTable("Settings", (string)null);
+                    b.ToTable("Settings");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.VolumeReference", b =>
@@ -232,7 +235,7 @@ namespace MangaShelf.DAL.System.Migrations
 
                     b.HasIndex("UpdatedParserJobId");
 
-                    b.ToTable("VolumeReferences", (string)null);
+                    b.ToTable("VolumeReferences");
                 });
 
             modelBuilder.Entity("MangaShelf.DAL.System.Models.JobStateHistory", b =>

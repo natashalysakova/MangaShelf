@@ -344,4 +344,17 @@ public class ParseJobManagerService : IParseJobManagerService
             throw;
         }
     }
+
+    public async Task<int> DeleteOldJobs(DateTimeOffset cutoffDate, bool removeFailedJobs, CancellationToken token = default)
+    {
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var statusesToDelete = removeFailedJobs ? new[] { RunStatus.Finished, RunStatus.Error, RunStatus.Cancelled } : new[] { RunStatus.Finished, RunStatus.Cancelled };
+
+        var jobsToDelete = await dbContext.Runs
+            .Where(r => r.Created < cutoffDate && statusesToDelete.Contains(r.Status)).ToListAsync(token);
+
+        dbContext.RemoveRange(jobsToDelete);
+        return await dbContext.SaveChangesAsync(token);
+    }
 }

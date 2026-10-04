@@ -22,4 +22,5 @@ public interface IParseJobManagerService
     Task SetToCancelledStatus(Guid jobId, CancellationToken token);
     Task RunJob(Guid jobId, CancellationToken token = default);
 
+    Task<int> DeleteOldJobs(DateTimeOffset cutoffDate, bool removeFailedJobs, CancellationToken token = default);
 }
