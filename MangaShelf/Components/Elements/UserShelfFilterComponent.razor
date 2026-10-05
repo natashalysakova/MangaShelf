@@ -12,7 +12,7 @@
         </MudStack>
 
         <MudStack Row>
-            <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Text="_searchTerm" @bind-Text:after="ApplyFiltersAsync" SearchFunc="@SearchAutocomplete"
+            <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Text="_searchTerm" SearchFunc="@SearchAutocomplete"
                              Variant="Variant.Outlined" Clearable="true" ResetValueOnEmptyText="true"
                              SelectValueOnTab="true" CoerceValue="true"
                              Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
