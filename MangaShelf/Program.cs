@@ -2,13 +2,13 @@ using MangaShelf.Cache;
 using MangaShelf.Common.Localization.Services;
 using MangaShelf.Components;
 using MangaShelf.Components.Account;
+using MangaShelf.DAL.Identity;
 using MangaShelf.Extentions;
 using MangaShelf.Infrastructure.Accounts;
 using MangaShelf.Infrastructure.Installer;
-using MangaShelf.Localization.Interfaces;
-using MangaShelf.Localization.Resources;
 using MangaShelf.Localization.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
 
 namespace MangaShelf;
@@ -74,19 +74,6 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
 
-        // builder.Services.AddHttpClient<IAuthClient, AuthClient>(client =>
-        // {
-        //     if(builder.Environment.IsDevelopment())
-        //     {
-        //         client.BaseAddress = new Uri("http://localhost:5090/");
-        //     }
-        //     else
-        //     {
-        //         var webAppBaseUrl = builder.Configuration["WebApp:BaseUrl"]
-        //             ?? throw new InvalidOperationException("WebApp:BaseUrl is not configured.");
-        //         client.BaseAddress = new Uri(webAppBaseUrl);
-        //     }
-        // });
 
         if (builder.Environment.IsDevelopment())
         {
@@ -140,6 +127,31 @@ public class Program
         app.MapAdditionalIdentityEndpoints();
 
         app.MapControllers();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapGet("/dev-login", async (
+                HttpContext context,
+                UserManager<MangaIdentityUser> userManager,
+                SignInManager<MangaIdentityUser> signInManager,
+                IConfiguration configuration) =>
+            {
+                var username = configuration["DevLogin:Username"];
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    return Results.Problem("Set DevLogin:Username in user secrets.");
+                }
+
+                var user = await userManager.FindByNameAsync(username);
+                if (user is null)
+                {
+                    return Results.NotFound("Development login user was not found.");
+                }
+
+                await signInManager.SignInAsync(user, isPersistent: false);
+                return Results.LocalRedirect("/");
+            }).AllowAnonymous();
+        }
 
         app.Run();
     }
