@@ -5,6 +5,34 @@ html, body {
 body {
     /*    background-image: radial-gradient(18% 28% at 34% 41%, rgba(253, 253, 113, 0.2117647059) 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(18% 28% at 26% 69%, rgba(127, 89, 131, 0.3490196078) 6%, rgba(7, 58, 255, 0) 100%), radial-gradient(70% 53% at 36% 76%, #102c36 0%, rgba(7, 58, 255, 0) 100%), radial-gradient(42% 53% at 15% 94%, #050101 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(42% 53% at 34% 72%, #06041d 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(18% 28% at 35% 87%, #1ed879 7%, rgba(7, 58, 255, 0) 100%), radial-gradient(31% 43% at 7% 98%, #611717 24%, rgba(7, 58, 255, 0) 100%), radial-gradient(21% 37% at 72% 23%, rgba(4, 30, 67, 0.6156862745) 24%, rgba(7, 58, 255, 0) 100%), radial-gradient(35% 56% at 91% 74%, rgba(8, 1, 20, 0.9607843137) 0%, rgba(7, 58, 255, 0) 100%), radial-gradient(74% 86% at 67% 38%, rgba(109, 245, 255, 0.6509803922) 24%, rgba(7, 58, 255, 0) 100%), linear-gradient(125deg, #000812 1%, #020d0f 100%);*/
     background: linear-gradient(135deg, #0f172d 0%, #1a3788 50%, #124c69 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #124b69;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #365a8c;
+    border-radius: 6px;
+    border: 2px solid #124b69;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4a74b3;
+}
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #365a8c #124b69 !important;
 }
 
 a, .btn-link {

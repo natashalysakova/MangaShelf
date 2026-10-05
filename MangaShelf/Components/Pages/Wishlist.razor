@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.Authorization
 @using MangaShelf.BL.Contracts
 @using MangaShelf.BL.Services
-@using MangaShelf.DAL.Models
 @using MangaShelf.Components.Pages.VolumePage.Elements
 @using MudBlazor
 @inherits UserContextComponent
@@ -60,50 +59,6 @@ else
         await dialog.Result;
         await LoadVolumesAsync();
     }
-
-    // private async Task OnReadingStatusClick(Guid volumeId)
-    // {
-    //     var userId = await GetUserId();
-    //     var reading = await VolumeService.GetActiveReading(volumeId, userId);
-
-    //     if (reading == null)
-    //     {
-    //         reading = new Reading
-    //         {
-    //             VolumeId = volumeId,
-    //             StartedAt = DateTime.UtcNow,
-    //             Rating = 0
-    //         };
-    //     }
-
-    //     reading.Status = ReadingStatus.Completed;
-    //     reading.FinishedAt = DateTimeOffset.Now;
-
-    //     var dialog = await DialogService.ShowAsync<AddEditReadingDialog>("", new DialogParameters
-    //     {
-    //         { nameof(AddEditReadingDialog.Reading), reading }
-    //     }, new DialogOptions
-    //     {
-    //         FullWidth = true,
-    //         Position = DialogPosition.Center,
-    //         MaxWidth = MaxWidth.Small
-    //     });
-
-    //     var result = await dialog.Result;
-    //     if (result != null && !result.Canceled && result.Data is EditReadingDialogResult resultData)
-    //     {
-    //         try
-    //         {
-    //             await VolumeService.AddEditReadingAsync(resultData.Reading, userId);
-    //             await LoadVolumesAsync();
-    //         }
-    //         catch (Exception ex)
-    //         {
-    //             Snackbar.Add($"Error saving reading: {ex.Message}", Severity.Error);
-    //         }
-    //     }
-    // }
-
     private async Task LoadVolumesAsync()
     {
         try
