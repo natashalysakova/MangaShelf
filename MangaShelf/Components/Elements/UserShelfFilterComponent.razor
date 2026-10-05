@@ -12,21 +12,20 @@
         </MudStack>
 
         <MudStack Row>
-            <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Value="_searchTerm" SearchFunc="@SearchAutocomplete"
+            <MudAutocomplete T="string" Label="@Localizer["Search"]" @bind-Text="_searchTerm" @bind-Text:after="ApplyFiltersAsync" SearchFunc="@SearchAutocomplete"
                              Variant="Variant.Outlined" Clearable="true" ResetValueOnEmptyText="true"
                              SelectValueOnTab="true" CoerceValue="true"
-                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
-                             OnKeyDown="@OnSearchKeyDown" />
+                             Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary"
+                             OnAdornmentClick="ApplyFiltersAsync" OnKeyDown="@OnSearchKeyDown" />
 
             <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="ClearFiltersAsync">@Localizer["Reset"]</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFiltersAsync">@Localizer["Apply"]</MudButton>
 
         </MudStack>
 
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6">
                 <MudText Typo="Typo.subtitle2" Class="mb-2">@Localizer["OwnershipStatus"]</MudText>
-                <MudChipSet @bind-SelectedValues="SelectedOwnershipStatuses"
+                <MudChipSet @bind-SelectedValues="SelectedOwnershipStatuses" @bind-SelectedValues:after="ApplyFiltersAsync"
                             SelectionMode="SelectionMode.MultiSelection" CheckMark="true" Variant="Variant.Outlined">
                     @foreach (var status in _ownershipStatuses)
                     {
@@ -38,7 +37,7 @@
 
             <MudItem xs="12" md="6">
                 <MudText Typo="Typo.subtitle2" Class="mb-2">@Localizer["ReadingStatus"]</MudText>
-                <MudChipSet @bind-SelectedValues="SelectedReadingStatuses" SelectionMode="SelectionMode.MultiSelection"
+                <MudChipSet @bind-SelectedValues="SelectedReadingStatuses" @bind-SelectedValues:after="ApplyFiltersAsync" SelectionMode="SelectionMode.MultiSelection"
                             CheckMark="true" Variant="Variant.Outlined">
                     @foreach (var status in _readingStatuses)
                     {
@@ -49,7 +48,7 @@
             </MudItem>
 
             <MudItem xs="12" md="4">
-                <MudSelect T="string" @bind-Value="_likedSelection" Label="@Localizer["Liked"]" Variant="Variant.Outlined"
+                <MudSelect T="string" @bind-Value="_likedSelection" @bind-Value:after="ApplyFiltersAsync" Label="@Localizer["Liked"]" Variant="Variant.Outlined"
                            FullWidth="true">
                     <MudSelectItem T="string" Value="@(string.Empty)">@Localizer["Any"]</MudSelectItem>
                     <MudSelectItem T="string" Value="@("true")">@Localizer["Liked"]</MudSelectItem>
@@ -57,12 +56,12 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="6" md="4">
-                <MudNumericField T="int?" @bind-Value="_minRating" Label="@Localizer["MinRating"]" Variant="Variant.Outlined" Min="0"
+                 <MudNumericField T="int?" @bind-Value="_minRating" @bind-Value:after="ApplyFiltersAsync" Label="@Localizer["MinRating"]" Variant="Variant.Outlined" Min="0"
                                  Max="5" />
             </MudItem>
-
+ 
             <MudItem xs="6" md="4">
-                <MudNumericField T="int?" @bind-Value="_maxRating" Label="@Localizer["MaxRating"]" Variant="Variant.Outlined" Min="0"
+                <MudNumericField T="int?" @bind-Value="_maxRating" @bind-Value:after="ApplyFiltersAsync" Label="@Localizer["MaxRating"]" Variant="Variant.Outlined" Min="0"
                                  Max="5" />
             </MudItem>
         </MudGrid>
@@ -144,8 +143,8 @@
         _selectedOwnershipStatuses = Array.Empty<VolumeStatus>();
         _selectedReadingStatuses = Array.Empty<ReadingStatus>();
         _likedSelection = string.Empty;
-        _minRating = null;
-        _maxRating = null;
+        _minRating = 0;
+        _maxRating = 5;
 
         await ApplyFiltersAsync();
     }
