@@ -107,6 +107,9 @@ else
     public bool ShowStatusIcon { get; set; }
 
     [Parameter]
+    public EventCallback<string> OnCardClick { get; set; }
+
+    [Parameter]
     public EventCallback<VolumeStatus> OnStatusChange { get; set; }
 
     [Inject]
@@ -159,7 +162,14 @@ else
     {
         if (Volume != null)
         {
-            NavigationManager.NavigateTo($"volume/{Volume.PublicId}");
+            if (OnCardClick.HasDelegate)
+            {
+                await OnCardClick.InvokeAsync(Volume.PublicId);
+            }
+            else
+            {
+                NavigationManager.NavigateTo($"volume/{Volume.PublicId}");
+            }
         }
     }
 

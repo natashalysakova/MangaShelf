@@ -13,7 +13,7 @@
 <style>
     .expired-preorder {
         /*outline: 5px solid red !important;
-        outline-offset: -5px;  or -5px if you want it drawn inside */
+            outline-offset: -5px;  or -5px if you want it drawn inside */
         background-color: rgba(255, 0, 0, 0.3) !important;
     }
 
@@ -21,7 +21,7 @@
         background-color: rgba(255, 255, 255, 0.1) !important;
     }
 
-    .preorder-image{
+    .preorder-image {
         width: 100%;
         height: auto;
     }
@@ -38,12 +38,13 @@
                         <MudAlert Severity="Severity.Normal">@Localizer["NoPreorders"]</MudAlert>
                     </MudItem>
                 }
-                <MudGrid>
+                <MudGrid Spacing="6" Justify="Justify.FlexStart">
                     @foreach (var preorder in UserLibraryDto.Volumes)
                     {
                         var cardClass = "" + (preorder.IsPreorderDue ? "expired-preorder" :
                "normal-preorder");
-                        <MudItem xs="6" sm="3" md="2" >
+                        <MudItem @key="preorder.VolumeId" xs="6" sm="4" md="3" lg="2">
+
                             <MudStack Spacing="1" AlignItems="AlignItems.Center" class="@cardClass">
                                 <div class="preorder-image">
                                     <SmallCard ShowButtons="true" VolumeId="@preorder.VolumeId"
@@ -64,18 +65,18 @@
 
                                 <MudTooltip Text="@text" Arrow="true" Color="Color.Dark">
 
-                                @if (preorder.IsPreorderDue)
-                                {
-                                    <MudText Color="Color.Error">@preorder.ReleaseDate?.ToString("d")</MudText>
-                                }
-                                else if (preorder.DaysTillRelease == 0)
-                                {
-                                    <MudText Color="Color.Success">@Localizer["Today"]</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>@preorder.ReleaseDate?.ToString("d")</MudText>
-                                }
+                                    @if (preorder.IsPreorderDue)
+                                    {
+                                        <MudText Color="Color.Error">@preorder.ReleaseDate?.ToString("d")</MudText>
+                                    }
+                                    else if (preorder.DaysTillRelease == 0)
+                                    {
+                                        <MudText Color="Color.Success">@Localizer["Today"]</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText>@preorder.ReleaseDate?.ToString("d")</MudText>
+                                    }
                                 </MudTooltip>
                             </MudStack>
                         </MudItem>
