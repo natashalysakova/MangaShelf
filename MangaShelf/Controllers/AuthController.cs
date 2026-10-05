@@ -32,6 +32,7 @@ public class AuthController : Controller
         this.logger = logger;
         this.localizer = localizer;
     }
+
     [HttpPost]
     public async Task<IActionResult> Login(string username, string password, bool rememberMe, string? returnUrl = null)
     {

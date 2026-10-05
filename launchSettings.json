@@ -5,7 +5,7 @@
       "commandVersion": "1.0",
       "composeLaunchAction": "LaunchBrowser",
       "composeLaunchServiceName": "mangashelf",
-      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}/dev-login",
       "serviceActions": {
         "mangashelf": "StartDebugging",
         "mangashelf.db": "StartWithoutDebugging",

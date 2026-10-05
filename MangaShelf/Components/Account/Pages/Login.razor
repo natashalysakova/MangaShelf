@@ -40,7 +40,7 @@
     <input type="hidden" name="returnUrl" value="@ReturnUrl" />
     <input type="hidden" name="Username" value="@Input.Username" />
     <input type="password" hidden name="Password" value="@Input.Password" />
-    <input type="hidden" name="rememberMe" value="@Input.RememberMe.ToString().ToLower()" />
+    <input type="hidden" name="rememberMe" value="@Input.RememberMe.ToString().ToLowerInvariant()" />
 </form>
 @code {
 

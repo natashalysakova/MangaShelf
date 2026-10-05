@@ -661,6 +661,27 @@ public class VolumeService(
             .Select(o => o.ToUserVolumeCard(readings));
     }
 
+    public async Task<IEnumerable<CardVolumeDto>> GetWishlistedVolumes(string userIdentityId, CancellationToken token = default)
+    {
+        using var context = dbContextFactory.CreateDbContext();
+        var volumeIds = await context.Users
+            .AsNoTracking()
+            .Where(user => user.IdentityUserId == userIdentityId)
+            .SelectMany(user => user.OwnedVolumes
+                .Where(ownership => ownership.Status == VolumeStatus.Wishlist)
+                .Select(ownership => ownership.VolumeId))
+            .Distinct()
+            .ToListAsync(token);
+
+        var volumes = await context.Volumes
+            .AsNoTracking()
+            .Where(volume => volumeIds.Contains(volume.Id))
+            .Include(volume => volume.Series)
+            .ToListAsync(token);
+
+        return volumes.Select(v => v.ToDto());
+    }
+
     private static bool MatchesShelfFilter(
         Ownership ownership,
         IEnumerable<Reading> readings,
