@@ -143,8 +143,8 @@
         _selectedOwnershipStatuses = Array.Empty<VolumeStatus>();
         _selectedReadingStatuses = Array.Empty<ReadingStatus>();
         _likedSelection = string.Empty;
-        _minRating = 0;
-        _maxRating = 5;
+        _minRating = null;
+        _maxRating = null;
 
         await ApplyFiltersAsync();
     }
