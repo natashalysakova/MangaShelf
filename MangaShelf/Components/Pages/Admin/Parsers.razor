@@ -1,11 +1,11 @@
 ﻿@page "/admin/parsers"
 @using MangaShelf.DAL.System.Models
-@using System.Collections.ObjectModel
 
-@inject IParserReadService parserService;
-@inject IJobRequester jobManager;
-@inject IJobUpdateService jobUpdateService;
-@inject IConfigurationService configurationService;
+@inject IParserReadService parserService
+@inject IJobRequester jobManager
+@inject IJobUpdateService jobUpdateService
+@inject IConfigurationService configurationService
+@inject ILogger<Parsers> Logger
 @implements IDisposable
 
 
@@ -422,11 +422,10 @@
                 await jobManager.CreateSingleJob(url);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            Logger.LogError(ex, "Failed to parse url: {Url}", url);
         }
-
     }
 
     private async Task CancelJob(Guid? id)

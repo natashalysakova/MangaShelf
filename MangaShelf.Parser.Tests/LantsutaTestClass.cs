@@ -40,13 +40,15 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
     }
 
     [TestMethod]
-    public async Task Lantsuta_Title_ShouldBeParsed()
+    [DataRow("https://lantsuta-publishing.com/manga-ua/avatar_tla_ua", "Обіцянка", "Аватар. Останній Захисник")]
+    [DataRow("https://lantsuta-publishing.com/manga-ua/manga-school-ua", "Художня школа манґи", "Художня школа манґи")]
+    public async Task Lantsuta_Title_ShouldBeParsed(string url, string expectedTitle, string expectedSeries)
     {
-        var result = await Parser.Parse("https://lantsuta-publishing.com/manga-ua/avatar_tla_ua");
+        var result = await Parser.Parse(url);
 
         Assert.IsNotNull(result);
-        Assert.AreEqual("Обіцянка", result.Title);
-        Assert.AreEqual("Аватар. Останній Захисник", result.Series);
+        Assert.AreEqual(expectedTitle, result.Title);
+        Assert.AreEqual(expectedSeries, result.Series);
         Assert.AreEqual(null, result.VolumeNumber);
         Assert.IsNotNull(result.Description);
     }
@@ -56,6 +58,7 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
     [DataRow("Видання на стадії виробництва і з'явиться у продажі наприкінці 2025 року.", "2025-12-31")]
     [DataRow("Відправка з 20 серпня 2025 року.", "2025-08-20")]
     [DataRow("Видання на стадії виробництва і з'явиться у продажі\r\nвзимку 2025-2026 року.", "2026-02-28")]
+    [DataRow("Видання на стадії виробництва і з'явиться у продажі\r\n\r\n\r\nв листопаді-грудні 2026 року.", "2026-12-31")]
     public async Task Lantsuta_Description_ShouldBe_ParsedToReleaseDate(string input, string dateTime)
     {
         var expectedDate = DateTime.SpecifyKind(DateTime.Parse(dateTime), DateTimeKind.Local);
@@ -64,5 +67,13 @@ public class LantsutaTestClass : BaseParserTestClass<LantsutaParser>
 
         Assert.IsNotNull(result);
         Assert.AreEqual(expectedDate, result);
+    }
+
+    [TestMethod]
+    [DataRow("https://lantsuta-publishing.com/manga-ua/manga-school-ua")]
+    public async Task Lantsuta_ShouldBe_Parsed(string url)
+    {
+        var result = await Parser.Parse(url);
+        Assert.IsNotNull(result);
     }
 }

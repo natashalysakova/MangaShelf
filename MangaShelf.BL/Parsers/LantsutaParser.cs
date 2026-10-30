@@ -149,15 +149,29 @@ public class LantsutaParser : BaseParser
             {
                 if (dateString.Contains(season.pattern))
                 {
-                    var month = season.month;
-                    var indexAfterSeason = dateString.IndexOf(season.pattern) + season.pattern.Length;
+                    var nextCharacterIndex = dateString.IndexOf(season.pattern, StringComparison.Ordinal) + season.pattern.Length;
+                    if (nextCharacterIndex < dateString.Length && dateString[nextCharacterIndex] == '-')
+                    {
+                        continue;
+                    }
 
-                    var nextWhiteSpaceAfterSeason = dateString.IndexOf(' ', indexAfterSeason+1);
-                    var yearLength = nextWhiteSpaceAfterSeason - indexAfterSeason;
-                    var yearString = dateString.Substring(indexAfterSeason, yearLength).Trim();
-                    var yearStartIndex = yearLength - 4 - 1;
-                    var yearFinalString = yearString.Substring(yearStartIndex, 4);
-                    var year = int.Parse(yearFinalString);
+
+                    var month = season.month;
+                    var year = DateTime.Now.Year;
+
+                    var yearRangeMatch = Regex.Match(dateString, @"\b(\d{4})\s*-\s*(\d{4})\b");
+                    if (yearRangeMatch.Success)
+                    {
+                        year = int.Parse(yearRangeMatch.Groups[2].Value);
+                    }
+                    else
+                    {
+                        var yearMatch = Regex.Match(dateString, @"\b\d{4}\b");
+                        if (yearMatch.Success)
+                        {
+                            year = int.Parse(yearMatch.Value);
+                        }
+                    }
                     return new DateTimeOffset(DateTime.SpecifyKind(new DateTime(year, month, DateTime.DaysInMonth(year, month)), DateTimeKind.Local));
                 }
             }
@@ -188,7 +202,12 @@ public class LantsutaParser : BaseParser
 
     protected override string GetSeries(IDocument document)
     {
-        return GetFromTable(document, "Серія")!;
+        var series = GetFromTable(document, "Серія");
+        if (series is null)
+        {
+            series = document.QuerySelector(VolumeTitleSelector).InnerHtml;
+        }
+        return series;
     }
 
     protected override SeriesStatus GetSeriesStatus(IDocument document)
@@ -200,13 +219,15 @@ public class LantsutaParser : BaseParser
     {
         var node = document.QuerySelector(VolumeTitleSelector).InnerHtml;
         var series = GetSeries(document);
-        node = node.Replace(series, "").Trim();
+        if(series != node)
+        {
+            node = node.Replace(series, "").Trim();
+        }
         if (series.Contains('.'))
         {
             series = series.Replace('.', ':');
             node = node.Replace(series, "").Trim();
         }
-
 
         if (char.IsPunctuation(node[0]))
         {

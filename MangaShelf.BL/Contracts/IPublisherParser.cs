@@ -6,6 +6,7 @@ public interface IPublisherParser
     string GetPageUrl(int page);
     Task<IEnumerable<string>> GetVolumesUrls(string url, CancellationToken token = default);
     bool CanParse(string url);
+    string BaseUrl { get; }
 
     string CatalogUrl { get; }
     string Pagination { get; }
