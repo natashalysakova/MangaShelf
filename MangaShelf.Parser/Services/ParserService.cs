@@ -1,5 +1,6 @@
 using MangaShelf.BL.Configuration;
 using MangaShelf.BL.Contracts;
+using MangaShelf.BL.Parsers;
 using MangaShelf.Common.Interfaces;
 using MangaShelf.DAL;
 using MangaShelf.DAL.System.Models;
@@ -151,6 +152,12 @@ public class ParserService : IParseService
                 pageExists = false;
                 _logger.LogInformation($"{parser.GetType().Name}: Page not found {pageUrl} : {httpEx.Message}");
                 await _jobManagerService.RecordError(jobId, httpEx, pageUrl, token);
+                break;
+            }
+            catch (LastPageReachedException lastPageEx)
+            {
+                pageExists = false;
+                _logger.LogInformation($"{parser.GetType().Name}: Last page reached {pageUrl} : {lastPageEx.Message}");
                 break;
             }
             catch (Exception ex)

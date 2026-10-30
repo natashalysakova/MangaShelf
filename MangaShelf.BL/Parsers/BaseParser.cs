@@ -73,6 +73,10 @@ public abstract class BaseParser : IPublisherParser
     public abstract string SiteUrl { get; }
 
     public abstract string CatalogUrl { get; }
+    public string BaseUrl
+    {
+        get => SiteUrl + CatalogUrl;
+    }
 
     public abstract string Pagination { get; }
 
@@ -84,7 +88,7 @@ public abstract class BaseParser : IPublisherParser
 
     public virtual string GetPageUrl(int page)
     {
-        return $"{SiteUrl}{CatalogUrl}{Pagination.Replace("{0}", page.ToString())}";
+        return $"{BaseUrl}{Pagination.Replace("{0}", page.ToString())}";
     }
 
     protected virtual bool GetCanBePublished()
@@ -104,7 +108,7 @@ public abstract class BaseParser : IPublisherParser
             var nodes = document.QuerySelectorAll(classToSearch).Where(x => !x.TextContent.ToLower().StartsWith("комплект"));
             if (!nodes.Any())
             {
-                throw new Exception("Page does not contain any volumes. Probably last page reached.");
+                throw new LastPageReachedException(pageUrl);
             }
             var attribute = nodes.Where(x => x.Attributes["href"] != null).Select(x => x.Attributes["href"]);
             return attribute.Select(x => x.Value);
@@ -137,28 +141,43 @@ public abstract class BaseParser : IPublisherParser
 
         try
         {
+            T ParseValue<T>(string property, Func<T> getValue)
+            {
+                try
+                {
+                    var value = getValue();
+                    _logger.LogDebug("Parsed property {Property} with value {Value}", property, value);
+                    return value;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed parsing property {Property}; no value was produced", property);
+                    throw;
+                }
+            }
+
             var parsed = new ParsedInfo
             {
-                Title = GetVolumeTitle(document),
-                Authors = GetAuthors(document),
-                VolumeNumber = GetVolumeNumber(document),
-                Series = GetSeries(document),
-                Cover = GetCover(document),
-                Release = EnsureLocalOffset(GetReleaseDate(document)),
-                Publisher = GetPublisher(document),
-                VolumeType = GetVolumeType(document),
-                Isbn = VolumeHelper.NormalizedIsbn(GetISBN(document)),
-                TotalVolumes = GetTotalVolumes(document),
-                SeriesStatus = GetSeriesStatus(document),
-                OriginalSeriesTitle = GetOriginalSeriesName(document),
-                Url = url,
-                PreorderStartDate = EnsureLocalOffset(GetSaleStartDate(document)),
-                CountryCode = GetCountryCode(document),
-                IsPreorder = GetIsPreorder(document),
-                AgeRestrictions = GetAgeRestriction(document),
-                CanBePublished = GetCanBePublished(),
-                SeriesType = GetSeriesType(document),
-                Description = GetDescription(document)
+                Title = ParseValue(nameof(ParsedInfo.Title), () => GetVolumeTitle(document)),
+                Authors = ParseValue(nameof(ParsedInfo.Authors), () => GetAuthors(document)),
+                VolumeNumber = ParseValue(nameof(ParsedInfo.VolumeNumber), () => GetVolumeNumber(document)),
+                Series = ParseValue(nameof(ParsedInfo.Series), () => GetSeries(document)),
+                Cover = ParseValue(nameof(ParsedInfo.Cover), () => GetCover(document)),
+                Release = ParseValue(nameof(ParsedInfo.Release), () => EnsureLocalOffset(GetReleaseDate(document))),
+                Publisher = ParseValue(nameof(ParsedInfo.Publisher), () => GetPublisher(document)),
+                VolumeType = ParseValue(nameof(ParsedInfo.VolumeType), () => GetVolumeType(document)),
+                Isbn = ParseValue(nameof(ParsedInfo.Isbn), () => VolumeHelper.NormalizedIsbn(GetISBN(document))),
+                TotalVolumes = ParseValue(nameof(ParsedInfo.TotalVolumes), () => GetTotalVolumes(document)),
+                SeriesStatus = ParseValue(nameof(ParsedInfo.SeriesStatus), () => GetSeriesStatus(document)),
+                OriginalSeriesTitle = ParseValue(nameof(ParsedInfo.OriginalSeriesTitle), () => GetOriginalSeriesName(document)),
+                Url = ParseValue(nameof(ParsedInfo.Url), () => url),
+                PreorderStartDate = ParseValue(nameof(ParsedInfo.PreorderStartDate), () => EnsureLocalOffset(GetSaleStartDate(document))),
+                CountryCode = ParseValue(nameof(ParsedInfo.CountryCode), () => GetCountryCode(document)),
+                IsPreorder = ParseValue(nameof(ParsedInfo.IsPreorder), () => GetIsPreorder(document)),
+                AgeRestrictions = ParseValue(nameof(ParsedInfo.AgeRestrictions), () => GetAgeRestriction(document)),
+                CanBePublished = ParseValue(nameof(ParsedInfo.CanBePublished), () => GetCanBePublished()),
+                SeriesType = ParseValue(nameof(ParsedInfo.SeriesType), () => GetSeriesType(document)),
+                Description = ParseValue(nameof(ParsedInfo.Description), () => GetDescription(document))
             };
 
             var jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
@@ -319,6 +338,8 @@ public abstract class BaseParser : IPublisherParser
 
     public bool CanParse(string url)
     {
-        return url.StartsWith(SiteUrl, StringComparison.OrdinalIgnoreCase);
+        return url.StartsWith(SiteUrl+CatalogUrl, StringComparison.OrdinalIgnoreCase);
     }
+
+
 }
